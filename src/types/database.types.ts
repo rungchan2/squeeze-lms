@@ -388,33 +388,42 @@ export type Database = {
       users: {
         Row: {
           created_at: string | null
+          email: string
           first_name: string | null
+          hashed_password: string | null
           id: number
           last_name: string | null
           marketing_opt_in: boolean | null
           organization_id: number | null
+          phone: string | null
           privacy_agreed: boolean | null
           role: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          email: string
           first_name?: string | null
+          hashed_password?: string | null
           id?: number
           last_name?: string | null
           marketing_opt_in?: boolean | null
           organization_id?: number | null
+          phone?: string | null
           privacy_agreed?: boolean | null
           role?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          email?: string
           first_name?: string | null
+          hashed_password?: string | null
           id?: number
           last_name?: string | null
           marketing_opt_in?: boolean | null
           organization_id?: number | null
+          phone?: string | null
           privacy_agreed?: boolean | null
           role?: string | null
           updated_at?: string | null

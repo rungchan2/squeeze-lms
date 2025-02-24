@@ -10,6 +10,8 @@ export const userSchema = z.object({
   privacy_agreed: z.boolean(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
+  email: z.string().email(),
+  phone: z.string().optional(),
 });
 
 export type User = z.infer<typeof userSchema>;
