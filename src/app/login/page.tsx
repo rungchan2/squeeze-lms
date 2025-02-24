@@ -6,38 +6,35 @@ import styled from "@emotion/styled";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { supabase } from "@/lib/initSupabase";
-import { loginSchema } from "@/types/user.types";
-import {
-  PasswordInput,
-  PasswordStrengthMeter,
-} from "@/components/ui/password-input";
+import { loginSchema } from "@/types";
+import InputAndTitle from "@/components/InputAndTitle";
+import Heading from "@/components/Text/Heading";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Input } from "@chakra-ui/react";
+import { HStack, Separator } from "@chakra-ui/react";
+import Text from "@/components/Text/Text";
+import Image from "next/image";
+import { socialLogin } from "@/app/auth/socialLogin";
 
 const LoginContainer = styled.div`
   display: flex;
+  max-width: 400px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  margin: 0 auto;
   padding: 2rem;
+  gap: 1rem;
 `;
 
 const LoginForm = styled.form`
   width: 100%;
-  max-width: 400px;
-  padding: 2rem;
   background: var(--gray-alpha-100);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-`;
-
-const Title = styled.h1`
-  font-size: 2rem;
-  text-align: center;
-  margin-bottom: 1rem;
-  color: var(--foreground);
 `;
 
 const Button = styled.button`
@@ -89,26 +86,52 @@ export default function LoginPage() {
         throw signInError;
       }
 
-      router.push("/dashboard");
+      router.push("/");
     } catch (err) {
       setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
     }
   };
 
+  const handleGoogleLogin = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      const { error } = await socialLogin('google');
+      if (error) {
+        setError("Google 로그인에 실패했습니다.");
+      }
+    } catch (err) {
+      setError("로그인 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <LoginContainer>
-      <LoginForm onSubmit={handleSubmit(onSubmit)}>
-        <Title>로그인</Title>
+      <Heading level={1}>로그인</Heading>
 
-        <div>
+      <GoogleLoginButton onClick={handleGoogleLogin}>
+        <Image src="/google.svg" alt="Google" width={27} height={27} />
+        <Text variant="body" color="var(--background)">
+          Google로 로그인
+        </Text>
+      </GoogleLoginButton>
+      <LoginForm onSubmit={handleSubmit(onSubmit)}>
+        <HStack>
+          <Separator flex="1" />
+          <Text variant="caption" color="var(--grey-500)">
+            또는
+          </Text>
+          <Separator flex="1" />
+        </HStack>
+
+        <InputAndTitle title="이메일">
           <Input type="email" placeholder="이메일" {...register("email")} />
           {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
-        </div>
+        </InputAndTitle>
 
-        <div>
+        <InputAndTitle title="비밀번호">
           <PasswordInput />
-          <PasswordStrengthMeter value={2} />
-        </div>
+          {/* <PasswordStrengthMeter value={4} /> */}
+        </InputAndTitle>
 
         {error && <ErrorMessage>{error}</ErrorMessage>}
 
@@ -119,3 +142,21 @@ export default function LoginPage() {
     </LoginContainer>
   );
 }
+
+const GoogleLoginButton = styled.button`
+  width: 100%;
+  padding: 5px 15px;
+  background: var(--foreground);
+  color: var(--background);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  & > p {
+    font-weight: 700;
+  }
+`;

@@ -1,6 +1,47 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Brand - Primary */
+  --primary-50: #FFEAD8;
+  --primary-100: #FFDFC3;
+  --primary-150: #FFCA9C;
+  --primary-300: #FFB16E;
+  --primary-400: #FF9F4C;
+  --primary-500: #FF8C2B;
+  --primary-600: #FF6F00;
+  --primary-700: #E07112;
+  --primary-800: #89450C;
+  --primary-900: #472305;
+
+  /* Brand - Secondary */
+  --secondary-50: #FFF9DA;
+  --secondary-100: #FFF4B9;
+  --secondary-200: #FFF1A3;
+  --secondary-300: #FFE86B;
+  --secondary-400: #FFE453;
+  --secondary-500: #FFDF32;
+  --secondary-600: #EFD22F;
+  --secondary-700: #DDBE14;
+  --secondary-900: #75650A;
+
+  /* Neutral (Grey) */
+  --grey-50: #FDFDFD;
+  --grey-100: #F5F4F4;
+  --grey-200: #EAE8E7;
+  --grey-300: #DCDAD9;
+  --grey-400: #C9C3BF;
+  --grey-500: #9B918D;
+  --grey-600: #6C6560;
+  --grey-700: #514C48;
+  --grey-800: #373431;
+  --grey-900: #1B1918;
+
+  /* Support - Status Colors */
+  --negative-100: #FFE2E5;
+  --negative-400: #FF616D;
+  --negative-500: #ED3241;
+  --negative-600: #FF0000;
+  --positive-600: #008625;
 }
 
 html,
