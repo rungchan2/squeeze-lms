@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import styled from "@emotion/styled";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { supabase } from "@/lib/initSupabase";
+import { createClient } from "@/utils/supabase/client";
 import { loginSchema } from "@/types";
 import InputAndTitle from "@/components/InputAndTitle";
 import Heading from "@/components/Text/Heading";
@@ -14,8 +14,9 @@ import { Input } from "@chakra-ui/react";
 import { HStack, Separator } from "@chakra-ui/react";
 import Text from "@/components/Text/Text";
 import Image from "next/image";
-import { socialLogin } from "@/app/auth/socialLogin";
+import { socialLogin } from "@/utils/socialLogin";
 
+const supabase = createClient();
 const LoginContainer = styled.div`
   display: flex;
   max-width: 400px;
@@ -92,15 +93,14 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = async (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleGoogleLogin = async () => {
     try {
       const { error } = await socialLogin('google');
       if (error) {
         setError("Google 로그인에 실패했습니다.");
       }
     } catch (err) {
-      setError("로그인 중 오류가 발생했습니다.");
+      setError("Google 로그인 중 오류가 발생했습니다. error: " + err);
     }
   };
 
