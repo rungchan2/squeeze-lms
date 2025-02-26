@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
+import Cookies from 'js-cookie'
 
 const supabase = createClient();
 
@@ -36,5 +37,8 @@ export const socialLogout = async () => {
     console.error('소셜 로그아웃 에러:', error);
     throw error;
   }
+  Cookies.remove("auth_data");
+  Cookies.remove("authData");
+  console.log("소셜 로그아웃 성공");
   return { error };
 };

@@ -13,5 +13,6 @@ export default function InputAndTitle({ title, children }: { title: string; chil
 const InputTitleContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 3px;
+  width: 100%;
 `;

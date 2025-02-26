@@ -22,3 +22,18 @@ export const loginSchema = z.object({
 });
 
 export type Login = z.infer<typeof loginSchema>;
+
+export const signupSchema = z.object({
+  uid: z.string().min(1, "uid를 입력해주세요"),
+  email: z.string().email("유효한 이메일을 입력해주세요"),
+  password: z.string().min(6, "비밀번호는 최소 6자 이상이어야 합니다"),
+  passwordConfirm: z.string().min(6, "비밀번호는 최소 6자 이상이어야 합니다"),
+  name: z.string().min(1, "이름을 입력해주세요"),
+  lastName: z.string().min(1, "성을 입력해주세요"),
+  phone: z.string().min(1, "전화번호를 입력해주세요"),
+  agreement: z.boolean(),
+  mailAgreement: z.boolean(),
+  cookieAgreement: z.boolean(),
+});
+
+export type Signup = z.infer<typeof signupSchema>;

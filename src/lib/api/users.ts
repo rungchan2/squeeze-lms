@@ -1,7 +1,9 @@
-import { supabase } from '@/lib/initSupabase';
-import type { Database } from '@/types/database.types';
+import { createClient } from "@/utils/supabase/client";
+import type { Database } from "@/types/database.types";
 
 type User = Database['public']['Tables']['users']['Row'];
+
+const supabase = await createClient();
 
 export const userApi = {
   // 사용자 정보 가져오기

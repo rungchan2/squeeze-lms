@@ -27,8 +27,8 @@ const Message = styled.p`
 
 const StyledLink = styled(Link)`
   padding: 0.8rem 1.6rem;
-  background-color: var(--foreground);
-  color: var(--background);
+  background-color: var(--black);
+  color: var(--white);
   border-radius: 8px;
   text-decoration: none;
   transition: opacity 0.2s;

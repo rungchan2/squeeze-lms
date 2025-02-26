@@ -41,8 +41,8 @@ const LoginForm = styled.form`
 const Button = styled.button`
   width: 100%;
   padding: 0.8rem;
-  background: var(--foreground);
-  color: var(--background);
+  background: var(--black);
+  color: var(--white);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -89,6 +89,7 @@ export default function LoginPage() {
 
       router.push("/");
     } catch (err) {
+      console.log(err);
       setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
     }
   };
@@ -146,8 +147,8 @@ export default function LoginPage() {
 const GoogleLoginButton = styled.button`
   width: 100%;
   padding: 5px 15px;
-  background: var(--foreground);
-  color: var(--background);
+  background: var(--black);
+  color: var(--white);
   border: none;
   border-radius: 10px;
   cursor: pointer;
