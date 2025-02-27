@@ -53,9 +53,3 @@ body {
   overflow-x: hidden;
   background-color: var(--grey-100);
 }
-
-body {
-  color: var(--grey-900);
-  background: var(--grey-100);
-  font-family: Arial, Helvetica, sans-serif;
-}

@@ -5,7 +5,7 @@ import InputAndTitle from "@/components/InputAndTitle";
 import Heading from "@/components/Text/Heading";
 import { Input } from "@chakra-ui/react";
 import Button from "@/components/common/Button";
-// import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordInput } from "@/components/ui/password-input";
 import Text from "@/components/Text/Text";
 import Checkbox from "@/components/common/Checkbox";
 import { Separator, Stack } from "@chakra-ui/react";
@@ -49,6 +49,7 @@ export default function LoginInfoPage() {
   const {
     register,
     handleSubmit,
+    getValues,
     setValue,
     control,
     formState: { errors, isSubmitting },
@@ -65,48 +66,7 @@ export default function LoginInfoPage() {
       cookieAgreement: false,
     },
   });
-  useEffect(() => {
-    console.log("useEffect 실행됨");
-    const authData = Cookies.get("auth_data");
-    console.log("쿠키 데이터:", authData, typeof authData);
-
-    if (!authData || typeof authData !== "string") {
-      console.log("유효하지 않은 auth_data");
-      window.location.href =
-        "/error?message=로그인 정보가 없거나 유효하지 않습니다";
-      return;
-    }
-
-    try {
-      // 문자열이 아닌 경우를 대비해 JSON.stringify 추가
-      const decryptedString = decrypt(authData);
-      console.log("복호화된 문자열:", decryptedString);
-
-      if (!decryptedString) {
-        throw new Error("복호화된 데이터가 없습니다");
-      }
-
-      const decryptedAuthData: DecryptedAuthData = JSON.parse(decryptedString);
-      console.log("파싱된 데이터:", decryptedAuthData);
-
-      if (!decryptedAuthData || !decryptedAuthData.email) {
-        throw new Error("필수 데이터가 누락되었습니다");
-      }
-
-      setValue("email", decryptedAuthData.email);
-      setValue("name", decryptedAuthData.first_name);
-      setValue("lastName", decryptedAuthData.last_name);
-    } catch (error) {
-      console.error("데이터 처리 중 에러:", error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "알 수 없는 에러가 발생했습니다";
-      window.location.href = `/error?message=${encodeURIComponent(
-        errorMessage
-      )}`;
-    }
-  }, [setValue]);
+  
   const onSubmit = async (data: Signup) => {
     console.log(data);
     const { error } = await supabase.from("users").insert({
@@ -154,7 +114,7 @@ export default function LoginInfoPage() {
             {...register("phone")}
           />
         </InputAndTitle>
-        {/* <InputAndTitle title="비밀번호" errorMessage={errors.password?.message}>
+        <InputAndTitle title="비밀번호" errorMessage={errors.password?.message}>
           <PasswordInput
             placeholder="비밀번호를 입력해주세요"
             {...register("password")}
@@ -173,7 +133,7 @@ export default function LoginInfoPage() {
             placeholder="비밀번호를 입력해주세요"
             {...register("passwordConfirm")}
           />
-        </InputAndTitle> */}
+        </InputAndTitle>
       </InputContainer>
       <Stack className="agreement-container">
         <div className="agreement-container-line">

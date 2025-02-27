@@ -42,3 +42,33 @@ export const socialLogout = async () => {
   console.log("소셜 로그아웃 성공");
   return { error };
 };
+export const clearCookie = () => {
+  Cookies.remove("auth_data");
+  Cookies.remove("authData");
+};
+
+export const signUpNewUser = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${window.location.origin}/auth/callback`,
+    },
+  })
+  if (error) {
+    console.error('회원가입 에러:', error);
+    throw error;
+  }
+  return data;
+}
+export const signInWithEmail = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+  if (error) {
+    console.error('이메일 로그인 에러:', error);
+    throw error;
+  }
+  return data;
+}
