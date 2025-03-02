@@ -15,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="ko" data-theme="light" style={{ colorScheme: 'light' }}>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="container">{children}</div>
+        </Providers>
       </body>
     </html>
   );

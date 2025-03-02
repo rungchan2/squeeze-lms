@@ -2,11 +2,14 @@
 
 import styles from "./page.module.css";
 import { useEffect } from "react";
-import { supabase } from "@/lib/initSupabase";
+import { createClient } from "@/utils/supabase/client";
+const supabase = createClient();
 
-import { socialLogout } from "@/app/auth/socialLogin";
+import { socialLogout } from "@/utils/socialLogin";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -19,7 +22,10 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <h1>Hello World</h1>
-      <button onClick={() => socialLogout()}>sign out</button>
+      <button onClick={() => {
+        socialLogout();
+        router.push('/login');
+      }}>sign out</button>
     </div>
   );
 }
