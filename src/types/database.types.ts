@@ -398,6 +398,7 @@ export type Database = {
           phone: string | null
           privacy_agreed: boolean | null
           role: string | null
+          uid: string | null
           updated_at: string | null
         }
         Insert: {
@@ -412,6 +413,7 @@ export type Database = {
           phone?: string | null
           privacy_agreed?: boolean | null
           role?: string | null
+          uid?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -426,6 +428,7 @@ export type Database = {
           phone?: string | null
           privacy_agreed?: boolean | null
           role?: string | null
+          uid?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -446,7 +449,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      role: "user" | "teacher" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never

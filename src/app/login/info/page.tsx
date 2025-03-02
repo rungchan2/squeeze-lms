@@ -5,25 +5,25 @@ import InputAndTitle from "@/components/InputAndTitle";
 import Heading from "@/components/Text/Heading";
 import { Input } from "@chakra-ui/react";
 import Button from "@/components/common/Button";
-// import { PasswordInput } from "@/components/ui/password-input";
 import Text from "@/components/Text/Text";
 import Checkbox from "@/components/common/Checkbox";
-import { Separator, Stack } from "@chakra-ui/react";
+import { Separator, Stack, Spinner } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signupSchema, type Signup } from "@/types/users";
+import { registerNewUser, type RegisterNewUser } from "@/types/users";
 import { DevTool } from "@hookform/devtools";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Cookies from "js-cookie";
 import { decrypt } from "@/utils/encryption";
+import { Database } from "@/types/database.types";
 
-type DecryptedAuthData = {
+export type DecryptedAuthData = {
   uid: string;
   email: string;
-  first_name: string;
-  last_name: string;
+  first_name: string | "";
+  last_name: string | "";
 };
 
 type Agreement = "mailAgreement" | "cookieAgreement";
@@ -46,29 +46,8 @@ export default function LoginInfoPage() {
       setIsChecked([...isChecked, value]);
     }
   };
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    control,
-    formState: { errors, isSubmitting },
-  } = useForm<Signup>({
-    resolver: zodResolver(signupSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      passwordConfirm: "",
-      name: "",
-      lastName: "",
-      phone: "",
-      mailAgreement: false,
-      cookieAgreement: false,
-    },
-  });
-  useEffect(() => {
-    console.log("useEffect 실행됨");
+  function getDecryptedAuthData() {
     const authData = Cookies.get("auth_data");
-    console.log("쿠키 데이터:", authData, typeof authData);
 
     if (!authData || typeof authData !== "string") {
       console.log("유효하지 않은 auth_data");
@@ -78,26 +57,13 @@ export default function LoginInfoPage() {
     }
 
     try {
-      // 문자열이 아닌 경우를 대비해 JSON.stringify 추가
       const decryptedString = decrypt(authData);
-      console.log("복호화된 문자열:", decryptedString);
-
       if (!decryptedString) {
         throw new Error("복호화된 데이터가 없습니다");
       }
-
       const decryptedAuthData: DecryptedAuthData = JSON.parse(decryptedString);
-      console.log("파싱된 데이터:", decryptedAuthData);
-
-      if (!decryptedAuthData || !decryptedAuthData.email) {
-        throw new Error("필수 데이터가 누락되었습니다");
-      }
-
-      setValue("email", decryptedAuthData.email);
-      setValue("name", decryptedAuthData.first_name);
-      setValue("lastName", decryptedAuthData.last_name);
+      return decryptedAuthData;
     } catch (error) {
-      console.error("데이터 처리 중 에러:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -106,31 +72,52 @@ export default function LoginInfoPage() {
         errorMessage
       )}`;
     }
-  }, [setValue]);
-  const onSubmit = async (data: Signup) => {
-    console.log(data);
-    const { error } = await supabase.from("users").insert({
-      uid: data.uid,
-      email: data.email,
-      password: data.password,
-      name: data.name,
-      lastName: data.lastName,
-      phone: data.phone,
-      role: "user",
-      mailAgreement: isChecked.includes("mailAgreement"),
-      cookieAgreement: isChecked.includes("cookieAgreement"),
-      created_at: new Date().toISOString(),
-    });
+  }
+  const decryptedAuthData = getDecryptedAuthData();
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterNewUser>({
+    resolver: zodResolver(registerNewUser),
+    mode: "onChange",
+    defaultValues: {
+      email: decryptedAuthData?.email || "",
+      name: decryptedAuthData?.first_name || "",
+      lastName: decryptedAuthData?.last_name || "",
+      phone: "",
+      mailAgreement: false,
+      cookieAgreement: false,
+    },
+  });
+
+  const onSubmit = async (data: RegisterNewUser) => {
+
+    const { data: userData, error } = await supabase
+      .from('users')
+      .insert({
+        uid: decryptedAuthData?.uid || "",
+        email: data.email,
+        first_name: data.name,
+        last_name: data.lastName,
+        phone: data.phone,
+        role: "user" as const,
+        marketing_opt_in: isChecked.includes("mailAgreement"),
+        privacy_agreed: isChecked.includes("cookieAgreement"),
+        created_at: new Date().toISOString(),
+      } satisfies Database['public']['Tables']['users']['Insert'])
+    console.log("userData", userData);
     if (error) {
-      console.error(error);
-      router.push("/error?error=회원가입 실패");
+      router.push(`/error?message=회원가입 실패: ${error.message}`);
+      return;
     }
     router.push("/");
   };
 
   return (
     <Container onSubmit={handleSubmit(onSubmit)}>
-      <Heading level={3}>회원가입</Heading>
+      <Heading level={4}>환영합니다! {decryptedAuthData?.first_name}님</Heading>
       <InputContainer>
         <HorizontalContainer>
           <InputAndTitle title="성" errorMessage={errors.lastName?.message}>
@@ -154,26 +141,7 @@ export default function LoginInfoPage() {
             {...register("phone")}
           />
         </InputAndTitle>
-        {/* <InputAndTitle title="비밀번호" errorMessage={errors.password?.message}>
-          <PasswordInput
-            placeholder="비밀번호를 입력해주세요"
-            {...register("password")}
-          />
-        </InputAndTitle>
-        <InputAndTitle
-          title="비밀번호 확인"
-          errorMessage={
-            errors.passwordConfirm?.message ||
-            getValues("password") !== getValues("passwordConfirm")
-              ? "비밀번호가 일치하지 않습니다"
-              : undefined
-          }
-        >
-          <PasswordInput
-            placeholder="비밀번호를 입력해주세요"
-            {...register("passwordConfirm")}
-          />
-        </InputAndTitle> */}
+
       </InputContainer>
       <Stack className="agreement-container">
         <div className="agreement-container-line">
@@ -208,7 +176,7 @@ export default function LoginInfoPage() {
           />
         </div>
       </Stack>
-      <Button type="submit">{isSubmitting ? "로딩중..." : "회원가입"}</Button>
+      <Button style={{ fontWeight: "bold" }} type="submit">{isSubmitting ? <Spinner /> : "회원가입"}</Button>
       <DevTool control={control} />
     </Container>
   );

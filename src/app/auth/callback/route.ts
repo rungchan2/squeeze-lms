@@ -37,7 +37,7 @@ export async function GET(request: Request) {
         const userData = await supabase
           .from("users")
           .select("*")
-          .eq("uid", data.user.id)
+          .eq("email", data.user.email || "")
           .single();
 
         // 디버깅을 위한 로그 추가

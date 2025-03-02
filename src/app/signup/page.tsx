@@ -8,24 +8,16 @@ import Button from "@/components/common/Button";
 import { PasswordInput } from "@/components/ui/password-input";
 import Text from "@/components/Text/Text";
 import Checkbox from "@/components/common/Checkbox";
-import { Separator, Stack } from "@chakra-ui/react";
+import { Separator, Stack, Spinner } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, type Signup } from "@/types/users";
 import { DevTool } from "@hookform/devtools";
-import { useState, useEffect } from "react";
-import Cookies from "js-cookie";
-import { decrypt } from "@/utils/encryption";
-
-type DecryptedAuthData = {
-  uid: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-};
-
+import { useState } from "react";
+import { signUpWithEmail } from "@/utils/socialLogin";
+import { clearCookie } from "@/utils/socialLogin";
 type Agreement = "mailAgreement" | "cookieAgreement";
 const supabase = createClient();
 
@@ -49,12 +41,12 @@ export default function LoginInfoPage() {
   const {
     register,
     handleSubmit,
-    getValues,
-    setValue,
+    watch,
     control,
-    formState: { errors, isSubmitting },
-  } = useForm<Signup>({
-    resolver: zodResolver(signupSchema),
+    formState: { errors, isSubmitting, isValid },
+  } = useForm<Omit<Signup, "uid">>({
+    resolver: zodResolver(signupSchema.omit({ uid: true })),
+    mode: "onChange",
     defaultValues: {
       email: "",
       password: "",
@@ -67,12 +59,22 @@ export default function LoginInfoPage() {
     },
   });
   
-  const onSubmit = async (data: Signup) => {
-    console.log(data);
-    const { error } = await supabase.from("users").insert({
-      uid: data.uid,
+  console.log("Form State:", {
+    errors,
+    isValid,
+    isSubmitting,
+    values: watch(),
+  });
+
+  const onSubmit = async (data: Omit<Signup, "uid">) => {
+    const { userData: signUpData, error: signUpError } = await signUpWithEmail(data.email, data.password);
+    if (signUpError) {
+      router.push(`/error?message=회원가입 실패: ${signUpError}`);
+      return;
+    }
+    const { error : userError } = await supabase.from("users").insert({
+      uid: signUpData.user?.id,
       email: data.email,
-      password: data.password,
       name: data.name,
       lastName: data.lastName,
       phone: data.phone,
@@ -80,12 +82,14 @@ export default function LoginInfoPage() {
       mailAgreement: isChecked.includes("mailAgreement"),
       cookieAgreement: isChecked.includes("cookieAgreement"),
       created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     });
-    if (error) {
-      console.error(error);
-      router.push("/error?error=회원가입 실패");
+    if (userError) {
+      router.push(`/error?message=회원가입 실패: ${userError}`);
+      return;
     }
     router.push("/");
+    clearCookie();
   };
 
   return (
@@ -124,7 +128,7 @@ export default function LoginInfoPage() {
           title="비밀번호 확인"
           errorMessage={
             errors.passwordConfirm?.message ||
-            getValues("password") !== getValues("passwordConfirm")
+            watch("password") !== watch("passwordConfirm")
               ? "비밀번호가 일치하지 않습니다"
               : undefined
           }
@@ -168,14 +172,18 @@ export default function LoginInfoPage() {
           />
         </div>
       </Stack>
-      <Button type="submit">{isSubmitting ? "로딩중..." : "회원가입"}</Button>
+      <Button 
+        type="submit" 
+        disabled={isSubmitting || !isChecked.includes("cookieAgreement")}
+      >
+        {isSubmitting ? <Spinner /> : "회원가입"}
+      </Button>
       <DevTool control={control} />
     </Container>
   );
 }
 
-const Container = styled.form`
-  display: flex;
+const Container = styled.form`  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -232,3 +240,4 @@ const HorizontalContainer = styled.div`
   align-items: top;
   justify-content: top;
 `;
+
