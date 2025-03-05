@@ -1,6 +1,12 @@
 /* @import 'reset-css/reset.css'; */
 
 :root {
+
+  --breakpoint-phone: 480px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+  --breakpoint-large: 1440px;
+
   /* Brand - Primary */
   --primary-50: #FFEAD8;
   --primary-100: #FFDFC3;

@@ -19,6 +19,8 @@
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.48.1",
     "@tanstack/react-query": "^5.66.7",
+    "dayjs": "^1.11.13",
+    "dayjs-plugin-utc": "^0.1.2",
     "dotenv": "^16.4.7",
     "gsap": "^3.12.7",
     "js-cookie": "^3.0.5",

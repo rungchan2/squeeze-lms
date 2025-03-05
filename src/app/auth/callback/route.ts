@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { encrypt } from "@/utils/encryption"; // 암호화 유틸리티 필요
 
 export async function GET(request: Request) {
+  const supabase_server = await createClient();
   const { searchParams, origin } = new URL(request.url);
   const error = searchParams.get("error") || "";
   const error_description = searchParams.get("error_description") || "";
@@ -28,13 +29,12 @@ export async function GET(request: Request) {
 
   if (code) {
     try {
-      const supabase = await createClient();
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+      const { data, error } = await supabase_server.auth.exchangeCodeForSession(code);
 
       console.log("Exchange 결과:", { data: data.user, error });
 
       if (!error) {
-        const userData = await supabase
+        const userData = await supabase_server
           .from("users")
           .select("*")
           .eq("email", data.user.email || "")

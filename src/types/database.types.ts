@@ -1,3 +1,4 @@
+// supabase gen types typescript --linked --debug > src/types/database.types.ts
 export type Json =
   | string
   | number
@@ -268,6 +269,44 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: number
+          link: string | null
+          message: string
+          read_at: string | null
+          receiver_id: number
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          link?: string | null
+          message: string
+          read_at?: string | null
+          receiver_id: number
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          link?: string | null
+          message?: string
+          read_at?: string | null
+          receiver_id?: number
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_notifications_user"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           created_at: string | null
@@ -390,7 +429,6 @@ export type Database = {
           created_at: string | null
           email: string
           first_name: string | null
-          hashed_password: string | null
           id: number
           last_name: string | null
           marketing_opt_in: boolean | null
@@ -405,7 +443,6 @@ export type Database = {
           created_at?: string | null
           email: string
           first_name?: string | null
-          hashed_password?: string | null
           id?: number
           last_name?: string | null
           marketing_opt_in?: boolean | null
@@ -420,7 +457,6 @@ export type Database = {
           created_at?: string | null
           email?: string
           first_name?: string | null
-          hashed_password?: string | null
           id?: number
           last_name?: string | null
           marketing_opt_in?: boolean | null

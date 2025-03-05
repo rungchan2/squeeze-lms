@@ -1,7 +1,5 @@
-import { createClient } from "@/utils/supabase/client";
+import { supabase } from "@/utils/supabase/client";
 import Cookies from "js-cookie";
-
-const supabase = createClient();
 
 export const socialLogin = async (
   provider: "google" | "github" | "apple" | "twitter" | "facebook"

@@ -1,0 +1,118 @@
+.noJourney {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.notificationCard {
+  width: 100%;
+  position: relative;
+  border-radius: 10px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  box-sizing: border-box;
+  text-align: left;
+  font-size: 14px;
+  color: #000;
+  font-family: Inter;
+
+  &:hover {
+    background-color: var(--grey-200);
+    cursor: pointer;
+  }
+}
+
+.contentContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 15px;
+  flex: 1;
+}
+
+.notificationIcon {
+  width: 28px;
+  position: relative;
+  height: 32px;
+}
+
+.textContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.notificationTitle {
+  align-self: stretch;
+  position: relative;
+  line-height: 28px;
+  font-weight: 600;
+}
+
+.dateContainer {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  text-align: center;
+  font-size: 12px;
+  color: #9b918d;
+}
+
+.dateLabel {
+  position: relative;
+  line-height: 24px;
+}
+
+.dateValue {
+  position: relative;
+  line-height: 24px;
+}
+
+.menuIcon {
+  width: 13.5px;
+  position: relative;
+  height: 3.5px;
+}
+.dots {
+  color: var(--grey-500);
+
+  &:hover {
+    color: var(--grey-600);
+  }
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.typeContainer {
+  background-color: var(--primary-400);
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: 700;
+}
+.link {
+  color: var(--primary-400);
+  cursor: pointer;
+  &:hover {
+    color: var(--primary-500);
+    text-decoration: underline;
+  }
+}

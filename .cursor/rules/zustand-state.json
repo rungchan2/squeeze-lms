@@ -1,0 +1,11 @@
+{
+    "description": "Defines best practices for Zustand state management.",
+    "file_patterns": ["**/store/*.ts"],
+    "rules": [
+      "Persist authentication state using `zustand/middleware`.",
+      "Store `uid`, `email`, and `role` in Zustand.",
+      "Provide a `fetchUser()` method to sync state with Supabase.",
+      "Ensure that role-based state updates reflect in UI conditionally.",
+      "Use Zustand selectors to optimize component re-renders."
+    ]
+  }

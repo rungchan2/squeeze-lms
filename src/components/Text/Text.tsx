@@ -9,13 +9,14 @@ type TextProps = {
   weight?: "regular" | "medium" | "bold";
   onClick?: () => void;
   style?: React.CSSProperties;
+  fontWeight?: "regular" | "medium" | "bold";
 };
 
-const Text = ({ variant = "body", children, className = "", color, weight = "regular", onClick, style }: TextProps) => {
+const Text = ({ variant = "body", children, className = "", color, onClick, style, fontWeight = "regular" }: TextProps) => {
   const textStyle = {
     color: color || "inherit",
-    fontWeight: weight === "regular" ? 400 : weight === "medium" ? 500 : weight === "bold" ? 700 : undefined,
-    ...style
+    ...style,
+    fontWeight: fontWeight || "regular",
   };
 
   return (

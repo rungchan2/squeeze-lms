@@ -99,17 +99,11 @@ const StyledModal = styled.div`
 
   .modal-body {
     position: absolute;
-    margin: 16px;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 90%;
     max-width: 450px;
-    /* display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%; */
 
     .modal-content {
       position: relative;
@@ -120,8 +114,15 @@ const StyledModal = styled.div`
 
       .modal-close {
         position: absolute;
-        top: 5px;
+        top: 10px;
         right: 10px;
+        cursor: pointer;
+        padding: 4px;
+
+        &:hover {
+          background-color: var(--grey-100);
+          border-radius: 50%;
+        }
       }
     }
   }

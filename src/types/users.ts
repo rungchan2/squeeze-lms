@@ -48,3 +48,7 @@ export const registerNewUser = z.object({
 });
 
 export type RegisterNewUser = z.infer<typeof registerNewUser>;
+
+export const roleSchema = z.enum(["user", "teacher", "admin"]);
+
+export type Role = z.infer<typeof roleSchema>;

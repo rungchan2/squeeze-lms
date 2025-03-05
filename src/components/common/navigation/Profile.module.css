@@ -1,0 +1,13 @@
+.profile {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.profile:hover {
+  transform: scale(1.1);
+}

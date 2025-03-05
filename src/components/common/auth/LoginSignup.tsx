@@ -16,7 +16,7 @@ import { useState } from "react";
 import { DevTool } from "@hookform/devtools";
 import Cookies from "js-cookie";
 import { encrypt } from "@/utils/encryption";
-import { createClient } from "@/utils/supabase/client";
+import { supabase } from "@/utils/supabase/client";
 import { DecryptedAuthData } from "@/app/login/info/page";
 
 let decryptedAuthData: DecryptedAuthData = {
@@ -25,8 +25,6 @@ let decryptedAuthData: DecryptedAuthData = {
   first_name: "",
   last_name: "",
 }
-
-const supabase = createClient();
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
