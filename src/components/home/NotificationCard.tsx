@@ -7,12 +7,13 @@ import { Modal } from "../common/modal/Modal";
 import { useState } from "react";
 import dayjs from "@/utils/dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-
+import Button from "../common/Button";
+import Dropdown from "../common/dropdown/Dropdown";
 dayjs.extend(relativeTime);
 
 function formatNotificationTime(createdAt: string) {
-  if (!createdAt) return "Unknown time"; // created_at 값이 없을 경우
-  return dayjs(createdAt).fromNow(); // ex) "3 minutes ago"
+  if (!createdAt) return "Unknown time";
+  return dayjs(createdAt).fromNow();
 }
 
 export default function NotificationCard(notification: Notification) {
@@ -33,8 +34,58 @@ export default function NotificationCard(notification: Notification) {
               </Text>
             </div>
           </div>
+
+          <Dropdown
+            toggleButton={
+              <div className={styles.dotsContainer}>
+                <HiDotsHorizontal
+                  className={styles.dots}
+                  color="var(--grey-500)"
+                />
+              </div>
+            }
+            items={[
+              <Text
+                variant="small"
+                key="accept"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("accept");
+                }}
+              >
+                수락
+              </Text>,
+              <Text
+                variant="small"
+                key="reject"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("reject");
+                }}
+              >
+                거절
+              </Text>,
+            ]}
+          />
         </div>
-        <HiDotsHorizontal className={styles.dots} color="var(--grey-500)" />
+        {notification.type === "request" && (
+          <div className={styles.buttonContainer}>
+            <Button
+              variant="outline"
+              onClick={(e) => e.stopPropagation()}
+              maxWidth={60}
+            >
+              <Text variant="small">거절</Text>
+            </Button>
+            <Button
+              variant="flat"
+              onClick={(e) => e.stopPropagation()}
+              maxWidth={60}
+            >
+              <Text variant="small">수락</Text>
+            </Button>
+          </div>
+        )}
         <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
           <div className={styles.modalContent}>
             <Text variant="body" fontWeight="bold">

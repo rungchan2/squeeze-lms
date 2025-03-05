@@ -7,7 +7,7 @@ type TextProps = {
   className?: string;
   color?: string;
   weight?: "regular" | "medium" | "bold";
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
   style?: React.CSSProperties;
   fontWeight?: "regular" | "medium" | "bold";
 };

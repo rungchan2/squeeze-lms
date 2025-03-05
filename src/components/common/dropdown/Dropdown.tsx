@@ -3,13 +3,13 @@ import styled from "@emotion/styled";
 import { useState, useEffect } from "react";
 interface Props {
   toggleButton: React.ReactNode;
-  children: React.ReactNode;
+  items: React.ReactNode[];
   isOpen?: boolean;
 }
 
 export default function Dropdown({
   toggleButton,
-  children,
+  items,
   isOpen = false,
 }: Props) {
   const [open, setOpen] = useState(isOpen);
@@ -17,7 +17,10 @@ export default function Dropdown({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setOpen(false);
       }
     };
@@ -29,10 +32,24 @@ export default function Dropdown({
 
   return (
     <StyledContainer $open={open} ref={dropdownRef}>
-      <button className="toggle" onClick={() => setOpen(!open)}>
+      <button
+        className="toggle"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(!open);
+        }}
+      >
         {toggleButton}
       </button>
-      {open && <div className="pannel">{children}</div>}
+      {open && (
+        <div className="pannel">
+          {items.map((item, index) => (
+            <div className="item" key={index}>
+              {item}
+            </div>
+          ))}
+        </div>
+      )}
     </StyledContainer>
   );
 }
@@ -50,26 +67,46 @@ const StyledContainer = styled.div<StyledProps>`
     cursor: pointer;
 
     svg {
-      font-size: 1.5rem;
-      fill: ${({ theme, $open }) => ($open ? theme.color.primary : "black")};
+      fill: ${({ $open }) =>
+        $open ? "var(--primary-700)" : "var(--grey-500)"};
     }
   }
 
   .pannel {
     position: absolute;
+    display: flex;
+    flex-direction: column;
+    min-width: 100px;
     z-index: 10;
     top: 100%;
     right: 0;
     background-color: white;
     border: 1px solid #ddd;
-    border-radius: 0.5rem;
-    padding: 0.5rem;
+    border-radius: 10px;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
     justify-content: center;
     align-items: center;
+    text-align: center;
 
     & > button {
       margin: 0, auto;
+    }
+
+    .item {
+      cursor: pointer;
+      width: 100%;
+      padding: 6px 0;
+      &:hover {
+        background-color: var(--grey-100);
+      }
+    }
+    .item:last-child {
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+    .item:first-child {
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
   }
-}
-`
+`;

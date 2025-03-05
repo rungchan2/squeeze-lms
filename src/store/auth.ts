@@ -59,10 +59,6 @@ export const useAuthStore = create<UserState>()(
 
         const { data: supabaseGetUser } = await supabase.auth.getUser();
         if (supabaseGetUser && supabaseGetUser.user) {
-          console.log(
-            "profileImage",
-            supabaseGetUser.user.user_metadata.picture
-          );
 
           set({
             profileImage: supabaseGetUser.user.user_metadata.picture,

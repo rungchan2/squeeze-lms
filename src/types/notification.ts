@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // ✅ 알림 유형 (Enum)
-export const NotificationTypeEnum = z.enum(["comment", "submission", "bug_report", "announcement"]);
+export const NotificationTypeEnum = z.enum(["comment", "submission", "bug_report", "announcement", "request"]);
 
 // ✅ Notifications 테이블의 데이터 스키마
 export const NotificationSchema = z.object({
