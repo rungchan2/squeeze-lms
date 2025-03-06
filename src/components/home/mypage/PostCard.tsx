@@ -1,5 +1,5 @@
 import Text from "@/components/Text/Text";
-import Heading from "../Text/Heading";
+import Heading from "../../Text/Heading";
 import styled from "@emotion/styled";
 import {
   FaRegBookmark,

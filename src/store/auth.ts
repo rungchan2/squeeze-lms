@@ -13,6 +13,7 @@ export type UserState = {
   isAuthenticated: boolean;
   loading: boolean;
   profileImage: string;
+  fullName: string | null;
   error: string | null;
   fetchUser: () => Promise<void>;
   logout: () => Promise<void>;
@@ -55,6 +56,7 @@ export const useAuthStore = create<UserState>()(
       loading: false,
       profileImage: defaultProfile.src,
       error: null,
+      fullName: null,
       // ✅ 로그인 후 유저 데이터 가져오기
       fetchUser: async () => {
         set({ loading: true, error: null });
@@ -64,6 +66,7 @@ export const useAuthStore = create<UserState>()(
 
           set({
             profileImage: supabaseGetUser.user.user_metadata.picture,
+            fullName: supabaseGetUser.user.user_metadata.full_name,
           });
         }
 
@@ -119,6 +122,8 @@ export const useAuthStore = create<UserState>()(
             role: null,
             isAuthenticated: false,
             error: null,
+            fullName: null,
+            profileImage: defaultProfile.src,
           });
         } catch (error) {
           const errorMessage =

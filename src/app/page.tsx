@@ -6,16 +6,13 @@ import { supabase } from "@/utils/supabase/client";
 import { socialLogout } from "@/utils/socialLogin";
 import { useRouter } from "next/navigation";
 import HomeTab from "@/components/home/HomeTab";
+import { useAuthStore } from "@/store/auth";
 
 export default function Home() {
   const router = useRouter();
+  const { fetchUser } = useAuthStore();
   useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getUser();
-      console.log("Current session:", data);
-    };
-
-    checkSession();
+    fetchUser();
   }, []);
   return (
     <div className={styles.container}>

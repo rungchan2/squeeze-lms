@@ -1,13 +1,13 @@
-import styles from "./Home.module.css";
+import styles from "../Home.module.css"
 import { FaBell } from "react-icons/fa";
 import { HiDotsHorizontal } from "react-icons/hi";
 import Text from "@/components/Text/Text";
 import { Notification } from "@/types/notification";
-import { Modal } from "../common/modal/Modal";
+import { Modal } from "../../common/modal/Modal";
 import { useState } from "react";
 import dayjs from "@/utils/dayjs/dayjs";
-import Button from "../common/Button";
-import Dropdown from "../common/dropdown/Dropdown";
+import Button from "../../common/Button";
+import Dropdown from "../../common/dropdown/Dropdown";
 import { formatDifference } from "@/utils/dayjs/calcDifference";
 export default function NotificationCard(notification: Notification) {
   const duration = formatDifference(notification.created_at || "");

@@ -15,6 +15,9 @@ interface TabProps {
 
 interface TabsProps {
   children: React.ReactNode;
+  usePath?: boolean;
+  hoverActiveColor?: string;
+  defaultIndex?: number;
 }
 
 function Tab({ children }: TabProps) {
@@ -25,61 +28,81 @@ function Tab({ children }: TabProps) {
   );
 }
 
-function Tabs({ children }: TabsProps) {
+function Tabs({ 
+  children, 
+  usePath = false, 
+  hoverActiveColor = "transparent",
+  defaultIndex = 0
+}: TabsProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const currentTab = searchParams.get('tab');
-  const [activeIndex, setActiveIndex] = useState<string | null>(currentTab);
+  
+  const [activeIndex, setActiveIndex] = useState<string | null>(
+    usePath ? currentTab : String(defaultIndex)
+  );
+  
   const tabs = React.Children.toArray(
     children
   ) as React.ReactElement<TabProps>[];
 
   useEffect(() => {
-    setActiveIndex(currentTab);
-  }, [currentTab]);
+    if (usePath) {
+      setActiveIndex(currentTab);
+    }
+  }, [currentTab, usePath]);
 
-  // 첫 번째 탭의 path를 기본값으로 사용
   useEffect(() => {
-    if (!activeIndex && tabs.length > 0 && tabs[0].props.path) {
+    if (usePath && !activeIndex && tabs.length > 0 && tabs[0].props.path) {
       const defaultPath = tabs[0].props.path;
       setActiveIndex(defaultPath);
       
-      // URL 파라미터 업데이트
       const newParams = new URLSearchParams(searchParams.toString());
       newParams.set('tab', defaultPath);
       router.push(`?${newParams.toString()}`);
     }
-  }, [activeIndex, tabs, router, searchParams]);
+  }, [activeIndex, tabs, router, searchParams, usePath]);
 
-  const handleTabClick = (path: string | undefined) => {
-    if (path) {
+  const handleTabClick = (path: string | undefined, index: number) => {
+    if (usePath && path) {
       setActiveIndex(path);
       
-      // URL 파라미터 업데이트
       const newParams = new URLSearchParams(searchParams.toString());
       newParams.set('tab', path);
       router.push(`?${newParams.toString()}`);
+    } else {
+      setActiveIndex(String(index));
     }
   };
 
-  // 현재 활성화된 탭 컨텐츠 찾기
-  const activeTabContent = tabs.find(tab => tab.props.path === activeIndex);
+  const activeTabContent = usePath 
+    ? tabs.find(tab => tab.props.path === activeIndex)
+    : tabs[Number(activeIndex) || 0];
 
   return (
     <div className={styles.container}>
       <div className={styles.tabButton}>
-        {tabs.map((tab, index) => (
-          <button
-            key={index}
-            onClick={() => handleTabClick(tab.props.path)}
-            className={activeIndex === tab.props.path ? styles.active : ""}
-          >
-            {tab.props.icon}
-            <Text variant="caption">
-              {tab.props.title}
-            </Text>
-          </button>
-        ))}
+        {tabs.map((tab, index) => {
+          const isActive = usePath 
+            ? activeIndex === tab.props.path 
+            : activeIndex === String(index);
+            
+          return (
+            <button
+              key={index}
+              onClick={() => handleTabClick(tab.props.path, index)}
+              className={isActive ? styles.active : ""}
+              style={{
+                backgroundColor: isActive ? hoverActiveColor : undefined, cursor: 'pointer'
+              }}
+            >
+              {tab.props.icon}
+              <Text variant="caption">
+                {tab.props.title}
+              </Text>
+            </button>
+          );
+        })}
       </div>
 
       <div className={styles.tabContent}>

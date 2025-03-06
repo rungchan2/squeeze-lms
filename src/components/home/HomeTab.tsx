@@ -1,20 +1,19 @@
 import { Tabs, Tab } from "@/components/common/tab/Tabs";
-import Text from "@/components/Text/Text";
 import { MdSpaceDashboard } from "react-icons/md";
 import { FaBell } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
-import JourneyCard from "@/components/home/JourneyCard";
+import JourneyCard from "@/components/home/space/JourneyCard";
 import { useJourney } from "@/hooks/useJourney";
 import Spinner from "@/components/common/Spinner";
 import styled from "@emotion/styled";
-import NoJourney from "./NoJourney";
-import NotificationCard from "./NotificationCard";
+import NoJourney from "./space/NoJourney";
+import NotificationCard from "./notification/NotificationCard";
 import { useNotification } from "@/hooks/useNotification";
-import MyPage from "./MyPage";
+import MyPage from "./mypage/MyPage";
 
 export default function HomeTab() {
   return (
-    <Tabs>
+    <Tabs usePath={true}>
       <Tab title="내 조직" icon={<MdSpaceDashboard />} path="home">
         <JourneyTab />
       </Tab>
