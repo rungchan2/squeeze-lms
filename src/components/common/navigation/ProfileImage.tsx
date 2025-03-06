@@ -7,7 +7,7 @@ export function ProfileImage({
   profileImage,
   width,
 }: {
-  profileImage: string;
+  profileImage: string | null;
   width: number;
 }) {
   if (!profileImage) {
@@ -16,7 +16,8 @@ export function ProfileImage({
   const router = useRouter();
   return (
     <div
-      className={styles.profile}
+      className={styles.profileContainer}
+      style={{ width: width, height: width }}
       onClick={() => {
         router.push("/profile");
       }}

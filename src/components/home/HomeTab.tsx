@@ -10,6 +10,7 @@ import styled from "@emotion/styled";
 import NoJourney from "./NoJourney";
 import NotificationCard from "./NotificationCard";
 import { useNotification } from "@/hooks/useNotification";
+import MyPage from "./MyPage";
 
 export default function HomeTab() {
   return (
@@ -21,7 +22,7 @@ export default function HomeTab() {
         <NotificationTab />
       </Tab>
       <Tab title="프로필" icon={<FaUser />} path="profile">
-        <Text>3</Text>
+        <ProfileTab />
       </Tab>
     </Tabs>
   );
@@ -83,3 +84,7 @@ const NotificationsContainer = styled.div`
   gap: 8px;
   align-items: center;
 `;
+
+function ProfileTab() {
+  return <MyPage />;
+}

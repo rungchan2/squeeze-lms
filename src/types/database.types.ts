@@ -1,4 +1,5 @@
 // supabase gen types typescript --linked --debug > src/types/database.types.ts
+
 export type Json =
   | string
   | number
@@ -100,10 +101,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "comments_submission_id_fkey"
+            foreignKeyName: "comments_post_id_fkey"
             columns: ["submission_id"]
             isOneToOne: false
-            referencedRelation: "submissions"
+            referencedRelation: "posts"
             referencedColumns: ["id"]
           },
           {
@@ -207,10 +208,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "likes_submission_id_fkey"
+            foreignKeyName: "likes_post_id_fkey"
             columns: ["submission_id"]
             isOneToOne: false
-            referencedRelation: "submissions"
+            referencedRelation: "posts"
             referencedColumns: ["id"]
           },
           {
@@ -328,7 +329,7 @@ export type Database = {
         }
         Relationships: []
       }
-      submissions: {
+      posts: {
         Row: {
           attachment_url: string | null
           content: string | null
@@ -336,7 +337,7 @@ export type Database = {
           id: number
           mission_id: number | null
           score: number | null
-          submitted_at: string | null
+          title: string
           updated_at: string | null
           user_id: number | null
         }
@@ -347,7 +348,7 @@ export type Database = {
           id?: number
           mission_id?: number | null
           score?: number | null
-          submitted_at?: string | null
+          title: string
           updated_at?: string | null
           user_id?: number | null
         }
@@ -358,7 +359,7 @@ export type Database = {
           id?: number
           mission_id?: number | null
           score?: number | null
-          submitted_at?: string | null
+          title?: string
           updated_at?: string | null
           user_id?: number | null
         }

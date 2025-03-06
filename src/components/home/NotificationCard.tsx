@@ -5,19 +5,12 @@ import Text from "@/components/Text/Text";
 import { Notification } from "@/types/notification";
 import { Modal } from "../common/modal/Modal";
 import { useState } from "react";
-import dayjs from "@/utils/dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "@/utils/dayjs/dayjs";
 import Button from "../common/Button";
 import Dropdown from "../common/dropdown/Dropdown";
-dayjs.extend(relativeTime);
-
-function formatNotificationTime(createdAt: string) {
-  if (!createdAt) return "Unknown time";
-  return dayjs(createdAt).fromNow();
-}
-
+import { formatDifference } from "@/utils/dayjs/calcDifference";
 export default function NotificationCard(notification: Notification) {
-  const duration = formatNotificationTime(notification.created_at || "");
+  const duration = formatDifference(notification.created_at || "");
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>

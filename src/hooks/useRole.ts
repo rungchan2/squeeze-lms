@@ -6,7 +6,6 @@ import { Role } from "@/types/users";
 export function useRole(requiredRole: Role) {
   const { role, isAuthenticated, loading } = useAuthStore();
   const router = useRouter();
-  console.log(role);
   useEffect(() => {
     if (!loading && isAuthenticated && role !== requiredRole) {
       router.push("/login");

@@ -7,6 +7,7 @@ import defaultProfile from "@/assets/default-profile.png";
 
 export type UserState = {
   uid: string | null;
+  id: number;
   email: string | null;
   role: Role | null;
   isAuthenticated: boolean;
@@ -46,6 +47,7 @@ const encryptedStorage = {
 export const useAuthStore = create<UserState>()(
   persist(
     (set) => ({
+      id: 0,
       uid: null,
       email: null,
       role: null,
@@ -75,13 +77,14 @@ export const useAuthStore = create<UserState>()(
         // ✅ `users` 테이블에서 `role` 가져오기
         const { data: userData, error: userDataError } = await supabase
           .from("users")
-          .select("uid, email, role")
+          .select("uid, email, role, id")
           .eq("uid", authUser?.user.id ?? "")
           .single();
 
         if (userDataError) {
           console.error("Error fetching user data:", userDataError.message);
           set({
+            id: 0,
             isAuthenticated: false,
             loading: false,
             error: userDataError.message,
@@ -96,6 +99,7 @@ export const useAuthStore = create<UserState>()(
 
         // 데이터 설정 시 검증 추가
         set({
+          id: userData.id,
           uid: userData.uid,
           email: userData.email,
           role: isValidRole(userData.role) ? userData.role : "user", // 기본값으로 "user" 사용
@@ -109,6 +113,7 @@ export const useAuthStore = create<UserState>()(
         try {
           await supabase.auth.signOut();
           set({
+            id: 0,
             uid: null,
             email: null,
             role: null,

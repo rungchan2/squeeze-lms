@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { Providers } from "./providers";
 import "./globals.css";
 import { Navigation } from "@/components/common/navigation/Navigation";
-import dayjs from "dayjs";
-import 'dayjs/locale/ko'
-dayjs.locale('ko')
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 
 export const metadata: Metadata = {
@@ -23,6 +21,7 @@ export default function RootLayout({
         <Providers>
           <Navigation />
           <div className="container">{children}</div>
+          <SpeedInsights />
         </Providers>
       </body>
     </html>

@@ -1,4 +1,4 @@
-.profile {
+.profileContainer {
   position: relative;
   width: 100%;
   height: 100%;
@@ -6,8 +6,9 @@
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
+  max-width: 100px;
 }
 
-.profile:hover {
-  transform: scale(1.1);
+.profileContainer:hover {
+  transform: scale(1.03);
 }
