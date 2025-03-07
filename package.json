@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "dev-turbo": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
@@ -43,6 +43,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
     "eslint": "^9",
     "eslint-config-next": "15.1.7",
     "typescript": "^5"

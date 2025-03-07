@@ -4,8 +4,8 @@ import { useAuthStore } from "@/store/auth";
 import styled from "@emotion/styled";
 import { useEffect, useState, useRef } from "react";
 import { FaChevronLeft } from "react-icons/fa";
-import { ProfileImage } from "@/components/common/navigation/ProfileImage";
-import { Logo } from "@/components/common/navigation/Logo";
+import { ProfileImage } from "@/components/navigation/ProfileImage";
+import { Logo } from "@/components/navigation/Logo";
 
 export function Navigation() {
   const { fetchUser, profileImage } = useAuthStore();

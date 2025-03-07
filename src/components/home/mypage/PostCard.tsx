@@ -10,7 +10,7 @@ import {
 import { LuDot } from "react-icons/lu";
 import { formatDifference } from "@/utils/dayjs/calcDifference";
 import { useRouter } from "next/navigation";
-import { ProfileImage } from "@/components/common/navigation/ProfileImage";
+import { ProfileImage } from "@/components/navigation/ProfileImage";
 import dayjs from "@/utils/dayjs/dayjs";
 import { PostWithRelations } from "@/types/posts";
 import { useLikes } from "@/hooks/useLikes";

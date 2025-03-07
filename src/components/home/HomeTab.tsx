@@ -1,4 +1,4 @@
-import { Tabs, Tab } from "@/components/common/tab/Tabs";
+import { Tabs, Tab } from "@/components/tab/Tabs";
 import { MdSpaceDashboard } from "react-icons/md";
 import { FaBell } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";

@@ -9,7 +9,7 @@ import Text from "@/components/Text/Text";
 import Checkbox from "@/components/common/Checkbox";
 import { Separator, Stack, Spinner } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
+import { supabase } from "@/utils/supabase/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerNewUser, type RegisterNewUser } from "@/types/users";
@@ -27,7 +27,6 @@ export type DecryptedAuthData = {
 };
 
 type Agreement = "mailAgreement" | "cookieAgreement";
-const supabase = createClient();
 
 export default function LoginInfoPage() {
   const router = useRouter();
@@ -93,20 +92,17 @@ export default function LoginInfoPage() {
   });
 
   const onSubmit = async (data: RegisterNewUser) => {
-
-    const { data: userData, error } = await supabase
-      .from('users')
-      .insert({
-        uid: decryptedAuthData?.uid || "",
-        email: data.email,
-        first_name: data.name,
-        last_name: data.lastName,
-        phone: data.phone,
-        role: "user" as const,
-        marketing_opt_in: isChecked.includes("mailAgreement"),
-        privacy_agreed: isChecked.includes("cookieAgreement"),
-        created_at: new Date().toISOString(),
-      } satisfies Database['public']['Tables']['users']['Insert'])
+    const { data: userData, error } = await supabase.from("users").insert({
+      uid: decryptedAuthData?.uid || "",
+      email: data.email,
+      first_name: data.name,
+      last_name: data.lastName,
+      phone: data.phone,
+      role: "user" as const,
+      marketing_opt_in: isChecked.includes("mailAgreement"),
+      privacy_agreed: isChecked.includes("cookieAgreement"),
+      created_at: new Date().toISOString(),
+    } satisfies Database["public"]["Tables"]["users"]["Insert"]);
     console.log("userData", userData);
     if (error) {
       router.push(`/error?message=회원가입 실패: ${error.message}`);
@@ -141,7 +137,6 @@ export default function LoginInfoPage() {
             {...register("phone")}
           />
         </InputAndTitle>
-
       </InputContainer>
       <Stack className="agreement-container">
         <div className="agreement-container-line">
@@ -176,7 +171,13 @@ export default function LoginInfoPage() {
           />
         </div>
       </Stack>
-      <Button style={{ fontWeight: "bold" }} type="submit">{isSubmitting ? <Spinner /> : "회원가입"}</Button>
+      <Button
+        variant="flat"
+        type="submit"
+        disabled={isSubmitting || !isChecked.includes("cookieAgreement")}
+      >
+        {isSubmitting ? <Spinner /> : "회원가입"}
+      </Button>
       <DevTool control={control} />
     </Container>
   );

@@ -6,8 +6,8 @@ import Heading from "@/components/Text/Heading";
 import { HStack, Separator } from "@chakra-ui/react";
 import Image from "next/image";
 import { socialLogin } from "@/utils/socialLogin";
-import { Modal } from "@/components/common/modal/Modal";
-import LoginSignup from "@/components/common/auth/LoginSignup";
+import { Modal } from "@/components/modal/Modal";
+import LoginSignup from "@/components/auth/LoginSignup";
 import Text from "@/components/Text/Text";
 export default function LoginPage() {
   const [isOpen, setIsOpen] = useState(false);

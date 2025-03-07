@@ -10,7 +10,7 @@ import Text from "@/components/Text/Text";
 import Checkbox from "@/components/common/Checkbox";
 import { Separator, Stack, Spinner } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
+import { supabase } from "@/utils/supabase/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, type Signup } from "@/types/users";
@@ -19,7 +19,6 @@ import { useState } from "react";
 import { signUpWithEmail } from "@/utils/socialLogin";
 import { clearCookie } from "@/utils/socialLogin";
 type Agreement = "mailAgreement" | "cookieAgreement";
-const supabase = createClient();
 
 export default function LoginInfoPage() {
   const router = useRouter();
@@ -173,6 +172,7 @@ export default function LoginInfoPage() {
         </div>
       </Stack>
       <Button 
+        variant="flat"
         type="submit" 
         disabled={isSubmitting || !isChecked.includes("cookieAgreement")}
       >

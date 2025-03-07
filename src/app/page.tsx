@@ -2,7 +2,6 @@
 
 import styles from "./page.module.css";
 import { useEffect } from "react";
-import { supabase } from "@/utils/supabase/client";
 import { socialLogout } from "@/utils/socialLogin";
 import { useRouter } from "next/navigation";
 import HomeTab from "@/components/home/HomeTab";

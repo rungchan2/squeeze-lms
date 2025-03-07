@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Providers } from "./providers";
 import "./globals.css";
-import { Navigation } from "@/components/common/navigation/Navigation";
+import { Navigation } from "@/components/navigation/Navigation";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 

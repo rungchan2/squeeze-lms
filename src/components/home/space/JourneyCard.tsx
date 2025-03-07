@@ -7,7 +7,7 @@ import { HiDotsVertical } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import Text from "@/components/Text/Text";
 import { useJourneyUser } from "@/hooks/useJourneyUser";
-import { AdminOnly } from "@/components/common/auth/AdminOnly";
+import { AdminOnly } from "@/components/auth/AdminOnly";
 
 export default function JourneyCard({ journey }: { journey: Journey }) {
   const defaultImage = "https://picsum.photos/200/200";

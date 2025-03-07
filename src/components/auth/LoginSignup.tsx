@@ -113,6 +113,7 @@ export default function LoginSignup({ type }: { type: "login" | "signup" }) {
       )}
 
       <Button
+        variant="flat"
         type="submit"
         disabled={isSubmitting || !email || !password}
         style={{ marginTop: "10px", fontWeight: "bold" }}
