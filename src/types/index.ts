@@ -4,7 +4,7 @@ export * from "./journeys";
 export * from "./userJourneys";
 export * from "./journeyWeeks";
 export * from "./missions";
-export * from "./submissions";
+export * from "./posts";
 export * from "./comments";
 export * from "./likes";
 export * from "./bugReports";

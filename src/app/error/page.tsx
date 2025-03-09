@@ -22,7 +22,7 @@ export default function ErrorPage() {
     <Container>
       <Heading level={2} color="var(--grey-700)" weight="bold" >Error</Heading>
       <Text variant="body" color="var(--grey-500)">{errorMessage}</Text>
-      <Button onClick={handleLogout}>Login</Button>
+      <Button variant="flat" onClick={handleLogout}>Login</Button>
     </Container>
   );
 }
