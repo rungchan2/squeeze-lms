@@ -1,4 +1,8 @@
 .button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     background-color: var(--primary-700);
     color: var(--white);
     border: none;

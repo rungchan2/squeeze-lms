@@ -24,11 +24,6 @@ export const NotificationUpdateSchema = z.object({
   read_at: z.string().datetime({ offset: true }).nullable().optional(),
 });
 
-// ✅ 알림 데이터 타입
 export type Notification = z.infer<typeof NotificationSchema>;
-
-// ✅ 새로운 알림을 생성할 때 사용할 타입
 export type NotificationInsert = z.infer<typeof NotificationInsertSchema>;
-
-// ✅ 알림 업데이트 타입 (읽음 처리 등)
 export type NotificationUpdate = z.infer<typeof NotificationUpdateSchema>;

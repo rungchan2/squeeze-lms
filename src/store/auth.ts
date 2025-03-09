@@ -1,27 +1,34 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { supabase } from "@/utils/supabase/client";
-import { Role } from "@/types/users";
 import { encrypt, decrypt } from "@/utils/encryption";
-import defaultProfile from "@/assets/default-profile.png";
+import { redirect } from "next/navigation";
+// 역할 타입 정의
+export type Role = "user" | "teacher" | "admin";
 
-export type UserState = {
+// 사용자 상태 타입
+export interface UserState {
+  id: number | null;
   uid: string | null;
-  id: number;
   email: string | null;
   role: Role | null;
   isAuthenticated: boolean;
   loading: boolean;
-  profileImage: string;
+  profileImage: string | null;
   fullName: string | null;
   error: string | null;
-  fetchUser: () => Promise<void>;
-  logout: () => Promise<void>;
-};
+  lastUpdated: number | null;
 
-// ✅ 암호화된 스토리지 구현
+  // 액션
+  fetchUser: () => void;
+  refreshUser: () => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+// 암호화된 스토리지 구현
 const encryptedStorage = {
   getItem: (name: string) => {
+    if (typeof window === 'undefined') return null;
     const value = localStorage.getItem(name);
     if (!value) return null;
     try {
@@ -33,6 +40,7 @@ const encryptedStorage = {
     }
   },
   setItem: (name: string, value: any) => {
+    if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(name, encrypt(JSON.stringify(value)));
     } catch (error) {
@@ -40,127 +48,155 @@ const encryptedStorage = {
     }
   },
   removeItem: (name: string) => {
+    if (typeof window === 'undefined') return;
     localStorage.removeItem(name);
   },
 };
 
-// ✅ Zustand Store 생성
+// Zustand 스토어 생성
 export const useAuthStore = create<UserState>()(
   persist(
-    (set) => ({
-      id: 0,
+    (set, get) => ({
+      id: null,
       uid: null,
       email: null,
       role: null,
       isAuthenticated: false,
       loading: false,
-      profileImage: defaultProfile.src,
-      error: null,
+      profileImage: null,
       fullName: null,
-      // ✅ 로그인 후 유저 데이터 가져오기
-      fetchUser: async () => {
-        set({ loading: true, error: null });
+      error: null,
+      lastUpdated: null,
 
-        const { data: supabaseGetUser } = await supabase.auth.getUser();
-        if (supabaseGetUser && supabaseGetUser.user) {
-
-          set({
-            profileImage: supabaseGetUser.user.user_metadata.picture,
-            fullName: supabaseGetUser.user.user_metadata.full_name,
-          });
+      // 로컬 스토리지에서 사용자 데이터 가져오기
+      fetchUser: () => {
+        try {
+          if (typeof window === 'undefined') return;
+          const storedData = encryptedStorage.getItem("auth-store");
+          if (storedData) {
+            set({ ...storedData, loading: false });
+          }
+        } catch (error) {
+          console.error("fetchUser 오류:", error);
+          set({ loading: false });
         }
-
-        // Supabase 세션 가져오기
-        const { data: authUser, error: userError } =
-          await supabase.auth.getUser();
-        if (userError) {
-          set({ isAuthenticated: false, loading: false });
-          return;
-        }
-        // ✅ `users` 테이블에서 `role` 가져오기
-        const { data: userData, error: userDataError } = await supabase
-          .from("users")
-          .select("uid, email, role, id")
-          .eq("uid", authUser?.user.id ?? "")
-          .single();
-
-        if (userDataError) {
-          console.error("Error fetching user data:", userDataError.message);
-          set({
-            id: 0,
-            isAuthenticated: false,
-            loading: false,
-            error: userDataError.message,
-          });
-          return;
-        }
-
-        // 유효한 role 값인지 확인하는 함수
-        const isValidRole = (role: string | null): role is Role => {
-          return role === "user" || role === "teacher" || role === "admin";
-        };
-
-        // 데이터 설정 시 검증 추가
-        set({
-          id: userData.id,
-          uid: userData.uid,
-          email: userData.email,
-          role: isValidRole(userData.role) ? userData.role : "user", // 기본값으로 "user" 사용
-          isAuthenticated: true,
-          loading: false,
-        });
       },
 
-      // ✅ 로그아웃 처리
+      // 데이터베이스에서 최신 사용자 데이터 가져오기
+      refreshUser: async () => {
+        set({ loading: true, error: null });
+
+        try {
+          // 현재 세션 확인
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (!session) {
+            set({
+              id: null,
+              uid: null,
+              email: null,
+              role: null,
+              isAuthenticated: false,
+              loading: false,
+              profileImage: null,
+              fullName: null,
+              lastUpdated: null
+            });
+            return;
+          }
+
+          // 사용자 프로필 정보 가져오기
+          const { data: userData, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('uid', session.user.id)
+            .single();
+
+          if (error || !userData) {
+            get().logout();
+            redirect("/login");
+            return;
+          }
+
+          set({
+            id: userData.id,
+            uid: userData.uid,
+            email: userData.email,
+            role: userData.role as Role,
+            isAuthenticated: true,
+            loading: false,
+            profileImage: userData.profile_image,
+            fullName: `${userData.first_name} ${userData.last_name}`,
+            lastUpdated: Date.now()
+          });
+        } catch (error) {
+          console.error("refreshUser 오류:", error);
+          set({ 
+            loading: false,
+            error: error instanceof Error ? error.message : "사용자 정보 갱신 중 오류가 발생했습니다"
+          });
+        }
+      },
+
+      // 로그아웃 처리
       logout: async () => {
         try {
-          await supabase.auth.signOut();
+          console.log("logout 함수 호출됨");
+          
+          // 상태를 먼저 초기화하고 나서 supabase.auth.signOut() 호출
           set({
-            id: 0,
+            id: null,
             uid: null,
             email: null,
             role: null,
             isAuthenticated: false,
-            error: null,
+            loading: false,
+            profileImage: null,
             fullName: null,
-            profileImage: defaultProfile.src,
+            error: null,
+            lastUpdated: null
           });
+          console.log("상태 초기화 완료");
+          
+          // 로컬 스토리지에서 auth-store 데이터 삭제
+          if (typeof window !== 'undefined') {
+            console.log("로컬 스토리지에서 auth-store 데이터 삭제 시도");
+            localStorage.removeItem('auth-store');
+            console.log("로컬 스토리지에서 auth-store 데이터 삭제 완료");
+          }
+          
+          // 마지막으로 supabase.auth.signOut() 호출
+          // 이 함수가 실패하더라도 이미 상태와 로컬 스토리지는 초기화됨
+          try {
+            await supabase.auth.signOut();
+          } catch (error) {
+            console.error("supabase.auth.signOut() 오류:", error);
+          }
         } catch (error) {
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : "로그아웃 중 오류가 발생했습니다";
-          set({ error: errorMessage });
+          console.error("logout 함수 오류:", error);
+          set({ 
+            loading: false,
+            error: error instanceof Error ? error.message : "로그아웃 중 오류가 발생했습니다"
+          });
         }
       },
     }),
     {
-      name: "auth-store", // LocalStorage에 저장
+      name: "auth-store",
       storage: {
         getItem: encryptedStorage.getItem,
         setItem: encryptedStorage.setItem,
         removeItem: encryptedStorage.removeItem,
       },
-      // 선택적: 저장할 상태 제한
       partialize: (state) => ({
         uid: state.uid,
         email: state.email,
         role: state.role,
         isAuthenticated: state.isAuthenticated,
-        // loading과 error는 저장하지 않음
+        profileImage: state.profileImage,
+        fullName: state.fullName,
+        lastUpdated: state.lastUpdated
       }),
     }
   )
 );
-
-// 스토어 초기화 함수 생성 (useEffect 제거)
-export const initializeAuthStore = () => {
-  const { fetchUser, isAuthenticated } = useAuthStore.getState();
-
-  if (isAuthenticated) {
-    fetchUser().catch((error) => {
-      console.error("사용자 정보 갱신 오류:", error);
-      useAuthStore.getState().logout();
-    });
-  }
-};

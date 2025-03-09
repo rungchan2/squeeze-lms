@@ -1,20 +1,29 @@
 import { ButtonHTMLAttributes } from "react";
 import styles from "./Button.module.css";
+import Spinner from "./Spinner";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant: "flat" | "outline";
   maxWidth?: number;
+  isLoading?: boolean;
 };
 
 export default function Button(props: ButtonProps) {
-  const { className, variant, maxWidth, ...rest } = props;
+  const { className, variant, maxWidth, isLoading, ...rest } = props;
   return (
     <button
+      disabled={isLoading}
+      style={{
+        backgroundColor: isLoading ? "var(--grey-500)" : undefined,
+        cursor: isLoading ? "not-allowed" : "pointer",
+        maxWidth: maxWidth ? `${maxWidth}px` : "100%",
+      }}
       {...rest}
       className={`${styles.button} ${className || ""} ${
         variant === "outline" ? styles.outline : ""
       }`}
-      style={{ maxWidth: maxWidth ? `${maxWidth}px` : "100%" }}
-    />
+    >
+      {isLoading ? <Spinner size="20px" /> : rest.children}
+    </button>
   );
 }

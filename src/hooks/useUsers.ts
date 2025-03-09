@@ -5,7 +5,7 @@ export function useUsers(id: number) {
   const [user, setUser] = useState<User | null>(null);
   useEffect(() => {
     const fetchUser = async () => {
-      const { data } = await supabase.from("users").select("*").eq("id", id).single();
+      const { data } = await supabase.from("profiles").select("*").eq("id", id).single();
       setUser(data as User);
     };
     fetchUser();

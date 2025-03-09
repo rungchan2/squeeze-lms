@@ -1,5 +1,3 @@
-// supabase gen types typescript --linked --debug > src/types/database.types.ts
-
 export type Json =
   | string
   | number
@@ -44,7 +42,7 @@ export type Database = {
           status: string | null
           title: string
           updated_at: string | null
-          user_id: number | null
+          user_id: number
         }
         Insert: {
           created_at?: string | null
@@ -53,7 +51,7 @@ export type Database = {
           status?: string | null
           title: string
           updated_at?: string | null
-          user_id?: number | null
+          user_id: number
         }
         Update: {
           created_at?: string | null
@@ -62,14 +60,14 @@ export type Database = {
           status?: string | null
           title?: string
           updated_at?: string | null
-          user_id?: number | null
+          user_id?: number
         }
         Relationships: [
           {
             foreignKeyName: "bug_reports_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -79,30 +77,30 @@ export type Database = {
           content: string | null
           created_at: string | null
           id: number
-          submission_id: number | null
+          post_id: number | null
           updated_at: string | null
-          user_id: number | null
+          user_id: number
         }
         Insert: {
           content?: string | null
           created_at?: string | null
           id?: number
-          submission_id?: number | null
+          post_id?: number | null
           updated_at?: string | null
-          user_id?: number | null
+          user_id: number
         }
         Update: {
           content?: string | null
           created_at?: string | null
           id?: number
-          submission_id?: number | null
+          post_id?: number | null
           updated_at?: string | null
-          user_id?: number | null
+          user_id?: number
         }
         Relationships: [
           {
             foreignKeyName: "comments_post_id_fkey"
-            columns: ["submission_id"]
+            columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
             referencedColumns: ["id"]
@@ -111,7 +109,7 @@ export type Database = {
             foreignKeyName: "comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -188,28 +186,25 @@ export type Database = {
         Row: {
           created_at: string | null
           id: number
-          submission_id: number | null
-          updated_at: string | null
-          user_id: number | null
+          post_id: number | null
+          user_id: number
         }
         Insert: {
           created_at?: string | null
           id?: number
-          submission_id?: number | null
-          updated_at?: string | null
-          user_id?: number | null
+          post_id?: number | null
+          user_id: number
         }
         Update: {
           created_at?: string | null
           id?: number
-          submission_id?: number | null
-          updated_at?: string | null
-          user_id?: number | null
+          post_id?: number | null
+          user_id?: number
         }
         Relationships: [
           {
             foreignKeyName: "likes_post_id_fkey"
-            columns: ["submission_id"]
+            columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
             referencedColumns: ["id"]
@@ -218,7 +213,7 @@ export type Database = {
             foreignKeyName: "likes_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -277,7 +272,7 @@ export type Database = {
           link: string | null
           message: string
           read_at: string | null
-          receiver_id: number
+          receiver_id: number | null
           type: string
         }
         Insert: {
@@ -286,7 +281,7 @@ export type Database = {
           link?: string | null
           message: string
           read_at?: string | null
-          receiver_id: number
+          receiver_id?: number | null
           type: string
         }
         Update: {
@@ -295,7 +290,7 @@ export type Database = {
           link?: string | null
           message?: string
           read_at?: string | null
-          receiver_id?: number
+          receiver_id?: number | null
           type?: string
         }
         Relationships: [
@@ -303,7 +298,7 @@ export type Database = {
             foreignKeyName: "fk_notifications_user"
             columns: ["receiver_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -331,39 +326,49 @@ export type Database = {
       }
       posts: {
         Row: {
-          attachment_url: string | null
           content: string | null
           created_at: string | null
+          file_url: string | null
           id: number
           mission_id: number | null
           score: number | null
           title: string
           updated_at: string | null
-          user_id: number | null
+          user_id: number
+          uuid: string
         }
         Insert: {
-          attachment_url?: string | null
           content?: string | null
           created_at?: string | null
+          file_url?: string | null
           id?: number
           mission_id?: number | null
           score?: number | null
           title: string
           updated_at?: string | null
-          user_id?: number | null
+          user_id: number
+          uuid?: string
         }
         Update: {
-          attachment_url?: string | null
           content?: string | null
           created_at?: string | null
+          file_url?: string | null
           id?: number
           mission_id?: number | null
           score?: number | null
           title?: string
           updated_at?: string | null
-          user_id?: number | null
+          user_id?: number
+          uuid?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "submissions_mission_id_fkey"
             columns: ["mission_id"]
@@ -371,11 +376,60 @@ export type Database = {
             referencedRelation: "missions"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          first_name: string | null
+          id: number
+          last_name: string | null
+          marketing_opt_in: boolean | null
+          organization_id: number | null
+          phone: string | null
+          privacy_agreed: boolean | null
+          profile_image: string | null
+          role: string | null
+          uid: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          first_name?: string | null
+          id?: number
+          last_name?: string | null
+          marketing_opt_in?: boolean | null
+          organization_id?: number | null
+          phone?: string | null
+          privacy_agreed?: boolean | null
+          profile_image?: string | null
+          role?: string | null
+          uid: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          first_name?: string | null
+          id?: number
+          last_name?: string | null
+          marketing_opt_in?: boolean | null
+          organization_id?: number | null
+          phone?: string | null
+          privacy_agreed?: boolean | null
+          profile_image?: string | null
+          role?: string | null
+          uid?: string
+          updated_at?: string | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "submissions_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "users_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -420,60 +474,7 @@ export type Database = {
             foreignKeyName: "user_journeys_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      users: {
-        Row: {
-          created_at: string | null
-          email: string
-          first_name: string | null
-          id: number
-          last_name: string | null
-          marketing_opt_in: boolean | null
-          organization_id: number | null
-          phone: string | null
-          privacy_agreed: boolean | null
-          role: string | null
-          uid: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email: string
-          first_name?: string | null
-          id?: number
-          last_name?: string | null
-          marketing_opt_in?: boolean | null
-          organization_id?: number | null
-          phone?: string | null
-          privacy_agreed?: boolean | null
-          role?: string | null
-          uid?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string
-          first_name?: string | null
-          id?: number
-          last_name?: string | null
-          marketing_opt_in?: boolean | null
-          organization_id?: number | null
-          phone?: string | null
-          privacy_agreed?: boolean | null
-          role?: string | null
-          uid?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "users_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

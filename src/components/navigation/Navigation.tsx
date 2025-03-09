@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuthStore } from "@/store/auth";
+import { useAuth } from "@/components/AuthProvider";
 import styled from "@emotion/styled";
 import { useEffect, useState, useRef } from "react";
 import { FaChevronLeft } from "react-icons/fa";
@@ -8,31 +8,27 @@ import { ProfileImage } from "@/components/navigation/ProfileImage";
 import { Logo } from "@/components/navigation/Logo";
 
 export function Navigation() {
-  const { fetchUser, profileImage } = useAuthStore();
+  const { profileImage} = useAuth();
+  
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
   const upScrollThreshold = 30;   // 위로 스크롤할 때의 임계값
   const downScrollThreshold = 150; // 아래로 스크롤할 때의 임계값
 
   useEffect(() => {
-    fetchUser();
-  }, []);
+    // 데이터 가져오기
 
-  useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       const scrollDifference = Math.abs(currentScrollY - lastScrollY.current);
       const isScrollingUp = currentScrollY < lastScrollY.current;
       
-      // 스크롤 방향에 따라 다른 임계값 적용
       const threshold = isScrollingUp ? upScrollThreshold : downScrollThreshold;
       
       if (scrollDifference > threshold) {
         if (isScrollingUp) {
-          // 위로 스크롤 - 더 빠르게 나타남
           setIsVisible(true);
         } else {
-          // 아래로 스크롤 - 더 천천히 숨겨짐
           setIsVisible(false);
         }
         

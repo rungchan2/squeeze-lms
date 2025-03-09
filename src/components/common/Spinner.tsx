@@ -116,7 +116,7 @@ const keyframes = `
 
 const Spinner: React.FC<SpinnerProps> = ({ size, color, speed, style }) => {
   return (
-    <>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'top', height: '100%', marginTop: '0px' }}>
       <style>{keyframes}</style>
       <SpinnerContainer size={size} color={color} speed={speed} style={style}>
         <SpinnerDot />
@@ -128,7 +128,7 @@ const Spinner: React.FC<SpinnerProps> = ({ size, color, speed, style }) => {
         <SpinnerDot />
         <SpinnerDot />
       </SpinnerContainer>
-    </>
+    </div>
   );
 };
 

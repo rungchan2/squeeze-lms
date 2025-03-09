@@ -12,19 +12,13 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabase/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerNewUser, type RegisterNewUser } from "@/types/users";
+import { createUserSchema, type CreateUser } from "@/types/users";
 import { DevTool } from "@hookform/devtools";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { decrypt } from "@/utils/encryption";
 import { Database } from "@/types/database.types";
-
-export type DecryptedAuthData = {
-  uid: string;
-  email: string;
-  first_name: string | "";
-  last_name: string | "";
-};
+import { NeededUserMetadata } from "@/app/(auth)/auth/callback/route";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
 
@@ -60,7 +54,7 @@ export default function LoginInfoPage() {
       if (!decryptedString) {
         throw new Error("복호화된 데이터가 없습니다");
       }
-      const decryptedAuthData: DecryptedAuthData = JSON.parse(decryptedString);
+      const decryptedAuthData: NeededUserMetadata = JSON.parse(decryptedString);
       return decryptedAuthData;
     } catch (error) {
       const errorMessage =
@@ -78,31 +72,34 @@ export default function LoginInfoPage() {
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterNewUser>({
-    resolver: zodResolver(registerNewUser),
+  } = useForm<CreateUser>({
+    resolver: zodResolver(createUserSchema),
     mode: "onChange",
     defaultValues: {
       email: decryptedAuthData?.email || "",
-      name: decryptedAuthData?.first_name || "",
-      lastName: decryptedAuthData?.last_name || "",
+      first_name: decryptedAuthData?.first_name || "",
+      last_name: decryptedAuthData?.last_name || "",
       phone: "",
-      mailAgreement: false,
-      cookieAgreement: false,
     },
   });
 
-  const onSubmit = async (data: RegisterNewUser) => {
-    const { data: userData, error } = await supabase.from("users").insert({
+  const onSubmit = async (data: CreateUser) => {
+    console.log("decryptedAuthData", decryptedAuthData?.uid);
+    const { data: getUserData, error: getUserDataError } = await supabase.auth.getUser();
+    console.log("getUserData", getUserData.user?.id, getUserDataError);
+    
+    const { data: userData, error } = await supabase.from("profiles").insert({
       uid: decryptedAuthData?.uid || "",
       email: data.email,
-      first_name: data.name,
-      last_name: data.lastName,
+      first_name: data.first_name,
+      last_name: data.last_name,
       phone: data.phone,
       role: "user" as const,
+      profile_image: decryptedAuthData?.profile_image || null,
+      organization_id: null,
       marketing_opt_in: isChecked.includes("mailAgreement"),
       privacy_agreed: isChecked.includes("cookieAgreement"),
-      created_at: new Date().toISOString(),
-    } satisfies Database["public"]["Tables"]["users"]["Insert"]);
+    } satisfies Database["public"]["Tables"]["profiles"]["Insert"]);
     console.log("userData", userData);
     if (error) {
       router.push(`/error?message=회원가입 실패: ${error.message}`);
@@ -116,11 +113,11 @@ export default function LoginInfoPage() {
       <Heading level={4}>환영합니다! {decryptedAuthData?.first_name}님</Heading>
       <InputContainer>
         <HorizontalContainer>
-          <InputAndTitle title="성" errorMessage={errors.lastName?.message}>
-            <Input type="text" placeholder="홍" {...register("lastName")} />
+          <InputAndTitle title="성" errorMessage={errors.last_name?.message}>
+            <Input type="text" placeholder="홍" {...register("last_name")} />
           </InputAndTitle>
-          <InputAndTitle title="이름" errorMessage={errors.name?.message}>
-            <Input type="text" placeholder="길동" {...register("name")} />
+          <InputAndTitle title="이름" errorMessage={errors.first_name?.message}>
+            <Input type="text" placeholder="길동" {...register("first_name")} />
           </InputAndTitle>
         </HorizontalContainer>
         <InputAndTitle title="이메일" errorMessage={errors.email?.message}>
@@ -176,7 +173,13 @@ export default function LoginInfoPage() {
         type="submit"
         disabled={isSubmitting || !isChecked.includes("cookieAgreement")}
       >
-        {isSubmitting ? <Spinner /> : "회원가입"}
+        {isSubmitting ? (
+          <>
+            <Spinner /> 회원가입
+          </>
+        ) : (
+          "회원가입"
+        )}
       </Button>
       <DevTool control={control} />
     </Container>

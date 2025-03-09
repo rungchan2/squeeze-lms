@@ -9,7 +9,13 @@ type HeadingProps = {
   weight?: string;
 };
 
-const Heading = ({ level = 1, children, className, color, weight }: HeadingProps) => {
+export default function Heading({
+  level = 1,
+  children,
+  className,
+  color,
+  weight,
+}: HeadingProps) {
   switch (level) {
     case 1:
       return <H1 className={className} color={color} weight={weight}>{children}</H1>;
@@ -25,8 +31,6 @@ const Heading = ({ level = 1, children, className, color, weight }: HeadingProps
       return <H1 className={className} color={color} weight={weight}>{children}</H1>;
   }
 };
-
-export default Heading;
 
 const H1 = styled.h1<{ color?: string; weight?: string }>`
   font-family: "Inter", sans-serif;

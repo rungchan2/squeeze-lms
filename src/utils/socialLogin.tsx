@@ -1,8 +1,9 @@
 import { supabase } from "@/utils/supabase/client";
 import Cookies from "js-cookie";
 
+
 export const socialLogin = async (
-  provider: "google" | "github" | "apple" | "twitter" | "facebook"
+  provider: "google" | "github" | "apple" | "twitter" | "facebook",
 ) => {
   try {
     console.log("소셜 로그인 시도:", provider);

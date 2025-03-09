@@ -3,6 +3,14 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { encrypt } from "@/utils/encryption"; // 암호화 유틸리티 필요
 
+export type NeededUserMetadata = {
+  uid: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  profile_image: string;
+};
+
 export async function GET(request: Request) {
   const supabase_server = await createClient();
   const { searchParams, origin } = new URL(request.url);
@@ -35,7 +43,7 @@ export async function GET(request: Request) {
 
       if (!error) {
         const userData = await supabase_server
-          .from("users")
+          .from("profiles")
           .select("*")
           .eq("email", data.user.email || "")
           .single();
@@ -43,11 +51,12 @@ export async function GET(request: Request) {
         // 디버깅을 위한 로그 추가
         console.log("userData 결과:", userData.data);
 
-        const neededuserData = {
+        const neededuserData: NeededUserMetadata = {
           uid: data.user.id,
-          email: data.user.email,
+          email: data.user.email || "",
           first_name: data.user.user_metadata.full_name.split(" ")[0],
           last_name: data.user.user_metadata.full_name.split(" ")[1] || "",
+          profile_image: data.user.user_metadata.picture || "",
         };
         console.log("neededuserData:", neededuserData);
         if (userData.data === null) {

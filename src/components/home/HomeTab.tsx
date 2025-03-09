@@ -36,7 +36,7 @@ function JourneyTab() {
     <JourneysContainer>
       {isLoading ? (
         <div>
-          <Spinner size="32px" style={{ marginTop: "12px" }} />
+          <Spinner size="32px" />
         </div>
       ) : journeys.length > 0 ? (
         journeys.map((journey) => (

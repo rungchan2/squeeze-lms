@@ -16,10 +16,21 @@ import Link from "next/link";
 import { Separator } from "@chakra-ui/react";
 import { MdPrivacyTip, MdFeedback, MdLogout, MdLanguage } from "react-icons/md";
 import { FaRegQuestionCircle } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
+import { socialLogout } from "@/utils/socialLogin";
 
 export default function MyPage() {
+  const { logout } = useAuthStore();
+  const router = useRouter();
   const { profileImage, email, fullName } = useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleLogout = useCallback(() => {
+    socialLogout();
+    logout();
+    router.push("/login");
+  }, [logout]);
   return (
     <PostContainer>
       <div className="header">
@@ -49,7 +60,7 @@ export default function MyPage() {
                 </MenuItem>
               </Link>
 
-              <MenuItem title="" icon={<MdLogout />}>
+              <MenuItem title="" icon={<MdLogout />} onClick={handleLogout}>
                 <Text>로그아웃</Text>
               </MenuItem>
               <Separator style={{ margin: "10px 0" }} />

@@ -1,24 +1,19 @@
 "use client";
 
-import styles from "./page.module.css";
-import { useEffect } from "react";
-import { socialLogout } from "@/utils/socialLogin";
 import { useRouter } from "next/navigation";
 import HomeTab from "@/components/home/HomeTab";
-import { useAuthStore } from "@/store/auth";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function Home() {
   const router = useRouter();
-  const { fetchUser } = useAuthStore();
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  const { logout } = useAuth();
+  
   return (
-    <div className={styles.container}>
+    <div className="container">
       <HomeTab />
       <button
         onClick={() => {
-          socialLogout();
+          logout();
           router.push("/login");
         }}
       >

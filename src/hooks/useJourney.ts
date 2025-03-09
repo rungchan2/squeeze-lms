@@ -9,7 +9,6 @@ export const useJourney = (): {
 } => {
   const fetchJourneys = async () => {
     const { data, error } = await supabase.from("journeys").select("*");
-    console.log(data);
     if (error) {
       throw new Error(error.message);
     }

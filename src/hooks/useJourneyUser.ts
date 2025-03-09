@@ -10,9 +10,6 @@ const getJourneyUser = async (journey_id: number) => {
   if (error) {
     throw new Error(error.message);
   }
-
-  console.log(data);
-
   return data;
 };
 

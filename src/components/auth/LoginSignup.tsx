@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { Spinner } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import { z } from "zod";
-import { loginSchema } from "@/types";
 import InputAndTitle from "@/components/InputAndTitle";
 import { PasswordInput } from "@/components/ui/password-input";
 import { signInWithEmail, signUpWithEmail } from "@/utils/socialLogin";
@@ -17,14 +16,20 @@ import { DevTool } from "@hookform/devtools";
 import Cookies from "js-cookie";
 import { encrypt } from "@/utils/encryption";
 import { supabase } from "@/utils/supabase/client";
-import { DecryptedAuthData } from "@/app/login/info/page";
+import { NeededUserMetadata } from "@/app/(auth)/auth/callback/route";
 
-let decryptedAuthData: DecryptedAuthData = {
+let decryptedAuthData: NeededUserMetadata = {
   uid: "",
   email: "",
   first_name: "",
   last_name: "",
+  profile_image: "",
 }
+
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
@@ -44,18 +49,22 @@ export default function LoginSignup({ type }: { type: "login" | "signup" }) {
 
   const onSubmitLogin = async (data: LoginFormData) => {
 
-    const { error } = await signInWithEmail(data.email, data.password);
+    const { userData ,error } = await signInWithEmail(data.email, data.password);
     if (error) {
       setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
+      return;
+    }
+    const { data: user } = await supabase.from('profiles').select('*').eq('email', userData.user?.email || '').single();
+    if (!user) {
+      router.push("/login/info");
       return;
     }
     router.push("/");
   };
   const onSubmitSignup = async (data: LoginFormData) => {
 
-
     const { userData: { user }, error } = await signUpWithEmail(data.email, data.password);
-    const { data: duplicateUser } = await supabase.from('users').select('*').eq('email', data.email)
+    const { data: duplicateUser } = await supabase.from('profiles').select('*').eq('email', data.email)
     if (duplicateUser && duplicateUser.length > 0) {
       setError("이미 가입된 이메일입니다.");
       return;
@@ -69,6 +78,7 @@ export default function LoginSignup({ type }: { type: "login" | "signup" }) {
       email: user?.email || "",
       first_name: user?.user_metadata.first_name || "",
       last_name: user?.user_metadata.last_name || "",
+      profile_image: user?.user_metadata.picture || "",
     }
     const encryptedAuthData = encrypt(JSON.stringify(decryptedAuthData));
     Cookies.set("auth_data", encryptedAuthData);

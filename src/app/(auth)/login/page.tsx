@@ -9,9 +9,23 @@ import { socialLogin } from "@/utils/socialLogin";
 import { Modal } from "@/components/modal/Modal";
 import LoginSignup from "@/components/auth/LoginSignup";
 import Text from "@/components/Text/Text";
+import { supabase } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 export default function LoginPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        router.push("/");
+      }
+    };
+    checkUser();
+  }, [router]);
 
   const handleGoogleLogin = async () => {
     try {
@@ -69,7 +83,6 @@ const LoginContainer = styled.div`
   justify-content: center;
   min-height: 100vh;
   margin: 0 auto;
-  padding: 16px;
   gap: 10px;
 
   & > .login-container {
