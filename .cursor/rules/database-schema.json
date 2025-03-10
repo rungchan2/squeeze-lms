@@ -1,0 +1,11 @@
+{
+    "description": "Defines the database schema and relationships for the project.",
+    "file_patterns": ["**/migrations/*.sql", "**/schema.sql"],
+    "rules": [
+      "Users table has an auto-increment `id` (int) and a `uid` (UUID) linked to `auth.users`.",
+      "Roles are managed in the `users` table with `role` values: 'student', 'teacher', 'admin'.",
+      "Foreign key relationships must be explicitly defined.",
+      "Ensure that `users.uid` is used to link `auth.users` with `public.users`.",
+      "Use ON DELETE CASCADE where appropriate."
+    ]
+  }

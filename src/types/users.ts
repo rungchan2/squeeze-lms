@@ -1,50 +1,31 @@
 import { z } from "zod";
 
-export const userSchema = z.object({
-  uid: z.string().optional(),
-  id: z.number().int().nonnegative(),
-  first_name: z.string().min(1).optional(),
-  last_name: z.string().min(1).optional(),
-  role: z.enum(["user", "teacher", "admin"]),
-  organization_id: z.number().int().nullable(),
-  marketing_opt_in: z.boolean(),
-  privacy_agreed: z.boolean(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
-  email: z.string().email(),
-  phone: z.string().optional(),
-});
+export const roleSchema = z.enum(["user", "teacher", "admin"])
 
+export const userSchema = z.object({
+  id: z.number(),
+  uid: z.string(),
+  email: z.string().email(),
+  first_name: z.string().nullable(),
+  last_name: z.string().nullable(),
+  phone: z.string().nonempty(),
+  profile_image: z.string().nullable(),
+  role: roleSchema.nullable(),
+  organization_id: z.number().nullable(),
+  marketing_opt_in: z.boolean().nullable(),
+  privacy_agreed: z.boolean().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+})
+
+export const createUserSchema = userSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  role: true,
+})
+
+export type Role = z.infer<typeof roleSchema>;
+export type CreateUser = z.infer<typeof createUserSchema>;
 export type User = z.infer<typeof userSchema>;
 
-export const loginSchema = z.object({
-  email: z.string().email("유효한 이메일을 입력해주세요"),
-  password: z.string().min(6, "비밀번호는 최소 6자 이상이어야 합니다"),
-});
-
-export type Login = z.infer<typeof loginSchema>;
-
-export const signupSchema = z.object({
-  uid: z.string(),
-  email: z.string().email("유효한 이메일을 입력해주세요"),
-  password: z.string().min(8, "비밀번호는 최소 8자 이상이어야 합니다"),
-  passwordConfirm: z.string().min(8, "비밀번호는 최소 8자 이상이어야 합니다"),
-  name: z.string().min(1, "이름을 입력해주세요"),
-  lastName: z.string().min(1, "성을 입력해주세요"),
-  phone: z.string().min(1, "전화번호를 입력해주세요"),
-  mailAgreement: z.boolean(),
-  cookieAgreement: z.boolean(),
-});
-
-export type Signup = z.infer<typeof signupSchema>;
-
-export const registerNewUser = z.object({
-  email: z.string().email("유효한 이메일을 입력해주세요"),
-  name: z.string().min(1, "이름을 입력해주세요"),
-  lastName: z.string().min(1, "성을 입력해주세요"),
-  phone: z.string().min(1, "전화번호를 입력해주세요"),
-  mailAgreement: z.boolean(),
-  cookieAgreement: z.boolean(),
-});
-
-export type RegisterNewUser = z.infer<typeof registerNewUser>;

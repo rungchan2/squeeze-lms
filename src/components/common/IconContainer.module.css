@@ -1,0 +1,12 @@
+.iconContainer {
+    display: flex;
+    gap: 5px;
+    padding: 5px;
+    cursor: pointer;
+    width: fit-content;
+}
+
+.iconContainer:hover {
+    background-color: var(--grey-200);
+    border-radius: 50%;
+}
