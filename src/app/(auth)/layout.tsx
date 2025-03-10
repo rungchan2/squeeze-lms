@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
-import { SpeedInsights } from '@vercel/speed-insights/next';
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "@/app/globals.css";
 
 export const metadata: Metadata = {
@@ -14,14 +14,10 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" data-theme="light" style={{ colorScheme: "light" }}>
-      <body>
-        <div>
-          <div className="container">{children}</div>
-          <SpeedInsights />
-          <Toaster />
-        </div>
-      </body>
-    </html>
+    <div>
+      <div className="container">{children}</div>
+      <SpeedInsights />
+      <Toaster />
+    </div>
   );
-} 
+}

@@ -80,8 +80,14 @@ export default function LoginInfoPage() {
       first_name: decryptedAuthData?.first_name || "",
       last_name: decryptedAuthData?.last_name || "",
       phone: "",
+      uid: decryptedAuthData?.uid || "",
+      profile_image: decryptedAuthData?.profile_image || "",
+      organization_id: null,
+      marketing_opt_in: isChecked.includes("mailAgreement"),
+      privacy_agreed: isChecked.includes("cookieAgreement"),
     },
   });
+  console.log(errors);
 
   const onSubmit = async (data: CreateUser) => {
     console.log("decryptedAuthData", decryptedAuthData?.uid);
