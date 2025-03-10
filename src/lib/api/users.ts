@@ -1,9 +1,27 @@
 import { supabase } from "@/utils/supabase/client";
 import type { Database } from "@/types/database.types";
-
+import type { CreateUser } from "@/types/users";
 type User = Database['public']['Tables']['profiles']['Row'];
 
 export const userApi = {
+
+  createUser: async (user: CreateUser) => {
+    try {
+      console.log("Supabase createUser 호출 시작");
+      const { data, error } = await supabase
+        .from("profiles")
+        .insert(user)
+        .select()
+        .single();
+      console.log("Supabase createUser 호출 완료", data, error);
+      return { data, error };
+    } catch (e) {
+      console.error("Supabase createUser 오류:", e);
+      return { data: null, error: e instanceof Error ? e.message : String(e) };
+    } finally {
+      console.log("Supabase createUser 완료");
+    }
+  },
   // 사용자 정보 가져오기
   getUser: async (userId: number) => {
     const { data, error } = await supabase
