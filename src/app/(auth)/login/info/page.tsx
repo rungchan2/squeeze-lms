@@ -9,7 +9,7 @@ import Text from "@/components/Text/Text";
 import Checkbox from "@/components/common/Checkbox";
 import { Separator, Stack, Spinner } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createUserSchema, type CreateUser } from "@/types/users";
@@ -22,7 +22,10 @@ import { NeededUserMetadata } from "@/app/(auth)/auth/callback/route";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
 
+
 export default function LoginInfoPage() {
+  const supabase = createClient();
+
   const router = useRouter();
   const [isChecked, setIsChecked] = useState<Agreement[]>([]);
   const handleCheckboxChangeAll = () => {
@@ -91,9 +94,13 @@ export default function LoginInfoPage() {
 
   const onSubmit = async (data: CreateUser) => {
     console.log("decryptedAuthData", decryptedAuthData?.uid);
-    const { data: getUserData, error: getUserDataError } = await supabase.auth.getUser();
-    console.log("getUserData", getUserData.user?.id, getUserDataError);
-    
+    try {
+      const { data: getUserData, error: getUserDataError } = await supabase.auth.getUser();
+      console.log("getUserData", getUserData.user?.id, getUserDataError);
+    } catch (error) {
+      console.log("error", error);
+    }
+      
     const { data: userData, error } = await supabase.from("profiles").insert({
       uid: decryptedAuthData?.uid || "",
       email: data.email,
