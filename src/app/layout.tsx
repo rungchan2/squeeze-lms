@@ -23,7 +23,6 @@ export default function RootLayout({
         <Providers>
           <ClientNavigation />
           <div className="container">{children}</div>
-          <SpeedInsights />
           <Toaster />
         </Providers>
       </body>

@@ -116,6 +116,10 @@ export default function LoginInfoPage() {
 
   return (
     <Container onSubmit={handleSubmit(onSubmit)}>
+      <Button variant="outline" onClick={async () => {
+        const { data, error } = await supabase.auth.getSession();
+        console.log(data, error);
+      }}>로그아웃</Button>
       <Heading level={4}>환영합니다! {decryptedAuthData?.first_name}님</Heading>
       <InputContainer>
         <HorizontalContainer>
