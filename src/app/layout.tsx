@@ -3,7 +3,7 @@ import { Providers } from "./providers";
 import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/toaster";
-import { ClientNavigation } from "@/components/navigation/ClientNavigation";
+import { Navigation } from "@/components/navigation/Navigation";
 
 export const metadata: Metadata = {
   title: "Squeeze LMS",
@@ -21,9 +21,10 @@ export default function RootLayout({
     <html lang="ko" data-theme="light" style={{ colorScheme: "light" }}>
       <body>
         <Providers>
-          <ClientNavigation />
+          <Navigation exceptionPath={["/login", "/register"]} />
           <div className="container">{children}</div>
           <Toaster />
+          <SpeedInsights />
         </Providers>
       </body>
     </html>

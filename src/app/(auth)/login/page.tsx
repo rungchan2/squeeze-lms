@@ -5,11 +5,10 @@ import styled from "@emotion/styled";
 import Heading from "@/components/Text/Heading";
 import { HStack, Separator } from "@chakra-ui/react";
 import Image from "next/image";
-import { socialLogin } from "@/utils/socialLogin";
+import { socialLogin, checkUser } from "@/app/(auth)/actions";
 import { Modal } from "@/components/modal/Modal";
 import LoginSignup from "@/components/auth/LoginSignup";
 import Text from "@/components/Text/Text";
-import { supabase } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 export default function LoginPage() {
@@ -18,13 +17,10 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        router.push("/");
-      }
-    };
-    checkUser();
+    const user = checkUser();
+    if (!user) {
+      router.push("/");
+    }
   }, [router]);
 
   const handleGoogleLogin = async () => {
@@ -48,19 +44,21 @@ export default function LoginPage() {
             Google로 로그인
           </Text>
         </GoogleLoginButton>
-        {error && <Text variant="caption" color="var(--negative-500)" style={{ textAlign: "center" }}>{error}</Text>}
+        {error && (
+          <Text
+            variant="caption"
+            color="var(--negative-500)"
+            style={{ textAlign: "center" }}
+          >
+            {error}
+          </Text>
+        )}
         <HStack width="100%" style={{ marginTop: "10px" }}>
-          <Separator 
-            flex="1" 
-            borderColor="gray.300"
-            borderWidth="1px"
-          />
-          <Text variant="caption" color="var(--grey-500)">또는</Text>
-          <Separator 
-            flex="1" 
-            borderColor="gray.300"
-            borderWidth="1px"
-          />
+          <Separator flex="1" borderColor="gray.300" borderWidth="1px" />
+          <Text variant="caption" color="var(--grey-500)">
+            또는
+          </Text>
+          <Separator flex="1" borderColor="gray.300" borderWidth="1px" />
         </HStack>
 
         <LoginSignup type="login" />

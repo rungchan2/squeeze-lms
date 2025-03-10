@@ -18,7 +18,7 @@ import { MdPrivacyTip, MdFeedback, MdLogout, MdLanguage } from "react-icons/md";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
-import { socialLogout } from "@/utils/socialLogin";
+import { logout } from "@/app/(auth)/actions";
 
 export default function MyPage() {
   const { logout } = useAuthStore();
@@ -27,7 +27,6 @@ export default function MyPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = useCallback(() => {
-    socialLogout();
     logout();
     router.push("/login");
   }, [logout]);

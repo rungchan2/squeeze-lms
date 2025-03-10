@@ -6,7 +6,7 @@ import styled from "@emotion/styled";
 import { z } from "zod";
 import InputAndTitle from "@/components/InputAndTitle";
 import { PasswordInput } from "@/components/ui/password-input";
-import { signInWithEmail, signUpWithEmail } from "@/utils/socialLogin";
+import { signInWithEmail, signUpWithEmail } from "@/app/(auth)/actions";
 import { Input } from "@chakra-ui/react";
 import Text from "@/components/Text/Text";
 import Button from "@/components/common/Button";

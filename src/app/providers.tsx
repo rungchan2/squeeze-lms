@@ -11,7 +11,6 @@ import createEmotionServer from '@emotion/server/create-instance'
 import { AuthProvider } from '@/components/AuthProvider'
 import { usePathname } from 'next/navigation';
 
-
 interface ProvidersProps {
   children: React.ReactNode;
   excludeAuthOnLogin?: boolean;

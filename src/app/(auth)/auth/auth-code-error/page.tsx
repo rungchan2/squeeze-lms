@@ -1,6 +1,6 @@
 "use client";
 
-import { socialLogout } from "@/utils/socialLogin";
+import { logout } from "@/app/(auth)/actions";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
@@ -11,7 +11,7 @@ export default function AuthCodeError() {
   const error_description = params.get('error_description');
 
   const handleLogout = async () => {
-    await socialLogout();
+    await logout();
     router.push("/login");
   };
   return <div>

@@ -9,7 +9,6 @@ import Text from "@/components/Text/Text";
 import Checkbox from "@/components/common/Checkbox";
 import { Separator, Stack, Spinner } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createUserSchema, type CreateUser } from "@/types/users";
@@ -17,14 +16,13 @@ import { DevTool } from "@hookform/devtools";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { decrypt } from "@/utils/encryption";
-import { Database } from "@/types/database.types";
 import { NeededUserMetadata } from "@/app/(auth)/auth/callback/route";
+import { createProfile } from "../../actions";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
 
 
 export default function LoginInfoPage() {
-  const supabase = createClient();
 
   const router = useRouter();
   const [isChecked, setIsChecked] = useState<Agreement[]>([]);
@@ -93,27 +91,7 @@ export default function LoginInfoPage() {
   console.log(errors);
 
   const onSubmit = async (data: CreateUser) => {
-    console.log("decryptedAuthData", decryptedAuthData?.uid);
-    try {
-      const { data: getUserData, error: getUserDataError } = await supabase.auth.getUser();
-      console.log("getUserData", getUserData.user?.id, getUserDataError);
-    } catch (error) {
-      console.log("error", error);
-    }
-      
-    const { data: userData, error } = await supabase.from("profiles").insert({
-      uid: decryptedAuthData?.uid || "",
-      email: data.email,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      phone: data.phone,
-      role: "user" as const,
-      profile_image: decryptedAuthData?.profile_image || null,
-      organization_id: null,
-      marketing_opt_in: isChecked.includes("mailAgreement"),
-      privacy_agreed: isChecked.includes("cookieAgreement"),
-    } satisfies Database["public"]["Tables"]["profiles"]["Insert"]);
-    console.log("userData", userData);
+    const { data: userData, error } = await createProfile(data);
     if (error) {
       router.push(`/error?message=회원가입 실패: ${error.message}`);
       return;
@@ -123,10 +101,6 @@ export default function LoginInfoPage() {
 
   return (
     <Container onSubmit={handleSubmit(onSubmit)}>
-      <Button variant="outline" onClick={async () => {
-        const { data, error } = await supabase.auth.getSession();
-        console.log(data, error);
-      }}>로그아웃</Button>
       <Heading level={4}>환영합니다! {decryptedAuthData?.first_name}님</Heading>
       <InputContainer>
         <HorizontalContainer>
