@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; 
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { Notification } from "@/types/notification";
 
 // ✅ 최신 알림을 가져오는 함수
 async function getNotifications(): Promise<Notification[]> {
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("notifications")
     .select("*")
@@ -15,6 +16,7 @@ async function getNotifications(): Promise<Notification[]> {
 
 // ✅ 알림을 읽음 처리하는 함수
 async function markAsRead(notificationId: number) {
+  const supabase = createClient();
   const { error } = await supabase
     .from("notifications")
     .update({ read_at: new Date().toISOString() })

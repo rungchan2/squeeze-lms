@@ -1,6 +1,8 @@
+'use server'
+
+import { createClient } from "@/utils/supabase/server";
 import { CreateUser } from "@/types";
-import { createClient } from "@/utils/supabase/client";
-import Cookies from "js-cookie";
+import Cookies from "js-cookie";  
 
 
 export async function checkUser() {
@@ -15,11 +17,17 @@ export async function getUser() {
   return user;
 }
 
+export async function getSession() {
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  return session;
+}
+
 export async function getUserProfile() {
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
-  const { data: profile } = await supabase.from("profiles").select("*").eq("uid", session?.user?.id || "").single();
-  return profile;
+  const { data: profile, error } = await supabase.from("profiles").select("*").eq("uid", session?.user?.id || "").single();
+  return { profile, error };
 }
 
 export async function logout() {
@@ -29,7 +37,7 @@ export async function logout() {
   Cookies.remove("auth-token");
 }
 
-export const signUpWithEmail = async (email: string, password: string) => {
+export async function signUpWithEmail(email: string, password: string) {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -46,39 +54,8 @@ export const signUpWithEmail = async (email: string, password: string) => {
     return { userData: data, error };
   };
 
-export const socialLogin = async (
-  provider: "google" | "github" | "apple" | "twitter" | "facebook",
-) => {
+export async function createProfile(profile: CreateUser) {
   const supabase = await createClient();
-  try {
-    console.log("소셜 로그인 시도:", provider);
-    const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          skipBrowserRedirect: false,
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-        },
-      });
-  
-      if (error) {
-        console.error("소셜 로그인 에러:", error);
-        throw error;
-      }
-  
-      console.log("소셜 로그인 데이터:", data);
-      return { data, error };
-    } catch (error) {
-      console.error("소셜 로그인 예외:", error);
-      return { data: null, error };
-    }
-  };
-
-export const createProfile = async (profile: CreateUser) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("profiles").insert(profile);
+  const { data, error } = await supabase.from("profiles").insert(profile).single();
   return { data, error };
-};
+}

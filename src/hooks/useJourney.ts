@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { Journey } from "@/types/journeys";
 
 export const useJourney = (): {
@@ -8,6 +8,7 @@ export const useJourney = (): {
   isLoading: boolean;
 } => {
   const fetchJourneys = async () => {
+    const supabase = createClient();
     const { data, error } = await supabase.from("journeys").select("*");
     if (error) {
       throw new Error(error.message);

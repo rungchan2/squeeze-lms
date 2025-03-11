@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 const getJourneyUser = async (journey_id: number) => {
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("user_journeys")
     .select("*")

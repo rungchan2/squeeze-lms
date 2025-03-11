@@ -9,7 +9,7 @@ import { Input } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 
 import { useAuth } from "@/components/AuthProvider"; // 수정된 인증 컨텍스트 사용
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import Heading from "@/components/Text/Heading";
 import Spinner from "@/components/common/Spinner";
 import InputAndTitle from "@/components/InputAndTitle";
@@ -63,7 +63,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!uid) return;
-
+      const supabase = createClient();
       try {
         const { data, error } = await supabase
           .from("profiles")
@@ -114,6 +114,7 @@ export default function ProfilePage() {
       const filePath = `profiles/${fileName}`;
 
       // 파일 업로드
+      const supabase = createClient();
       const { error: uploadError } = await supabase.storage
         .from('profiles')
         .upload(filePath, file);
@@ -143,6 +144,7 @@ export default function ProfilePage() {
     if (!uid) return;
 
     try {
+      const supabase = createClient();
       const { error } = await supabase
         .from("profiles")
         .update({

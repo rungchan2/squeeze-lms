@@ -11,10 +11,6 @@ const nextConfig = {
   experimental: {
     // ... 다른 experimental 설정들 ...
   },
-  webpack: (config) => {
-    config.experiments = { ...config.experiments, topLevelAwait: true }
-    return config
-  }
 };
 
 module.exports = nextConfig; 

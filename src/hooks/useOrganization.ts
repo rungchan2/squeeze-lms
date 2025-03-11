@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Organization } from "@/types/organizations";
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 export function useOrganization(id: number) {
   const [organization, setOrganization] = useState<Organization | null>(null);
@@ -12,6 +12,7 @@ export function useOrganization(id: number) {
     }
     
     const fetchOrganization = async () => {
+      const supabase = createClient();
       const { data } = await supabase.from("organizations").select("*").eq("id", id).single();
       setOrganization(data as Organization);
     };

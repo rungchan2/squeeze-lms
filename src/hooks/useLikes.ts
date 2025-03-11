@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 // 타입 정의 개선
 interface LikeParams {
@@ -13,6 +13,7 @@ interface LikesCountResponse {
 
 // ✅ 좋아요 수만 가져오는 최적화된 함수
 async function getLikesCount(postId: number): Promise<LikesCountResponse> {
+  const supabase = createClient();
   const { count, error } = await supabase
     .from("likes")
     .select("*", { count: "exact", head: true })
@@ -32,7 +33,7 @@ async function addLike({ postId, userId }: LikeParams): Promise<void> {
   if (existingLike) {
     return; // 이미 좋아요가 있으면 중복 추가 방지
   }
-  
+  const supabase = createClient();
   const { error } = await supabase
     .from("likes")
     .insert([{ post_id: postId, user_id: userId }]);
@@ -45,7 +46,7 @@ async function addLike({ postId, userId }: LikeParams): Promise<void> {
 
 // ✅ 좋아요 삭제 함수
 async function removeLike({ postId, userId }: LikeParams): Promise<void> {
-  
+  const supabase = createClient();
   const { error } = await supabase
     .from("likes")
     .delete()
@@ -59,6 +60,7 @@ async function removeLike({ postId, userId }: LikeParams): Promise<void> {
 
 // ✅ 사용자가 좋아요 했는지 확인하는 함수 - 수정
 async function getUserLike({ postId, userId }: LikeParams) {
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("likes")
     .select("id")
@@ -74,6 +76,7 @@ async function getUserLike({ postId, userId }: LikeParams) {
 }
 
 export function useLikes(postId: number) {
+  const supabase = createClient();
   const queryClient = useQueryClient();
   const likesCountQueryKey = ["likes-count", postId] as const;
   const userLikeQueryKeyPrefix = ["user-like", postId] as const;

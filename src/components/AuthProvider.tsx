@@ -7,7 +7,7 @@ import {
 } from "react";
 import { useAuthStore } from "@/store/auth";
 import { Role } from "@/types/users";
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { toaster } from "@/components/ui/toaster";
 // Context에서 제공할 값의 타입
 interface AuthContextType {
@@ -85,6 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       fetchUser();
       console.log("fetchUser 호출");
       try {
+        const supabase = createClient();
         // 세션 확인 및 필요시 갱신
         const {
           data: { session },
@@ -117,6 +118,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initializeAuth();
 
     // 인증 상태 변경 이벤트 리스너
+    const supabase = createClient();
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event) => {

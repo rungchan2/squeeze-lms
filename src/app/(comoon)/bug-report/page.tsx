@@ -15,16 +15,15 @@ import {
   FileUploadTrigger,
 } from "@/components/ui/file-upload";
 import { MdFileUpload } from "react-icons/md";
-
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { useAuthStore } from "@/store/auth";
 import { BugReport } from "@/types";
 import { useRouter } from "next/navigation";
-import { uploadFile } from "@/utils/uploadFile";
+import { uploadFile } from "@/app/(comoon)/actions";
 import { toaster } from "@/components/ui/toaster";
 import { bugReportSchema } from "@/types/bugReports";
 type BugReportFormData = Omit<BugReport, "id" | "created_at" | "updated_at"> & {
-  screenshot: FileList;
+  screenshot: FileList; 
 };
 
 export default function BugReportPage() {
@@ -41,6 +40,7 @@ export default function BugReportPage() {
       alert("로그인이 필요합니다.");
       return;
     }
+    const supabase = createClient();
     const { data: bugReport, error } = await supabase
       .from("bug_reports")
       .insert({

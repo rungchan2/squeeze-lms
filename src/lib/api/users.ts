@@ -1,4 +1,4 @@
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import type { Database } from "@/types/database.types";
 import type { CreateUser } from "@/types/users";
 type User = Database['public']['Tables']['profiles']['Row'];
@@ -8,6 +8,7 @@ export const userApi = {
   createUser: async (user: CreateUser) => {
     try {
       console.log("Supabase createUser 호출 시작");
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("profiles")
         .insert(user)
@@ -24,6 +25,7 @@ export const userApi = {
   },
   // 사용자 정보 가져오기
   getUser: async (userId: number) => {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -36,6 +38,7 @@ export const userApi = {
 
   // 사용자 목록 가져오기
   getUsers: async () => {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from('profiles')
       .select('*');
@@ -46,6 +49,7 @@ export const userApi = {
 
   // 사용자 정보 업데이트
   updateUser: async (userId: number, updates: Partial<User>) => {
+    const supabase = createClient();
     const { data, error } = await supabase
       .from('profiles')
       .update(updates)
@@ -59,6 +63,7 @@ export const userApi = {
 
   // 사용자 삭제
   deleteUser: async (userId: number) => {
+    const supabase = createClient();
     const { error } = await supabase
       .from('profiles')
       .delete()

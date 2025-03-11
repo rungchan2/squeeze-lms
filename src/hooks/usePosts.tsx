@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 // ✅ posts 데이터 가져오기 (users + companies LEFT JOIN)
 async function getPosts() {
+  const supabase = createClient();
   const { data, error } = await supabase.from("posts").select(`
       *,
       users (

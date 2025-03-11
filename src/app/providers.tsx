@@ -46,13 +46,7 @@ export function Providers({ children}: ProvidersProps) {
     <CacheProvider value={emotionCache}>
       <QueryClientProvider client={queryClient}>
         <ChakraProvider value={defaultSystem}>
-          {isLoginPage ? (
-            children
-          ) : (
-            <AuthProvider>
-              {children}
-            </AuthProvider>
-          )}
+          <AuthProvider>{children}</AuthProvider>
         </ChakraProvider>
       </QueryClientProvider>
     </CacheProvider>

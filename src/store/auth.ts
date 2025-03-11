@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { supabase } from "@/utils/supabase/client";
+import { getSession, getUserProfile, logout } from "@/app/(auth)/actions";
 import { encrypt, decrypt } from "@/utils/encryption";
 import { redirect } from "next/navigation";
 // 역할 타입 정의
@@ -88,7 +88,7 @@ export const useAuthStore = create<UserState>()(
 
         try {
           // 현재 세션 확인
-          const { data: { session } } = await supabase.auth.getSession();
+          const session = await getSession();
           
           if (!session) {
             set({
@@ -106,27 +106,23 @@ export const useAuthStore = create<UserState>()(
           }
 
           // 사용자 프로필 정보 가져오기
-          const { data: userData, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('uid', session.user.id)
-            .single();
+          const { profile, error } = await getUserProfile();
 
-          if (error || !userData) {
+          if (error || !profile) {
             get().logout();
             redirect("/login");
             return;
           }
 
           set({
-            id: userData.id,
-            uid: userData.uid,
-            email: userData.email,
-            role: userData.role as Role,
+            id: profile.id,
+            uid: profile.uid,
+            email: profile.email,
+            role: profile.role as Role,
             isAuthenticated: true,
             loading: false,
-            profileImage: userData.profile_image,
-            fullName: `${userData.first_name} ${userData.last_name}`,
+            profileImage: profile.profile_image,
+            fullName: `${profile.first_name} ${profile.last_name}`,
             lastUpdated: Date.now()
           });
         } catch (error) {
@@ -168,7 +164,7 @@ export const useAuthStore = create<UserState>()(
           // 마지막으로 supabase.auth.signOut() 호출
           // 이 함수가 실패하더라도 이미 상태와 로컬 스토리지는 초기화됨
           try {
-            await supabase.auth.signOut();
+            await logout();
           } catch (error) {
             console.error("supabase.auth.signOut() 오류:", error);
           }

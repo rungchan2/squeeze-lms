@@ -15,7 +15,7 @@ import { useState } from "react";
 import { DevTool } from "@hookform/devtools";
 import Cookies from "js-cookie";
 import { encrypt } from "@/utils/encryption";
-import { supabase } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { NeededUserMetadata } from "@/app/(auth)/auth/callback/route";
 
 let decryptedAuthData: NeededUserMetadata = {
@@ -54,6 +54,7 @@ export default function LoginSignup({ type }: { type: "login" | "signup" }) {
       setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
       return;
     }
+    const supabase = createClient();
     const { data: user } = await supabase.from('profiles').select('*').eq('email', userData.user?.email || '').single();
     if (!user) {
       router.push("/login/info");
@@ -62,8 +63,8 @@ export default function LoginSignup({ type }: { type: "login" | "signup" }) {
     router.push("/");
   };
   const onSubmitSignup = async (data: LoginFormData) => {
-
     const { userData: { user }, error } = await signUpWithEmail(data.email, data.password);
+    const supabase = createClient();
     const { data: duplicateUser } = await supabase.from('profiles').select('*').eq('email', data.email)
     if (duplicateUser && duplicateUser.length > 0) {
       setError("이미 가입된 이메일입니다.");
