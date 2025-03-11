@@ -41,7 +41,7 @@ export const userWithOrganizationSchema = pickedUserSchema.extend({
 });
 
 export const postWithRelationsSchema = postSchema.extend({
-  users: userWithOrganizationSchema.nullable(),
+  profiles: userWithOrganizationSchema.nullable(),
 });
 
 export type PostWithRelations = z.infer<typeof postWithRelationsSchema>;

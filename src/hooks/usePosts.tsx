@@ -6,14 +6,13 @@ async function getPosts() {
   const supabase = createClient();
   const { data, error } = await supabase.from("posts").select(`
       *,
-      users (
+      profiles (
         id, first_name, last_name, organization_id,
         organizations (
           id, name
         )
       )
     `);
-
   if (error) {
     throw error;
   }

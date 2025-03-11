@@ -16,7 +16,7 @@ export function ProfileImage({
 }: ProfileImageProps) {
   const imageUrl = profileImage || defaultProfile.src;
   const router = useRouter();
-  
+
   const getResponsiveClass = () => {
     switch(size) {
       case 'small': return styles.profileSmall;

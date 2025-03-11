@@ -18,7 +18,6 @@ import Cookies from "js-cookie";
 import { decrypt } from "@/utils/encryption";
 import { NeededUserMetadata } from "@/app/(auth)/auth/callback/route";
 import { createProfile } from "../../actions";
-import { createClient } from "@/utils/supabase/client";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
 

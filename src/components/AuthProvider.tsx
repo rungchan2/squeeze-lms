@@ -90,8 +90,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const {
           data: { session },
         } = await supabase.auth.getSession();
-        console.log("AuthProvider session", session);
-
         const now = Date.now();
         const needsRefresh = !lastUpdated || now - lastUpdated > 30 * 60 * 1000; // 30분
 

@@ -50,7 +50,7 @@ export default function PostCard(post: PostWithRelations) {
           <div className="user-info-wrapper">
             <UserNameWrapper>
               <Text variant="caption" fontWeight="bold">
-                {post?.users?.first_name}
+                {post?.profiles?.first_name}
               </Text>
               <Text variant="caption" fontWeight="bold">
                 의 포스팅
@@ -58,8 +58,8 @@ export default function PostCard(post: PostWithRelations) {
             </UserNameWrapper>
             <UserDetailsWrapper>
               <Text variant="small" fontWeight="bold">
-                {post?.users?.organizations?.name
-                  ? post?.users?.organizations?.name
+                {post?.profiles?.organizations?.name
+                  ? post?.profiles?.organizations?.name
                   : "익명"}
               </Text>
               <LuDot />

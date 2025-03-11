@@ -80,6 +80,6 @@ const StyledNavigation = styled.div<{ $isVisible: boolean }>`
   }
 
   & + * {
-    padding-top: 70px;
+    padding-top: 86px;
   }
 `;
