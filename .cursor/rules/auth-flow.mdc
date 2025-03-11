@@ -1,0 +1,12 @@
+---
+description: Handles authentication and session logic using Supabase.
+globs: **/auth/*.ts", "**/utils/supabase/*.ts
+alwaysApply: true
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
+
+[auth-flow.json](mdc:.cursor/rules/auth-flow.json)

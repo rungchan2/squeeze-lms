@@ -6,7 +6,7 @@ import Button from "@/components/common/Button";
 import Heading from "@/components/Text/Heading";
 import styled from "@emotion/styled";
 import { useSearchParams } from 'next/navigation'
-import { socialLogout } from "@/utils/socialLogin";
+import { logout } from "@/app/(auth)/actions";
 
 export default function ErrorPage() {
   const searchParams = useSearchParams()
@@ -14,7 +14,7 @@ export default function ErrorPage() {
   const router = useRouter();
 
   const handleLogout = async () => {
-    await socialLogout();
+    await logout();
     router.push("/login");
   };
 
@@ -22,7 +22,7 @@ export default function ErrorPage() {
     <Container>
       <Heading level={2} color="var(--grey-700)" weight="bold" >Error</Heading>
       <Text variant="body" color="var(--grey-500)">{errorMessage}</Text>
-      <Button onClick={handleLogout}>Login</Button>
+      <Button variant="flat" onClick={handleLogout}>Login</Button>
     </Container>
   );
 }

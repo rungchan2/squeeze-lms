@@ -13,7 +13,7 @@ export default function InputAndTitle({ title, children, errorMessage }: { title
 const InputTitleContainer = styled.div<{ errorMessage?: string }>`
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 10px;
   width: 100%;
 
   input, 

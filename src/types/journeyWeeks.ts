@@ -1,12 +1,22 @@
 import { z } from "zod";
 
 export const journeyWeekSchema = z.object({
-  id: z.number().int().nonnegative(),
-  journey_id: z.number().int(),
-  name: z.string().min(1),
-  week_number: z.number().int().nonnegative(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
-});
+  id: z.number(),
+  journey_id: z.number().nullable(),
+  name: z.string(),
+  week_number: z.number().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+})
+
+export const createJourneyWeekSchema = journeyWeekSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+})
+
+export const updateJourneyWeekSchema = createJourneyWeekSchema.partial()
 
 export type JourneyWeek = z.infer<typeof journeyWeekSchema>;
+export type CreateJourneyWeek = z.infer<typeof createJourneyWeekSchema>;
+export type UpdateJourneyWeek = z.infer<typeof updateJourneyWeekSchema>;
