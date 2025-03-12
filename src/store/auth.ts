@@ -156,9 +156,7 @@ export const useAuthStore = create<UserState>()(
           
           // 로컬 스토리지에서 auth-store 데이터 삭제
           if (typeof window !== 'undefined') {
-            console.log("로컬 스토리지에서 auth-store 데이터 삭제 시도");
             localStorage.removeItem('auth-store');
-            console.log("로컬 스토리지에서 auth-store 데이터 삭제 완료");
           }
           
           // 마지막으로 supabase.auth.signOut() 호출

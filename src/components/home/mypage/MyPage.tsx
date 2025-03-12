@@ -18,7 +18,6 @@ import { MdPrivacyTip, MdFeedback, MdLogout, MdLanguage } from "react-icons/md";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
-import { logout } from "@/app/(auth)/actions";
 
 export default function MyPage() {
   const { logout } = useAuthStore();
