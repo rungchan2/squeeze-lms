@@ -22,7 +22,7 @@
 }
 
 .outline {
-    background-color: var(--white);
+    background-color: transparent;
     color: var(--primary-700);
     border: 1px solid var(--primary-700);
 
@@ -34,4 +34,16 @@
         background-color: var(--grey-500);
         cursor: not-allowed;
     }
+}
+
+.plain {
+    background-color: transparent;
+    color: var(--primary-700);
+    border: none;
+
+    &:hover {
+        background-color: var(--primary-100);
+    }
+    
+    
 }

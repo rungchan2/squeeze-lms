@@ -40,3 +40,27 @@ export async function getImageUrl(path: string) {
   const { data } = supabase.storage.from("images").getPublicUrl(path);
   return data.publicUrl;
 }
+
+export async function updatePassword(password: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.updateUser({
+    password,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function deleteProfile(uid: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("profiles").delete().eq("uid", uid);
+  return { data, error };
+}
+export async function deleteUser(uid: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.admin.deleteUser(uid);
+  return { data, error };
+}

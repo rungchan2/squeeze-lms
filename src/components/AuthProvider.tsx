@@ -77,9 +77,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window === "undefined") return;
 
     const initializeAuth = async () => {
-      toaster.success({
+      toaster.create({
         title: "초기화 시작",
         description: "초기화 중입니다.",
+        type: "info",
       });
       // 로컬 스토리지에서 먼저 데이터 가져오기
       fetchUser();
@@ -99,16 +100,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           await logout();
         }
       } catch (error) {
-        toaster.error({
+        toaster.create({
           title: "인증 초기화 오류",
           description: (error as Error).message,
+          type: "error",
         });
       } finally {
         // 초기화 완료 표시 (오류가 발생해도 초기화는 완료된 것으로 간주)
         setIsInitialized(true);
-        toaster.success({
+        toaster.create({
           title: "초기화 완료",
           description: "초기화가 완료되었습니다.",
+          type: "success",
         });
       }
     };
@@ -123,14 +126,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       toaster.create({
         title: "인증 상태 변경",
         description: event,
-      });
+        type: "info",
+      });   
       if (event === "SIGNED_IN") {
         try {
           await refreshUser();
         } catch (error) {
-          toaster.error({
+          toaster.create({
             title: "로그인 후 사용자 정보 갱신 오류",
             description: (error as Error).message,
+            type: "error",
           });
         } finally {
           setIsInitialized(true);
@@ -139,9 +144,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
           await logout();
         } catch (error) {
-          toaster.error({
+          toaster.create({
             title: "로그아웃 처리 오류",
             description: (error as Error).message,
+            type: "error",
           });
         } finally {
           setIsInitialized(true);

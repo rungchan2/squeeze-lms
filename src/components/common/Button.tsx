@@ -3,7 +3,7 @@ import styles from "./Button.module.css";
 import Spinner from "./Spinner";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant: "flat" | "outline";
+  variant: "flat" | "outline" | "plain";
   maxWidth?: number;
   isLoading?: boolean;
   disabled?: boolean;
@@ -21,7 +21,7 @@ export default function Button(props: ButtonProps) {
       }}
       {...rest}
       className={`${styles.button} ${className || ""} ${
-        variant === "outline" ? styles.outline : ""
+        variant === "outline" ? styles.outline : variant === "plain" ? styles.plain : variant === "flat" ? styles.flat : ""
       }`}
     >
       {isLoading ? <Spinner size="20px" /> : rest.children}

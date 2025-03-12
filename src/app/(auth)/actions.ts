@@ -22,6 +22,11 @@ export async function getSession() {
   const { data: { session } } = await supabase.auth.getSession();
   return session;
 }
+export async function getPorfile(uid: string) {
+  const supabase = await createClient();
+  const { data: profile, error } = await supabase.from("profiles").select("*").eq("uid", uid).single();
+  return { profile, error };
+}
 
 export async function getUserProfile() {
   const supabase = await createClient();

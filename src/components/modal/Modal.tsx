@@ -42,11 +42,23 @@ export function Modal({ children, isOpen, onClose }: ModalProps) {
     }
   }, [isOpen]);
   
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [isOpen]);
+  
   if (!isOpen) return null;
 
   return createPortal(
     <StyledModal
-      className={isFadeOut ? "fade-out" : "fade-in"}
+      className={`${isFadeOut ? "fade-out" : "fade-in"}`}
       onClick={handleOverlayClick}
       onAnimationEnd={handleAnimationEnd}
     >
@@ -64,6 +76,7 @@ export function Modal({ children, isOpen, onClose }: ModalProps) {
 }
 
 const StyledModal = styled.div`
+
   @keyframes fade-out {
     from {
       opacity: 1;
@@ -107,10 +120,9 @@ const StyledModal = styled.div`
 
     .modal-content {
       position: relative;
-      background-color: white;
+      background-color: var(--white);
       border-radius: 10px;
       padding: 32px 24px;
-      box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 
       .modal-close {
         position: absolute;
@@ -126,4 +138,7 @@ const StyledModal = styled.div`
       }
     }
   }
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 `;
