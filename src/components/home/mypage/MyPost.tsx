@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import PostCard from "@/components/home/mypage/PostCard";
 import { usePosts } from "@/hooks/usePosts";
 import styles from "./Mypage.module.css";

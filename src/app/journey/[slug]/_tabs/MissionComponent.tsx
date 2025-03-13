@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useMission } from "@/hooks/useMission";
-import { CreateMission, Mission } from "@/types/missions";
+import { Mission } from "@/types/missions";
 import Text from "@/components/Text/Text";
 import Heading from "@/components/Text/Heading";
 import Spinner from "@/components/common/Spinner";
 import styled from "@emotion/styled";
 import { Modal } from "@/components/modal/Modal";
-import { Input, Textarea } from "@chakra-ui/react";
-import Button from "@/components/common/Button";
+import { Input } from "@chakra-ui/react";
 import MissionCard from "./MissionCard";
 import { FaPlus, FaCheck } from "react-icons/fa6";
 import { AdminOnly } from "@/components/auth/AdminOnly";
@@ -63,14 +62,16 @@ export default function MissionComponent({
   // 검색 결과 필터링
   const searchResults = useMemo(() => {
     if (!allMissions) return [];
-    
+
     if (!searchQuery.trim()) {
       return allMissions;
     }
 
-    return allMissions.filter(mission => 
-      mission.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (mission.description && mission.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    return allMissions.filter(
+      (mission) =>
+        mission.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (mission.description &&
+          mission.description.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [searchQuery, allMissions]);
 
@@ -212,7 +213,11 @@ export default function MissionComponent({
                       isModal={true}
                     />
                     <button
-                      className={`add-button ${weekMissions.some((m) => m.id === mission.id) ? 'added' : ''}`}
+                      className={`add-button ${
+                        weekMissions.some((m) => m.id === mission.id)
+                          ? "added"
+                          : ""
+                      }`}
                       onClick={() => handleAddMission(mission.id)}
                       disabled={weekMissions.some((m) => m.id === mission.id)}
                     >
@@ -316,11 +321,11 @@ const ShowSearchContainer = styled.div`
     margin-top: 16px;
     overflow-y: auto;
     max-height: 60vh;
-    
+
     /* 스크롤바 숨기기 */
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
-    
+
     /* Chrome, Safari, Opera에서 스크롤바 숨기기 */
     &::-webkit-scrollbar {
       display: none;
@@ -360,29 +365,29 @@ const ShowSearchContainer = styled.div`
       border: none;
       border-radius: 0;
       transition: all 0.2s ease;
-      
+
       &:hover:not(:disabled) {
         background-color: var(--grey-500);
       }
-      
+
       &.added {
         background-color: var(--positive-600);
-        
+
         &:hover {
           background-color: var(--positive-600);
         }
       }
-      
+
       .check-icon {
         color: white;
         font-size: 18px;
       }
-      
+
       .plus-icon {
         color: white;
         font-size: 18px;
       }
-      
+
       &:disabled {
         cursor: not-allowed;
         opacity: 0.7;

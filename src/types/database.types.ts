@@ -117,6 +117,54 @@ export type Database = {
           },
         ]
       }
+      journey_mission_instances: {
+        Row: {
+          created_at: string | null
+          expiry_date: string | null
+          id: number
+          journey_week_id: number
+          mission_id: number
+          release_date: string | null
+          status: Database["public"]["Enums"]["mission_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: number
+          journey_week_id: number
+          mission_id: number
+          release_date?: string | null
+          status?: Database["public"]["Enums"]["mission_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: number
+          journey_week_id?: number
+          mission_id?: number
+          release_date?: string | null
+          status?: Database["public"]["Enums"]["mission_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journey_mission_instances_journey_week_id_fkey"
+            columns: ["journey_week_id"]
+            isOneToOne: false
+            referencedRelation: "journey_weeks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journey_mission_instances_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journey_weeks: {
         Row: {
           created_at: string | null
@@ -477,14 +525,102 @@ export type Database = {
           },
         ]
       }
+      user_points: {
+        Row: {
+          created_at: string | null
+          id: number
+          journey_id: number
+          mission_id: number | null
+          post_id: number | null
+          profile_id: number
+          total_points: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          journey_id: number
+          mission_id?: number | null
+          post_id?: number | null
+          profile_id: number
+          total_points?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          journey_id?: number
+          mission_id?: number | null
+          post_id?: number | null
+          profile_id?: number
+          total_points?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_points_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_points_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_points_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_points_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          completed_missions: number | null
+          first_name: string | null
+          last_name: string | null
+          total_points: number | null
+          user_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      migrate_missions_to_instances: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
+      mission_status:
+        | "not_started"
+        | "in_progress"
+        | "submitted"
+        | "completed"
+        | "rejected"
       role: "user" | "teacher" | "admin"
     }
     CompositeTypes: {

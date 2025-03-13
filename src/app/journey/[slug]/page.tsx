@@ -19,7 +19,7 @@ export default async function JourneyPage({
   const resolvedParams = await params;
   const { slug } = resolvedParams;
   
-  const { data, error } = await getJourney(slug);
+  const { error } = await getJourney(slug);
   if (error) {
     redirect("/");
   }
