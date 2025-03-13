@@ -15,6 +15,7 @@ interface MissionCardProps {
   isModal?: boolean;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
+  maxWidth?: string;
 }
 
 export default function MissionCard({
@@ -22,9 +23,10 @@ export default function MissionCard({
   isModal = false,
   onEdit,
   onDelete,
+  maxWidth = "100%",
 }: MissionCardProps) {
   return (
-    <StyledMissionCard isModal={isModal}>
+    <StyledMissionCard isModal={isModal} maxWidth={maxWidth}>
       <div className="left-container">
         {!isModal && (
           <FiMenu size="16px" style={{ minWidth: "16px" }} />
@@ -77,6 +79,7 @@ export default function MissionCard({
 
 interface StyledMissionCardProps {
   isModal: boolean;
+  maxWidth: string;
 }
 
 const StyledMissionCard = styled.div<StyledMissionCardProps>`
@@ -93,7 +96,7 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
   justify-content: space-between;
   border-radius: ${props => props.isModal ? '4px 0 0 4px' : '4px'};
   flex: 1;
-
+  max-width: ${props => props.maxWidth};
   .left-container {
     display: flex;
     align-items: center;

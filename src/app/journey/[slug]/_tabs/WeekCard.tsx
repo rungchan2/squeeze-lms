@@ -2,8 +2,10 @@ import { JourneyWeek } from "@/types";
 import Text from "@/components/Text/Text";
 import styled from "@emotion/styled";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6";
-import { useState, memo } from "react";
+import { useState, memo, useEffect } from "react";
 import MissionComponent from "./MissionComponent";
+import { useWeeks } from "@/hooks/useWeeks";
+import { FaSquare } from "react-icons/fa";
 
 interface JourneyWeekCardProps {
   week: JourneyWeek;
@@ -24,39 +26,55 @@ export default function WeekCard({
   journeyId,
 }: JourneyWeekCardProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
-  // 미션 개수 계산 - null 체크 추가
-  const missionCount = week.missions?.length || 0;
+  const [missionCount, setMissionCount] = useState(0);
+  const { getWeekMissionCount } = useWeeks(journeyId);
+
+  // 미션 개수 가져오기
+  useEffect(() => {
+    const fetchMissionCount = async () => {
+      const count = await getWeekMissionCount(week.id);
+      setMissionCount(count);
+    };
+
+    fetchMissionCount();
+  }, [week.id, getWeekMissionCount]);
 
   // 토글 핸들러
   const handleToggle = () => {
-    setIsOpen(prev => !prev);
+    setIsOpen((prev) => !prev);
   };
 
   return (
-    <StyledWeekCard key={week.id}>
-      <div className="week-header" onClick={handleToggle}>
-        <div className="week-header-left">
-          {isOpen ? <FaChevronUp /> : <FaChevronDown />}
-          <Text color="var(--grey-500)" variant="body">
-            {week.week_number ? `${week.week_number}` : "미정"}
-          </Text>
-          <Text variant="body">{week.name}</Text>
-        </div>
-        <div className="week-header-right">
-          <Text variant="small">
-            {missionCount}/3
-          </Text>
-        </div>
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+        <FaSquare />
+        <Text variant="body" fontWeight="bold">
+          {index + 1}
+        </Text>
       </div>
-      {isOpen && (
-        <MemoizedMissionComponent 
-          weekId={week.id} 
-          weekName={week.name} 
-          journeyId={journeyId} 
-        />
-      )}
-    </StyledWeekCard>
+      <StyledWeekCard key={week.id}>
+        <div className="week-header" onClick={handleToggle}>
+          <div className="week-header-left">
+            {isOpen ? <FaChevronUp /> : <FaChevronDown />}
+            <Text color="var(--grey-500)" variant="body">
+              {week.week_number ? `${week.week_number}주차` : "미정"}
+            </Text>
+            <Text variant="body">{week.name}</Text>
+          </div>
+          <div className="week-header-right">
+            <Text variant="caption">?/{missionCount}</Text>
+          </div>
+        </div>
+        {isOpen && (
+          <MemoizedMissionComponent
+            weekId={week.id}
+            weekName={week.name}
+            journeyId={journeyId}
+            deleteWeek={deleteWeek}
+          />
+        )}
+      </StyledWeekCard>
+    </div>
   );
 }
 
@@ -64,7 +82,7 @@ const StyledWeekCard = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 10px 16px;
+  padding: 16px;
   border-radius: 8px;
   border: 1px solid var(--grey-200);
   background-color: var(--white);

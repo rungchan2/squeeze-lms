@@ -9,6 +9,8 @@ import Spinner from "@/components/common/Spinner";
 import { useWeeks } from "@/hooks/useWeeks";
 import styled from "@emotion/styled";
 import WeekCard from "./WeekCard";
+import Button from "@/components/common/Button";
+import { AdminOnly } from "@/components/auth/AdminOnly";
 
 // WeekCard 컴포넌트를 메모이제이션
 const MemoizedWeekCard = memo(WeekCard);
@@ -95,8 +97,7 @@ export default function PlanPage() {
       await createWeek({
         journey_id: journeyId,
         name: `Week ${weeks.length + 1}`,
-        week_number: weeks.length + 1,
-        missions: []
+        week_number: weeks.length + 1
       });
     } catch (error) {
       console.error("Error adding week:", error);
@@ -105,7 +106,7 @@ export default function PlanPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-full">
+      <div>
         <Spinner />
       </div>
     );
@@ -124,12 +125,15 @@ export default function PlanPage() {
     <PlanContainer>
       <div className="header">
         <Heading level={2}>여행 일정</Heading>
-        <button 
-          onClick={handleAddWeek}
-          className="add-button"
+        <AdminOnly>
+          <Button 
+            variant="outline"
+            onClick={handleAddWeek}
+          maxWidth={100}
         >
-          새 주차 추가
-        </button>
+          새 주차
+        </Button>
+        </AdminOnly>
       </div>
       
       <Suspense fallback={<Spinner />}>

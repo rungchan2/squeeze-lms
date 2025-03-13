@@ -6,14 +6,16 @@ export const missionStatusEnum = z.enum([
   'in_progress',
   'submitted',
   'completed',
-  'failed'
+  'rejected'
 ]);
 
 export const journeyMissionInstanceSchema = z.object({
   id: z.number(),
-  week_id: z.number(),
+  journey_week_id: z.number(),
   mission_id: z.number(),
   status: missionStatusEnum.default('not_started'),
+  release_date: z.string().nullable(),
+  expiry_date: z.string().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
 });

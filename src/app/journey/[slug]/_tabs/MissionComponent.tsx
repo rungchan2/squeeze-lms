@@ -16,20 +16,31 @@ import { InputGroup } from "@/components/ui/input-group";
 import { IoSearch } from "react-icons/io5";
 import ChipGroup from "@/components/common/ChipGroup";
 import { useWeeks } from "@/hooks/useWeeks";
+import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
+import { getMissionTypes } from "@/app/journey/actions";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { IconContainer } from "@/components/common/IconContainer";
 
 interface MissionComponentProps {
   weekId: number;
   weekName: string;
   journeyId: number;
+  deleteWeek: (weekId: number) => void;
 }
 
-export type MissionOption = "추천미션" | "사진미션" | "쓰기미션";
-const missionOptions: MissionOption[] = ["추천미션", "사진미션", "쓰기미션"];
+export type MissionOption = string;
+
+// 서버 컴포넌트에서 데이터 가져오기
+const { data: missionTypesData } = await getMissionTypes();
+// mission_type 값만 추출
+const missionTypeValues = missionTypesData ? missionTypesData.map((item: { mission_type: string }) => item.mission_type).filter(Boolean) : [];
+const missionOptions: MissionOption[] = ["전체", ...missionTypeValues];
 
 export default function MissionComponent({
   weekId,
   weekName,
   journeyId,
+  deleteWeek,
 }: MissionComponentProps) {
   const [showSearch, setShowSearch] = useState(false);
   const [selectedOption, setSelectedOption] = useState<MissionOption>(
@@ -39,18 +50,21 @@ export default function MissionComponent({
   const [isLoadingMissions, setIsLoadingMissions] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // 이전 weekId를 저장하기 위한 ref
-  const prevWeekIdRef = useRef<number>(weekId);
-
   // useWeeks 훅 사용
   const {
-    weeks,
     isLoading: isLoadingWeeks,
     error: weeksError,
     addMissionToWeek,
     removeMissionFromWeek,
     getWeekMissions,
   } = useWeeks(journeyId);
+
+  // useJourneyMissionInstances 훅 사용
+  const {
+    missionInstances,
+    isLoading: isLoadingInstances,
+    error: instancesError,
+  } = useJourneyMissionInstances(weekId);
 
   // useMission 훅 사용 (전체 미션 목록 가져오기)
   const {
@@ -63,52 +77,35 @@ export default function MissionComponent({
   const searchResults = useMemo(() => {
     if (!allMissions) return [];
 
-    if (!searchQuery.trim()) {
-      return allMissions;
+    // 필터링할 미션 목록
+    let filteredMissions = allMissions;
+
+    // 선택된 옵션이 '전체'가 아닌 경우 미션 타입으로 필터링
+    if (selectedOption !== "전체") {
+      filteredMissions = allMissions.filter(
+        (mission) => mission.mission_type === selectedOption
+      );
     }
 
-    return allMissions.filter(
+    if (!searchQuery.trim()) {
+      return filteredMissions;
+    }
+
+    return filteredMissions.filter(
       (mission) =>
         mission.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (mission.description &&
           mission.description.toLowerCase().includes(searchQuery.toLowerCase()))
     );
-  }, [searchQuery, allMissions]);
+  }, [searchQuery, allMissions, selectedOption]);
 
   // 주차의 미션 목록 가져오기
   useEffect(() => {
-    // 주차 ID가 변경되었거나 weeks 데이터가 로드된 경우에만 실행
-    const shouldFetchMissions =
-      weekId &&
-      !isLoadingWeeks &&
-      weeks &&
-      (prevWeekIdRef.current !== weekId || !isLoadingMissions);
+    if (!weekId || isLoadingInstances) return;
 
-    if (!shouldFetchMissions) return;
-
-    // 현재 weekId를 ref에 저장
-    prevWeekIdRef.current = weekId;
-
-    // 미션 데이터 가져오기
     const fetchMissions = async () => {
       setIsLoadingMissions(true);
       try {
-        // 현재 주차 찾기
-        const currentWeek = weeks.find((w) => w.id === weekId);
-        if (!currentWeek) {
-          console.error("주차를 찾을 수 없습니다:", weekId);
-          setWeekMissions([]);
-          return;
-        }
-
-        // 미션 ID 배열 가져오기
-        const missionIds = currentWeek.missions || [];
-        if (missionIds.length === 0) {
-          setWeekMissions([]);
-          return;
-        }
-
-        // 미션 데이터 가져오기
         const missions = await getWeekMissions(weekId);
         setWeekMissions(missions);
       } catch (error) {
@@ -120,28 +117,32 @@ export default function MissionComponent({
     };
 
     fetchMissions();
-  }, [weekId, weeks, isLoadingWeeks, getWeekMissions]);
+  }, [weekId, isLoadingInstances, getWeekMissions, missionInstances]);
 
   // 미션 추가 핸들러
   const handleAddMission = async (missionId: number) => {
     try {
-      const result = await addMissionToWeek(weekId, missionId);
-      if (!result) return;
+      // 이미 추가된 미션인지 확인
+      const isAlreadyAdded = weekMissions.some((m) => m.id === missionId);
 
-      // 이미 추가된 미션인 경우 중복 추가 방지
-      if (weekMissions.some((m) => m.id === missionId)) {
-        return;
+      if (isAlreadyAdded) {
+        // 이미 추가된 미션이면 제거
+        await removeMissionFromWeek(weekId, missionId);
+
+        // UI에서 미션 제거
+        setWeekMissions((prev) => prev.filter((m) => m.id !== missionId));
+      } else {
+        // 새 미션 추가
+        await addMissionToWeek(weekId, missionId);
+
+        // 미션 데이터 가져오기
+        const addedMission = allMissions?.find((m) => m.id === missionId);
+        if (addedMission) {
+          setWeekMissions((prev) => [...prev, addedMission]);
+        }
       }
-
-      // 미션 데이터 가져오기
-      const addedMission = allMissions?.find((m) => m.id === missionId);
-      if (addedMission) {
-        setWeekMissions((prev) => [...prev, addedMission]);
-      }
-
-      setShowSearch(false);
     } catch (error) {
-      console.error("Error adding mission:", error);
+      console.error("Error managing mission:", error);
     }
   };
 
@@ -149,8 +150,7 @@ export default function MissionComponent({
   const handleRemoveMission = async (missionId: number) => {
     if (window.confirm("정말로 이 미션을 제거하시겠습니까?")) {
       try {
-        const result = await removeMissionFromWeek(weekId, missionId);
-        if (!result) return;
+        await removeMissionFromWeek(weekId, missionId);
 
         // UI에서 미션 제거
         setWeekMissions((prev) => prev.filter((m) => m.id !== missionId));
@@ -178,6 +178,11 @@ export default function MissionComponent({
     <MissionContainer>
       <div className="mission-header">
         <Heading level={3}>{weekName} 미션</Heading>
+        <AdminOnly>
+          <IconContainer onClick={() => deleteWeek(weekId)} hoverColor="var(--negative-500)">
+            <RiDeleteBin6Line size="16px" />
+          </IconContainer>
+        </AdminOnly>
       </div>
 
       <Modal isOpen={showSearch} onClose={() => setShowSearch(false)}>
@@ -190,22 +195,24 @@ export default function MissionComponent({
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </InputGroup>
+          <div className="mission-type-filter">
           <ChipGroup
             options={missionOptions}
             selectedOption={selectedOption}
             onSelect={(option) => setSelectedOption(option as MissionOption)}
           />
+          </div>
+          <Heading level={4}>검색 결과</Heading>
 
           <div className="search-results">
-            <Heading level={4}>검색 결과</Heading>
             {isLoadingAllMissions ? (
               <Spinner />
             ) : allMissionsError ? (
               <Text>미션 데이터를 불러오는 중 오류가 발생했습니다.</Text>
             ) : searchResults && searchResults.length > 0 ? (
-              <div className="mission-list">
+              <ModalListContainer>
                 {searchResults.map((mission) => (
-                  <div key={mission.id} className="search-mission-item">
+                  <div key={mission.id} className="single-item">
                     <MissionCard
                       mission={mission}
                       onEdit={handleEditMission}
@@ -213,23 +220,22 @@ export default function MissionComponent({
                       isModal={true}
                     />
                     <button
-                      className={`add-button ${
+                      className={`single-item-button ${
                         weekMissions.some((m) => m.id === mission.id)
                           ? "added"
                           : ""
                       }`}
                       onClick={() => handleAddMission(mission.id)}
-                      disabled={weekMissions.some((m) => m.id === mission.id)}
                     >
                       {weekMissions.some((m) => m.id === mission.id) ? (
-                        <FaCheck className="check-icon" />
+                        <FaCheck />
                       ) : (
-                        <FaPlus className="plus-icon" />
+                        <FaPlus />
                       )}
                     </button>
                   </div>
                 ))}
-              </div>
+              </ModalListContainer>
             ) : (
               <Text>검색 결과가 없습니다.</Text>
             )}
@@ -250,142 +256,49 @@ export default function MissionComponent({
         </div>
       ) : (
         <div className="empty-state">
-          <Text>등록된 미션이 없습니다.</Text>
+          <Text color="var(--grey-500)">등록된 미션이 없습니다.</Text>
         </div>
       )}
+
       <AdminOnly>
-        <div
+        <button
           className="add-mission-button"
-          onClick={() => setShowSearch(!showSearch)}
+          onClick={() => setShowSearch(true)}
         >
           <FaPlus />
-          미션 추가
-        </div>
+          <span>미션 추가</span>
+        </button>
       </AdminOnly>
     </MissionContainer>
   );
 }
 
-const MissionContainer = styled.div`
-  margin-top: 1rem;
-
-  .mission-header {
+const ModalListContainer = styled.div`
+  .single-item {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
+    flex-direction: row;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 10px;
 
-  .mission-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 2rem;
-    background-color: var(--gray-50);
-    border-radius: 0.25rem;
-  }
-
-  .add-mission-button {
-    margin-top: 6px;
-    text-align: center;
-    padding: 16px;
-    border: 1px solid var(--grey-200);
-    background-color: var(--white);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: box-shadow 0.2s;
-    justify-content: center;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    &:hover {
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-  }
-`;
-
-const ShowSearchContainer = styled.div`
-  padding-top: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 16px;
-  width: 100%;
-  max-height: 100%;
-
-  .search-results {
-    width: 100%;
-    margin-top: 16px;
-    overflow-y: auto;
-    max-height: 60vh;
-
-    /* 스크롤바 숨기기 */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
-
-    /* Chrome, Safari, Opera에서 스크롤바 숨기기 */
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-
-  .mission-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-    padding-bottom: 16px;
-  }
-
-  .search-mission-item {
-    display: flex;
-    position: relative;
-    border-radius: 4px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .add-button {
-      height: auto;
-      min-height: 100%;
-      width: 50px;
-      background-color: var(--grey-400);
-      cursor: pointer;
+    & > .single-item-button {
       display: flex;
       align-items: center;
       justify-content: center;
+      min-width: 50px;
       border: none;
-      border-radius: 0;
-      transition: all 0.2s ease;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background-color: var(--grey-200);
 
-      &:hover:not(:disabled) {
-        background-color: var(--grey-500);
+      &:hover {
+        background-color: var(--grey-300);
       }
 
       &.added {
-        background-color: var(--positive-600);
-
-        &:hover {
-          background-color: var(--positive-600);
-        }
-      }
-
-      .check-icon {
+        background-color: var(--primary-500);
         color: white;
-        font-size: 18px;
-      }
-
-      .plus-icon {
-        color: white;
-        font-size: 18px;
       }
 
       &:disabled {
@@ -393,9 +306,76 @@ const ShowSearchContainer = styled.div`
         opacity: 0.7;
       }
     }
+  }
+`;
+const MissionContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem;
 
-    .mission-info {
-      flex: 1;
+  .mission-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mission-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .empty-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    background-color: var(--grey-50);
+    border-radius: 0.5rem;
+  }
+
+  .mission-actions {
+    display: flex;
+  }
+
+  .add-mission-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: var(--grey-700);
+    border: 1px solid var(--grey-200);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s;
+    &:hover {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
+  }
+`;
+
+const ShowSearchContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 600px;
+
+  .mission-type-filter {
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
   }
 `;

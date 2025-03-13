@@ -17,7 +17,6 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background-color: transparent;
   padding: 10px;
   color: var(--gray-700);
   border-bottom: 2px solid var(--grey-200);

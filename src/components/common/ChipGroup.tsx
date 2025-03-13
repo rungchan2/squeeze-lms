@@ -47,24 +47,24 @@ const Chip = styled.div<ChipProps>`
   justify-content: center;
   padding: 6px 12px;
   border-radius: 4px;
+  flex-shrink: 0;
   cursor: pointer;
   transition: all 0.2s ease;
-  background-color: ${({ isSelected }) => 
+  background-color: ${({ isSelected }) =>
     isSelected ? "var(--primary-500)" : "var(--white)"};
-  color: ${({ isSelected }) => 
+  color: ${({ isSelected }) =>
     isSelected ? "var(--white)" : "var(--grey-700)"};
-  border: 1px solid ${({ isSelected }) => 
-    isSelected ? "var(--primary-500)" : "var(--grey-200)"};
-  
+  border: 1px solid
+    ${({ isSelected }) =>
+      isSelected ? "var(--primary-500)" : "var(--grey-200)"};
+
   &:hover {
-    background-color: ${({ isSelected }) => 
+    background-color: ${({ isSelected }) =>
       isSelected ? "var(--primary-600)" : "var(--grey-100)"};
   }
-  
+
   & > span {
-    color: ${({ isSelected }) => 
-      isSelected ? "var(--white)" : "inherit"};
-    font-weight: ${({ isSelected }) => 
-      isSelected ? "500" : "400"};
+    color: ${({ isSelected }) => (isSelected ? "var(--white)" : "inherit")};
+    font-weight: ${({ isSelected }) => (isSelected ? "500" : "400")};
   }
-`; 
+`;
