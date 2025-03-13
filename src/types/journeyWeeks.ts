@@ -5,7 +5,6 @@ export const journeyWeekSchema = z.object({
   journey_id: z.number().nullable(),
   name: z.string(),
   week_number: z.number().nullable(),
-  missions: z.array(z.number()).nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
 })

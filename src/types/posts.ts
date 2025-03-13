@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { organizationSchema } from "./organizations";
 import { userSchema } from "./users";
+import { missionSchema } from "./missions";
 
 const pickedUserSchema = userSchema.pick({
   id: true,
@@ -12,6 +13,14 @@ const pickedUserSchema = userSchema.pick({
 const pickedOrganizationSchema = organizationSchema.pick({
   id: true,
   name: true,
+});
+
+const pickedMissionSchema = missionSchema.pick({
+  id: true,
+  name: true,
+  description: true,
+  points: true,
+  mission_type: true,
 });
 
 export const postSchema = z.object({
@@ -44,6 +53,7 @@ export const userWithOrganizationSchema = pickedUserSchema.extend({
 
 export const postWithRelationsSchema = postSchema.extend({
   profiles: userWithOrganizationSchema.nullable(),
+  missions: pickedMissionSchema.nullable(),
 });
 
 export type PostWithRelations = z.infer<typeof postWithRelationsSchema>;
