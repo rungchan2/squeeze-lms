@@ -64,7 +64,9 @@ export function Modal({ children, isOpen, onClose }: ModalProps) {
     >
       <div className="modal-body" ref={modalRef}>
         <div className="modal-content">
-          {children}
+          <div className="modal-scroll-container">
+            {children}
+          </div>
           <div className="modal-close" onClick={handleOnClose}>
             <FaTimes />
           </div>
@@ -76,7 +78,6 @@ export function Modal({ children, isOpen, onClose }: ModalProps) {
 }
 
 const StyledModal = styled.div`
-
   @keyframes fade-out {
     from {
       opacity: 1;
@@ -109,6 +110,7 @@ const StyledModal = styled.div`
   height: 100dvh;
   z-index: 1000;
   background-color: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
 
   .modal-body {
     position: absolute;
@@ -117,12 +119,33 @@ const StyledModal = styled.div`
     transform: translate(-50%, -50%);
     width: 90%;
     max-width: 450px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
 
     .modal-content {
       position: relative;
       background-color: var(--white);
       border-radius: 10px;
       padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+      
+      .modal-scroll-container {
+        overflow-y: auto;
+        max-height: calc(90vh - 64px); /* 패딩 고려 */
+        padding-right: 8px; /* 스크롤바 공간 확보 */
+        
+        /* 스크롤바 숨기기 */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+        
+        /* Chrome, Safari, Opera에서 스크롤바 숨기기 */
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
 
       .modal-close {
         position: absolute;
@@ -130,6 +153,7 @@ const StyledModal = styled.div`
         right: 10px;
         cursor: pointer;
         padding: 4px;
+        z-index: 10;
 
         &:hover {
           background-color: var(--grey-100);
@@ -138,7 +162,4 @@ const StyledModal = styled.div`
       }
     }
   }
-
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 `;

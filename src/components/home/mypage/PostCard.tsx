@@ -1,12 +1,9 @@
 import Text from "@/components/Text/Text";
 import Heading from "../../Text/Heading";
 import styled from "@emotion/styled";
-import {
-  FaRegBookmark,
-  FaRegComment,
-  FaShare,
-  FaHeart,
-} from "react-icons/fa";
+import { FaRegComment, FaShare, FaHeart } from "react-icons/fa";
+import { MdAutoGraph } from "react-icons/md";
+
 import { LuDot } from "react-icons/lu";
 import { formatDifference } from "@/utils/dayjs/calcDifference";
 import { useRouter } from "next/navigation";
@@ -22,15 +19,15 @@ export default function PostCard(post: PostWithRelations) {
   const { onLike, onUnlike, likesCount, useUserLike } = useLikes(post.id);
   const { data: userLike } = useUserLike(id);
   const isUserLike = Boolean(userLike);
-  
+
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     if (!id) {
       alert("로그인이 필요합니다.");
       return;
     }
-    
+
     if (isUserLike) {
       onUnlike(id);
     } else {
@@ -83,19 +80,22 @@ export default function PostCard(post: PostWithRelations) {
 
         <InteractionContainer>
           <InteractionItem onClick={handleLike}>
-            {isUserLike ? 
-              <FaHeart color="var(--primary-500)" /> : 
+            {isUserLike ? (
+              <FaHeart color="var(--primary-500)" />
+            ) : (
               <FaHeart color="var(--grey-500)" />
-            }
-            <Text variant="caption" fontWeight="bold">{likesCount}</Text>
+            )}
+            <Text variant="caption" fontWeight="bold">
+              {likesCount}
+            </Text>
           </InteractionItem>
           <InteractionItem>
             <FaRegComment />
             <Text variant="caption">50</Text>
           </InteractionItem>
           <InteractionItem>
-            <FaRegBookmark />
-            <Text variant="caption">15</Text>
+            <MdAutoGraph />
+            <Text variant="caption">{post.view_count}</Text>
           </InteractionItem>
           <InteractionItem>
             <FaShare />
@@ -185,7 +185,7 @@ const InteractionContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   gap: 16px;
   width: 100%;
   color: var(--grey-500);

@@ -45,8 +45,7 @@ export default function LoginPage() {
 
     if (!authData || typeof authData !== "string") {
       console.log("유효하지 않은 auth_data");
-      window.location.href =
-        "/error?message=로그인 정보가 없거나 유효하지 않습니다";
+      router.push("/error?message=로그인 정보가 없거나 유효하지 않습니다");
       return;
     }
 

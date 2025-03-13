@@ -4,7 +4,6 @@ export const missionSchema = z.object({
   id: z.number(),
   name: z.string(),
   description: z.string().nullable(),
-  journey_week_id: z.number().nullable(),
   mission_type: z.string().nullable(),
   points: z.number().nullable(),
   release_date: z.string().nullable(),

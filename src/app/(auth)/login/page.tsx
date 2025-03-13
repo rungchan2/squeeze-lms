@@ -5,24 +5,21 @@ import styled from "@emotion/styled";
 import Heading from "@/components/Text/Heading";
 import { HStack, Separator } from "@chakra-ui/react";
 import Image from "next/image";
-import { checkUser } from "@/app/(auth)/actions";
 import { socialLogin } from "@/app/(auth)/clientActions";
 import { Modal } from "@/components/modal/Modal";
 import LoginSignup from "@/components/auth/LoginSignup";
 import Text from "@/components/Text/Text";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useAuth } from "@/components/AuthProvider";
 export default function LoginPage() {
   const [isOpen, setIsOpen] = useState(false);
-  const [error, setError] = useState("");
+  const { id } = useAuth();
   const router = useRouter();
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    const user = checkUser();
-    if (!user) {
-      router.push("/");
-    }
-  }, [router]);
+  if (id) {
+    router.push("/");
+  }
 
   const handleGoogleLogin = async () => {
     try {

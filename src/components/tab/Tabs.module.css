@@ -4,7 +4,6 @@
   flex-direction: column;
   gap: 16px;
   max-width: 100%;
-  
 }
 
 .tabButton {
@@ -22,6 +21,7 @@
   padding: 10px;
   color: var(--gray-700);
   border-bottom: 2px solid var(--grey-200);
+  cursor: pointer;
 }
 
 .tabButton button:hover {

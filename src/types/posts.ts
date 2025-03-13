@@ -25,6 +25,7 @@ export const postSchema = z.object({
   score: z.number().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
+  view_count: z.number(),
 });
 
 export const createPostSchema = postSchema.omit({
@@ -32,6 +33,7 @@ export const createPostSchema = postSchema.omit({
   uuid: true,
   created_at: true,
   updated_at: true,
+  view_count: true,
 });
 
 export const updatePostSchema = createPostSchema.partial();

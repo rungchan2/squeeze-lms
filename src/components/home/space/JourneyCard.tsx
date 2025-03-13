@@ -14,7 +14,7 @@ export default function JourneyCard({ journey }: { journey: Journey }) {
   const router = useRouter();
   const { adminNum, participantNum, teacherNum } = useJourneyUser(journey.id);
   return (
-    <Container onClick={() => router.push(`/journey/${journey.id}`)}>
+    <Container onClick={() => router.push(`/journey/${journey.uuid}`)}>
       <InnerContainer>
         <Image
           src={journey.image_url || defaultImage}

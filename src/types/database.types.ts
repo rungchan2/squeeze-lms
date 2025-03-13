@@ -38,6 +38,7 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
+          file_url: string | null
           id: number
           status: string | null
           title: string
@@ -47,6 +48,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
+          file_url?: string | null
           id?: number
           status?: string | null
           title: string
@@ -56,6 +58,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string | null
+          file_url?: string | null
           id?: number
           status?: string | null
           title?: string
@@ -119,6 +122,7 @@ export type Database = {
           created_at: string | null
           id: number
           journey_id: number | null
+          missions: number[] | null
           name: string
           updated_at: string | null
           week_number: number | null
@@ -127,6 +131,7 @@ export type Database = {
           created_at?: string | null
           id?: number
           journey_id?: number | null
+          missions?: number[] | null
           name: string
           updated_at?: string | null
           week_number?: number | null
@@ -135,6 +140,7 @@ export type Database = {
           created_at?: string | null
           id?: number
           journey_id?: number | null
+          missions?: number[] | null
           name?: string
           updated_at?: string | null
           week_number?: number | null
@@ -151,7 +157,6 @@ export type Database = {
       }
       journeys: {
         Row: {
-          countries: string | null
           created_at: string | null
           date_end: string | null
           date_start: string | null
@@ -159,9 +164,9 @@ export type Database = {
           image_url: string | null
           name: string
           updated_at: string | null
+          uuid: string
         }
         Insert: {
-          countries?: string | null
           created_at?: string | null
           date_end?: string | null
           date_start?: string | null
@@ -169,9 +174,9 @@ export type Database = {
           image_url?: string | null
           name: string
           updated_at?: string | null
+          uuid?: string
         }
         Update: {
-          countries?: string | null
           created_at?: string | null
           date_end?: string | null
           date_start?: string | null
@@ -179,6 +184,7 @@ export type Database = {
           image_url?: string | null
           name?: string
           updated_at?: string | null
+          uuid?: string
         }
         Relationships: []
       }
@@ -224,7 +230,6 @@ export type Database = {
           description: string | null
           expiry_date: string | null
           id: number
-          journey_week_id: number | null
           mission_type: string | null
           name: string
           points: number | null
@@ -236,7 +241,6 @@ export type Database = {
           description?: string | null
           expiry_date?: string | null
           id?: number
-          journey_week_id?: number | null
           mission_type?: string | null
           name: string
           points?: number | null
@@ -248,22 +252,13 @@ export type Database = {
           description?: string | null
           expiry_date?: string | null
           id?: number
-          journey_week_id?: number | null
           mission_type?: string | null
           name?: string
           points?: number | null
           release_date?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "missions_journey_week_id_fkey"
-            columns: ["journey_week_id"]
-            isOneToOne: false
-            referencedRelation: "journey_weeks"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -336,6 +331,7 @@ export type Database = {
           updated_at: string | null
           user_id: number
           uuid: string
+          view_count: number
         }
         Insert: {
           content?: string | null
@@ -348,6 +344,7 @@ export type Database = {
           updated_at?: string | null
           user_id: number
           uuid?: string
+          view_count?: number
         }
         Update: {
           content?: string | null
@@ -360,6 +357,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: number
           uuid?: string
+          view_count?: number
         }
         Relationships: [
           {

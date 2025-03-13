@@ -18,6 +18,8 @@ interface TabsProps {
   usePath?: boolean;
   hoverActiveColor?: string;
   defaultIndex?: number;
+  flexDirection?: "row" | "column";
+  variant?: "plain" | "underline";
 }
 
 function Tab({ children }: TabProps) {
@@ -32,7 +34,9 @@ function Tabs({
   children, 
   usePath = false, 
   hoverActiveColor = "transparent",
-  defaultIndex = 0
+  defaultIndex = 0,
+  flexDirection = "row",
+  variant = "underline"
 }: TabsProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -80,7 +84,7 @@ function Tabs({
     : tabs[Number(activeIndex) || 0];
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} >
       <div className={styles.tabButton}>
         {tabs.map((tab, index) => {
           const isActive = usePath 
@@ -93,7 +97,9 @@ function Tabs({
               onClick={() => handleTabClick(tab.props.path, index)}
               className={isActive ? styles.active : ""}
               style={{
-                backgroundColor: isActive ? hoverActiveColor : undefined, cursor: 'pointer'
+                backgroundColor: isActive ? hoverActiveColor : undefined, cursor: 'pointer',
+                flexDirection: flexDirection,
+                color: isActive ? "var(--grey-700)" : "var(--grey-500)"
               }}
             >
               {tab.props.icon}

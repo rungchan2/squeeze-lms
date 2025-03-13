@@ -3,12 +3,12 @@ import { z } from "zod";
 export const journeySchema = z.object({
   id: z.number(),
   name: z.string(),
-  countries: z.string().nullable(),
   date_start: z.string().nullable(),
   date_end: z.string().nullable(),
   image_url: z.string().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
+  uuid: z.string().uuid(),
 })
 
 export const createJourneySchema = journeySchema.omit({
