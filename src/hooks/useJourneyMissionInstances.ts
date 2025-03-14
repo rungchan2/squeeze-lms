@@ -1,8 +1,13 @@
-import useSWR from 'swr';
+import useSWR from "swr";
 import { createClient } from "@/utils/supabase/client";
-import { JourneyMissionInstance, CreateJourneyMissionInstance, UpdateJourneyMissionInstance, MissionStatus } from '@/types/journeyMissionInstances';
-import { Mission } from '@/types/missions';
-import { useCallback } from 'react';
+import {
+  JourneyMissionInstance,
+  CreateJourneyMissionInstance,
+  UpdateJourneyMissionInstance,
+  MissionStatus,
+  Mission,
+} from "@/types";
+import { useCallback } from "react";
 
 /**
  * 주차별 미션 인스턴스를 관리하는 훅
@@ -13,27 +18,27 @@ export function useJourneyMissionInstances(weekId: number = 0) {
   // 데이터 가져오기 함수
   const fetcher = useCallback(async () => {
     const supabase = createClient();
-    
+
     // 특정 주차의 미션 인스턴스 가져오기
-    const query = supabase
-      .from("journey_mission_instances")
-      .select(`
+    const query = supabase.from("journey_mission_instances").select(`
         *,
         missions(*)
       `);
-    
+
     // 주차 ID가 있으면 필터링œ
     if (weekId > 0) {
       query.eq("journey_week_id", weekId);
     }
-    
+
     const { data, error } = await query;
-    
+
     if (error) {
       throw new Error(error.message);
     }
-    
-    return data as unknown as (JourneyMissionInstance & { missions: Mission })[];
+
+    return data as unknown as (JourneyMissionInstance & {
+      missions: Mission;
+    })[];
   }, [weekId]);
 
   // SWR 훅 사용
@@ -41,9 +46,9 @@ export function useJourneyMissionInstances(weekId: number = 0) {
     data: missionInstances,
     error,
     isLoading,
-    mutate
+    mutate,
   } = useSWR<(JourneyMissionInstance & { missions: Mission })[]>(
-    weekId ? `mission-instances-${weekId}` : 'all-mission-instances',
+    weekId ? `mission-instances-${weekId}` : "all-mission-instances",
     fetcher,
     {
       revalidateOnFocus: false,
@@ -56,26 +61,31 @@ export function useJourneyMissionInstances(weekId: number = 0) {
    * @param instanceData 생성할 미션 인스턴스 데이터
    * @returns 생성된 미션 인스턴스 데이터
    */
-  const createMissionInstance = useCallback(async (instanceData: CreateJourneyMissionInstance) => {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("journey_mission_instances")
-      .insert(instanceData)
-      .select(`
+  const createMissionInstance = useCallback(
+    async (instanceData: CreateJourneyMissionInstance) => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("journey_mission_instances")
+        .insert(instanceData)
+        .select(
+          `
         *,
         missions(*)
-      `)
-      .single();
-    
-    if (error) {
-      throw new Error(error.message);
-    }
-    
-    // 캐시 업데이트
-    mutate();
-    
-    return data as unknown as (JourneyMissionInstance & { missions: Mission });
-  }, [mutate]);
+      `
+        )
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // 캐시 업데이트
+      mutate();
+
+      return data as unknown as JourneyMissionInstance & { missions: Mission };
+    },
+    [mutate]
+  );
 
   /**
    * 미션 인스턴스 업데이트 함수
@@ -83,27 +93,32 @@ export function useJourneyMissionInstances(weekId: number = 0) {
    * @param instanceData 업데이트할 미션 인스턴스 데이터
    * @returns 업데이트된 미션 인스턴스 데이터
    */
-  const updateMissionInstance = useCallback(async (id: number, instanceData: UpdateJourneyMissionInstance) => {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("journey_mission_instances")
-      .update(instanceData)
-      .eq("id", id)
-      .select(`
+  const updateMissionInstance = useCallback(
+    async (id: number, instanceData: UpdateJourneyMissionInstance) => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("journey_mission_instances")
+        .update(instanceData)
+        .eq("id", id)
+        .select(
+          `
         *,
         missions(*)
-      `)
-      .single();
-    
-    if (error) {
-      throw new Error(error.message);
-    }
-    
-    // 캐시 업데이트
-    mutate();
-    
-    return data as unknown as (JourneyMissionInstance & { missions: Mission });
-  }, [mutate]);
+      `
+        )
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // 캐시 업데이트
+      mutate();
+
+      return data as unknown as JourneyMissionInstance & { missions: Mission };
+    },
+    [mutate]
+  );
 
   /**
    * 미션 인스턴스 상태 업데이트 함수
@@ -111,40 +126,49 @@ export function useJourneyMissionInstances(weekId: number = 0) {
    * @param status 새로운 상태
    * @returns 업데이트된 미션 인스턴스 데이터
    */
-  const updateMissionStatus = useCallback(async (id: number, status: MissionStatus) => {
-    return updateMissionInstance(id, { status });
-  }, [updateMissionInstance]);
+  const updateMissionStatus = useCallback(
+    async (id: number, status: MissionStatus) => {
+      return updateMissionInstance(id, { status });
+    },
+    [updateMissionInstance]
+  );
 
   /**
    * 미션 인스턴스 삭제 함수
    * @param id 삭제할 미션 인스턴스 ID
    * @returns 삭제 성공 여부
    */
-  const deleteMissionInstance = useCallback(async (id: number) => {
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("journey_mission_instances")
-      .delete()
-      .eq("id", id);
-    
-    if (error) {
-      throw new Error(error.message);
-    }
-    
-    // 캐시 업데이트
-    mutate();
-    
-    return true;
-  }, [mutate]);
+  const deleteMissionInstance = useCallback(
+    async (id: number) => {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("journey_mission_instances")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // 캐시 업데이트
+      mutate();
+
+      return true;
+    },
+    [mutate]
+  );
 
   /**
    * 특정 미션 인스턴스 조회 함수
    * @param id 조회할 미션 인스턴스 ID
    * @returns 미션 인스턴스 데이터
    */
-  const getMissionInstanceById = useCallback((id: number) => {
-    return missionInstances?.find(instance => instance.id === id);
-  }, [missionInstances]);
+  const getMissionInstanceById = useCallback(
+    (id: number) => {
+      return missionInstances?.find((instance) => instance.id === id);
+    },
+    [missionInstances]
+  );
 
   return {
     missionInstances: missionInstances || [],
@@ -155,6 +179,6 @@ export function useJourneyMissionInstances(weekId: number = 0) {
     updateMissionStatus,
     deleteMissionInstance,
     getMissionInstanceById,
-    mutate
+    mutate,
   };
-} 
+}

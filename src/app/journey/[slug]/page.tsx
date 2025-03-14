@@ -5,7 +5,8 @@ import { FaSchool, FaCalendarAlt } from "react-icons/fa";
 import { VscGraphLine } from "react-icons/vsc";
 import { TbMessages } from "react-icons/tb";
 import { FiMenu } from "react-icons/fi";
-import PlanPage from "./_tabs/PlanPage";
+import PlanTab from "./_plan/PlanTab";
+import MissionTab from "./_mission/MissionTab";
 
 // params 타입을 Promise로 정의
 type Params = Promise<{ slug: string }>;
@@ -27,12 +28,10 @@ export default async function JourneyPage({
     <div>
       <Tabs usePath={true} flexDirection="column">
         <Tab title="일정" icon={<FaSchool />} path="plan">
-          <PlanPage />
+          <PlanTab />
         </Tab>
-        <Tab title="미션" icon={<FaCalendarAlt />} path="schedule">
-          <div>
-            <h1>여행 정보2</h1>
-          </div>
+        <Tab title="미션" icon={<FaCalendarAlt />} path="missions">
+          <MissionTab/>
         </Tab>
         <Tab title="순위" icon={<VscGraphLine />} path="dashboard">
           <div>

@@ -2,7 +2,7 @@ import styles from "../Home.module.css"
 import { FaBell } from "react-icons/fa";
 import { HiDotsHorizontal } from "react-icons/hi";
 import Text from "@/components/Text/Text";
-import { Notification } from "@/types/notification";
+import { Notification } from "@/types";
 import { Modal } from "../../modal/Modal";
 import { useState } from "react";
 import dayjs from "@/utils/dayjs/dayjs";

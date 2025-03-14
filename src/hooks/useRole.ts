@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/store/auth";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { Role } from "@/types/users";
+import { Role } from "@/types";
 
 export function useRole(requiredRole: Role) {
   const { role, isAuthenticated, loading } = useAuthStore();

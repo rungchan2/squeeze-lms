@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useMission } from "@/hooks/useMission";
-import { Mission } from "@/types/missions";
+import { Mission, MissionStatus } from "@/types";
 import Text from "@/components/Text/Text";
 import Heading from "@/components/Text/Heading";
 import Spinner from "@/components/common/Spinner";
@@ -20,8 +20,6 @@ import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import { getMissionTypes } from "@/app/journey/actions";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
-import { MissionStatus } from "@/types/journeyMissionInstances";
-
 interface MissionComponentProps {
   weekId: number;
   weekName: string;

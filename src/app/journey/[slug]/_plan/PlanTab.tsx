@@ -11,6 +11,8 @@ import styled from "@emotion/styled";
 import WeekCard from "./WeekCard";
 import Button from "@/components/common/Button";
 import { AdminOnly } from "@/components/auth/AdminOnly";
+import { FloatingButton } from "@/components/common/FloatingButton";
+import { FaWandMagicSparkles } from "react-icons/fa6";
 
 // WeekCard 컴포넌트를 메모이제이션
 const MemoizedWeekCard = memo(WeekCard);
@@ -50,7 +52,7 @@ const PlanContainer = styled.div`
   }
 `;
 
-export default function PlanPage() {
+export default function PlanTab() {
   const router = useRouter();
   const pathname = usePathname();
   const slug = pathname.split("/").pop() ?? "";
@@ -80,24 +82,24 @@ export default function PlanPage() {
   }, [slug, router]);
 
   // useWeeks 훅 사용
-  const { 
-    weeks, 
-    isLoading: weeksLoading, 
+  const {
+    weeks,
+    isLoading: weeksLoading,
     error: weeksError,
     createWeek,
     updateWeek,
-    deleteWeek
+    deleteWeek,
   } = useWeeks(journeyId || 0);
 
   // 새 주차 추가 핸들러 예시
   const handleAddWeek = useCallback(async () => {
     try {
       if (!journeyId) return;
-      
+
       await createWeek({
         journey_id: journeyId,
         name: `Week ${weeks.length + 1}`,
-        week_number: weeks.length + 1
+        week_number: weeks.length + 1,
       });
     } catch (error) {
       console.error("Error adding week:", error);
@@ -125,17 +127,8 @@ export default function PlanPage() {
     <PlanContainer>
       <div className="header">
         <Heading level={2}>여행 일정</Heading>
-        <AdminOnly>
-          <Button 
-            variant="outline"
-            onClick={handleAddWeek}
-          maxWidth={100}
-        >
-          새 주차
-        </Button>
-        </AdminOnly>
       </div>
-      
+
       <Suspense fallback={<Spinner />}>
         {weeksLoading ? (
           <Spinner />
@@ -160,6 +153,14 @@ export default function PlanPage() {
           </div>
         )}
       </Suspense>
+      <AdminOnly>
+        <FloatingButton onClick={handleAddWeek}>
+          <FaWandMagicSparkles />
+          <Text variant="body" fontWeight="bold" color="var(--white)">
+            새 주차
+          </Text>
+        </FloatingButton>
+      </AdminOnly>
     </PlanContainer>
   );
 }

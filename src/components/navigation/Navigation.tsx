@@ -9,7 +9,7 @@ import { Logo } from "@/components/navigation/Logo";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { IconContainer } from "../common/IconContainer";
-import { UserJourneyWithJourney } from "@/types/userJourneys";
+import { UserJourneyWithJourney } from "@/types";
 import { getJourney } from "@/utils/journey";
 import { Separator } from "@chakra-ui/react";
 export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {

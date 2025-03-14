@@ -6,7 +6,7 @@ import {
   ReactNode,
 } from "react";
 import { useAuthStore } from "@/store/auth";
-import { Role } from "@/types/users";
+import { Role } from "@/types";
 import { createClient } from "@/utils/supabase/client";
 import { toaster } from "@/components/ui/toaster";
 // Context에서 제공할 값의 타입

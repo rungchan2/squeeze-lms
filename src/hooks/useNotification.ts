@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; 
 import { createClient } from "@/utils/supabase/client";
-import { Notification } from "@/types/notification";
+import { Notification } from "@/types";
 
 // ✅ 최신 알림을 가져오는 함수
 async function getNotifications(): Promise<Notification[]> {

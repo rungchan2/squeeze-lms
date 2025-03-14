@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
-import { CreateBugReport } from "@/types/bugReports";
+import { CreateBugReport } from "@/types";
 
 export async function createBugReport(bugReport: CreateBugReport) {
   const supabase = createClient();

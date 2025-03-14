@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Organization } from "@/types/organizations";
+import { Organization } from "@/types";
 import { createClient } from "@/utils/supabase/client";
 
 export function useOrganization(id: number) {

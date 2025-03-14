@@ -2,7 +2,7 @@
 
 import styled from "@emotion/styled";
 import Image from "next/image";
-import { Journey } from "@/types/journeys";
+import { Journey } from "@/types";
 import { HiDotsVertical } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import Text from "@/components/Text/Text";

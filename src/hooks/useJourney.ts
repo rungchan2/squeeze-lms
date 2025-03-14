@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
-import { Journey } from "@/types/journeys";
+import { Journey } from "@/types";
 
 export const useJourney = (): {
   journeys: Journey[];

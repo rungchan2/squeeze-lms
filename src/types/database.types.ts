@@ -609,6 +609,12 @@ export type Database = {
       }
     }
     Functions: {
+      get_distinct_mission_types: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          mission_type: string
+        }[]
+      }
       migrate_missions_to_instances: {
         Args: Record<PropertyKey, never>
         Returns: undefined

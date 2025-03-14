@@ -9,11 +9,10 @@ import { Input } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import Button from "@/components/common/Button";
 import { NativeSelect } from "@chakra-ui/react";
-import { CreateBugReport } from "@/types/bugReports";
+import { CreateBugReport, createBugReportSchema } from "@/types";
 import { useRouter } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
 import { createBugReport } from "../clientActions";
-import { createBugReportSchema } from "@/types/bugReports";
 import FileUpload from "@/components/common/FileUpload";
 import { redirect } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
@@ -34,7 +33,7 @@ export default function BugReport() {
     defaultValues: {
       user_id: id || 0,
       file_url: "",
-    }
+    },
   });
   console.log("errors", errors);
   const onSubmit: SubmitHandler<CreateBugReport> = async (data) => {
@@ -104,7 +103,10 @@ export default function BugReport() {
           <InputAndTitle title="스크린샷">
             <FileUpload
               onUploadComplete={(fileUrl) => {
-                setValue("file_url", process.env.TEMPORARY_IMAGE_ORIGIN + fileUrl);
+                setValue(
+                  "file_url",
+                  process.env.TEMPORARY_IMAGE_ORIGIN + fileUrl
+                );
               }}
             />
           </InputAndTitle>

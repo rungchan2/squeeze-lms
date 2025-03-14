@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { createClient } from "@/utils/supabase/client";
-import { Mission, CreateMission, UpdateMission } from '@/types/missions';
+import { Mission, CreateMission, UpdateMission } from '@/types';
 import { useCallback } from 'react';
 
 /**

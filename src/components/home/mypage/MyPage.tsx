@@ -78,13 +78,22 @@ export default function MyPage() {
       </div>
       <div className="mainContainer">
         <div className="profileContainer">
-          <ProfileImage profileImage={profileImage || ""} width={100} />
+          <ProfileImage profileImage={profileImage || ""} width={80} />
 
           <div className="profileInfo">
             <Heading level={3}>
               안녕하세요 <br /> {fullName}님!
             </Heading>
-            <Text variant="body" color="var(--grey-500)">
+            <Text
+              variant="body"
+              color="var(--grey-500)"
+              style={{ 
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                wordBreak: "break-word",
+                maxWidth: "100%" 
+              }}
+            >
               {email}
             </Text>
           </div>

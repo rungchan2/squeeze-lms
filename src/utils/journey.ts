@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { UserJourneyWithJourney } from "@/types/userJourneys";
+import { UserJourneyWithJourney } from "@/types";
 
 export async function getJourney(userId: number) {
   if (userId === 0) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Mission } from "@/types/missions";
+import { Mission, JourneyMissionInstanceWithMission } from "@/types";
 import Text from "@/components/Text/Text";
 import styled from "@emotion/styled";
 import { RiDeleteBin6Line } from "react-icons/ri";
@@ -9,13 +9,12 @@ import { FaEdit } from "react-icons/fa";
 import { FiMenu } from "react-icons/fi";
 import dayjs from "@/utils/dayjs/dayjs";
 import { AdminOnly } from "@/components/auth/AdminOnly";
-import { JourneyMissionInstanceWithMission } from "@/types/journeyMissionInstances";
 import { calcDifference } from "@/utils/dayjs/calcDifference";
 interface MissionCardProps {
   mission: Mission;
   isModal?: boolean;
-  onEdit: (id: number) => void;
-  onDelete: (id: number) => void;
+  onEdit?: (id: number) => void;
+  onDelete?: (id: number) => void;
   maxWidth?: string;
   missionInstance?: JourneyMissionInstanceWithMission;
 }
@@ -31,9 +30,7 @@ export default function MissionCard({
   return (
     <StyledMissionCard isModal={isModal} maxWidth={maxWidth}>
       <div className="left-container">
-        {!isModal && (
-          <FiMenu size="16px" style={{ minWidth: "16px" }} />
-        )}
+        {!isModal && <FiMenu size="16px" style={{ minWidth: "16px" }} />}
         <div className="mission-item-header">
           <Text variant="body" fontWeight="bold">
             {mission.name}
@@ -63,16 +60,18 @@ export default function MissionCard({
           </div>
           {missionInstance?.expiry_date && (
             <div className="d-day">
-              <Text variant="small">D-{calcDifference(missionInstance?.expiry_date || "")}</Text>
+              <Text variant="small">
+                D-{calcDifference(missionInstance?.expiry_date || "")}
+              </Text>
             </div>
           )}
           <AdminOnly>
             <div className="mission-actions">
-              <IconContainer onClick={() => onEdit(mission.id)}>
+              {/* <IconContainer onClick={() => onEdit?.(mission.id)}>
                 <FaEdit />
-              </IconContainer>
+              </IconContainer> */}
               <IconContainer
-                onClick={() => onDelete(mission.id)}
+                onClick={() => onDelete?.(mission.id)}
                 hoverColor="var(--negative-500)"
               >
                 <RiDeleteBin6Line />
@@ -102,19 +101,21 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.2s;
   justify-content: space-between;
-  border-radius: ${props => props.isModal ? '4px 0 0 4px' : '4px'};
+  border-radius: ${(props) => (props.isModal ? "4px 0 0 4px" : "4px")};
   flex: 1;
-  max-width: ${props => props.maxWidth};
+  max-width: ${(props) => props.maxWidth};
   .left-container {
     display: flex;
     align-items: center;
     gap: 10px;
-    max-width: ${props => props.isModal ? '100%' : 'calc(100% - 80px)'}; /* 오른쪽 버튼 영역 고려 */
+    max-width: ${(props) =>
+      props.isModal ? "100%" : "calc(100% - 80px)"}; /* 오른쪽 버튼 영역 고려 */
     overflow: hidden;
   }
 
   &:hover {
-    box-shadow: ${props => props.isModal ? 'none' : '0 4px 6px rgba(0, 0, 0, 0.1)'};
+    box-shadow: ${(props) =>
+      props.isModal ? "none" : "0 4px 6px rgba(0, 0, 0, 0.1)"};
   }
 
   .mission-item-header {
@@ -164,6 +165,5 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
     padding: 4px 4px;
     border-radius: 4px;
     background-color: var(--negative-600);
-    z-index: 1;
   }
 `;

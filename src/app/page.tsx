@@ -10,14 +10,6 @@ export default function Home() {
   return (
     <div>
       <HomeTab />
-      <button
-        onClick={() => {
-          logout();
-          router.push("/login");
-        }}
-      >
-        sign out
-      </button>
     </div>
   );
 }
