@@ -22,7 +22,7 @@ export function useJourneyMissionInstances(weekId: number = 0) {
         missions(*)
       `);
     
-    // 주차 ID가 있으면 필터링
+    // 주차 ID가 있으면 필터링œ
     if (weekId > 0) {
       query.eq("journey_week_id", weekId);
     }

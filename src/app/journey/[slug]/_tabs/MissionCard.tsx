@@ -9,13 +9,15 @@ import { FaEdit } from "react-icons/fa";
 import { FiMenu } from "react-icons/fi";
 import dayjs from "@/utils/dayjs/dayjs";
 import { AdminOnly } from "@/components/auth/AdminOnly";
-
+import { JourneyMissionInstanceWithMission } from "@/types/journeyMissionInstances";
+import { calcDifference } from "@/utils/dayjs/calcDifference";
 interface MissionCardProps {
   mission: Mission;
   isModal?: boolean;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
   maxWidth?: string;
+  missionInstance?: JourneyMissionInstanceWithMission;
 }
 
 export default function MissionCard({
@@ -24,6 +26,7 @@ export default function MissionCard({
   onEdit,
   onDelete,
   maxWidth = "100%",
+  missionInstance,
 }: MissionCardProps) {
   return (
     <StyledMissionCard isModal={isModal} maxWidth={maxWidth}>
@@ -44,10 +47,10 @@ export default function MissionCard({
               {mission.description}
             </Text>
           </div>
-          {!isModal && (
+          {!isModal && missionInstance && (
             <Text variant="small">
-              {dayjs(mission.release_date).format("M/D")} ~{" "}
-              {dayjs(mission.expiry_date).format("M/D")}
+              {dayjs(missionInstance.release_date).format("M/D")} ~{" "}
+              {dayjs(missionInstance.expiry_date).format("M/D")}
             </Text>
           )}
         </div>
@@ -58,6 +61,11 @@ export default function MissionCard({
           <div className="mission-meta">
             <Text variant="small">{mission.points || 0}PT</Text>
           </div>
+          {missionInstance?.expiry_date && (
+            <div className="d-day">
+              <Text variant="small">D-{calcDifference(missionInstance?.expiry_date || "")}</Text>
+            </div>
+          )}
           <AdminOnly>
             <div className="mission-actions">
               <IconContainer onClick={() => onEdit(mission.id)}>
@@ -147,6 +155,15 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
     padding: 4px 4px;
     border-radius: 4px;
     background-color: var(--primary-400);
+    z-index: 1;
+  }
+  .d-day {
+    display: flex;
+    gap: 1rem;
+    color: var(--white);
+    padding: 4px 4px;
+    border-radius: 4px;
+    background-color: var(--negative-600);
     z-index: 1;
   }
 `;

@@ -6,8 +6,6 @@ export const missionSchema = z.object({
   description: z.string().nullable(),
   mission_type: z.string().nullable(),
   points: z.number().nullable(),
-  release_date: z.string().nullable(),
-  expiry_date: z.string().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
 })

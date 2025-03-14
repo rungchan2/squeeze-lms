@@ -8,3 +8,9 @@ export function formatDifference(createdAt: string): string {
   if (!createdAt) return "Unknown time";
   return dayjs(formattedDate).fromNow();
 }
+
+export function calcDifference(createdAt: string): number {
+  const now = dayjs();
+  const diffInDays = now.diff(dayjs(createdAt), "day");
+  return diffInDays;
+}

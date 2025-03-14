@@ -4,7 +4,7 @@ import styled from "@emotion/styled";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6";
 import { useState, memo, useEffect } from "react";
 import MissionComponent from "./MissionComponent";
-import { useWeeks } from "@/hooks/useWeeks";
+import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import { FaSquare } from "react-icons/fa";
 
 interface JourneyWeekCardProps {
@@ -27,23 +27,22 @@ export default function WeekCard({
 }: JourneyWeekCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [missionCount, setMissionCount] = useState(0);
-  const { getWeekMissionCount } = useWeeks(journeyId);
-
-  // 미션 개수 가져오기
+  
+  // 미션 인스턴스 가져오기 (isOpen 상태와 관계없이)
+  const { missionInstances, isLoading: isLoadingInstances } = useJourneyMissionInstances(week.id);
+  
+  // 미션 인스턴스가 로드되면 카운트 업데이트
   useEffect(() => {
-    const fetchMissionCount = async () => {
-      const count = await getWeekMissionCount(week.id);
-      setMissionCount(count);
-    };
-
-    fetchMissionCount();
-  }, [week.id, getWeekMissionCount]);
+    if (!isLoadingInstances && missionInstances) {
+      setMissionCount(missionInstances.length);
+    }
+  }, [missionInstances, isLoadingInstances]);
 
   // 토글 핸들러
   const handleToggle = () => {
     setIsOpen((prev) => !prev);
   };
-
+  
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
@@ -71,6 +70,7 @@ export default function WeekCard({
             weekName={week.name}
             journeyId={journeyId}
             deleteWeek={deleteWeek}
+            onTotalMissionCountChange={setMissionCount}
           />
         )}
       </StyledWeekCard>

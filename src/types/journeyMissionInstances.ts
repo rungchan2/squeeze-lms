@@ -1,5 +1,5 @@
 import { z } from "zod";
-
+import { missionSchema } from "./missions";
 // mission_status ENUM 타입 정의
 export const missionStatusEnum = z.enum([
   'not_started',
@@ -26,9 +26,14 @@ export const createJourneyMissionInstanceSchema = journeyMissionInstanceSchema.o
   updated_at: true,
 });
 
+export const journeyMissionInstanceSchemaWithMission = journeyMissionInstanceSchema.extend({
+  missions: missionSchema,
+});
+
 export const updateJourneyMissionInstanceSchema = createJourneyMissionInstanceSchema.partial();
 
 export type MissionStatus = z.infer<typeof missionStatusEnum>;
 export type JourneyMissionInstance = z.infer<typeof journeyMissionInstanceSchema>;
 export type CreateJourneyMissionInstance = z.infer<typeof createJourneyMissionInstanceSchema>;
 export type UpdateJourneyMissionInstance = z.infer<typeof updateJourneyMissionInstanceSchema>; 
+export type JourneyMissionInstanceWithMission = z.infer<typeof journeyMissionInstanceSchemaWithMission>;

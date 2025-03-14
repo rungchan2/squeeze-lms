@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useMission } from "@/hooks/useMission";
 import { Mission } from "@/types/missions";
 import Text from "@/components/Text/Text";
@@ -20,12 +20,14 @@ import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import { getMissionTypes } from "@/app/journey/actions";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
+import { MissionStatus } from "@/types/journeyMissionInstances";
 
 interface MissionComponentProps {
   weekId: number;
   weekName: string;
   journeyId: number;
   deleteWeek: (weekId: number) => void;
+  onTotalMissionCountChange: (count: number) => void;
 }
 
 export type MissionOption = string;
@@ -33,7 +35,11 @@ export type MissionOption = string;
 // 서버 컴포넌트에서 데이터 가져오기
 const { data: missionTypesData } = await getMissionTypes();
 // mission_type 값만 추출
-const missionTypeValues = missionTypesData ? missionTypesData.map((item: { mission_type: string }) => item.mission_type).filter(Boolean) : [];
+const missionTypeValues = missionTypesData
+  ? missionTypesData
+      .map((item: { mission_type: string }) => item.mission_type)
+      .filter(Boolean)
+  : [];
 const missionOptions: MissionOption[] = ["전체", ...missionTypeValues];
 
 export default function MissionComponent({
@@ -41,6 +47,7 @@ export default function MissionComponent({
   weekName,
   journeyId,
   deleteWeek,
+  onTotalMissionCountChange,
 }: MissionComponentProps) {
   const [showSearch, setShowSearch] = useState(false);
   const [selectedOption, setSelectedOption] = useState<MissionOption>(
@@ -50,12 +57,18 @@ export default function MissionComponent({
   const [isLoadingMissions, setIsLoadingMissions] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // 날짜 입력 모달 상태
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [selectedMissionId, setSelectedMissionId] = useState<number | null>(
+    null
+  );
+  const [releaseDate, setReleaseDate] = useState<string>("");
+  const [expiryDate, setExpiryDate] = useState<string>("");
+
   // useWeeks 훅 사용
   const {
     isLoading: isLoadingWeeks,
     error: weeksError,
-    addMissionToWeek,
-    removeMissionFromWeek,
     getWeekMissions,
   } = useWeeks(journeyId);
 
@@ -63,7 +76,9 @@ export default function MissionComponent({
   const {
     missionInstances,
     isLoading: isLoadingInstances,
-    error: instancesError,
+    createMissionInstance,
+    deleteMissionInstance,
+    mutate: mutateMissionInstances,
   } = useJourneyMissionInstances(weekId);
 
   // useMission 훅 사용 (전체 미션 목록 가져오기)
@@ -117,45 +132,106 @@ export default function MissionComponent({
     };
 
     fetchMissions();
-  }, [weekId, isLoadingInstances, getWeekMissions, missionInstances]);
+  }, [weekId, getWeekMissions, missionInstances]);
+
+  // missionInstances가 변경될 때마다 부모 컴포넌트에 알림
+  useEffect(() => {
+    if (onTotalMissionCountChange && !isLoadingInstances) {
+      onTotalMissionCountChange(missionInstances.length);
+    }
+  }, [missionInstances, isLoadingInstances, onTotalMissionCountChange]);
 
   // 미션 추가 핸들러
   const handleAddMission = async (missionId: number) => {
-    try {
-      // 이미 추가된 미션인지 확인
-      const isAlreadyAdded = weekMissions.some((m) => m.id === missionId);
+    // 이미 추가된 미션인지 확인
+    const isAlreadyAdded = missionInstances.some(
+      (m) => m.mission_id === missionId
+    );
 
-      if (isAlreadyAdded) {
-        // 이미 추가된 미션이면 제거
-        await removeMissionFromWeek(weekId, missionId);
-
-        // UI에서 미션 제거
-        setWeekMissions((prev) => prev.filter((m) => m.id !== missionId));
-      } else {
-        // 새 미션 추가
-        await addMissionToWeek(weekId, missionId);
-
-        // 미션 데이터 가져오기
-        const addedMission = allMissions?.find((m) => m.id === missionId);
-        if (addedMission) {
-          setWeekMissions((prev) => [...prev, addedMission]);
+    if (isAlreadyAdded) {
+      // 이미 추가된 미션이면 제거
+      const instanceToRemove = missionInstances.find(
+        (m) => m.mission_id === missionId
+      );
+      if (instanceToRemove) {
+        try {
+          setIsLoadingMissions(true);
+          await deleteMissionInstance(instanceToRemove.id);
+          // UI 즉시 업데이트
+          await mutateMissionInstances();
+          // 카운트 업데이트는 useEffect에서 처리됨
+        } catch (error) {
+          console.error("Error removing mission:", error);
+        } finally {
+          setIsLoadingMissions(false);
         }
       }
+    } else {
+      // 새 미션 추가를 위해 날짜 입력 모달 표시
+      setSelectedMissionId(missionId);
+      setReleaseDate("");
+      setExpiryDate("");
+      setShowDateModal(true);
+      // 카운트 업데이트는 useEffect에서 처리됨
+    }
+
+    // 검색 모달은 닫지 않음 (날짜 입력 모달이 표시됨)
+  };
+
+  // 날짜 입력 후 미션 추가 확인
+  const handleConfirmAddMission = async () => {
+    if (!selectedMissionId) return;
+    
+    try {
+      setIsLoadingMissions(true);
+      
+      // 미션 인스턴스 생성
+      const newInstance = {
+        journey_week_id: weekId,
+        mission_id: selectedMissionId,
+        status: 'not_started' as MissionStatus,
+        release_date: releaseDate || null,
+        expiry_date: expiryDate || null
+      };
+      
+      await createMissionInstance(newInstance);
+      
+      // UI 즉시 업데이트
+      await mutateMissionInstances();
+      // 카운트 업데이트는 useEffect에서 처리됨
+      
+      // 모달 닫기
+      setShowDateModal(false);
+      setShowSearch(false);
+      
     } catch (error) {
-      console.error("Error managing mission:", error);
+      console.error("Error adding mission:", error);
+    } finally {
+      setIsLoadingMissions(false);
     }
   };
 
   // 미션 제거 핸들러
-  const handleRemoveMission = async (missionId: number) => {
+  const DeleteMission = async (missionId: number) => {
     if (window.confirm("정말로 이 미션을 제거하시겠습니까?")) {
       try {
-        await removeMissionFromWeek(weekId, missionId);
+        setIsLoadingMissions(true);
 
-        // UI에서 미션 제거
-        setWeekMissions((prev) => prev.filter((m) => m.id !== missionId));
+        // 해당 미션 ID를 가진 인스턴스 찾기
+        const instanceToRemove = missionInstances.find(
+          (m) => m.mission_id === missionId
+        );
+
+        if (instanceToRemove) {
+          await deleteMissionInstance(instanceToRemove.id);
+
+          // UI 즉시 업데이트
+          mutateMissionInstances();
+        }
       } catch (error) {
         console.error("Error removing mission:", error);
+      } finally {
+        setIsLoadingMissions(false);
       }
     }
   };
@@ -179,78 +255,35 @@ export default function MissionComponent({
       <div className="mission-header">
         <Heading level={3}>{weekName} 미션</Heading>
         <AdminOnly>
-          <IconContainer onClick={() => deleteWeek(weekId)} hoverColor="var(--negative-500)">
+          <IconContainer
+            onClick={() => deleteWeek(weekId)}
+            hoverColor="var(--negative-500)"
+          >
             <RiDeleteBin6Line size="16px" />
           </IconContainer>
         </AdminOnly>
       </div>
 
-      <Modal isOpen={showSearch} onClose={() => setShowSearch(false)}>
-        <ShowSearchContainer>
-          <InputGroup flex={1} startElement={<IoSearch />} width="100%">
-            <Input
-              placeholder="미션 검색"
-              width="100%"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </InputGroup>
-          <div className="mission-type-filter">
-          <ChipGroup
-            options={missionOptions}
-            selectedOption={selectedOption}
-            onSelect={(option) => setSelectedOption(option as MissionOption)}
-          />
-          </div>
-          <Heading level={4}>검색 결과</Heading>
-
-          <div className="search-results">
-            {isLoadingAllMissions ? (
-              <Spinner />
-            ) : allMissionsError ? (
-              <Text>미션 데이터를 불러오는 중 오류가 발생했습니다.</Text>
-            ) : searchResults && searchResults.length > 0 ? (
-              <ModalListContainer>
-                {searchResults.map((mission) => (
-                  <div key={mission.id} className="single-item">
-                    <MissionCard
-                      mission={mission}
-                      onEdit={handleEditMission}
-                      onDelete={() => handleRemoveMission(mission.id)}
-                      isModal={true}
-                    />
-                    <button
-                      className={`single-item-button ${
-                        weekMissions.some((m) => m.id === mission.id)
-                          ? "added"
-                          : ""
-                      }`}
-                      onClick={() => handleAddMission(mission.id)}
-                    >
-                      {weekMissions.some((m) => m.id === mission.id) ? (
-                        <FaCheck />
-                      ) : (
-                        <FaPlus />
-                      )}
-                    </button>
-                  </div>
-                ))}
-              </ModalListContainer>
-            ) : (
-              <Text>검색 결과가 없습니다.</Text>
-            )}
-          </div>
-        </ShowSearchContainer>
-      </Modal>
-
-      {weekMissions.length > 0 ? (
+      {missionInstances.length > 0 ? (
         <div className="mission-list">
-          {weekMissions.map((mission) => (
+          {missionInstances.map((instance) => (
             <MissionCard
-              key={mission.id}
-              mission={mission}
+              key={instance.id}
+              mission={instance.missions}
               onEdit={handleEditMission}
-              onDelete={() => handleRemoveMission(mission.id)}
+              onDelete={async () => {
+                try {
+                  setIsLoadingMissions(true);
+                  await deleteMissionInstance(instance.id);
+                  // UI 즉시 업데이트
+                  await mutateMissionInstances();
+                } catch (error) {
+                  console.error("Error removing mission:", error);
+                } finally {
+                  setIsLoadingMissions(false);
+                }
+              }}
+              missionInstance={instance}
             />
           ))}
         </div>
@@ -269,6 +302,132 @@ export default function MissionComponent({
           <span>미션 추가</span>
         </button>
       </AdminOnly>
+
+      <Modal isOpen={showSearch} onClose={() => setShowSearch(false)}>
+        <ShowSearchContainer>
+          <InputGroup flex={1} startElement={<IoSearch />} width="100%">
+            <Input
+              placeholder="미션 검색"
+              width="100%"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </InputGroup>
+          <div className="mission-type-filter">
+            <ChipGroup
+              options={missionOptions}
+              selectedOption={selectedOption}
+              onSelect={(option) => setSelectedOption(option as MissionOption)}
+            />
+          </div>
+          <Heading level={4}>검색 결과</Heading>
+
+          <div className="search-results">
+            {isLoadingAllMissions ? (
+              <Spinner />
+            ) : allMissionsError ? (
+              <Text>미션 데이터를 불러오는 중 오류가 발생했습니다.</Text>
+            ) : searchResults && searchResults.length > 0 ? (
+              <ModalListContainer>
+                {searchResults.map((mission) => (
+                  <div key={mission.id} className="single-item">
+                    <MissionCard
+                      mission={mission}
+                      onEdit={handleEditMission}
+                      onDelete={async () => {
+                        try {
+                          setIsLoadingMissions(true);
+                          // 해당 미션 ID를 가진 인스턴스 찾기
+                          const instanceToRemove = missionInstances.find(
+                            (m) => m.mission_id === mission.id
+                          );
+                          
+                          if (instanceToRemove) {
+                            await deleteMissionInstance(instanceToRemove.id);
+                            // UI 즉시 업데이트
+                            await mutateMissionInstances();
+                          }
+                        } catch (error) {
+                          console.error("Error removing mission:", error);
+                        } finally {
+                          setIsLoadingMissions(false);
+                        }
+                      }}
+                      isModal={true}
+                    />
+                    <button
+                      className={`single-item-button ${
+                        missionInstances.some(
+                          (m) => m.mission_id === mission.id
+                        )
+                          ? "added"
+                          : ""
+                      }`}
+                      onClick={() => handleAddMission(mission.id)}
+                      disabled={isLoadingMissions}
+                    >
+                      {missionInstances.some(
+                        (m) => m.mission_id === mission.id
+                      ) ? (
+                        <FaCheck />
+                      ) : (
+                        <FaPlus />
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </ModalListContainer>
+            ) : (
+              <Text>검색 결과가 없습니다.</Text>
+            )}
+          </div>
+        </ShowSearchContainer>
+      </Modal>
+
+      {/* 날짜 입력 모달 */}
+      <Modal isOpen={showDateModal} onClose={() => setShowDateModal(false)}>
+        <DateModalContainer onSubmit={handleConfirmAddMission}>
+          <Heading level={4}>미션 일정 설정</Heading>
+          <div className="date-inputs">
+            <div className="input-group">
+              <label htmlFor="release-date">공개 일자</label>
+              <Input
+                id="release-date"
+                type="date"
+                value={releaseDate}
+                onChange={(e) => setReleaseDate(e.target.value)}
+                required
+              />
+            </div>
+            <div className="input-group">
+              <label htmlFor="expiry-date">마감 일자</label>
+              <Input
+                id="expiry-date"
+                type="date"
+                value={expiryDate}
+                onChange={(e) => setExpiryDate(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+          <div className="modal-actions">
+            <button
+              className="cancel-button"
+              onClick={() => setShowDateModal(false)}
+              disabled={isLoadingMissions}
+            >
+              취소
+            </button>
+            <button
+              className="confirm-button"
+              type="submit"
+              disabled={isLoadingMissions}
+            >
+              {isLoadingMissions ? <Spinner size="sm" /> : "확인"}
+            </button>
+          </div>
+        </DateModalContainer>
+      </Modal>
     </MissionContainer>
   );
 }
@@ -377,5 +536,71 @@ const ShowSearchContainer = styled.div`
     gap: 1rem;
     max-height: 400px;
     overflow-y: auto;
+  }
+`;
+
+const DateModalContainer = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 400px;
+
+  .date-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--grey-700);
+    }
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+
+    .cancel-button {
+      background-color: var(--grey-100);
+      color: var(--grey-700);
+      border: 1px solid var(--grey-200);
+
+      &:hover:not(:disabled) {
+        background-color: var(--grey-200);
+      }
+    }
+
+    .confirm-button {
+      background-color: var(--primary-500);
+      color: white;
+      border: none;
+
+      &:hover:not(:disabled) {
+        background-color: var(--primary-600);
+      }
+    }
   }
 `;
