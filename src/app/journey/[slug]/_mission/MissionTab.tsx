@@ -7,7 +7,6 @@ import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import MissionCard from "@/app/journey/[slug]/_plan/MissionCard";
 import Spinner from "@/components/common/Spinner";
 import { JourneyMissionInstanceWithMission } from "@/types";
-import { createClient } from "@/utils/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
 import Text from "@/components/Text/Text";
 import { AdminOnly } from "@/components/auth/AdminOnly";
@@ -19,16 +18,14 @@ import { IoSearch } from "react-icons/io5";
 import { Input } from "@chakra-ui/react";
 import { FaSortAmountDownAlt, FaSortAmountUpAlt } from "react-icons/fa";
 import { IconContainer } from "@/components/common/IconContainer";
-
+import { useCompletedMissions } from "@/hooks/usePosts";
 
 export default function MissionTab() {
   const router = useRouter();
   const pathname = usePathname();
-  const supabase = createClient();
-  const { missionInstances, isLoading } = useJourneyMissionInstances();
-  const [completedMissionIds, setCompletedMissionIds] = useState<number[]>([]);
-  const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const { id: userId } = useAuth();
+  const { missionInstances, isLoading: isLoadingMissions } = useJourneyMissionInstances();
+  const { completedMissionIds, isLoading: isLoadingCompletedMissions } = useCompletedMissions(userId || 0);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortMission, setSortMission] = useState<"asc" | "desc">("asc");
   // 현재 URL에서 slug 추출
@@ -39,39 +36,6 @@ export default function MissionTab() {
     return pathParts.length > 2 ? pathParts[2] : "";
   };
 
-  // 사용자가 제출한 미션 ID 목록 가져오기
-  useEffect(() => {
-    const fetchCompletedMissions = async () => {
-      if (!userId) return;
-
-      try {
-        // posts 테이블에서 사용자가 제출한 mission_id 목록 가져오기
-        const { data, error } = await supabase
-          .from("posts")
-          .select("mission_id")
-          .eq("user_id", userId);
-
-        if (error) {
-          console.error("Error fetching completed missions:", error);
-          return;
-        }
-
-        // 제출한 미션 ID 목록 추출
-        const completedIds = data
-          .filter((post) => post.mission_id !== null)
-          .map((post) => post.mission_id as number);
-
-        setCompletedMissionIds(completedIds);
-      } catch (error) {
-        console.error("Error in fetchCompletedMissions:", error);
-      } finally {
-        setIsLoadingPosts(false);
-      }
-    };
-
-    fetchCompletedMissions();
-  }, [userId, supabase]);
-
   // 미션 카드 클릭 핸들러
   const handleMissionClick = (missionInstanceId: number) => {
     const slug = getSlugFromPathname();
@@ -79,7 +43,7 @@ export default function MissionTab() {
   };
 
   // 로딩 중이면 스피너 표시
-  if (isLoading || isLoadingPosts) {
+  if (isLoadingMissions || isLoadingCompletedMissions) {
     return <Spinner />;
   }
 
@@ -162,10 +126,10 @@ export default function MissionTab() {
       )}
 
       <AdminOnly>
-        <FloatingButton onClick={() => {}}>
+        <FloatingButton onClick={() => router.push(`/journey/${getSlugFromPathname()}/new-mission`)}>
           <FaWandMagicSparkles />
           <Text variant="body" fontWeight="bold" color="var(--white)">
-            새 주차
+            새 미션
           </Text>
         </FloatingButton>
       </AdminOnly>

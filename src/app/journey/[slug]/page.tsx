@@ -7,6 +7,8 @@ import { TbMessages } from "react-icons/tb";
 import { FiMenu } from "react-icons/fi";
 import PlanTab from "./_plan/PlanTab";
 import MissionTab from "./_mission/MissionTab";
+import FeedTab from "./_feed/FeedTab";
+import DashboardTab from "./_dashboard/DashboardTab";
 
 // params 타입을 Promise로 정의
 type Params = Promise<{ slug: string }>;
@@ -34,14 +36,10 @@ export default async function JourneyPage({
           <MissionTab/>
         </Tab>
         <Tab title="순위" icon={<VscGraphLine />} path="dashboard">
-          <div>
-            <h1>여행 정보3</h1>
-          </div>
+          <DashboardTab/>
         </Tab>
         <Tab title="피드" icon={<TbMessages />} path="discussion">
-          <div>
-            <h1>여행 정보4</h1>
-          </div>
+          <FeedTab />
         </Tab>
         <Tab title="설정" icon={<FiMenu />} path="settings">
           <div>
