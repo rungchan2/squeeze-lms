@@ -1,9 +1,4 @@
----
-description: 
-globs: 
-alwaysApply: false
----
- # 데이터 페칭 규칙
+# 데이터 페칭 규칙
 
 ## 커스텀 훅
 - SWR을 사용한 데이터 페칭
@@ -34,4 +29,4 @@ alwaysApply: false
 ## 에러 처리
 - 모든 데이터베이스 작업은 try-catch로 에러 처리
 - 에러 발생 시 Error 객체 throw
-- 컴포넌트에서 에러 상태 관리 (예: `error`, `isLoading` 상태)
+- 컴포넌트에서 에러 상태 관리 (예: `error`, `isLoading` 상태) 

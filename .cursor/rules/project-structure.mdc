@@ -1,9 +1,4 @@
----
-description: 
-globs: 
-alwaysApply: false
----
- # 프로젝트 구조 규칙
+# 프로젝트 구조 규칙
 
 ## 디렉토리 구조
 - `/src`
@@ -24,4 +19,4 @@ alwaysApply: false
 - 각 엔티티별 CRUD 작업을 위한 타입 정의 패턴:
   - 기본 타입 (예: `JourneyMissionInstance`)
   - Create 타입 (예: `CreateJourneyMissionInstance`)
-  - Update 타입 (예: `UpdateJourneyMissionInstance`)
+  - Update 타입 (예: `UpdateJourneyMissionInstance`) 
