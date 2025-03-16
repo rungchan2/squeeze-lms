@@ -103,10 +103,7 @@ export default function BugReport() {
           <InputAndTitle title="스크린샷">
             <FileUpload
               onUploadComplete={(fileUrl) => {
-                setValue(
-                  "file_url",
-                  process.env.TEMPORARY_IMAGE_ORIGIN + fileUrl
-                );
+                setValue("file_url", fileUrl);
               }}
             />
           </InputAndTitle>
