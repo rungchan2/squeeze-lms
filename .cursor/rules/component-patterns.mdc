@@ -1,0 +1,37 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+ # 컴포넌트 패턴 규칙
+
+## 스타일링
+- Emotion을 사용한 스타일링
+  ```typescript
+  import styled from "@emotion/styled";
+  
+  const ComponentContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  `;
+  ```
+- Chakra UI 컴포넌트 사용 가능
+- CSS 변수를 통한 테마 관리 (예: `var(--primary-500)`)
+
+## 컴포넌트 구조
+- 클라이언트 컴포넌트는 파일 상단에 "use client" 지시문 추가
+- 컴포넌트 내부 타입은 인터페이스로 정의
+- 상태 관리는 React hooks 사용 (useState, useEffect)
+- 데이터 페칭은 커스텀 훅 사용
+
+## 공통 컴포넌트
+- `Text` - 텍스트 표시용 컴포넌트
+- `Spinner` - 로딩 상태 표시
+- `ProfileImage` - 사용자 프로필 이미지 표시
+- `Box` - 레이아웃 컨테이너
+
+## 에러 처리
+- 로딩 상태와 에러 상태 처리
+- 에러 발생 시 사용자 친화적인 메시지 표시
+- 빈 데이터 상태(Empty State) 처리

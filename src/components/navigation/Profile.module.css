@@ -1,0 +1,85 @@
+.profileContainer {
+  position: relative;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  aspect-ratio: 1/1;
+}
+
+.profileContainer:hover {
+  transform: scale(1.03);
+}
+
+.profileContainer img {
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* 반응형 크기 클래스 */
+.profileSmall {
+  width: 32px;
+  height: 32px;
+}
+
+.profileMedium {
+  width: 40px;
+  height: 40px;
+}
+
+.profileLarge {
+  width: 60px;
+  height: 60px;
+}
+
+.profileXLarge {
+  width: 90px;
+  height: 90px;
+}
+
+/* 반응형 미디어 쿼리 */
+@media (max-width: 480px) {
+  .profileSmall {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .profileMedium {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .profileLarge {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .profileXLarge {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .profileSmall {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .profileMedium {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .profileLarge {
+    width: 54px;
+    height: 54px;
+  }
+  
+  .profileXLarge {
+    width: 90px;
+    height: 90px;
+  }
+}

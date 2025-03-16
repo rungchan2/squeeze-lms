@@ -1,0 +1,35 @@
+# 타입 시스템 규칙
+
+## Zod 스키마
+- 모든 데이터 모델은 Zod 스키마로 정의
+- 스키마 네이밍: `{엔티티명}Schema` (예: `journeyMissionInstanceSchema`)
+- 스키마 확장 및 변형:
+  - 생성용: `create{엔티티명}Schema` (id, timestamps 제외)
+  - 업데이트용: `update{엔티티명}Schema` (모든 필드 optional)
+  - 관계 포함: `{엔티티명}SchemaWith{관계명}` (관계 데이터 포함)
+
+## TypeScript 타입
+- 모든 타입은 Zod 스키마에서 추론
+  ```typescript
+  export type JourneyMissionInstance = z.infer<typeof journeyMissionInstanceSchema>;
+  ```
+- 타입 네이밍: PascalCase
+- 관계 타입은 & 연산자로 확장 가능
+
+## 열거형
+- 열거형은 Zod enum으로 정의
+  ```typescript
+  export const missionStatusEnum = z.enum([
+    'not_started',
+    'in_progress',
+    'submitted',
+    'completed',
+    'rejected'
+  ]);
+  ```
+- 열거형 타입은 z.infer로 추론
+
+## 타입 내보내기
+- 모든 타입은 해당 파일에서 export
+- 공통 타입은 `index.ts`에서 재내보내기
+- 데이터베이스 타입은 `database.types.ts`에서 관리 

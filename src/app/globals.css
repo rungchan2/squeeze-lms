@@ -1,6 +1,12 @@
 /* @import 'reset-css/reset.css'; */
 
 :root {
+
+  --breakpoint-phone: 480px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+  --breakpoint-large: 1440px;
+
   /* Brand - Primary */
   --primary-50: #FFEAD8;
   --primary-100: #FFDFC3;
@@ -45,6 +51,27 @@
 
   --white: #FFFFFF;
   --black: #000000;
+
+  --gold-50: #FFF9E5;
+  --gold-100: #FFF2C7;
+  --gold-200: #FFE594;
+  --gold-300: #FFD962;
+  --gold-400: #FFCC31;
+  --gold-500: #FFC200;
+
+  --silver-50: #F5F5F5;
+  --silver-100: #E5E5E5;
+  --silver-200: #D4D4D4;
+  --silver-300: #C4C4C4;
+  --silver-400: #B3B3B3;
+  --silver-500: #A2A2A2;
+
+  --bronze-50: #FFF9E5;
+  --bronze-100: #FFF2C7;
+  --bronze-200: #FFE594;
+  --bronze-300: #FFD962;
+  --bronze-400: #FFCC31;
+  --bronze-500: #FFC200;
 }
 
 html,
@@ -52,4 +79,17 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   background-color: var(--grey-100);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  padding-top: 70px; /* 네비게이션 바 높이만큼 상단 패딩 추가 */
+}
+
+.container {
+  min-height: calc(100vh - 70px);
+  padding: 16px 16px 0px 16px;
+  overflow-y: auto;
 }

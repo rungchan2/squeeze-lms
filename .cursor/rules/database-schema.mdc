@@ -1,0 +1,73 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+ # 데이터베이스 스키마 규칙
+
+## 테이블
+- `journeys` - 여정 정보
+  - `id`: number (PK)
+  - `slug`: string (유니크)
+  - `name`: string
+  - `description`: string
+  - `created_at`: timestamp
+  - `updated_at`: timestamp
+
+- `journey_weeks` - 여정 주차 정보
+  - `id`: number (PK)
+  - `journey_id`: number (FK)
+  - `week_number`: number
+  - `title`: string
+  - `description`: string
+  - `created_at`: timestamp
+  - `updated_at`: timestamp
+
+- `missions` - 미션 정보
+  - `id`: number (PK)
+  - `title`: string
+  - `description`: string
+  - `points`: number
+  - `created_at`: timestamp
+  - `updated_at`: timestamp
+
+- `journey_mission_instances` - 여정 미션 인스턴스
+  - `id`: number (PK)
+  - `journey_week_id`: number (FK)
+  - `mission_id`: number (FK)
+  - `status`: enum ('not_started', 'in_progress', 'submitted', 'completed', 'rejected')
+  - `release_date`: timestamp
+  - `expiry_date`: timestamp
+  - `created_at`: timestamp
+  - `updated_at`: timestamp
+
+- `posts` - 미션 제출물
+  - `id`: number (PK)
+  - `user_id`: number (FK)
+  - `mission_instance_id`: number (FK)
+  - `content`: string
+  - `score`: number
+  - `created_at`: timestamp
+  - `updated_at`: timestamp
+
+- `profiles` - 사용자 프로필
+  - `id`: number (PK)
+  - `first_name`: string
+  - `last_name`: string
+  - `profile_image`: string
+  - `organization_id`: number (FK)
+  - `created_at`: timestamp
+  - `updated_at`: timestamp
+
+## 관계
+- `journey_mission_instances` -> `missions` (Many-to-One)
+- `journey_mission_instances` -> `journey_weeks` (Many-to-One)
+- `journey_weeks` -> `journeys` (Many-to-One)
+- `posts` -> `journey_mission_instances` (Many-to-One)
+- `posts` -> `profiles` (Many-to-One)
+- `profiles` -> `organizations` (Many-to-One)
+
+## 상태 관리
+- 미션 상태 변경은 `updateMissionStatus` 함수를 통해 관리
+- 상태 값: 'not_started', 'in_progress', 'submitted', 'completed', 'rejected'
+- 상태 변경 시 자동으로 `updated_at` 업데이트

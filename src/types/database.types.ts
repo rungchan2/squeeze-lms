@@ -38,36 +38,39 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
+          file_url: string | null
           id: number
           status: string | null
           title: string
           updated_at: string | null
-          user_id: number | null
+          user_id: number
         }
         Insert: {
           created_at?: string | null
           description?: string | null
+          file_url?: string | null
           id?: number
           status?: string | null
           title: string
           updated_at?: string | null
-          user_id?: number | null
+          user_id: number
         }
         Update: {
           created_at?: string | null
           description?: string | null
+          file_url?: string | null
           id?: number
           status?: string | null
           title?: string
           updated_at?: string | null
-          user_id?: number | null
+          user_id?: number
         }
         Relationships: [
           {
             foreignKeyName: "bug_reports_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -77,39 +80,87 @@ export type Database = {
           content: string | null
           created_at: string | null
           id: number
-          submission_id: number | null
+          post_id: number | null
           updated_at: string | null
-          user_id: number | null
+          user_id: number
         }
         Insert: {
           content?: string | null
           created_at?: string | null
           id?: number
-          submission_id?: number | null
+          post_id?: number | null
           updated_at?: string | null
-          user_id?: number | null
+          user_id: number
         }
         Update: {
           content?: string | null
           created_at?: string | null
           id?: number
-          submission_id?: number | null
+          post_id?: number | null
           updated_at?: string | null
-          user_id?: number | null
+          user_id?: number
         }
         Relationships: [
           {
-            foreignKeyName: "comments_submission_id_fkey"
-            columns: ["submission_id"]
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: "submissions"
+            referencedRelation: "posts"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journey_mission_instances: {
+        Row: {
+          created_at: string | null
+          expiry_date: string | null
+          id: number
+          journey_week_id: number
+          mission_id: number
+          release_date: string | null
+          status: Database["public"]["Enums"]["mission_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: number
+          journey_week_id: number
+          mission_id: number
+          release_date?: string | null
+          status?: Database["public"]["Enums"]["mission_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: number
+          journey_week_id?: number
+          mission_id?: number
+          release_date?: string | null
+          status?: Database["public"]["Enums"]["mission_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journey_mission_instances_journey_week_id_fkey"
+            columns: ["journey_week_id"]
+            isOneToOne: false
+            referencedRelation: "journey_weeks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journey_mission_instances_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
             referencedColumns: ["id"]
           },
         ]
@@ -119,6 +170,7 @@ export type Database = {
           created_at: string | null
           id: number
           journey_id: number | null
+          missions: number[] | null
           name: string
           updated_at: string | null
           week_number: number | null
@@ -127,6 +179,7 @@ export type Database = {
           created_at?: string | null
           id?: number
           journey_id?: number | null
+          missions?: number[] | null
           name: string
           updated_at?: string | null
           week_number?: number | null
@@ -135,6 +188,7 @@ export type Database = {
           created_at?: string | null
           id?: number
           journey_id?: number | null
+          missions?: number[] | null
           name?: string
           updated_at?: string | null
           week_number?: number | null
@@ -151,7 +205,6 @@ export type Database = {
       }
       journeys: {
         Row: {
-          countries: string | null
           created_at: string | null
           date_end: string | null
           date_start: string | null
@@ -159,9 +212,9 @@ export type Database = {
           image_url: string | null
           name: string
           updated_at: string | null
+          uuid: string
         }
         Insert: {
-          countries?: string | null
           created_at?: string | null
           date_end?: string | null
           date_start?: string | null
@@ -169,9 +222,9 @@ export type Database = {
           image_url?: string | null
           name: string
           updated_at?: string | null
+          uuid?: string
         }
         Update: {
-          countries?: string | null
           created_at?: string | null
           date_end?: string | null
           date_start?: string | null
@@ -179,6 +232,7 @@ export type Database = {
           image_url?: string | null
           name?: string
           updated_at?: string | null
+          uuid?: string
         }
         Relationships: []
       }
@@ -186,37 +240,34 @@ export type Database = {
         Row: {
           created_at: string | null
           id: number
-          submission_id: number | null
-          updated_at: string | null
-          user_id: number | null
+          post_id: number | null
+          user_id: number
         }
         Insert: {
           created_at?: string | null
           id?: number
-          submission_id?: number | null
-          updated_at?: string | null
-          user_id?: number | null
+          post_id?: number | null
+          user_id: number
         }
         Update: {
           created_at?: string | null
           id?: number
-          submission_id?: number | null
-          updated_at?: string | null
-          user_id?: number | null
+          post_id?: number | null
+          user_id?: number
         }
         Relationships: [
           {
-            foreignKeyName: "likes_submission_id_fkey"
-            columns: ["submission_id"]
+            foreignKeyName: "likes_post_id_fkey"
+            columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: "submissions"
+            referencedRelation: "posts"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "likes_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -227,7 +278,6 @@ export type Database = {
           description: string | null
           expiry_date: string | null
           id: number
-          journey_week_id: number | null
           mission_type: string | null
           name: string
           points: number | null
@@ -239,7 +289,6 @@ export type Database = {
           description?: string | null
           expiry_date?: string | null
           id?: number
-          journey_week_id?: number | null
           mission_type?: string | null
           name: string
           points?: number | null
@@ -251,19 +300,48 @@ export type Database = {
           description?: string | null
           expiry_date?: string | null
           id?: number
-          journey_week_id?: number | null
           mission_type?: string | null
           name?: string
           points?: number | null
           release_date?: string | null
           updated_at?: string | null
         }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: number
+          link: string | null
+          message: string
+          read_at: string | null
+          receiver_id: number | null
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          link?: string | null
+          message: string
+          read_at?: string | null
+          receiver_id?: number | null
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          link?: string | null
+          message?: string
+          read_at?: string | null
+          receiver_id?: number | null
+          type?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "missions_journey_week_id_fkey"
-            columns: ["journey_week_id"]
+            foreignKeyName: "fk_notifications_user"
+            columns: ["receiver_id"]
             isOneToOne: false
-            referencedRelation: "journey_weeks"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -289,53 +367,112 @@ export type Database = {
         }
         Relationships: []
       }
-      submissions: {
+      posts: {
         Row: {
-          attachment_url: string | null
           content: string | null
           created_at: string | null
+          file_url: string | null
           id: number
-          mission_id: number | null
+          mission_instance_id: number | null
           score: number | null
-          submitted_at: string | null
+          title: string
           updated_at: string | null
-          user_id: number | null
+          user_id: number
+          view_count: number
         }
         Insert: {
-          attachment_url?: string | null
           content?: string | null
           created_at?: string | null
+          file_url?: string | null
           id?: number
-          mission_id?: number | null
+          mission_instance_id?: number | null
           score?: number | null
-          submitted_at?: string | null
+          title: string
           updated_at?: string | null
-          user_id?: number | null
+          user_id: number
+          view_count?: number
         }
         Update: {
-          attachment_url?: string | null
           content?: string | null
           created_at?: string | null
+          file_url?: string | null
           id?: number
-          mission_id?: number | null
+          mission_instance_id?: number | null
           score?: number | null
-          submitted_at?: string | null
+          title?: string
           updated_at?: string | null
-          user_id?: number | null
+          user_id?: number
+          view_count?: number
         }
         Relationships: [
           {
-            foreignKeyName: "submissions_mission_id_fkey"
-            columns: ["mission_id"]
+            foreignKeyName: "posts_mission_instance_id_fkey"
+            columns: ["mission_instance_id"]
             isOneToOne: false
-            referencedRelation: "missions"
+            referencedRelation: "journey_mission_instances"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "submissions_user_id_fkey"
+            foreignKeyName: "posts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          first_name: string | null
+          id: number
+          last_name: string | null
+          marketing_opt_in: boolean | null
+          organization_id: number | null
+          phone: string | null
+          privacy_agreed: boolean | null
+          profile_image: string | null
+          role: string | null
+          uid: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          first_name?: string | null
+          id?: number
+          last_name?: string | null
+          marketing_opt_in?: boolean | null
+          organization_id?: number | null
+          phone?: string | null
+          privacy_agreed?: boolean | null
+          profile_image?: string | null
+          role?: string | null
+          uid: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          first_name?: string | null
+          id?: number
+          last_name?: string | null
+          marketing_opt_in?: boolean | null
+          organization_id?: number | null
+          phone?: string | null
+          privacy_agreed?: boolean | null
+          profile_image?: string | null
+          role?: string | null
+          uid?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -380,75 +517,113 @@ export type Database = {
             foreignKeyName: "user_journeys_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
-      users: {
+      user_points: {
         Row: {
           created_at: string | null
-          email: string
-          first_name: string | null
-          hashed_password: string | null
           id: number
-          last_name: string | null
-          marketing_opt_in: boolean | null
-          organization_id: number | null
-          phone: string | null
-          privacy_agreed: boolean | null
-          role: string | null
-          uid: string | null
+          journey_id: number
+          mission_id: number | null
+          post_id: number | null
+          profile_id: number
+          total_points: number | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
-          email: string
-          first_name?: string | null
-          hashed_password?: string | null
           id?: number
-          last_name?: string | null
-          marketing_opt_in?: boolean | null
-          organization_id?: number | null
-          phone?: string | null
-          privacy_agreed?: boolean | null
-          role?: string | null
-          uid?: string | null
+          journey_id: number
+          mission_id?: number | null
+          post_id?: number | null
+          profile_id: number
+          total_points?: number | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
-          email?: string
-          first_name?: string | null
-          hashed_password?: string | null
           id?: number
-          last_name?: string | null
-          marketing_opt_in?: boolean | null
-          organization_id?: number | null
-          phone?: string | null
-          privacy_agreed?: boolean | null
-          role?: string | null
-          uid?: string | null
+          journey_id?: number
+          mission_id?: number | null
+          post_id?: number | null
+          profile_id?: number
+          total_points?: number | null
           updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "users_organization_id_fkey"
-            columns: ["organization_id"]
+            foreignKeyName: "user_points_journey_id_fkey"
+            columns: ["journey_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_points_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_points_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_points_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          completed_missions: number | null
+          first_name: string | null
+          last_name: string | null
+          total_points: number | null
+          user_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      get_distinct_mission_types: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          mission_type: string
+        }[]
+      }
+      migrate_missions_to_instances: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
+      mission_status:
+        | "not_started"
+        | "in_progress"
+        | "submitted"
+        | "completed"
+        | "rejected"
       role: "user" | "teacher" | "admin"
     }
     CompositeTypes: {

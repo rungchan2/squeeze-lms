@@ -1,0 +1,32 @@
+# 데이터 페칭 규칙
+
+## 커스텀 훅
+- SWR을 사용한 데이터 페칭
+- 기본 설정:
+  - `revalidateOnFocus: false`
+  - `dedupingInterval: 60000` (1분)
+- 훅 네이밍: `use{엔티티명}` 형식 (예: `useJourneyMissionInstances`)
+
+## Supabase 클라이언트
+- `createClient()` 함수를 사용하여 Supabase 인스턴스 생성
+- 클라이언트 생성 위치: `@/utils/supabase/client`
+- 관계 데이터 쿼리 시 중첩 select 사용:
+  ```typescript
+  .select(`
+    *,
+    missions(*)
+  `)
+  ```
+
+## 데이터 관리 패턴
+- CRUD 작업을 위한 함수 제공:
+  - `create{엔티티명}`: 데이터 생성
+  - `update{엔티티명}`: 데이터 업데이트
+  - `delete{엔티티명}`: 데이터 삭제
+  - `get{엔티티명}ById`: ID로 데이터 조회
+- 데이터 변경 후 `mutate()` 호출하여 캐시 업데이트
+
+## 에러 처리
+- 모든 데이터베이스 작업은 try-catch로 에러 처리
+- 에러 발생 시 Error 객체 throw
+- 컴포넌트에서 에러 상태 관리 (예: `error`, `isLoading` 상태) 

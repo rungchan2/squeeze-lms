@@ -9,7 +9,13 @@ type HeadingProps = {
   weight?: string;
 };
 
-const Heading = ({ level = 1, children, className, color, weight }: HeadingProps) => {
+export default function Heading({
+  level = 1,
+  children,
+  className,
+  color,
+  weight,
+}: HeadingProps) {
   switch (level) {
     case 1:
       return <H1 className={className} color={color} weight={weight}>{children}</H1>;
@@ -26,12 +32,9 @@ const Heading = ({ level = 1, children, className, color, weight }: HeadingProps
   }
 };
 
-export default Heading;
-
 const H1 = styled.h1<{ color?: string; weight?: string }>`
   font-family: "Inter", sans-serif;
   font-size: 40px;
-  line-height: 80px;
   font-weight: ${({ weight }) => weight || "bold"};
   color: ${({ color }) => color || "inherit"};
 `;
@@ -39,7 +42,6 @@ const H1 = styled.h1<{ color?: string; weight?: string }>`
 const H2 = styled.h2<{ color?: string; weight?: string }>`
   font-family: "Inter", sans-serif;
   font-size: 32px;
-  line-height: 64px;
   font-weight: ${({ weight }) => weight || "600"}; /* Semi Bold */
   color: ${({ color }) => color || "inherit"};
 `;
@@ -47,7 +49,6 @@ const H2 = styled.h2<{ color?: string; weight?: string }>`
 const H3 = styled.h3<{ color?: string; weight?: string }>`
   font-family: "Inter", sans-serif;
   font-size: 24px;
-  line-height: 48px;
   font-weight: ${({ weight }) => weight || "600"}; /* Semi Bold */
   color: ${({ color }) => color || "inherit"};
 `;
@@ -55,7 +56,6 @@ const H3 = styled.h3<{ color?: string; weight?: string }>`
 const H4 = styled.h4<{ color?: string; weight?: string }>`
   font-family: "Inter", sans-serif;
   font-size: 20px;
-  line-height: 40px;
   font-weight: ${({ weight }) => weight || "600"}; /* Semi Bold */
   color: ${({ color }) => color || "inherit"};
 `;
@@ -63,7 +63,6 @@ const H4 = styled.h4<{ color?: string; weight?: string }>`
 const H5 = styled.h5<{ color?: string; weight?: string }>`
   font-family: "Inter", sans-serif;
   font-size: 16px;
-  line-height: 24px;
   font-weight: ${({ weight }) => weight || "600"}; /* Semi Bold */
   color: ${({ color }) => color || "inherit"};
 `;

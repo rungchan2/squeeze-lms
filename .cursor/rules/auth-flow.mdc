@@ -1,0 +1,28 @@
+---
+description: Handles authentication and session logic using Supabase.
+globs: **/auth/*.ts", "**/utils/supabase/*.ts
+alwaysApply: true
+---
+# 인증 흐름 규칙
+
+## 인증 관리
+- Supabase Auth를 사용한 인증 처리
+- `AuthProvider` 컴포넌트를 통한 전역 인증 상태 관리
+사용하여 인증 상태 및 사용자 정보 접근
+
+## 인증 상태
+- 사용자 정보는 `useAuth` 훅을 통해 접근
+  ```typescript
+  const { id: userId } = useAuth();
+  ```
+- 인증 필요 페이지는 `AuthProvider`를 통한 리다이렉션 처리
+
+## 사용자 프로필
+- 사용자 정보는 `profiles` 테이블에 저장
+- 프로필 이미지는 Supabase Storage에 저장
+- `ProfileImage` 컴포넌트를 사용하여 프로필 이미지 표시
+
+## 세션 관리
+- Supabase 클라이언트를 통한 세션 관리
+- 세션 만료 시 자동 리다이렉션
+- 로그인/로그아웃 처리는 전용 함수 사용

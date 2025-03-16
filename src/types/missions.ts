@@ -1,16 +1,23 @@
 import { z } from "zod";
 
 export const missionSchema = z.object({
-  id: z.number().int().nonnegative(),
-  journey_week_id: z.number().int(),
-  name: z.string().min(1),
-  mission_type: z.string(),
-  points: z.number().int().nonnegative(),
-  description: z.string().optional(),
-  release_date: z.string().optional(),
-  expiry_date: z.string().optional(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
-});
+  id: z.number(),
+  name: z.string(),
+  description: z.string().nullable(),
+  mission_type: z.string().nullable(),
+  points: z.number().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+})
+
+export const createMissionSchema = missionSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+})
+
+export const updateMissionSchema = createMissionSchema.partial()
 
 export type Mission = z.infer<typeof missionSchema>;
+export type CreateMission = z.infer<typeof createMissionSchema>;
+export type UpdateMission = z.infer<typeof updateMissionSchema>;

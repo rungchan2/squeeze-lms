@@ -2,22 +2,22 @@
   font-family: "Inter", sans-serif;
   padding: 0;
   margin: 0;
+  font-weight: inherit;
+  line-height: 1.2;
+  color: inherit;
 }
 
 .body {
   font-size: 16px;
-  line-height: 32px;
-  font-weight: 400;
+  color: inherit;
 }
 
 .caption {
   font-size: 14px;
-  line-height: 28px; 
-  font-weight: 500;
+  color: inherit;
 }
 
 .small {
   font-size: 10px;
-  line-height: 20px;
-  font-weight: 400;
+  color: inherit;
 }
