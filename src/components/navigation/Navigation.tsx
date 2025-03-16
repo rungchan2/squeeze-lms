@@ -12,6 +12,7 @@ import { IconContainer } from "../common/IconContainer";
 import { UserJourneyWithJourney } from "@/types";
 import { getJourney } from "@/utils/journey";
 import { Separator } from "@chakra-ui/react";
+
 export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
   const { profileImage, id } = useAuth();
   const pathname = usePathname();
@@ -21,27 +22,32 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
   const [isVisible, setIsVisible] = useState(true);
   const [journeyList, setJourneyList] = useState<UserJourneyWithJourney[]>([]);
   const lastScrollY = useRef(0);
-  const upScrollThreshold = 30; // 위로 스크롤할 때의 임계값
-  const downScrollThreshold = 150; // 아래로 스크롤할 때의 임계값
+  const ticking = useRef(false);
 
   useEffect(() => {
-    // 데이터 가져오기
+    // 초기 스크롤 위치 설정
+    lastScrollY.current = window.scrollY;
 
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const scrollDifference = Math.abs(currentScrollY - lastScrollY.current);
-      const isScrollingUp = currentScrollY < lastScrollY.current;
-
-      const threshold = isScrollingUp ? upScrollThreshold : downScrollThreshold;
-
-      if (scrollDifference > threshold) {
-        if (isScrollingUp) {
-          setIsVisible(true);
-        } else {
-          setIsVisible(false);
-        }
-
-        lastScrollY.current = currentScrollY;
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          
+          // 스크롤 방향 감지
+          const isScrollingDown = currentScrollY > lastScrollY.current;
+          
+          // 스크롤 방향에 따라 네비게이션 바 표시/숨김
+          if (isScrollingDown && currentScrollY > 70) {
+            setIsVisible(false);
+          } else {
+            setIsVisible(true);
+          }
+          
+          lastScrollY.current = currentScrollY;
+          ticking.current = false;
+        });
+        
+        ticking.current = true;
       }
     };
 
@@ -129,20 +135,14 @@ const StyledNavigation = styled.div<{ $isVisible: boolean }>`
   padding: 20px;
   border-bottom: 1px solid var(--gray-200);
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out;
   transform: translateY(${(props) => (props.$isVisible ? "0" : "-100%")});
   z-index: 1000;
-
-  min-height: 70px;
 
   .left-container {
     display: flex;
     align-items: center;
     height: 100%;
     gap: 10px;
-  }
-
-  & + * {
-    padding-top: 86px;
   }
 `;

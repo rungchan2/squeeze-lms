@@ -7,12 +7,19 @@ export const commentSchema = z.object({
   post_id: z.number().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
+  profiles: z.object({
+    id: z.number(),
+    first_name: z.string().nullable(),
+    last_name: z.string().nullable(),
+    profile_image: z.string().nullable()
+  }).optional()
 })
 
 export const createCommentSchema = commentSchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
+  profiles: true
 })
 
 export const updateCommentSchema = createCommentSchema.partial()

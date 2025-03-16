@@ -92,7 +92,7 @@ export default function FeedTab() {
       {sortedPosts.length > 0 ? (
         <div className="posts-container">
           {sortedPosts.map((post: any) => (
-            <PostCard key={post.id} {...post} />
+            <PostCard key={post.id} post={post} />
           ))}
         </div>
       ) : (
@@ -110,7 +110,6 @@ const FeedTabContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 1rem;
 
   .feed-title {
     margin-bottom: 1rem;

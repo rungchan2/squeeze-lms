@@ -23,6 +23,7 @@ export default function RootLayout({
         <Providers>
           <Navigation exceptionPath={["/login", "/register"]} />
           <div className="container">{children}</div>
+          <div className="root-footer"></div>
           <Toaster />
           <SpeedInsights />
         </Providers>

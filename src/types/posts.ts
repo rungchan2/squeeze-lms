@@ -8,6 +8,7 @@ const pickedUserSchema = userSchema.pick({
   first_name: true,
   last_name: true,
   organization_id: true,
+  profile_image: true,
 });
 
 const pickedOrganizationSchema = organizationSchema.pick({
@@ -25,21 +26,20 @@ const pickedMissionSchema = missionSchema.pick({
 
 export const postSchema = z.object({
   id: z.number(),
-  uuid: z.string(),
   title: z.string(),
   content: z.string().nullable(),
   file_url: z.string().nullable(),
   user_id: z.number(),
-  mission_id: z.number().nullable(),
+  mission_instance_id: z.number().nullable(),
   score: z.number().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
   view_count: z.number(),
 });
 
+
 export const createPostSchema = postSchema.omit({
   id: true,
-  uuid: true,
   created_at: true,
   updated_at: true,
   view_count: true,
@@ -53,7 +53,7 @@ export const userWithOrganizationSchema = pickedUserSchema.extend({
 
 export const postWithRelationsSchema = postSchema.extend({
   profiles: userWithOrganizationSchema.nullable(),
-  missions: pickedMissionSchema.nullable(),
+  mission_instance_id: pickedMissionSchema.nullable(),
 });
 
 export type PostWithRelations = z.infer<typeof postWithRelationsSchema>;

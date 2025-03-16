@@ -80,9 +80,16 @@ body {
   overflow-x: hidden;
   background-color: var(--grey-100);
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  padding-top: 70px; /* 네비게이션 바 높이만큼 상단 패딩 추가 */
 }
 
 .container {
-  padding: 16px 16px 40px 16px;
-
+  min-height: calc(100vh - 70px);
+  padding: 16px 16px 0px 16px;
+  overflow-y: auto;
 }

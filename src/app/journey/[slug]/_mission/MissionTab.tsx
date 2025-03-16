@@ -24,8 +24,10 @@ export default function MissionTab() {
   const router = useRouter();
   const pathname = usePathname();
   const { id: userId } = useAuth();
-  const { missionInstances, isLoading: isLoadingMissions } = useJourneyMissionInstances();
-  const { completedMissionIds, isLoading: isLoadingCompletedMissions } = useCompletedMissions(userId || 0);
+  const { missionInstances, isLoading: isLoadingMissions } =
+    useJourneyMissionInstances();
+  const { completedMissionIds, isLoading: isLoadingCompletedMissions } =
+    useCompletedMissions(userId || 0);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortMission, setSortMission] = useState<"asc" | "desc">("asc");
   // 현재 URL에서 slug 추출
@@ -53,23 +55,28 @@ export default function MissionTab() {
   );
 
   // 검색어로 미션 필터링
-  const filteredMissions = pendingMissions.filter(instance => {
-    const missionName = instance.missions.name.toLowerCase();
-    const missionDescription = instance.missions.description?.toLowerCase() || '';
+  const filteredMissions = pendingMissions.filter((instance) => {
+    const missionName = instance.mission.name.toLowerCase();
+    const missionDescription =
+      instance.mission.description?.toLowerCase() || "";
     const query = searchQuery.toLowerCase();
-    
+
     return missionName.includes(query) || missionDescription.includes(query);
   });
 
   // expiry_date 기준으로 미션 정렬
   const sortedMissions = [...filteredMissions].sort((a, b) => {
     // null 값 처리
-    const dateA = a.expiry_date ? new Date(a.expiry_date).getTime() : Number.MAX_SAFE_INTEGER;
-    const dateB = b.expiry_date ? new Date(b.expiry_date).getTime() : Number.MAX_SAFE_INTEGER;
-    
+    const dateA = a.expiry_date
+      ? new Date(a.expiry_date).getTime()
+      : Number.MAX_SAFE_INTEGER;
+    const dateB = b.expiry_date
+      ? new Date(b.expiry_date).getTime()
+      : Number.MAX_SAFE_INTEGER;
+
     // 오름차순 또는 내림차순 정렬
-    return sortMission === "asc" 
-      ? dateA - dateB  // 오름차순: 빠른 날짜가 먼저
+    return sortMission === "asc"
+      ? dateA - dateB // 오름차순: 빠른 날짜가 먼저
       : dateB - dateA; // 내림차순: 늦은 날짜가 먼저
   });
 
@@ -101,32 +108,46 @@ export default function MissionTab() {
           </IconContainer>
         </div>
       </div>
-      
+
       {sortedMissions.length > 0 ? (
         sortedMissions.map(
-          (missionInstance: JourneyMissionInstanceWithMission) => (
-            <Link
-              key={missionInstance.id}
-              href={`/journey/${getSlugFromPathname()}/${missionInstance.id}`}
-              className="mission-card-wrapper"
-            >
-              <MissionCard
-                mission={missionInstance.missions}
-                missionInstance={missionInstance}
-              />
-            </Link>
-          )
+          (missionInstance: any) => {
+            // mission 속성이 없으면 missions 속성을 사용
+            const instance = {
+              ...missionInstance,
+              mission: missionInstance.mission || missionInstance.missions
+            };
+            
+            return (
+              <Link
+                key={instance.id}
+                href={`/journey/${getSlugFromPathname()}/${instance.id}`}
+                className="mission-card-wrapper"
+              >
+                <MissionCard
+                  mission={instance.mission}
+                  missionInstance={instance}
+                />
+              </Link>
+            );
+          }
         )
       ) : (
         <div className="empty-state">
           <Text color="var(--grey-500)">
-            {searchQuery ? "검색 결과가 없습니다." : "완료하지 않은 미션이 없습니다."}
+            {searchQuery
+              ? "검색 결과가 없습니다."
+              : "완료하지 않은 미션이 없습니다."}
           </Text>
         </div>
       )}
 
       <AdminOnly>
-        <FloatingButton onClick={() => router.push(`/journey/${getSlugFromPathname()}/new-mission`)}>
+        <FloatingButton
+          onClick={() =>
+            router.push(`/journey/${getSlugFromPathname()}/new-mission`)
+          }
+        >
           <FaWandMagicSparkles />
           <Text variant="body" fontWeight="bold" color="var(--white)">
             새 미션
@@ -145,14 +166,14 @@ const MissionTabContainer = styled.div`
   .mission-title {
     margin-bottom: 1rem;
   }
-  
+
   .search-sort-container {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-bottom: 1rem;
   }
-  
+
   .sort-container {
     display: flex;
     align-items: center;

@@ -79,7 +79,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const initializeAuth = async () => {
       toaster.create({
         title: "초기화 시작",
-        description: "초기화 중입니다.",
         type: "info",
       });
       // 로컬 스토리지에서 먼저 데이터 가져오기
@@ -102,7 +101,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } catch (error) {
         toaster.create({
           title: "인증 초기화 오류",
-          description: (error as Error).message,
           type: "error",
         });
       } finally {
@@ -110,7 +108,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsInitialized(true);
         toaster.create({
           title: "초기화 완료",
-          description: "초기화가 완료되었습니다.",
           type: "success",
         });
       }
@@ -124,17 +121,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event) => {
       toaster.create({
-        title: "인증 상태 변경",
-        description: event,
+        title: `인증 상태 변경 ${event}`,
         type: "info",
-      });   
+      });
       if (event === "SIGNED_IN") {
         try {
           await refreshUser();
         } catch (error) {
           toaster.create({
             title: "로그인 후 사용자 정보 갱신 오류",
-            description: (error as Error).message,
             type: "error",
           });
         } finally {
@@ -146,7 +141,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
           toaster.create({
             title: "로그아웃 처리 오류",
-            description: (error as Error).message,
             type: "error",
           });
         } finally {

@@ -1,0 +1,25 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+ # 라우팅 패턴 규칙
+
+## App Router 구조
+- Next.js 13+ App Router 사용
+- 파일 기반 라우팅 시스템
+
+## 주요 라우트
+- `/` - 메인 페이지
+- `/journey/[slug]` - 여정 상세 페이지
+  - `/journey/[slug]/page.tsx` - 여정 메인 페이지
+  - `/journey/[slug]/_dashboard/DashboardTab.tsx` - 대시보드 탭 컴포넌트
+  - `/journey/[slug]/week/[weekId]` - 주차별 페이지
+  - `/journey/[slug]/mission/[missionId]` - 미션 상세 페이지
+- `/profile/[userId]` - 사용자 프로필 페이지
+
+## 컨벤션
+- 페이지 컴포넌트는 해당 경로의 디렉토리에 `page.tsx` 파일로 위치
+- 동적 라우팅은 `[paramName]` 형식 사용
+- 프라이빗 컴포넌트는 `_` 접두사 사용 (예: `_dashboard`)
+- 레이아웃 컴포넌트는 `layout.tsx` 파일로 정의

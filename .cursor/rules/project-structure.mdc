@@ -1,0 +1,27 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+ # 프로젝트 구조 규칙
+
+## 디렉토리 구조
+- `/src`
+  - `/app` - Next.js 13+ App Router 구조
+  - `/types` - Zod 스키마 및 TypeScript 타입 정의
+  - `/hooks` - 커스텀 React 훅
+  - `/components` - 재사용 가능한 React 컴포넌트
+  - `/utils` - 유틸리티 함수들
+
+## 명명 규칙
+- 컴포넌트: PascalCase (예: `DashboardTab.tsx`)
+- 훅: camelCase, 'use' 접두사 (예: `useJourneyMissionInstances.ts`)
+- 타입: PascalCase (예: `JourneyMissionInstance`)
+- 스키마: camelCase + 'Schema' 접미사 (예: `journeyMissionInstanceSchema`)
+
+## 타입 정의 패턴
+- Zod 스키마를 사용하여 타입 정의
+- 각 엔티티별 CRUD 작업을 위한 타입 정의 패턴:
+  - 기본 타입 (예: `JourneyMissionInstance`)
+  - Create 타입 (예: `CreateJourneyMissionInstance`)
+  - Update 타입 (예: `UpdateJourneyMissionInstance`)

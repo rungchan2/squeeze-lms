@@ -7,7 +7,7 @@ async function getPosts() {
   const { data, error } = await supabase.from("posts").select(`
       *,
       profiles (
-        id, first_name, last_name, organization_id,
+        id, first_name, last_name, organization_id, profile_image,
         organizations (
           id, name
         )
@@ -27,7 +27,7 @@ async function getCompletedMissionIds(userId: number) {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("posts")
-    .select("mission_id")
+    .select("mission_instance_id")
     .eq("user_id", userId);
   
   if (error) {
@@ -37,8 +37,8 @@ async function getCompletedMissionIds(userId: number) {
   
   // 제출한 미션 ID 목록 추출
   const completedIds = data
-    .filter((post) => post.mission_id !== null)
-    .map((post) => post.mission_id as number);
+    .filter((post) => post.mission_instance_id !== null)
+    .map((post) => post.mission_instance_id as number);
   
   return completedIds;
 }

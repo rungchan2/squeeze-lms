@@ -17,6 +17,7 @@ interface MissionCardProps {
   onDelete?: (id: number) => void;
   maxWidth?: string;
   missionInstance?: JourneyMissionInstanceWithMission;
+  showDetails?: boolean;
 }
 
 export default function MissionCard({
@@ -26,9 +27,10 @@ export default function MissionCard({
   onDelete,
   maxWidth = "100%",
   missionInstance,
+  showDetails = false,
 }: MissionCardProps) {
   return (
-    <StyledMissionCard isModal={isModal} maxWidth={maxWidth}>
+    <StyledMissionCard isModal={isModal} maxWidth={maxWidth} showDetails={showDetails}>
       <div className="left-container">
         {!isModal && <FiMenu size="16px" style={{ minWidth: "16px" }} />}
         <div className="mission-item-header">
@@ -87,6 +89,7 @@ export default function MissionCard({
 interface StyledMissionCardProps {
   isModal: boolean;
   maxWidth: string;
+  showDetails: boolean;
 }
 
 const StyledMissionCard = styled.div<StyledMissionCardProps>`
@@ -126,15 +129,10 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
     width: 100%;
   }
 
-  .description-container {
-    width: 100%;
-    max-width: 100%;
-  }
-
   .description-text {
     display: block;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    text-overflow: ${(props) => (props.showDetails ? "none" : "ellipsis")};
+    white-space: ${(props) => (props.showDetails ? "normal" : "nowrap")};
     overflow: hidden;
     max-width: 100%;
   }

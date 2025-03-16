@@ -8,22 +8,16 @@ import {
   Mission,
 } from "@/types";
 import { useCallback } from "react";
+import { getMissionInstanceById } from "@/app/journey/actions";
 
-/**
- * 주차별 미션 인스턴스를 관리하는 훅
- * @param weekId 주차 ID (0이면 모든 미션 인스턴스 가져오기)
- * @returns 미션 인스턴스 데이터와 CRUD 함수들
- */
+
 export function useJourneyMissionInstances(weekId: number = 0) {
   // 데이터 가져오기 함수
   const fetcher = useCallback(async () => {
     const supabase = createClient();
 
     // 특정 주차의 미션 인스턴스 가져오기
-    const query = supabase.from("journey_mission_instances").select(`
-        *,
-        missions(*)
-      `);
+    const query = supabase.from("journey_mission_instances").select(`*, missions(*)`);
 
     // 주차 ID가 있으면 필터링œ
     if (weekId > 0) {
@@ -36,8 +30,12 @@ export function useJourneyMissionInstances(weekId: number = 0) {
       throw new Error(error.message);
     }
 
-    return data as unknown as (JourneyMissionInstance & {
-      missions: Mission;
+    // missions를 mission으로 매핑하여 타입 일관성 유지
+    return data.map((item: any) => ({
+      ...item,
+      mission: item.missions
+    })) as unknown as (JourneyMissionInstance & {
+      mission: Mission;
     })[];
   }, [weekId]);
 
@@ -47,7 +45,7 @@ export function useJourneyMissionInstances(weekId: number = 0) {
     error,
     isLoading,
     mutate,
-  } = useSWR<(JourneyMissionInstance & { missions: Mission })[]>(
+  } = useSWR<(JourneyMissionInstance & { mission: Mission })[]>(
     weekId ? `mission-instances-${weekId}` : "all-mission-instances",
     fetcher,
     {
@@ -56,11 +54,6 @@ export function useJourneyMissionInstances(weekId: number = 0) {
     }
   );
 
-  /**
-   * 미션 인스턴스 생성 함수
-   * @param instanceData 생성할 미션 인스턴스 데이터
-   * @returns 생성된 미션 인스턴스 데이터
-   */
   const createMissionInstance = useCallback(
     async (instanceData: CreateJourneyMissionInstance) => {
       const supabase = createClient();

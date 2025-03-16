@@ -1,3 +1,5 @@
+"use client";
+
 import Text from "@/components/Text/Text";
 import Heading from "../../Text/Heading";
 import styled from "@emotion/styled";
@@ -11,12 +13,21 @@ import { ProfileImage } from "@/components/navigation/ProfileImage";
 import dayjs from "@/utils/dayjs/dayjs";
 import { PostWithRelations } from "@/types";
 import { useLikes } from "@/hooks/useLikes";
-import { useAuthStore } from "@/store/auth";
+import RichTextViewer from "@/components/richTextInput/RichTextViewer";
+import { useAuth } from "@/components/AuthProvider";
+import { useComments } from "@/hooks/useComments";
 
-export default function PostCard(post: PostWithRelations) {
+interface PostCardProps {
+  post: PostWithRelations;
+  showDetails?: boolean;
+}
+
+export default function PostCard({ post, showDetails = false }: PostCardProps) {
   const router = useRouter();
-  const { id } = useAuthStore();
+  const { id } = useAuth();
   const { onLike, onUnlike, likesCount, useUserLike } = useLikes(post.id);
+  const { count } = useComments({ postId: post.id });
+
   const { data: userLike } = useUserLike(id);
   const isUserLike = Boolean(userLike);
 
@@ -37,13 +48,19 @@ export default function PostCard(post: PostWithRelations) {
 
   return (
     <PostCardContainer
+      showDetails={showDetails}
       onClick={() => {
-        router.push(`/post/${post.id}`);
+        if (!showDetails) {
+          router.push(`/post/${post.id}`);
+        }
       }}
     >
       <ContentWrapper>
         <UserInfoContainer>
-          <ProfileImage profileImage={""} width={40} />
+          <ProfileImage
+            profileImage={post?.profiles?.profile_image || ""}
+            width={40}
+          />
           <div className="user-info-wrapper">
             <UserNameWrapper>
               <Text variant="caption" fontWeight="bold">
@@ -71,11 +88,15 @@ export default function PostCard(post: PostWithRelations) {
           </div>
         </UserInfoContainer>
 
-        <PostContentContainer>
+        <PostContentContainer showDetails={showDetails}>
           <Heading level={3}>{post?.title}</Heading>
-          <div>
+          {showDetails ? (
+            <div>
+              <RichTextViewer content={post.content || ""} />
+            </div>
+          ) : (
             <Text variant="body">{post.content}</Text>
-          </div>
+          )}
         </PostContentContainer>
 
         <InteractionContainer>
@@ -91,7 +112,7 @@ export default function PostCard(post: PostWithRelations) {
           </InteractionItem>
           <InteractionItem>
             <FaRegComment />
-            <Text variant="caption">50</Text>
+            <Text variant="caption">{count}</Text>
           </InteractionItem>
           <InteractionItem>
             <MdAutoGraph />
@@ -106,18 +127,20 @@ export default function PostCard(post: PostWithRelations) {
   );
 }
 
-const PostCardContainer = styled.div`
+const PostCardContainer = styled.div<{ showDetails: boolean }>`
   width: 100%;
   border-radius: 10px;
-  border: 1px solid var(--grey-200);
-  background-color: var(--white);
+  border: ${({ showDetails }) =>
+    showDetails ? "none" : "1px solid var(--grey-200)"};
+  background-color: ${({ showDetails }) =>
+    showDetails ? "var(--grey-100)" : "var(--white)"};
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 7.5px;
-  cursor: pointer;
+  padding: ${({ showDetails }) => (showDetails ? "0px" : "7.5px")};
+  cursor: ${({ showDetails }) => (showDetails ? "default" : "pointer")};
   transition: background-color 0.1s ease;
   &:hover {
     background-color: var(--grey-100);
@@ -169,7 +192,7 @@ const UserDetailsWrapper = styled.div`
   color: var(--grey-500);
 `;
 
-const PostContentContainer = styled.div`
+const PostContentContainer = styled.div<{ showDetails: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -178,7 +201,8 @@ const PostContentContainer = styled.div`
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: ${({ showDetails }) => (showDetails ? "normal" : "nowrap")};
+  ${({ showDetails }) => (showDetails ? "overflow: visible;" : "")}
 `;
 
 const InteractionContainer = styled.div`
