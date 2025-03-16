@@ -5,7 +5,6 @@ import Text from "@/components/Text/Text";
 import styled from "@emotion/styled";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
-import { FaEdit } from "react-icons/fa";
 import { FiMenu } from "react-icons/fi";
 import dayjs from "@/utils/dayjs/dayjs";
 import { AdminOnly } from "@/components/auth/AdminOnly";
@@ -23,7 +22,6 @@ interface MissionCardProps {
 export default function MissionCard({
   mission,
   isModal = false,
-  onEdit,
   onDelete,
   maxWidth = "100%",
   missionInstance,

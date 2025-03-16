@@ -10,35 +10,34 @@ import { ProfileImage } from "@/components/navigation/ProfileImage";
 import { useAuth } from "@/components/AuthProvider";
 import { usePathname } from "next/navigation";
 import { Box } from "@chakra-ui/react";
+import { z } from "zod";
 
-// 리더보드 사용자 타입 정의
-interface LeaderboardUser {
-  id: number;
-  first_name: string | null;
-  last_name: string | null;
-  profile_image: string | null;
-  organization_name: string | null;
-  total_score: number;
-  rank: number;
-  isCurrentUser: boolean;
-}
+// Zod 스키마 정의
+const leaderboardUserSchema = z.object({
+  id: z.number(),
+  first_name: z.string().nullable(),
+  last_name: z.string().nullable(),
+  profile_image: z.string().nullable(),
+  organization_name: z.string().nullable(),
+  total_score: z.number(),
+  rank: z.number(),
+  isCurrentUser: z.boolean()
+});
 
-// 제출 현황 타입 정의
-interface SubmissionStats {
-  totalMissions: number;
-  completedMissions: number;
-  submittedMissions: number;
-  inProgressMissions: number;
-  notStartedMissions: number;
-  completionRate: number;
-}
+const submissionStatsSchema = z.object({
+  totalPosts: z.number(),
+  completedPosts: z.number(),
+  pendingPosts: z.number(),
+  completionRate: z.number()
+});
+
+// 타입 정의
+type LeaderboardUser = z.infer<typeof leaderboardUserSchema>;
+type SubmissionStats = z.infer<typeof submissionStatsSchema>;
 
 export default function DashboardTab() {
-  const [leaderboardUsers, setLeaderboardUsers] = useState<LeaderboardUser[]>(
-    []
-  );
-  const [submissionStats, setSubmissionStats] =
-    useState<SubmissionStats | null>(null);
+  const [leaderboardUsers, setLeaderboardUsers] = useState<LeaderboardUser[]>([]);
+  const [submissionStats, setSubmissionStats] = useState<SubmissionStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { id: userId } = useAuth();
@@ -53,7 +52,7 @@ export default function DashboardTab() {
   const journeySlug = getJourneyIdFromPathname();
 
   useEffect(() => {
-    const fetchLeaderboardData = async () => {
+    const fetchDashboardData = async () => {
       try {
         setIsLoading(true);
         const supabase = createClient();
@@ -73,32 +72,30 @@ export default function DashboardTab() {
 
         const journeyId = journeyData.id;
 
-        // 1. 현재 여정의 미션 인스턴스 가져오기
-        const { data: missionInstances, error: missionsError } =
-          await supabase.from("journey_mission_instances").select(`
-            id,
-            mission_id,
-            status,
-            missions (
-              id,
-              points
-            )
-          `);
-
-        if (missionsError) {
-          throw new Error(
-            `미션 데이터를 가져오는 중 오류 발생: ${missionsError.message}`
-          );
-        }
-
-        // 2. 사용자별 점수 계산을 위한 posts 데이터 가져오기
-        const { data: posts, error: postsError } = await supabase.from("posts")
+        // 1. 해당 여정의 모든 포스트 데이터 가져오기 (mission_instance 관계 포함)
+        const { data: postsData, error: postsError } = await supabase
+          .from("posts")
           .select(`
             id,
-            mission_instance_id,
+            title,
+            content,
             user_id,
-            score
-          `);
+            score,
+            created_at,
+            mission_instance_id,
+            file_url,
+            profiles (
+              id,
+              first_name, 
+              last_name,
+              profile_image,
+              organizations (
+                id,
+                name
+              )
+            )
+          `)
+          .order('created_at', { ascending: false });
 
         if (postsError) {
           throw new Error(
@@ -106,74 +103,41 @@ export default function DashboardTab() {
           );
         }
 
-        // 3. 사용자별 점수 계산
+        // 2. 사용자별 점수 계산
         const userScores: Record<number, number> = {};
+        const userMap: Record<number, any> = {};
 
-        // 완료된 미션 인스턴스 필터링
-        const completedMissionInstances = missionInstances.filter(
-          (mission) => mission.status === "completed"
-        );
+        postsData.forEach((post) => {
+          const postUserId = post.user_id;
+          const score = post.score || 0;
 
-        // 각 완료된 미션에 대해 사용자 점수 계산
-        completedMissionInstances.forEach((mission) => {
-          // 해당 미션에 대한 게시물 찾기
-          const relatedPosts = posts.filter(
-            (post) => post.mission_instance_id === mission.id
-          );
-
-          relatedPosts.forEach((post) => {
-            const postUserId = post.user_id;
-            const missionPoints = mission.missions?.points || 0;
-            const userScore = post.score || 0;
-
-            // 사용자별 점수 누적
-            if (!userScores[postUserId]) {
-              userScores[postUserId] = 0;
+          // 사용자별 점수 누적
+          if (!userScores[postUserId]) {
+            userScores[postUserId] = 0;
+            // 사용자 정보 저장
+            if (post.profiles) {
+              userMap[postUserId] = post.profiles;
             }
-            userScores[postUserId] += userScore > 0 ? userScore : missionPoints;
-          });
+          }
+          userScores[postUserId] += score;
         });
 
-        // 4. 사용자 정보 가져오기
-        const userIds = Object.keys(userScores).map(Number);
-
-        if (userIds.length === 0) {
-          setLeaderboardUsers([]);
-          return;
-        }
-
-        const { data: usersData, error: usersError } = await supabase
-          .from("profiles")
-          .select(
-            `
-            id,
-            first_name,
-            last_name,
-            profile_image,
-            organizations (
-              name
-            )
-          `
-          )
-          .in("id", userIds);
-
-        if (usersError) {
-          throw new Error(
-            `사용자 데이터를 가져오는 중 오류 발생: ${usersError.message}`
-          );
-        }
-
-        // 5. 리더보드 데이터 생성 및 정렬
-        const leaderboard = usersData.map((user) => ({
-          id: user.id,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          profile_image: user.profile_image,
-          organization_name: user.organizations?.name || null,
-          total_score: userScores[user.id] || 0,
-          rank: 0, // 초기값, 아래에서 계산
-          isCurrentUser: user.id === userId,
-        }));
+        // 3. 리더보드 데이터 생성
+        const leaderboard = Object.keys(userScores).map((userIdStr) => {
+          const userId = Number(userIdStr);
+          const user = userMap[userId];
+          
+          return {
+            id: userId,
+            first_name: user?.first_name || null,
+            last_name: user?.last_name || null,
+            profile_image: user?.profile_image || null,
+            organization_name: user?.organizations?.name || null,
+            total_score: userScores[userId] || 0,
+            rank: 0, // 초기값, 아래에서 계산
+            isCurrentUser: userId === userId,
+          };
+        });
 
         // 점수 기준 내림차순 정렬
         leaderboard.sort((a, b) => b.total_score - a.total_score);
@@ -186,36 +150,24 @@ export default function DashboardTab() {
         // 상위 5명만 선택
         setLeaderboardUsers(leaderboard.slice(0, 5));
 
-        // 6. 제출 현황 통계 계산
-        const totalMissionsCount = missionInstances.length;
-        const completedMissionsCount = missionInstances.filter(
-          (m) => m.status === "completed"
-        ).length;
-        const submittedMissionsCount = missionInstances.filter(
-          (m) => m.status === "submitted"
-        ).length;
-        const inProgressMissionsCount = missionInstances.filter(
-          (m) => m.status === "in_progress"
-        ).length;
-        const notStartedMissionsCount = missionInstances.filter(
-          (m) => m.status === "not_started"
-        ).length;
-
-        const completionRate =
-          totalMissionsCount > 0
-            ? Math.round((completedMissionsCount / totalMissionsCount) * 100)
-            : 0;
+        // 4. 제출 현황 통계 계산
+        const totalPosts = postsData.length;
+        const completedPosts = postsData.filter(post => post.score !== null && post.score > 0).length;
+        const pendingPosts = totalPosts - completedPosts;
+        
+        const completionRate = totalPosts > 0 
+          ? Math.round((completedPosts / totalPosts) * 100) 
+          : 0;
 
         setSubmissionStats({
-          totalMissions: totalMissionsCount,
-          completedMissions: completedMissionsCount,
-          submittedMissions: submittedMissionsCount,
-          inProgressMissions: inProgressMissionsCount,
-          notStartedMissions: notStartedMissionsCount,
-          completionRate,
+          totalPosts,
+          completedPosts,
+          pendingPosts,
+          completionRate
         });
+        
       } catch (err) {
-        console.error("리더보드 데이터를 가져오는 중 오류 발생:", err);
+        console.error("대시보드 데이터를 가져오는 중 오류 발생:", err);
         setError(
           err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."
         );
@@ -225,7 +177,7 @@ export default function DashboardTab() {
     };
 
     if (journeySlug) {
-      fetchLeaderboardData();
+      fetchDashboardData();
     }
   }, [journeySlug, userId]);
 
@@ -246,7 +198,7 @@ export default function DashboardTab() {
       {/* 제출 현황 섹션 */}
       <SectionContainer>
         <Text variant="body" fontWeight="bold" className="section-title">
-          미션 제출 현황
+          게시물 현황
         </Text>
 
         {submissionStats ? (
@@ -272,53 +224,41 @@ export default function DashboardTab() {
                   </text>
                 </svg>
               </Box>
-              <Text variant="caption">완료율</Text>
+              <Text variant="caption">평가 완료율</Text>
             </CircularProgressWrapper>
 
             <StatsDetailsContainer>
               <StatItem>
-                <Text variant="body">전체 미션</Text>
+                <Text variant="body">전체 게시물</Text>
                 <Text variant="body" fontWeight="bold">
-                  {submissionStats.totalMissions}개
+                  {submissionStats.totalPosts}개
                 </Text>
               </StatItem>
               <StatItem>
-                <Text variant="body">완료</Text>
+                <Text variant="body">평가 완료</Text>
                 <Text
                   variant="body"
                   fontWeight="bold"
                   color="var(--primary-500)"
                 >
-                  {submissionStats.completedMissions}개
+                  {submissionStats.completedPosts}개
                 </Text>
               </StatItem>
               <StatItem>
-                <Text variant="body">제출됨</Text>
-                <Text variant="body" fontWeight="bold" color="var(--info-500)">
-                  {submissionStats.submittedMissions}개
-                </Text>
-              </StatItem>
-              <StatItem>
-                <Text variant="body">진행 중</Text>
+                <Text variant="body">평가 대기</Text>
                 <Text
                   variant="body"
                   fontWeight="bold"
                   color="var(--warning-500)"
                 >
-                  {submissionStats.inProgressMissions}개
-                </Text>
-              </StatItem>
-              <StatItem>
-                <Text variant="body">시작 전</Text>
-                <Text variant="body" fontWeight="bold" color="var(--grey-500)">
-                  {submissionStats.notStartedMissions}개
+                  {submissionStats.pendingPosts}개
                 </Text>
               </StatItem>
             </StatsDetailsContainer>
           </StatsContainer>
         ) : (
           <EmptyState>
-            <Text color="var(--grey-500)">미션 데이터가 없습니다.</Text>
+            <Text color="var(--grey-500)">게시물 데이터가 없습니다.</Text>
           </EmptyState>
         )}
       </SectionContainer>
@@ -373,7 +313,7 @@ export default function DashboardTab() {
           </LeaderboardContainer>
         ) : (
           <EmptyState>
-            <Text color="var(--grey-500)">아직 완료된 미션이 없습니다.</Text>
+            <Text color="var(--grey-500)">아직 게시물이 없습니다.</Text>
           </EmptyState>
         )}
       </SectionContainer>

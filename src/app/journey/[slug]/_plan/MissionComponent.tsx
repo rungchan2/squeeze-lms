@@ -20,6 +20,7 @@ import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import { getMissionTypes } from "@/app/journey/actions";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
+import { JourneyMissionInstanceWithMission } from "@/types";
 interface MissionComponentProps {
   weekId: number;
   weekName: string;
@@ -267,7 +268,7 @@ export default function MissionComponent({
           {missionInstances.map((instance) => (
             <MissionCard
               key={instance.id}
-              mission={instance.missions}
+              mission={instance.mission}
               onEdit={handleEditMission}
               onDelete={async () => {
                 try {
@@ -281,7 +282,7 @@ export default function MissionComponent({
                   setIsLoadingMissions(false);
                 }
               }}
-              missionInstance={instance}
+              missionInstance={instance as unknown as JourneyMissionInstanceWithMission}
             />
           ))}
         </div>

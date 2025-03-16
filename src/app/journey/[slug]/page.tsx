@@ -9,6 +9,7 @@ import PlanTab from "./_plan/PlanTab";
 import MissionTab from "./_mission/MissionTab";
 import FeedTab from "./_feed/FeedTab";
 import DashboardTab from "./_dashboard/DashboardTab";
+import SettingTab from "./_setting/SettingTab";
 
 // params 타입을 Promise로 정의
 type Params = Promise<{ slug: string }>;
@@ -42,9 +43,7 @@ export default async function JourneyPage({
           <FeedTab />
         </Tab>
         <Tab title="설정" icon={<FiMenu />} path="settings">
-          <div>
-            <h1>여행 정보5</h1>
-          </div>
+          <SettingTab/>
         </Tab>
       </Tabs>
     </div>
