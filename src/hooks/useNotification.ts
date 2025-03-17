@@ -3,7 +3,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Notification, NotificationInsert } from "@/types";
 
 // 알림을 가져오는 fetcher 함수
-const fetchNotifications = async (url: string): Promise<Notification[]> => {
+const fetchNotifications = async (): Promise<Notification[]> => {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("notifications")

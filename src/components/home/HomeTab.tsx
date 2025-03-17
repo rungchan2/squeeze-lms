@@ -52,7 +52,7 @@ function JourneyTab() {
         <NoJourney />
       )}
       <AdminOnly>
-        <FloatingButton onClick={() => router.push("/journey/create-journey")}>
+        <FloatingButton onClick={() => router.push("/create-journey")}>
           <FaPlus />
           <Text variant="body" fontWeight="bold" color="var(--white)">
             새 조직
