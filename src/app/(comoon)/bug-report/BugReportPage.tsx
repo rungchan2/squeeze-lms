@@ -122,6 +122,8 @@ export default function BugReport() {
 }
 
 const StyledContainer = styled.div`
+  max-width: var(--breakpoint-tablet);
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 10px;

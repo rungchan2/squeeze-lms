@@ -12,7 +12,7 @@ export default function MyPost() {
     return (
         <div className={styles.postContainer}>
             {data?.map((post: any) => (
-                <PostCard key={post.id} {...post} />
+                <PostCard key={post.id} post={post} />
             ))}
         </div>
     );

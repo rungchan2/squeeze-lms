@@ -75,7 +75,7 @@ export default function CommentInputSection({ createComment }: CommentInputSecti
           onKeyDown={handleKeyDown}
           content={comment}
           onChange={handleCommentChange}
-          placeholder="멘션을 입력하려면 @ 기호를 입력하세요..."
+          placeholder="댓글..."
         />
       </div>
       <div className="comment-section-footer">
