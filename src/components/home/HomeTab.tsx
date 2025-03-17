@@ -1,6 +1,6 @@
 import { Tabs, Tab } from "@/components/tab/Tabs";
 import { MdSpaceDashboard } from "react-icons/md";
-import { FaBell, FaPlus } from "react-icons/fa";
+import { FaBell } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import JourneyCard from "@/components/home/space/JourneyCard";
 import { useJourney } from "@/hooks/useJourney";
@@ -10,13 +10,8 @@ import NoJourney from "./space/NoJourney";
 import NotificationCard from "./notification/NotificationCard";
 import { useNotification } from "@/hooks/useNotification";
 import MyPage from "./mypage/MyPage";
-import { FloatingButton } from "@/components/common/FloatingButton";
-import Text from "../Text/Text";
-import { useRouter } from "next/navigation";
-import { AdminOnly } from "../auth/AdminOnly";
 
 export default function HomeTab() {
-
   return (
     <Tabs usePath={true}>
       <Tab title="내 조직" icon={<MdSpaceDashboard />} path="home">
@@ -33,12 +28,10 @@ export default function HomeTab() {
 }
 
 function JourneyTab() {
-  const router = useRouter();
   const { journeys, error, isLoading } = useJourney();
   if (error) {
     return <div>Error: {error.message}</div>;
   }
-  
   return (
     <JourneysContainer>
       {isLoading ? (
@@ -52,14 +45,6 @@ function JourneyTab() {
       ) : (
         <NoJourney />
       )}
-      <AdminOnly>
-        <FloatingButton onClick={() => router.push("/create-journey")}>
-          <FaPlus />
-          <Text variant="body" fontWeight="bold" color="var(--white)">
-            새 조직
-          </Text>
-        </FloatingButton>
-      </AdminOnly>
     </JourneysContainer>
   );
 }
@@ -72,8 +57,7 @@ const JourneysContainer = styled.div`
 `;
 
 function NotificationTab() {
-  const { data, isLoading, error, readNotification } = useNotification();
-  
+  const { data, isLoading, error } = useNotification();
   if (error) {
     return <div>Error: {error.message}</div>;
   }
@@ -87,11 +71,7 @@ function NotificationTab() {
   return (
     <NotificationsContainer>
       {data?.map((notification) => (
-        <NotificationCard
-          key={notification.id}
-          notification={notification}
-          readNotification={readNotification}
-        />
+        <NotificationCard {...notification} key={notification.id} />
       ))}
     </NotificationsContainer>
   );

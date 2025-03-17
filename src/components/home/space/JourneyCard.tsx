@@ -8,32 +8,13 @@ import { useRouter } from "next/navigation";
 import Text from "@/components/Text/Text";
 import { useJourneyUser } from "@/hooks/useJourneyUser";
 import { AdminOnly } from "@/components/auth/AdminOnly";
-import { Menu, Portal } from "@chakra-ui/react";
-import { useJourney } from "@/hooks/useJourney";
-import { toaster } from "@/components/ui/toaster";
-import { useNotification } from "@/hooks/useNotification";
 
 export default function JourneyCard({ journey }: { journey: Journey }) {
   const defaultImage = "https://picsum.photos/200/200";
   const router = useRouter();
-  const { createNotification } = useNotification();
-  const { adminNum, participantNum, teacherNum, isUserJoined } = useJourneyUser(
-    journey.id
-  );
-  const { removeJourney } = useJourney();
-
-  const handleClick = () => {
-    if (isUserJoined) {
-      router.push(`/journey/${journey.uuid}`);
-    } else {
-      toaster.create({
-        title: "초대되지 않은 클라스 입니다. 담당 선생님에게 초대를 요구해주세요.",
-        type: "warning",
-      });
-    }
-  };
+  const { adminNum, participantNum, teacherNum } = useJourneyUser(journey.id);
   return (
-    <Container onClick={handleClick}>
+    <Container onClick={() => router.push(`/journey/${journey.uuid}`)}>
       <InnerContainer>
         <Image
           src={journey.image_url || defaultImage}
@@ -43,57 +24,21 @@ export default function JourneyCard({ journey }: { journey: Journey }) {
           style={{ borderRadius: "10px" }}
         />
         <TextContainer>
-          <Text variant="body" fontWeight="bold">
+          <Text variant="caption" style={{ fontWeight: "bold" }}>
             {journey.name}
           </Text>
           <DateContainer>
-            <Text variant="small" color="var(--grey-500)">
-              관리자 {adminNum} • 학생 {participantNum} • 선생님 {teacherNum}
+            <Text variant="small" color="var(--grey-400)">
+              Admin {adminNum} • Participant {participantNum} • Teacher {teacherNum}
             </Text>
-            <Text variant="small" color="var(--grey-500)">
-              기간 : {journey.date_start} ~ {journey.date_end}
+            <Text variant="small" color="var(--grey-400)">
+              {journey.date_start} ~ {journey.date_end}
             </Text>
           </DateContainer>
         </TextContainer>
       </InnerContainer>
       <AdminOnly>
-        <Menu.Root>
-          <Menu.Trigger asChild onClick={(e) => e.stopPropagation()}>
-            <div className="menu-trigger">
-              <HiDotsVertical />
-            </div>
-          </Menu.Trigger>
-          <Portal>
-            <Menu.Positioner>
-              <Menu.Content>
-                <Menu.Item
-                  style={{ cursor: "pointer" }}
-                  value="edit"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(`/journey/${journey.uuid}/edit`);
-                  }}
-                >
-                  수정
-                </Menu.Item>
-                <Menu.Item
-                  style={{ cursor: "pointer" }}
-                  value="delete"
-                  color="fg.error"
-                  _hover={{ bg: "bg.error", color: "fg.error" }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (confirm("삭제하시겠습니까?")) {
-                      removeJourney(journey.id);
-                    }
-                  }}
-                >
-                  삭제
-                </Menu.Item>
-              </Menu.Content>
-            </Menu.Positioner>
-          </Portal>
-        </Menu.Root>
+        <HiDotsVertical />
       </AdminOnly>
     </Container>
   );
@@ -101,7 +46,7 @@ export default function JourneyCard({ journey }: { journey: Journey }) {
 
 const Container = styled.div`
   width: 100%;
-  padding: 14px;
+  padding: 8px 14px;
   gap: 16px;
   justify-content: space-between;
   border: 1px solid var(--grey-500);
@@ -116,16 +61,6 @@ const Container = styled.div`
   &:hover {
     background: var(--gray-100);
   }
-
-  .menu-trigger {
-    cursor: pointer;
-    padding: 6px;
-
-    &:hover {
-      background: var(--grey-200);
-      border-radius: 50%;
-    }
-  }
 `;
 
 const InnerContainer = styled.div`
@@ -137,15 +72,12 @@ const InnerContainer = styled.div`
 
 const TextContainer = styled.div`
   flex-direction: column;
-  justify-content: space-between;
   display: flex;
   gap: 4px;
 `;
 
 const DateContainer = styled.div`
-  height: 100%;
-  justify-content: space-between;
+  align-items: flex-start;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 `;

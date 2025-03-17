@@ -28,7 +28,7 @@ const Button = styled.button`
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
-  gap: 8px;
+  gap: 5px;
   border-radius: 30px;
   & > * {
     color: var(--white);

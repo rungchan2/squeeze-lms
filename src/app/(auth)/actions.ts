@@ -64,17 +64,3 @@ export async function createProfile(profile: CreateUser) {
   const { data, error } = await supabase.from("profiles").insert(profile).single();
   return { data, error };
 }
-
-export async function getAdmin() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("profiles").select("*").eq("role", "admin");
-  return { data, error };
-}
-
-export async function getTeacher() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("profiles").select("*").eq("role", "teacher");
-  return { data, error };
-}
-
-

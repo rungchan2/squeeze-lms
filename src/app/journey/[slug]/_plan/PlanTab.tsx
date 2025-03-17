@@ -9,6 +9,7 @@ import Spinner from "@/components/common/Spinner";
 import { useWeeks } from "@/hooks/useWeeks";
 import styled from "@emotion/styled";
 import WeekCard from "./WeekCard";
+import Button from "@/components/common/Button";
 import { AdminOnly } from "@/components/auth/AdminOnly";
 import { FloatingButton } from "@/components/common/FloatingButton";
 import { FaWandMagicSparkles } from "react-icons/fa6";

@@ -32,21 +32,21 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
       if (!ticking.current) {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
-
+          
           // 스크롤 방향 감지
           const isScrollingDown = currentScrollY > lastScrollY.current;
-
+          
           // 스크롤 방향에 따라 네비게이션 바 표시/숨김
           if (isScrollingDown && currentScrollY > 70) {
             setIsVisible(false);
           } else {
             setIsVisible(true);
           }
-
+          
           lastScrollY.current = currentScrollY;
           ticking.current = false;
         });
-
+        
         ticking.current = true;
       }
     };
@@ -77,35 +77,33 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
 
   return (
     <StyledNavigation $isVisible={isVisible && !isException}>
-      <div className="outside-container">
-        <div className="left-container">
-          {isJourney ? (
-            <>
-              <IconContainer onClick={() => router.push("/")} padding="6px">
-                <FaHome size={20} />
-              </IconContainer>
-              <Separator orientation="vertical" height="100%" size="sm" />
-              <select className="dropdown" onChange={onDropDownChange}>
-                {journeyList && journeyList.length > 0 ? (
-                  journeyList.map((journey) => (
-                    <option value={journey.journeys?.uuid} key={journey.id}>
-                      {journey.journeys?.name}
-                    </option>
-                  ))
-                ) : (
-                  <option value={0} key={0}>
-                    여행 없음
+      <div className="left-container">
+        {isJourney ? (
+          <>
+            <IconContainer onClick={() => router.push("/")} padding="6px">
+              <FaHome size={20} />
+            </IconContainer>
+            <Separator orientation="vertical" height="100%" size="sm" />
+            <select className="dropdown" onChange={onDropDownChange}>
+              {journeyList && journeyList.length > 0 ? (
+                journeyList.map((journey) => (
+                  <option value={journey.journeys?.uuid} key={journey.id}>
+                    {journey.journeys?.name}
                   </option>
-                )}
-              </select>
-            </>
-          ) : (
-            <Logo width={100} />
-          )}
-        </div>
-        <div className="right-container">
-          <ProfileImage profileImage={profileImage} width={30} />
-        </div>
+                ))
+              ) : (
+                <option value={0} key={0}>
+                  여행 없음
+                </option>
+              )}
+            </select>
+          </>
+        ) : (
+          <Logo width={100} />
+        )}
+      </div>
+      <div className="right-container">
+        <ProfileImage profileImage={profileImage} width={30} />
       </div>
     </StyledNavigation>
   );
@@ -123,6 +121,7 @@ const StyledNavigation = styled.div<{ $isVisible: boolean }>`
     overflow: hidden;
     padding-right: 12px;
   }
+
   position: fixed;
   gap: 70px;
   top: 0;
@@ -139,16 +138,6 @@ const StyledNavigation = styled.div<{ $isVisible: boolean }>`
   transition: transform 0.3s ease-in-out;
   transform: translateY(${(props) => (props.$isVisible ? "0" : "-100%")});
   z-index: 1000;
-
-  .outside-container {
-    max-width: var(--breakpoint-tablet);
-    gap: 70px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-  }
 
   .left-container {
     display: flex;

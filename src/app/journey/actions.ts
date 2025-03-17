@@ -1,11 +1,11 @@
 "use server";
 
-import { CreatePost, CreateJourney } from "@/types";
+import { CreatePost } from "@/types";
 import { createClient } from "@/utils/supabase/server";
 
 export async function getJourney(uuid: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("journeys").select("*").eq("uuid", uuid).single();
+  const { data, error } = await supabase.from("journeys").select("*").eq("uuid", uuid);
   return {data, error};
 }
 
@@ -46,17 +46,5 @@ export async function createPost(post: CreatePost) {
   const { data, error } = await supabase.from("posts").insert(insertData);
   
   console.log("inaction file", data, error);
-  return { data, error };
-}
-
-export async function createJourney(journey: CreateJourney) {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("journeys").insert(journey);
-  return { data, error };
-}
-
-export async function updateJourney(id: number, journey: CreateJourney) {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("journeys").update(journey).eq("id", id);
   return { data, error };
 }

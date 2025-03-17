@@ -1,4 +1,4 @@
-import styles from "../Home.module.css";
+import styles from "../Home.module.css"
 import { FaBell } from "react-icons/fa";
 import { HiDotsHorizontal } from "react-icons/hi";
 import Text from "@/components/Text/Text";
@@ -7,72 +7,59 @@ import { Modal } from "../../modal/Modal";
 import { useState } from "react";
 import dayjs from "@/utils/dayjs/dayjs";
 import Button from "../../common/Button";
+import Dropdown from "../../dropdown/Dropdown";
 import { formatDifference } from "@/utils/dayjs/calcDifference";
-import { Menu, Portal } from "@chakra-ui/react";
-import styled from "@emotion/styled";
-
-interface NotificationCardProps {
-  notification: Notification;
-  readNotification: (id: number) => void;
-}
-
-export default function NotificationCard({
-  notification,
-  readNotification
-}: NotificationCardProps) {
+export default function NotificationCard(notification: Notification) {
   const duration = formatDifference(notification.created_at || "");
   const [isOpen, setIsOpen] = useState(false);
-  const isNotificationRead = notification.read_at !== null;
   return (
-    <Container>
+    <>
       <div className={styles.notificationCard} onClick={() => setIsOpen(true)}>
         <div className={styles.contentContainer}>
-          <FaBell color={isNotificationRead ? "var(--grey-500)" : "var(--primary-400)"} />
+          <FaBell color="var(--grey-500)" />
           <div className={styles.textContainer}>
-            <Text
-              variant="body"
-              fontWeight="bold"
-              className={isNotificationRead ? "read notification-title" : "notification-title"}
-            >
+            <Text variant="body" fontWeight="bold">
               {notification.message}
             </Text>
             <div className={styles.dateContainer}>
               <Text variant="small" color="var(--grey-400)">
-                {duration} {isNotificationRead ? "(읽음)" : ""}
+                {duration}
               </Text>
             </div>
           </div>
-          <Menu.Root>
-            <Menu.Trigger asChild>
-              <div
-                className={styles.dotsContainer}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
+
+          <Dropdown
+            toggleButton={
+              <div className={styles.dotsContainer}>
                 <HiDotsHorizontal
                   className={styles.dots}
                   color="var(--grey-500)"
                 />
               </div>
-            </Menu.Trigger>
-            <Portal>
-              <Menu.Positioner>
-                <Menu.Content>
-                  <Menu.Item
-                    value="reject"
-                    style={{ cursor: "pointer" }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      readNotification(notification.id);
-                    }}
-                  >
-                    읽음
-                  </Menu.Item>
-                </Menu.Content>
-              </Menu.Positioner>
-            </Portal>
-          </Menu.Root>
+            }
+            items={[
+              <Text
+                variant="small"
+                key="accept"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("accept");
+                }}
+              >
+                수락
+              </Text>,
+              <Text
+                variant="small"
+                key="reject"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("reject");
+                }}
+              >
+                거절
+              </Text>,
+            ]}
+          />
         </div>
         {notification.type === "request" && (
           <div className={styles.buttonContainer}>
@@ -126,30 +113,6 @@ export default function NotificationCard({
           </div>
         </Modal>
       </div>
-    </Container>
+    </>
   );
 }
-
-
-const Container = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .read {
-    color: var(--grey-400);
-  }
-
-  .notification-title {
-    color: var(--primary-400);
-    word-break: break-all;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    max-width: 100%;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-  }
-`;

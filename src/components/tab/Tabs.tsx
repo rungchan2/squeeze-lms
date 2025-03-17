@@ -36,6 +36,7 @@ function Tabs({
   hoverActiveColor = "transparent",
   defaultIndex = 0,
   flexDirection = "row",
+  variant = "underline"
 }: TabsProps) {
   const searchParams = useSearchParams();
   const router = useRouter();

@@ -39,7 +39,7 @@ export default async function JourneyPage({
         <Tab title="순위" icon={<VscGraphLine />} path="dashboard">
           <DashboardTab/>
         </Tab>
-        <Tab title="피드" icon={<TbMessages />} path="feed">
+        <Tab title="피드" icon={<TbMessages />} path="discussion">
           <FeedTab />
         </Tab>
         <Tab title="설정" icon={<FiMenu />} path="settings">

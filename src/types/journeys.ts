@@ -11,11 +11,10 @@ export const journeySchema = z.object({
   uuid: z.string().uuid(),
 })
 
-export const createJourneySchema = z.object({
-  name: z.string().min(1, { message: "이름을 입력해주세요." }),
-  date_start: z.string().min(1, { message: "날짜를 입력해주세요." }),
-  date_end: z.string().min(1, { message: "날짜를 입력해주세요." }),
-  image_url: z.string().min(1, { message: "이미지를 업로드해주세요." }),
+export const createJourneySchema = journeySchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
 })
 
 export const updateJourneySchema = createJourneySchema.partial()
