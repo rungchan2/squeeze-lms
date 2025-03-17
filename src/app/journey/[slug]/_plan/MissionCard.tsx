@@ -27,8 +27,20 @@ export default function MissionCard({
   missionInstance,
   showDetails = false,
 }: MissionCardProps) {
+  const dDay: string =
+    calcDifference(missionInstance?.expiry_date || "") > 0
+      ? "-" + calcDifference(missionInstance?.expiry_date || "")
+      : "+" +
+        calcDifference(missionInstance?.expiry_date || "")
+          .toString()
+          .split("-")[1];
+  const isDDayPassed = calcDifference(missionInstance?.expiry_date || "") < 0;
   return (
-    <StyledMissionCard isModal={isModal} maxWidth={maxWidth} showDetails={showDetails}>
+    <StyledMissionCard
+      isModal={isModal}
+      maxWidth={maxWidth}
+      showDetails={showDetails}
+    >
       <div className="left-container">
         {!isModal && <FiMenu size="16px" style={{ minWidth: "16px" }} />}
         <div className="mission-item-header">
@@ -45,10 +57,17 @@ export default function MissionCard({
             </Text>
           </div>
           {!isModal && missionInstance && (
-            <Text variant="small">
-              {dayjs(missionInstance.release_date).format("M/D")} ~{" "}
-              {dayjs(missionInstance.expiry_date).format("M/D")}
-            </Text>
+            <div className="horizontal-mission-container">
+              <Text variant="small">
+                {dayjs(missionInstance.release_date).format("M/D")} ~{" "}
+                {dayjs(missionInstance.expiry_date).format("M/D")}
+              </Text>
+              {missionInstance.expiry_date && (
+                <div className={`d-day ${isDDayPassed ? "" : "negative"}`}>
+                  <Text variant="small">D{dDay}</Text>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -58,13 +77,6 @@ export default function MissionCard({
           <div className="mission-meta">
             <Text variant="small">{mission.points || 0}PT</Text>
           </div>
-          {missionInstance?.expiry_date && (
-            <div className="d-day">
-              <Text variant="small">
-                D-{calcDifference(missionInstance?.expiry_date || "")}
-              </Text>
-            </div>
-          )}
           <AdminOnly>
             <div className="mission-actions">
               {/* <IconContainer onClick={() => onEdit?.(mission.id)}>
@@ -105,6 +117,13 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
   border-radius: ${(props) => (props.isModal ? "4px 0 0 4px" : "4px")};
   flex: 1;
   max-width: ${(props) => props.maxWidth};
+
+  .horizontal-mission-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
   .left-container {
     display: flex;
     align-items: center;
@@ -156,10 +175,16 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
   }
   .d-day {
     display: flex;
+    border: 1px solid var(--grey-200);
     gap: 1rem;
-    color: var(--white);
+    color: var(--grey-600);
     padding: 4px 4px;
     border-radius: 4px;
-    background-color: var(--negative-600);
+
+    &.negative {
+      background-color: var(--negative-600);
+      color: var(--white);
+      border: none;
+    }
   }
 `;

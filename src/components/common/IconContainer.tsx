@@ -1,18 +1,22 @@
 import styled from "@emotion/styled";
+import { RefObject } from "react";
+
 type IconContainerProps = {
   children: React.ReactNode;
   padding?: string;
   onClick?: () => void;
   hoverColor?: string;
+  ref?: RefObject<HTMLDivElement | null>;
 };
 export function IconContainer({
   children,
   padding = "4px",
   onClick,
   hoverColor = "var(--grey-600)",
+  ref,
 }: IconContainerProps) {
   return (
-    <StyledIconContainer onClick={onClick} padding={padding} hoverColor={hoverColor}>
+    <StyledIconContainer onClick={onClick} padding={padding} hoverColor={hoverColor} ref={ref}>
       {children}
     </StyledIconContainer>
   );

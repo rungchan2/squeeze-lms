@@ -4,6 +4,7 @@ import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/toaster";
 import { Navigation } from "@/components/navigation/Navigation";
+import { KakaoScript } from "@/components/KaKao";
 
 export const metadata: Metadata = {
   title: "Squeeze LMS",
@@ -26,6 +27,7 @@ export default function RootLayout({
           <div className="root-footer"></div>
           <Toaster />
           <SpeedInsights />
+          <KakaoScript />
         </Providers>
       </body>
     </html>

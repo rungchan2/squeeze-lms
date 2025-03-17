@@ -16,10 +16,17 @@ import { useLikes } from "@/hooks/useLikes";
 import RichTextViewer from "@/components/richTextInput/RichTextViewer";
 import { useAuth } from "@/components/AuthProvider";
 import { useComments } from "@/hooks/useComments";
+import { useEffect, useCallback } from "react";
 
 interface PostCardProps {
   post: PostWithRelations;
   showDetails?: boolean;
+}
+
+declare global {
+  interface Window {
+    Kakao: any;
+  }
 }
 
 export default function PostCard({ post, showDetails = false }: PostCardProps) {
@@ -30,6 +37,13 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
 
   const { data: userLike } = useUserLike(id);
   const isUserLike = Boolean(userLike);
+
+  // Kakao SDK 로드 확인
+  useEffect(() => {
+    if (!window.Kakao || !window.Kakao.isInitialized()) {
+      console.warn("Kakao SDK가 초기화되지 않았습니다.");
+    }
+  }, []);
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -45,6 +59,45 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
       onLike(id);
     }
   };
+  
+  const handleShare = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!window.Kakao || !window.Kakao.Share) {
+      console.error("Kakao SDK가 로드되지 않았습니다.");
+      return;
+    }
+    
+    // 현재 창의 URL 가져오기
+    const currentUrl = window.location.origin + `/post/${post.id}`;
+    
+    window.Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: post.title,
+        description: post.content ? post.content.replace(/<[^>]*>?/gm, '').substring(0, 100) + '...' : '내용이 없습니다.',
+        imageUrl: post.file_url || 'https://via.placeholder.com/500',
+        link: {
+          mobileWebUrl: currentUrl,
+          webUrl: currentUrl,
+        },
+      },
+      social: {
+        likeCount: likesCount,
+        commentCount: count,
+        viewCount: post.view_count,
+      },
+      buttons: [
+        {
+          title: '자세히 보기',
+          link: {
+            mobileWebUrl: currentUrl,
+            webUrl: currentUrl,
+          },
+        },
+      ],
+    });
+  }, [post, likesCount, count]);
 
   return (
     <PostCardContainer
@@ -74,7 +127,7 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
               <Text variant="small" fontWeight="bold">
                 {post?.profiles?.organizations?.name
                   ? post?.profiles?.organizations?.name
-                  : "익명"}
+                  : "무소속"}
               </Text>
               <LuDot />
               <Text variant="small" fontWeight="bold">
@@ -95,7 +148,10 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
               <RichTextViewer content={post.content || ""} />
             </div>
           ) : (
-            <Text variant="body">{post.content}</Text>
+            <div
+                className="not-details-content"
+                dangerouslySetInnerHTML={{ __html: post.content || "" }}
+              />
           )}
         </PostContentContainer>
 
@@ -118,8 +174,9 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
             <MdAutoGraph />
             <Text variant="caption">{post.view_count}</Text>
           </InteractionItem>
-          <InteractionItem>
+          <InteractionItem onClick={handleShare} data-kakao-share="true">
             <FaShare />
+            <Text variant="caption">공유</Text>
           </InteractionItem>
         </InteractionContainer>
       </ContentWrapper>
@@ -234,5 +291,16 @@ const InteractionItem = styled.div`
 
   p {
     margin-bottom: -1px;
+  }
+
+  .not-details-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-clamp: 5;
+    max-width: 100%;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
   }
 `;
