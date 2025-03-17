@@ -18,12 +18,16 @@ import { MdPrivacyTip, MdFeedback, MdLogout, MdLanguage } from "react-icons/md";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import { Menu, Portal } from "@chakra-ui/react";
+import { useRef } from "react";
 
 export default function MyPage() {
   const { logout } = useAuthStore();
   const router = useRouter();
   const { profileImage, email, fullName } = useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const getAnchorRect = () => ref.current!.getBoundingClientRect();
 
   const handleLogout = useCallback(() => {
     logout();
@@ -32,11 +36,26 @@ export default function MyPage() {
   return (
     <PostContainer>
       <div className="header">
-        <Heading level={2}>내 정보</Heading>
+        <Heading level={3}>내 정보</Heading>
         <div className="iconContainer">
           <IconContainer padding="5px">
             <FiEdit />
           </IconContainer>
+          <Menu.Root positioning={{ getAnchorRect }}>
+            <Menu.Trigger asChild>
+              <IconContainer padding="5px" ref={ref}>
+                <MdLanguage />
+              </IconContainer>
+            </Menu.Trigger>
+            <Portal>
+              <Menu.Positioner>
+                <Menu.Content>
+                  <Menu.Item value="Korean">한국어</Menu.Item>
+                  <Menu.Item value="English">English</Menu.Item>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Portal>
+          </Menu.Root>
           <IconContainer padding="5px" onClick={() => setIsMenuOpen(true)}>
             <IoSettingsOutline />
             <SideMenu
@@ -44,25 +63,12 @@ export default function MyPage() {
               onClose={() => setIsMenuOpen(false)}
               width="100%"
             >
-              <MenuItem title="" icon={<MdLanguage />}>
-                <Text>언어</Text>
-              </MenuItem>
-              <Link href="/bug-report">
-                <MenuItem title="" icon={<IoSettingsOutline />}>
-                  <Text>버그 신고</Text>
-                </MenuItem>
-              </Link>
               <Link href="/privacy-policy">
                 <MenuItem title="" icon={<MdPrivacyTip />}>
                   <Text>개인정보처리방침</Text>
                 </MenuItem>
               </Link>
-
-              <MenuItem title="" icon={<MdLogout />} onClick={handleLogout}>
-                <Text>로그아웃</Text>
-              </MenuItem>
-              <Separator style={{ margin: "10px 0" }} />
-              <Link href="/feedback">
+              <Link href="/bug-report">
                 <MenuItem title="" icon={<MdFeedback />}>
                   <Text>피드백</Text>
                 </MenuItem>
@@ -70,6 +76,10 @@ export default function MyPage() {
               <Link href="/guide">
                 <MenuItem title="" icon={<FaRegQuestionCircle />}>
                   <Text>가이드</Text>
+                </MenuItem>
+                <Separator style={{ margin: "10px 0" }} />
+                <MenuItem title="" icon={<MdLogout />} onClick={handleLogout}>
+                  <Text>로그아웃</Text>
                 </MenuItem>
               </Link>
             </SideMenu>
@@ -87,11 +97,11 @@ export default function MyPage() {
             <Text
               variant="body"
               color="var(--grey-500)"
-              style={{ 
+              style={{
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 wordBreak: "break-word",
-                maxWidth: "100%" 
+                maxWidth: "100%",
               }}
             >
               {email}

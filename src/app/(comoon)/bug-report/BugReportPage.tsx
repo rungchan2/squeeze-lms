@@ -69,7 +69,7 @@ export default function BugReport() {
     <StyledContainer>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="heading-container">
-          <Heading level={2}>버그 신고</Heading>
+          <Heading level={3}>버그 신고</Heading>
           <Text color="var(--grey-500)">
             관리자에게 불편한 점이나 피드백을 전달해주세요.
           </Text>
