@@ -74,7 +74,7 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
               <Text variant="small" fontWeight="bold">
                 {post?.profiles?.organizations?.name
                   ? post?.profiles?.organizations?.name
-                  : "익명"}
+                  : "무소속"}
               </Text>
               <LuDot />
               <Text variant="small" fontWeight="bold">
@@ -95,7 +95,10 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
               <RichTextViewer content={post.content || ""} />
             </div>
           ) : (
-            <Text variant="body">{post.content}</Text>
+            <div
+                className="not-details-content"
+                dangerouslySetInnerHTML={{ __html: post.content || "" }}
+              />
           )}
         </PostContentContainer>
 
@@ -234,5 +237,16 @@ const InteractionItem = styled.div`
 
   p {
     margin-bottom: -1px;
+  }
+
+  .not-details-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-clamp: 5;
+    max-width: 100%;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
   }
 `;

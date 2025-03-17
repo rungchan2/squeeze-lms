@@ -1,10 +1,13 @@
 import PostCard from "@/components/home/mypage/PostCard";
-import { usePosts } from "@/hooks/usePosts";
 import styles from "./Mypage.module.css";
+import { useMyPosts } from "@/hooks/usePosts";
+import Spinner from "@/components/common/Spinner";
 
 export default function MyPost() {
-    const { data, error } = usePosts();
-
+    const { data, isLoading: isMyPostsLoading, error } = useMyPosts();
+    if (isMyPostsLoading) {
+        return <div><Spinner /></div>;
+    }
     if (error) {
         return <div>Error: {error.message}</div>;
     }

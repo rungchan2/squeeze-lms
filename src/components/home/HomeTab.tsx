@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { AdminOnly } from "../auth/AdminOnly";
 
 export default function HomeTab() {
+
   return (
     <Tabs usePath={true}>
       <Tab title="내 조직" icon={<MdSpaceDashboard />} path="home">

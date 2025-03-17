@@ -20,8 +20,12 @@ import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { Menu, Portal } from "@chakra-ui/react";
 import { useRef } from "react";
+import { useMyLikedPosts } from "@/hooks/usePosts";
+import PostCard from "./PostCard";
+import styles from "./Mypage.module.css";
 
 export default function MyPage() {
+  const { data: myLikedPosts } = useMyLikedPosts();
   const { logout } = useAuthStore();
   const router = useRouter();
   const { profileImage, email, fullName } = useAuthStore();
@@ -113,7 +117,11 @@ export default function MyPage() {
             <MyPost />
           </Tab>
           <Tab title="좋아요 게시글" icon={<FaRegHeart />}>
-            <Text>좋아요 게시글</Text>
+            <div className={styles.postContainer}>
+              {myLikedPosts?.map((post: any) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
           </Tab>
         </Tabs>
       </div>
