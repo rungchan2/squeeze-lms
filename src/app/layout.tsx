@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Providers } from "./providers";
 import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/toaster";
 import { Navigation } from "@/components/navigation/Navigation";
+import { KakaoScript } from "@/components/KaKao";
 
 export const metadata: Metadata = {
   title: "Squeeze LMS",
@@ -21,23 +21,13 @@ export default function RootLayout({
   return (
     <html lang="ko" data-theme="light" style={{ colorScheme: "light" }}>
       <body>
-        <Script src="https://developers.kakao.com/sdk/js/kakao.js" strategy="beforeInteractive" />
-        <Script id="kakao-init" strategy="afterInteractive">
-          {`
-            if (window.Kakao) {
-              if (!window.Kakao.isInitialized()) {
-                window.Kakao.init('522aca402d6e1064a4d0d46a6a280b8a');
-              }
-            }
-          `}
-        </Script>
-
         <Providers>
           <Navigation exceptionPath={["/login", "/register"]} />
           <div className="container">{children}</div>
           <div className="root-footer"></div>
           <Toaster />
           <SpeedInsights />
+          <KakaoScript />
         </Providers>
       </body>
     </html>

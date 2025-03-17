@@ -174,7 +174,7 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
             <MdAutoGraph />
             <Text variant="caption">{post.view_count}</Text>
           </InteractionItem>
-          <InteractionItem onClick={handleShare}>
+          <InteractionItem onClick={handleShare} data-kakao-share="true">
             <FaShare />
             <Text variant="caption">공유</Text>
           </InteractionItem>
