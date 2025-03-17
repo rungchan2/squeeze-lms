@@ -17,7 +17,10 @@ import RichTextViewer from "@/components/richTextInput/RichTextViewer";
 import { useAuth } from "@/components/AuthProvider";
 import { useComments } from "@/hooks/useComments";
 import { useEffect, useCallback } from "react";
-
+import { toaster } from "@/components/ui/toaster";
+import { Menu, Portal } from "@chakra-ui/react";
+import { FaEllipsis } from "react-icons/fa6";
+import { deletePost } from "@/app/post/clientActions";
 interface PostCardProps {
   post: PostWithRelations;
   showDetails?: boolean;
@@ -38,6 +41,15 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
   const { data: userLike } = useUserLike(id);
   const isUserLike = Boolean(userLike);
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toaster.create({
+      title: "링크가 복사되었습니다.",
+      type: "success",
+      duration: 1000,
+    });
+  };
+
   // Kakao SDK 로드 확인
   useEffect(() => {
     if (!window.Kakao || !window.Kakao.isInitialized()) {
@@ -49,7 +61,11 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
     e.stopPropagation();
 
     if (!id) {
-      alert("로그인이 필요합니다.");
+      toaster.create({
+        title: "로그인이 필요합니다.",
+        type: "error",
+      });
+      router.push("/login");
       return;
     }
 
@@ -59,45 +75,50 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
       onLike(id);
     }
   };
-  
-  const handleShare = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (!window.Kakao || !window.Kakao.Share) {
-      console.error("Kakao SDK가 로드되지 않았습니다.");
-      return;
-    }
-    
-    // 현재 창의 URL 가져오기
-    const currentUrl = window.location.origin + `/post/${post.id}`;
-    
-    window.Kakao.Share.sendDefault({
-      objectType: 'feed',
-      content: {
-        title: post.title,
-        description: post.content ? post.content.replace(/<[^>]*>?/gm, '').substring(0, 100) + '...' : '내용이 없습니다.',
-        imageUrl: post.file_url || 'https://via.placeholder.com/500',
-        link: {
-          mobileWebUrl: currentUrl,
-          webUrl: currentUrl,
-        },
-      },
-      social: {
-        likeCount: likesCount,
-        commentCount: count,
-        viewCount: post.view_count,
-      },
-      buttons: [
-        {
-          title: '자세히 보기',
+
+  const handleShare = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+
+      if (!window.Kakao || !window.Kakao.Share) {
+        console.error("Kakao SDK가 로드되지 않았습니다.");
+        return;
+      }
+
+      // 현재 창의 URL 가져오기
+      const currentUrl = window.location.origin + `/post/${post.id}`;
+
+      window.Kakao.Share.sendDefault({
+        objectType: "feed",
+        content: {
+          title: post.title,
+          description: post.content
+            ? post.content.replace(/<[^>]*>?/gm, "").substring(0, 100) + "..."
+            : "내용이 없습니다.",
+          imageUrl: post.file_url || "https://via.placeholder.com/500",
           link: {
             mobileWebUrl: currentUrl,
             webUrl: currentUrl,
           },
         },
-      ],
-    });
-  }, [post, likesCount, count]);
+        social: {
+          likeCount: likesCount,
+          commentCount: count,
+          viewCount: post.view_count,
+        },
+        buttons: [
+          {
+            title: "자세히 보기",
+            link: {
+              mobileWebUrl: currentUrl,
+              webUrl: currentUrl,
+            },
+          },
+        ],
+      });
+    },
+    [post, likesCount, count]
+  );
 
   return (
     <PostCardContainer
@@ -110,35 +131,83 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
     >
       <ContentWrapper>
         <UserInfoContainer>
-          <ProfileImage
-            profileImage={post?.profiles?.profile_image || ""}
-            width={40}
-          />
           <div className="user-info-wrapper">
-            <UserNameWrapper>
-              <Text variant="caption" fontWeight="bold">
-                {post?.profiles?.first_name}
-              </Text>
-              <Text variant="caption" fontWeight="bold">
-                의 포스팅
-              </Text>
-            </UserNameWrapper>
-            <UserDetailsWrapper>
-              <Text variant="small" fontWeight="bold">
-                {post?.profiles?.organizations?.name
-                  ? post?.profiles?.organizations?.name
-                  : "무소속"}
-              </Text>
-              <LuDot />
-              <Text variant="small" fontWeight="bold">
-                {dayjs(post?.created_at).format("YYYY-MM-DD H:mm")}
-              </Text>
-              <LuDot />
-              <Text variant="small" fontWeight="bold">
-                {formatDifference(post?.created_at || "")}
-              </Text>
-            </UserDetailsWrapper>
+            <ProfileImage
+              profileImage={post?.profiles?.profile_image || ""}
+              width={40}
+            />
+            <div className="vertical-user-info-wrapper">
+              <UserNameWrapper>
+                <Text variant="caption" fontWeight="bold">
+                  {post?.profiles?.first_name}
+                </Text>
+                <Text variant="caption" fontWeight="bold">
+                  의 포스팅
+                </Text>
+              </UserNameWrapper>
+              <UserDetailsWrapper>
+                <Text variant="small" fontWeight="bold">
+                  {post?.profiles?.organizations?.name
+                    ? post?.profiles?.organizations?.name
+                    : "무소속"}
+                </Text>
+                <LuDot />
+                <Text variant="small" fontWeight="bold">
+                  {dayjs(post?.created_at).format("YYYY-MM-DD H:mm")}
+                </Text>
+                <LuDot />
+                <Text variant="small" fontWeight="bold">
+                  {formatDifference(post?.created_at || "")}
+                </Text>
+              </UserDetailsWrapper>
+            </div>
           </div>
+          <Menu.Root>
+            <Menu.Trigger asChild>
+              <div
+                className="menu-trigger"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <FaEllipsis />
+              </div>
+            </Menu.Trigger>
+            <Portal>
+              <Menu.Positioner>
+                <Menu.Content>
+                  <Menu.Item
+                    style={{ cursor: "pointer" }}
+                    value="rename"
+                    onClick={(e) => {
+                      copyToClipboard(window.location.href);
+                      e.stopPropagation();
+                    }}
+                  >
+                    링크 복사
+                  </Menu.Item>
+                  <Menu.Item value="export" style={{ cursor: "pointer" }}>
+                    수정
+                  </Menu.Item>
+                  <Menu.Item
+                    style={{ cursor: "pointer" }}
+                    value="delete"
+                    color="fg.error"
+                    _hover={{ bg: "bg.error", color: "fg.error" }}
+                    onClick={(e) => {
+                      if (confirm("삭제하시겠습니까?")) {
+                        deletePost(post.id);
+                        router.back();
+                      }
+                      e.stopPropagation();
+                    }}
+                  >
+                    삭제
+                  </Menu.Item>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Portal>
+          </Menu.Root>
         </UserInfoContainer>
 
         <PostContentContainer showDetails={showDetails}>
@@ -149,12 +218,17 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
             </div>
           ) : (
             <div
-                className="not-details-content"
-                dangerouslySetInnerHTML={{ __html: post.content || "" }}
-              />
+              className="not-details-content"
+              dangerouslySetInnerHTML={{
+                __html:
+                  post.content?.length && post.content?.length > 100
+                    ? post.content?.slice(0, 100) + "..."
+                    : post.content || "",
+              }}
+            />
           )}
         </PostContentContainer>
-
+        {/* TODO: html formatting 적용하기  (지금은 plain text) */}
         <InteractionContainer>
           <InteractionItem onClick={handleLike}>
             {isUserLike ? (
@@ -202,6 +276,29 @@ const PostCardContainer = styled.div<{ showDetails: boolean }>`
   &:hover {
     background-color: var(--grey-100);
   }
+  .vertical-user-info-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 4px;
+    width: fit-content;
+  }
+  .user-info-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 7.5px;
+    width: 100%;
+  }
+  .menu-trigger {
+    cursor: pointer;
+    padding: 6px;
+
+    &:hover {
+      background: var(--grey-200);
+      border-radius: 50%;
+    }
+  }
 `;
 
 const ContentWrapper = styled.div`
@@ -217,36 +314,61 @@ const ContentWrapper = styled.div`
 
 const UserInfoContainer = styled.div`
   display: flex;
-  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
-  justify-content: flex-start;
-  gap: 7.5px;
   width: 100%;
-
   .user-info-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: calc(100% - 40px);
+  }
+
+  .vertical-user-info-wrapper {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
     gap: 4px;
+    width: fit-content;
+    overflow: hidden;
+  }
+
+  .menu-trigger {
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    width: 32px;
+
+    &:hover {
+      background: var(--grey-200);
+      border-radius: 50%;
+    }
   }
 `;
 
 const UserNameWrapper = styled.div`
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
-  gap: 3px;
+  gap: 4px;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const UserDetailsWrapper = styled.div`
-  align-self: stretch;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
-  color: var(--grey-500);
+  gap: 4px;
+  color: var(--grey-600);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const PostContentContainer = styled.div<{ showDetails: boolean }>`

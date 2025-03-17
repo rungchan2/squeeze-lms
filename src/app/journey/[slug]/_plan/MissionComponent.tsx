@@ -331,6 +331,8 @@ export default function MissionComponent({
                 {searchResults.map((mission) => (
                   <div key={mission.id} className="single-item">
                     <MissionCard
+                      style={{ width: "calc(100% - 46px)" }}
+                      showDetails={false}
                       mission={mission}
                       onEdit={handleEditMission}
                       onDelete={async () => {
@@ -436,15 +438,15 @@ const ModalListContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 6px;
+    margin-bottom: 6px;
 
     & > .single-item-button {
       display: flex;
       align-items: center;
       justify-content: center;
-      min-width: 50px;
       border: none;
+      min-width: 40px;
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.2s;

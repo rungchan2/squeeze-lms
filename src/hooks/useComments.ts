@@ -7,6 +7,7 @@ import { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supab
 interface UseCommentsProps {
   postId: number;
 }
+//TODO: post 무한 스크롤 적용, swr 적용
 
 // 전역 상태로 댓글 캐시 관리
 const commentsCache: Record<number, Comment[]> = {};

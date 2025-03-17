@@ -6,6 +6,7 @@ import PostCard from "@/components/home/mypage/PostCard";
 import CommentSection from "./CommentSection";
 import { useParams } from "next/navigation";
 import Spinner from "@/components/common/Spinner";
+import styled from "@emotion/styled";
 
 export default function PostPage() {
   const params = useParams();
@@ -54,9 +55,16 @@ export default function PostPage() {
   if (!post) return <div>게시물을 찾을 수 없습니다.</div>;
 
   return (
-    <div>
+    <PostPageContainer>
       <PostCard post={post} showDetails={true} />
       <CommentSection />
-    </div>
+    </PostPageContainer>
   );
 }
+
+const PostPageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  max-width: var(--breakpoint-tablet);
+  margin: 0 auto;
+`;

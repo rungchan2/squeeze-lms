@@ -77,10 +77,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window === "undefined") return;
 
     const initializeAuth = async () => {
-      toaster.create({
-        title: "초기화 시작",
-        type: "info",
-      });
       // 로컬 스토리지에서 먼저 데이터 가져오기
       fetchUser();
       console.log("fetchUser 호출");
@@ -106,10 +102,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } finally {
         // 초기화 완료 표시 (오류가 발생해도 초기화는 완료된 것으로 간주)
         setIsInitialized(true);
-        toaster.create({
-          title: "초기화 완료",
-          type: "success",
-        });
       }
     };
 
@@ -120,10 +112,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event) => {
-      toaster.create({
-        title: `인증 상태 변경 ${event}`,
-        type: "info",
-      });
       if (event === "SIGNED_IN") {
         try {
           await refreshUser();

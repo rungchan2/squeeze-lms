@@ -1,3 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
 # 데이터 페칭 규칙
 
 ## 커스텀 훅

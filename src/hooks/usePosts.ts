@@ -99,6 +99,7 @@ async function getCompletedMissionIds(userId: number) {
   
   return completedIds;
 }
+//TODO: comments 무한 스크롤 적용
 
 // ✅ SWR을 사용한 usePosts 훅
 export function usePosts() {

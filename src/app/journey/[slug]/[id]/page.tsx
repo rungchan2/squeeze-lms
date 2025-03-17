@@ -13,6 +13,8 @@ import { useState } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { createPost } from "@/app/journey/actions";
 import { useAuth } from "@/components/AuthProvider";
+import { Input } from "@chakra-ui/react";
+import InputAndTitle from "@/components/InputAndTitle";
 
 export default function DoMissionPage() {
   const { id: userId } = useAuth();
@@ -21,8 +23,9 @@ export default function DoMissionPage() {
   const router = useRouter();
   const { missionInstance, isLoading, error } = useMissionInstance(
     id ? Number(id) : null
-  ); 
+  );
   const [content, setContent] = useState("");
+  const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   if (!userId) return <div>로그인이 필요합니다.</div>;
   if (isLoading) return <Spinner />;
@@ -31,7 +34,7 @@ export default function DoMissionPage() {
 
   const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault(); // 폼 기본 제출 동작 방지
-    
+
     if (!content.trim()) {
       toaster.create({
         title: "미션 내용을 입력해주세요.",
@@ -42,12 +45,12 @@ export default function DoMissionPage() {
 
     try {
       setIsSubmitting(true);
-      
+
       const result = await createPost({
         content: content,
         user_id: userId,
         mission_instance_id: missionInstance.id,
-        title: "미션 제출",
+        title: title,
         file_url: "",
         score: missionInstance.mission.points,
       });
@@ -83,6 +86,18 @@ export default function DoMissionPage() {
     <MissionContainer>
       <div className="mission-container">
         <Heading level={3}>{missionInstance.mission.name}</Heading>
+        <InputAndTitle
+          title="미션 제목"
+          errorMessage={
+            title.length === 0 ? "미션 제목을 입력해주세요." : ""
+          }
+        >
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="미션 제목을 입력해주세요."
+          />
+        </InputAndTitle>
         <Tiptap
           placeholder={
             missionInstance.mission.description ||
@@ -104,11 +119,7 @@ export default function DoMissionPage() {
         />
       </div>
       <div className="button-container">
-        <Button 
-          variant="flat" 
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-        >
+        <Button variant="flat" onClick={handleSubmit} disabled={isSubmitting || title.length === 0}>
           {isSubmitting ? <Spinner /> : "제출"}
         </Button>
       </div>
@@ -122,13 +133,15 @@ const MissionContainer = styled.div`
   flex-direction: column;
   gap: 16px;
   justify-content: space-between;
-  height: 90dvh;
+  height: calc(100dvh - 100px);
+  max-width: var(--breakpoint-tablet);
+  margin: 0 auto;
   .mission-container {
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .button-container {
     margin-top: 16px;
   }

@@ -17,6 +17,7 @@ interface MissionCardProps {
   maxWidth?: string;
   missionInstance?: JourneyMissionInstanceWithMission;
   showDetails?: boolean;
+  style?: React.CSSProperties;
 }
 
 export default function MissionCard({
@@ -26,6 +27,7 @@ export default function MissionCard({
   maxWidth = "100%",
   missionInstance,
   showDetails = false,
+  style,
 }: MissionCardProps) {
   const dDay: string =
     calcDifference(missionInstance?.expiry_date || "") > 0
@@ -40,14 +42,15 @@ export default function MissionCard({
       isModal={isModal}
       maxWidth={maxWidth}
       showDetails={showDetails}
+      style={style}
     >
       <div className="left-container">
         {!isModal && <FiMenu size="16px" style={{ minWidth: "16px" }} />}
         <div className="mission-item-header">
-          <Text variant="body" fontWeight="bold">
-            {mission.name}
-          </Text>
           <div className="description-container">
+            <Text variant="body" fontWeight="bold" className="description-text">
+              {mission.name}
+            </Text>
             <Text
               variant="caption"
               className="description-text"
@@ -146,11 +149,21 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
     width: 100%;
   }
 
+  .description-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
   .description-text {
     display: block;
     text-overflow: ${(props) => (props.showDetails ? "none" : "ellipsis")};
     white-space: ${(props) => (props.showDetails ? "normal" : "nowrap")};
     overflow: hidden;
+    line-clamp: ${(props) => (props.showDetails ? "none" : "1")};
+    -webkit-line-clamp: ${(props) => (props.showDetails ? "none" : "1")};
+    -webkit-box-orient: vertical;
     max-width: 100%;
   }
 

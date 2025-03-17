@@ -11,12 +11,10 @@ import { AdminOnly } from "@/components/auth/AdminOnly";
 import { Menu, Portal } from "@chakra-ui/react";
 import { useJourney } from "@/hooks/useJourney";
 import { toaster } from "@/components/ui/toaster";
-import { useNotification } from "@/hooks/useNotification";
 
 export default function JourneyCard({ journey }: { journey: Journey }) {
   const defaultImage = "https://picsum.photos/200/200";
   const router = useRouter();
-  const { createNotification } = useNotification();
   const { adminNum, participantNum, teacherNum, isUserJoined } = useJourneyUser(
     journey.id
   );
