@@ -77,9 +77,10 @@ const LoginContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  min-height: calc(100vh - 200px);
   margin: 0 auto;
   gap: 10px;
+  padding-bottom: 100px;
 
   & > .login-container {
     border: 1px solid var(--grey-300);

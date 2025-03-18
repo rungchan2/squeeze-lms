@@ -81,11 +81,11 @@ export default function MyPage() {
                 <MenuItem title="" icon={<FaRegQuestionCircle />}>
                   <Text>가이드</Text>
                 </MenuItem>
-                <Separator style={{ margin: "10px 0" }} />
-                <MenuItem title="" icon={<MdLogout />} onClick={handleLogout}>
-                  <Text>로그아웃</Text>
-                </MenuItem>
               </Link>
+              <Separator style={{ margin: "10px 0" }} />
+              <MenuItem title="" icon={<MdLogout />} onClick={handleLogout}>
+                <Text>로그아웃</Text>
+              </MenuItem>
             </SideMenu>
           </IconContainer>
         </div>

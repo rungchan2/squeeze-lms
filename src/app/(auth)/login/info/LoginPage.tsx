@@ -11,21 +11,40 @@ import { Separator, Stack, Spinner } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createUserSchema, type CreateUser } from "@/types";
+import { createUserSchema, Role, type CreateUser } from "@/types";
 import { DevTool } from "@hookform/devtools";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { decrypt } from "@/utils/encryption";
 import { NeededUserMetadata } from "@/app/(auth)/auth/callback/route";
 import { createProfile } from "../../actions";
+import { useOrganization } from "@/hooks/useOrganization";
+import Select from "react-select";
+import { Modal } from "@/components/modal/Modal";
+import { confirmRoleAccessCode } from "../../actions";
+import { toaster } from "@/components/ui/toaster";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
 
-
 export default function LoginPage() {
-
   const router = useRouter();
   const [isChecked, setIsChecked] = useState<Agreement[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [roleAccessCode, setRoleAccessCode] = useState("");
+  const [roleAccessType, setRoleAccessType] = useState<{
+    label: string;
+    value: Omit<Role, "user">;
+  }>({ label: "교사", value: "teacher" });
+  const [confirmedRoleType, setConfirmedRoleType] = useState<Role | null>(null);
+  const roleAccessTypeOptions = [
+    { label: "관리자", value: "admin" },
+    { label: "교사", value: "teacher" },
+  ];
+  const {
+    data: { useOrganizationList },
+  } = useOrganization();
+  const { organizations, isLoading: isOrganizationLoading } =
+    useOrganizationList();
   const handleCheckboxChangeAll = () => {
     if (isChecked.length === 2) {
       setIsChecked([]);
@@ -33,6 +52,7 @@ export default function LoginPage() {
       setIsChecked(["mailAgreement", "cookieAgreement"]);
     }
   };
+
   const handleCheckboxChange = (value: Agreement) => {
     if (isChecked.includes(value)) {
       setIsChecked(isChecked.filter((item) => item !== value));
@@ -44,7 +64,6 @@ export default function LoginPage() {
     const authData = Cookies.get("auth_data");
 
     if (!authData || typeof authData !== "string") {
-      console.log("유효하지 않은 auth_data");
       router.push("/error?message=로그인 정보가 없거나 유효하지 않습니다");
       return;
     }
@@ -71,6 +90,7 @@ export default function LoginPage() {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateUser>({
     resolver: zodResolver(createUserSchema),
@@ -82,16 +102,25 @@ export default function LoginPage() {
       phone: "",
       uid: decryptedAuthData?.uid || "",
       profile_image: decryptedAuthData?.profile_image || "",
-      organization_id: null,
       marketing_opt_in: isChecked.includes("mailAgreement"),
       privacy_agreed: isChecked.includes("cookieAgreement"),
     },
   });
-  console.log(errors);
+  const organizationOptions: { label: string; value: number }[] =
+    organizations?.map((organization) => ({
+      label: organization.name,
+      value: organization.id,
+    })) || [];
+  const formatedKrRole = (role: Role) => {
+    if (role === "admin") return "관리자";
+    if (role === "teacher") return "교사";
+    if (role === "user") return "학생";
+  };
 
   const onSubmit = async (data: CreateUser) => {
+
     console.log(data);
-    const { data: userData, error } = await createProfile(data);
+    const { error } = await createProfile(data);
     if (error) {
       router.push(`/error?message=회원가입 실패: ${error.message}`);
       return;
@@ -101,83 +130,201 @@ export default function LoginPage() {
 
   return (
     <Container onSubmit={handleSubmit(onSubmit)}>
-      <Heading level={4}>환영합니다! {decryptedAuthData?.first_name}님</Heading>
-      <InputContainer>
-        <HorizontalContainer>
-          <InputAndTitle title="성" errorMessage={errors.last_name?.message}>
-            <Input type="text" placeholder="홍" {...register("last_name")} />
+      <FormContainer>
+        <Heading level={4}>
+          환영합니다! {decryptedAuthData?.first_name}님
+        </Heading>
+        <InputContainer>
+          <HorizontalContainer>
+            <InputAndTitle title="성" errorMessage={errors.last_name?.message}>
+              <Input type="text" placeholder="홍" {...register("last_name")} />
+            </InputAndTitle>
+            <InputAndTitle
+              title="이름"
+              errorMessage={errors.first_name?.message}
+            >
+              <Input
+                type="text"
+                placeholder="길동"
+                {...register("first_name")}
+              />
+            </InputAndTitle>
+          </HorizontalContainer>
+          <InputAndTitle title="이메일" errorMessage={errors.email?.message}>
+            <Input
+              type="email"
+              placeholder="example@gmail.com"
+              {...register("email")}
+            />
           </InputAndTitle>
-          <InputAndTitle title="이름" errorMessage={errors.first_name?.message}>
-            <Input type="text" placeholder="길동" {...register("first_name")} />
+          <InputAndTitle title="전화번호" errorMessage={errors.phone?.message}>
+            <Input
+              type="tel"
+              placeholder="010-1234-5678"
+              {...register("phone")}
+            />
           </InputAndTitle>
-        </HorizontalContainer>
-        <InputAndTitle title="이메일" errorMessage={errors.email?.message}>
-          <Input
-            type="email"
-            placeholder="example@gmail.com"
-            {...register("email")}
-          />
-        </InputAndTitle>
-        <InputAndTitle title="전화번호" errorMessage={errors.phone?.message}>
-          <Input
-            type="tel"
-            placeholder="010-1234-5678"
-            {...register("phone")}
-          />
-        </InputAndTitle>
-      </InputContainer>
-      <Stack className="agreement-container">
-        <div className="agreement-container-line">
-          <Text variant="caption" weight="bold">
-            개인정보 보호정책 및 메일 수신에 동의합니다
-          </Text>
-          <Checkbox
-            checked={
-              isChecked.includes("mailAgreement") &&
-              isChecked.includes("cookieAgreement")
-            }
-            onChange={handleCheckboxChangeAll}
-          />
-        </div>
-        <Separator orientation="horizontal" style={{ width: "100%" }} />
-        <div className="agreement-container-line">
-          <Text variant="small" weight="medium">
-            메일 수신 동의하기(선택)
-          </Text>
-          <Checkbox
-            checked={isChecked.includes("mailAgreement")}
-            onChange={() => handleCheckboxChange("mailAgreement")}
-          />
-        </div>
-        <div className="agreement-container-line">
-          <Text variant="small" weight="medium">
-            개인정보 보호정책 및 쿠키 사용에 동의합니다(필수)
-          </Text>
-          <Checkbox
-            checked={isChecked.includes("cookieAgreement")}
-            onChange={() => handleCheckboxChange("cookieAgreement")}
-          />
-        </div>
-      </Stack>
-      <Button
-        variant="flat"
-        type="submit"
-        disabled={isSubmitting || !isChecked.includes("cookieAgreement")}
-      >
-        {isSubmitting ? (
-          <>
-            <Spinner /> 회원가입
-          </>
-        ) : (
-          "회원가입"
-        )}
-      </Button>
-      <DevTool control={control} />
+          <InputAndTitle
+            title="나의 소속"
+            errorMessage={errors.organization_id?.message}
+          >
+            <Select
+              placeholder="소속을 선택해주세요"
+              className="basic-single"
+              classNamePrefix="select"
+              isDisabled={isOrganizationLoading}
+              isLoading={isOrganizationLoading}
+              isClearable={true}
+              isRtl={false}
+              isSearchable={true}
+              options={organizationOptions}
+              name="organization_id"
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  border: "1px solid var(--grey-300)",
+                }),
+              }}
+              onChange={(e) => {
+                setValue("organization_id", e?.value || null);
+                console.log(e?.value);
+              }}
+            />
+          </InputAndTitle>
+        </InputContainer>
+        <Stack className="agreement-container">
+          <div className="agreement-container-line">
+            <Text variant="caption" weight="bold">
+              개인정보 보호정책 및 메일 수신에 동의합니다
+            </Text>
+            <Checkbox
+              checked={
+                isChecked.includes("mailAgreement") &&
+                isChecked.includes("cookieAgreement")
+              }
+              onChange={handleCheckboxChangeAll}
+            />
+          </div>
+          <Separator orientation="horizontal" style={{ width: "100%" }} />
+          <div className="agreement-container-line">
+            <Text variant="small" weight="medium">
+              메일 수신 동의하기(선택)
+            </Text>
+            <Checkbox
+              checked={isChecked.includes("mailAgreement")}
+              onChange={() => handleCheckboxChange("mailAgreement")}
+            />
+          </div>
+          <div className="agreement-container-line">
+            <Text variant="small" weight="medium">
+              개인정보 보호정책 및 쿠키 사용에 동의합니다(필수)
+            </Text>
+            <Checkbox
+              checked={isChecked.includes("cookieAgreement")}
+              onChange={() => handleCheckboxChange("cookieAgreement")}
+            />
+          </div>
+        </Stack>
+        <Button
+          variant="flat"
+          type="submit"
+          disabled={isSubmitting || !isChecked.includes("cookieAgreement")}
+        >
+          {isSubmitting ? (
+            <>
+              <Spinner /> 회원가입
+            </>
+          ) : confirmedRoleType ? (
+            formatedKrRole(confirmedRoleType) + " 회원가입"
+          ) : (
+            "회원가입"
+          )}
+        </Button>
+        <Text
+          variant="caption"
+          weight="medium"
+          onClick={() => setIsModalOpen(true)}
+          color="var(--grey-500)"
+          style={{
+            cursor: "pointer",
+            textDecoration: "underline",
+            marginTop: "10px",
+          }}
+        >
+          다른 권한으로 회원가입하기
+        </Text>
+        <DevTool control={control} />
+      </FormContainer>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ModalContainer>
+          <Heading level={4}>다른 권한으로 회원가입하기</Heading>
+          <InputAndTitle title="권한 종류">
+            <Select
+              options={roleAccessTypeOptions}
+              value={roleAccessType}
+              onChange={(e) => e && setRoleAccessType(e)}
+            />
+          </InputAndTitle>
+          <InputAndTitle title="권한 코드">
+            <Input
+              type="text"
+              placeholder="권한 코드"
+              value={roleAccessCode}
+              onChange={(e) => setRoleAccessCode(e.target.value)}
+            />
+          </InputAndTitle>
+          <Button
+            style={{ marginTop: "16px" }}
+            variant="flat"
+            disabled={!roleAccessCode}
+            onClick={async () => {
+              const { data, error } = await confirmRoleAccessCode(
+                roleAccessCode,
+                roleAccessType.value as Role
+              );
+              console.log("data", data, "error", error);
+              if (error || !data) {
+                toaster.create({
+                  title: "권한 인증 실패",
+                  type: "error",
+                });
+              } else if (data) {
+                setConfirmedRoleType(data.role as Role);
+                setValue("role", data.role as Role);
+                toaster.create({
+                  title: "권한 인증 성공",
+                  type: "success",
+                });
+                setValue("role", data.role as Role);
+                setIsModalOpen(false);
+                setRoleAccessCode("");
+              }
+            }}
+          >
+            인증
+          </Button>
+        </ModalContainer>
+      </Modal>
     </Container>
   );
 }
 
-const Container = styled.form`
+const ModalContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+`;
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const FormContainer = styled.form`
   display: flex;
   flex-direction: column;
   align-items: center;

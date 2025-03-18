@@ -477,6 +477,30 @@ export type Database = {
           },
         ]
       }
+      role_access_code: {
+        Row: {
+          code: string
+          created_at: string
+          expiry_date: string | null
+          id: number
+          role: Database["public"]["Enums"]["role"] | null
+        }
+        Insert: {
+          code?: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: number
+          role?: Database["public"]["Enums"]["role"] | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: number
+          role?: Database["public"]["Enums"]["role"] | null
+        }
+        Relationships: []
+      }
       user_journeys: {
         Row: {
           created_at: string | null

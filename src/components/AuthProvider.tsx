@@ -79,7 +79,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const initializeAuth = async () => {
       // 로컬 스토리지에서 먼저 데이터 가져오기
       fetchUser();
-      console.log("fetchUser 호출");
       try {
         const supabase = createClient();
         // 세션 확인 및 필요시 갱신
