@@ -57,7 +57,7 @@ export const createNotification = async (notification: NotificationInsert) => {
     .single();
   
   if (error) throw error;
-  return data as Notification;
+  return { data, error };
 };
 
 // 알림 읽음 처리 함수

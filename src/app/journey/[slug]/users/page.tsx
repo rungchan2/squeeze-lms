@@ -12,9 +12,14 @@ import { ProfileImage } from "@/components/navigation/ProfileImage";
 import Select from "react-select";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toaster } from "@/components/ui/toaster";
+import { createNotification } from "@/hooks/useNotification";
+import { fetchJourneyDetail } from "@/hooks/useJourney";
+import { useParams } from "next/navigation";
 export default function UsersPage() {
   const router = useRouter();
   const { organizationId, role } = useAuth();
+  const { slug } = useParams();
+  const uuid = slug as string;
   useEffect(() => {
     if (!organizationId || role === "user") {
       toaster.create({
@@ -32,6 +37,27 @@ export default function UsersPage() {
     label: organization.name,
     value: organization.id,
   }));
+  const handleInvite = async (userId: number) => {
+    const { data: journey } = await fetchJourneyDetail(uuid);
+    const { error } = await createNotification({
+      receiver_id: userId,
+      type: "request",
+      message: `${journey.name}에 초대되었습니다.`,
+      link: `journey/${uuid}/redirect/invite`,
+    });
+    if (error) {
+      toaster.create({
+        title: "초대 실패",
+        type: "error",
+      });
+    } else {
+      toaster.create({
+        title: "초대 완료",
+        type: "success",
+      });
+      //TODO: 초대 이메일 보내기
+    }
+  };
 
   const { users } = useOrganizationUsers(organizationId ?? 0);
   return (
@@ -41,6 +67,7 @@ export default function UsersPage() {
         defaultValue={organizationOptions?.find(
           (option) => option.value === organizationId
         )}
+        isDisabled={role === "teacher"}
       />
       <Table.Root size="sm" interactive showColumnBorder>
         <Table.Header>
@@ -55,7 +82,7 @@ export default function UsersPage() {
           {users.map((user) => (
             <Table.Row key={user.id}>
               <Table.Cell
-                textAlign="center"
+                
                 verticalAlign="middle"
                 justifyContent="center"
                 alignContent="center"
@@ -66,10 +93,18 @@ export default function UsersPage() {
                   size="small"
                 />
               </Table.Cell>
-              <Table.Cell>{user.first_name + " " + user.last_name}</Table.Cell>
-              <Table.Cell textAlign="end">{user.role}</Table.Cell>
-              <Table.Cell textAlign="end">
-                <Button variant="outline">초대</Button>
+              <Table.Cell >
+                {user.first_name + " " + user.last_name}
+              </Table.Cell>
+              <Table.Cell >{user.role}</Table.Cell>
+              <Table.Cell justifyContent="center">
+                <Button
+                  style={{ maxWidth: "100px", alignSelf: "center" }}
+                  variant="outline"
+                  onClick={() => handleInvite(user.id)}
+                >
+                  초대
+                </Button>
               </Table.Cell>
             </Table.Row>
           ))}
@@ -80,6 +115,8 @@ export default function UsersPage() {
 }
 
 const Container = styled.div`
+  max-width: var(--breakpoint-tablet);
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 1rem;

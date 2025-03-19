@@ -13,6 +13,14 @@ const fetchJourneys = async (url: string) => {
   return data as Journey[];
 };
 
+export const fetchJourneyDetail = async (uuid: string) => {
+  const trimmedUuid = uuid.trim();
+  const supabase = createClient();
+  const { data, error } = await supabase.from("journeys").select("*").eq("uuid", trimmedUuid).single();
+  if (error) throw new Error(error.message);
+  return { data, error };
+};
+
 export const useJourney = () => {
   const { data: journeys, error, isLoading, mutate: revalidate } = useSWR(
     "/api/journeys",
