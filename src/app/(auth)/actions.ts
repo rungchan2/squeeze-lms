@@ -4,29 +4,19 @@ import { createClient } from "@/utils/supabase/server";
 import { CreateUser, Role } from "@/types";
 import Cookies from "js-cookie";
 
-export async function checkUser() {
-  const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  return session;
-}
-
 export async function getUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user;
+  } catch (error) {
+    console.error("getUser 에러:", error);
+    return null;
+  }
 }
 
-export async function getSession() {
-  const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  return session;
-}
 export async function getPorfile(uid: string) {
   const supabase = await createClient();
   const { data: profile, error } = await supabase
@@ -40,12 +30,12 @@ export async function getPorfile(uid: string) {
 export async function getUserProfile() {
   const supabase = await createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("*")
-    .eq("uid", session?.user?.id || "")
+    .eq("uid", user?.id || "")
     .single();
   return { profile, error };
 }
@@ -65,6 +55,7 @@ export async function signUpWithEmail(email: string, password: string) {
   });
   return { userData: data, error };
 }
+
 export const signInWithEmail = async (email: string, password: string) => {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({

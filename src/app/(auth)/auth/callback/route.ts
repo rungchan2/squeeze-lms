@@ -64,7 +64,7 @@ export async function GET(request: Request) {
 
           response.cookies.set("auth_data", encryptedData, {
             httpOnly: false,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NEXT_PUBLIC_VERCEL_ENV === "production",
             sameSite: "lax",
             maxAge: 60 * 10, // 10분
           });

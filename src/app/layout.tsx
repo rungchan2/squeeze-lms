@@ -13,7 +13,9 @@ export const metadata: Metadata = {
     title: "스퀴즈!",
     description: "스퀴즈와 함께 학습을 디자인 해봐요!",
     images: [
-      { url: "https://lsaveangkauvxmfurksh.supabase.co/storage/v1/object/public/images/public/og-image.png" },
+      {
+        url: "https://lsaveangkauvxmfurksh.supabase.co/storage/v1/object/public/images/public/og-image.png",
+      },
     ],
   },
 };
@@ -30,12 +32,14 @@ export default function RootLayout({
       <body>
         <Providers>
           <Navigation exceptionPath={["/login", "/register"]} />
-          <div className="container">{children}</div>
-          <div className="root-footer"></div>
+          <div className="container">
+            {children}
+            <SpeedInsights />
+          </div>
           <Toaster />
-          <SpeedInsights />
           <KakaoScript />
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );

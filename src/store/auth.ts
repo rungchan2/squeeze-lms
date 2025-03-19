@@ -1,8 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { getSession, getUserProfile, logout } from "@/app/(auth)/actions";
+import { getUser, getUserProfile, logout } from "@/app/(auth)/actions";
 import { encrypt, decrypt } from "@/utils/encryption";
 import { redirect } from "next/navigation";
+import { toaster } from "@/components/ui/toaster";
+
 // 역할 타입 정의
 export type Role = "user" | "teacher" | "admin";
 
@@ -28,7 +30,7 @@ export interface UserState {
 // 암호화된 스토리지 구현
 const encryptedStorage = {
   getItem: (name: string) => {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
     const value = localStorage.getItem(name);
     if (!value) return null;
     try {
@@ -40,7 +42,7 @@ const encryptedStorage = {
     }
   },
   setItem: (name: string, value: any) => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     try {
       localStorage.setItem(name, encrypt(JSON.stringify(value)));
     } catch (error) {
@@ -48,7 +50,7 @@ const encryptedStorage = {
     }
   },
   removeItem: (name: string) => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     localStorage.removeItem(name);
   },
 };
@@ -67,11 +69,10 @@ export const useAuthStore = create<UserState>()(
       fullName: null,
       error: null,
       lastUpdated: null,
-      organizationId: null,
-      // 로컬 스토리지에서 사용자 데이터 가져오기
+      organizationId: null, // 로컬 스토리지에서 사용자 데이터 가져오기
       fetchUser: () => {
         try {
-          if (typeof window === 'undefined') return;
+          if (typeof window === "undefined") return;
           const storedData = encryptedStorage.getItem("auth-store");
           if (storedData) {
             set({ ...storedData, loading: false });
@@ -87,10 +88,9 @@ export const useAuthStore = create<UserState>()(
         set({ loading: true, error: null });
 
         try {
-          // 현재 세션 확인
-          const session = await getSession();
-          
-          if (!session) {
+          const user = await getUser();
+
+          if (!user) {
             set({
               id: null,
               uid: null,
@@ -106,32 +106,54 @@ export const useAuthStore = create<UserState>()(
             return;
           }
 
-          // 사용자 프로필 정보 가져오기
           const { profile, error } = await getUserProfile();
 
-          if (error || !profile) {
-            get().logout();
-            redirect("/login");
-            return;
+          let currentPath = "";
+          if (typeof window !== "undefined") {
+            currentPath = window.location.pathname;
           }
 
-          set({
-            id: profile.id,
-            uid: profile.uid,
-            email: profile.email,
-            role: profile.role as Role,
-            isAuthenticated: true,
-            loading: false,
-            profileImage: profile.profile_image,
-            fullName: `${profile.first_name} ${profile.last_name}`,
-            lastUpdated: Date.now(),
-            organizationId: profile.organization_id,
-          });
+          if ((error || !profile) && !currentPath.includes("/login/info")) {
+            get().logout();
+            toaster.create({
+              title: "로그인 정보가 없거나 유효하지 않습니다",
+              type: "error",
+            });
+            redirect("/error?message=로그인 정보가 없거나 유효하지 않습니다");
+          } else if (profile) {
+            set({
+              id: profile.id,
+              uid: profile.uid,
+              email: profile.email,
+              role: profile.role as Role,
+              isAuthenticated: true,
+              loading: false,
+              profileImage: profile.profile_image,
+              fullName: `${profile.first_name} ${profile.last_name}`,
+              lastUpdated: Date.now(),
+              organizationId: profile.organization_id,
+            });
+          } else {
+            set({
+              id: null,
+              uid: user.id || null,
+              email: user.email || null,
+              role: null,
+              isAuthenticated: true,
+              loading: false,
+              profileImage: null,
+              fullName: null,
+              lastUpdated: Date.now(),
+              organizationId: null,
+            });
+          }
         } catch (error) {
           console.error("refreshUser 오류:", error);
-          set({ 
+          set({
             loading: false,
-            error: error instanceof Error ? error.message : "사용자 정보 갱신 중 오류가 발생했습니다"
+            error: error instanceof Error
+              ? error.message
+              : "사용자 정보 갱신 중 오류가 발생했습니다",
           });
         }
       },
@@ -140,7 +162,7 @@ export const useAuthStore = create<UserState>()(
       logout: async () => {
         try {
           console.log("logout 함수 호출됨");
-          
+
           // 상태를 먼저 초기화하고 나서 supabase.auth.signOut() 호출
           set({
             id: null,
@@ -156,12 +178,12 @@ export const useAuthStore = create<UserState>()(
             organizationId: null,
           });
           console.log("상태 초기화 완료");
-          
+
           // 로컬 스토리지에서 auth-store 데이터 삭제
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('auth-store');
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("auth-store");
           }
-          
+
           // 마지막으로 supabase.auth.signOut() 호출
           // 이 함수가 실패하더라도 이미 상태와 로컬 스토리지는 초기화됨
           try {
@@ -171,9 +193,12 @@ export const useAuthStore = create<UserState>()(
           }
         } catch (error) {
           console.error("logout 함수 오류:", error);
-          set({ 
+          set({
             loading: false,
-            error: error instanceof Error ? error.message : "로그아웃 중 오류가 발생했습니다"
+            error:
+              error instanceof Error
+                ? error.message
+                : "로그아웃 중 오류가 발생했습니다",
           });
         }
       },

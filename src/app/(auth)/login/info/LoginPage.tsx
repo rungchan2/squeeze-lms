@@ -8,12 +8,12 @@ import Button from "@/components/common/Button";
 import Text from "@/components/Text/Text";
 import Checkbox from "@/components/common/Checkbox";
 import { Separator, Stack, Spinner } from "@chakra-ui/react";
-import { useRouter } from "next/navigation";
+import { useRouter } from 'next/navigation'
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createUserSchema, Role, type CreateUser } from "@/types";
 import { DevTool } from "@hookform/devtools";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { decrypt } from "@/utils/encryption";
 import { NeededUserMetadata } from "@/app/(auth)/auth/callback/route";
@@ -21,8 +21,9 @@ import { createProfile } from "../../actions";
 import { useOrganization } from "@/hooks/useOrganization";
 import Select from "react-select";
 import { Modal } from "@/components/modal/Modal";
-import { confirmRoleAccessCode } from "../../actions";
+import { confirmRoleAccessCode, getUser } from "../../actions";
 import { toaster } from "@/components/ui/toaster";
+import { useAuth } from "@/components/AuthProvider";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
 
@@ -31,6 +32,7 @@ export default function LoginPage() {
   const [isChecked, setIsChecked] = useState<Agreement[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roleAccessCode, setRoleAccessCode] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [roleAccessType, setRoleAccessType] = useState<{
     label: string;
     value: Omit<Role, "user">;
@@ -45,6 +47,25 @@ export default function LoginPage() {
   } = useOrganization();
   const { organizations, isLoading: isOrganizationLoading } =
     useOrganizationList();
+  const { refreshUser } = useAuth();
+
+  useEffect(() => {
+    async function checkUser() {
+      try {
+        const userData = await getUser();
+        if (!userData) {
+          router.push("/error?message=로그인 정보가 없거나 유효하지 않습니다");
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error("사용자 정보 확인 중 오류:", error);
+        router.push("/error?message=로그인 정보를 확인하는 중 오류가 발생했습니다");
+      }
+    }
+    
+    checkUser();
+  }, [router]);
+
   const handleCheckboxChangeAll = () => {
     if (isChecked.length === 2) {
       setIsChecked([]);
@@ -52,7 +73,7 @@ export default function LoginPage() {
       setIsChecked(["mailAgreement", "cookieAgreement"]);
     }
   };
-
+  
   const handleCheckboxChange = (value: Agreement) => {
     if (isChecked.includes(value)) {
       setIsChecked(isChecked.filter((item) => item !== value));
@@ -60,6 +81,7 @@ export default function LoginPage() {
       setIsChecked([...isChecked, value]);
     }
   };
+
   function getDecryptedAuthData() {
     const authData = Cookies.get("auth_data");
 
@@ -100,6 +122,7 @@ export default function LoginPage() {
       first_name: decryptedAuthData?.first_name || "",
       last_name: decryptedAuthData?.last_name || "",
       phone: "",
+      role: "user",
       uid: decryptedAuthData?.uid || "",
       profile_image: decryptedAuthData?.profile_image || "",
       marketing_opt_in: isChecked.includes("mailAgreement"),
@@ -118,7 +141,6 @@ export default function LoginPage() {
   };
 
   const onSubmit = async (data: CreateUser) => {
-
     console.log(data);
     const { error } = await createProfile(data);
     if (error) {
@@ -126,7 +148,19 @@ export default function LoginPage() {
       return;
     }
     router.push("/");
+    refreshUser()
   };
+
+  if (isLoading) {
+    return (
+      <Container>
+        <Spinner size="xl" />
+        <Text variant="body" weight="medium" style={{ marginTop: "16px" }}>
+          사용자 정보를 확인하는 중입니다...
+        </Text>
+      </Container>
+    );
+  }
 
   return (
     <Container onSubmit={handleSubmit(onSubmit)}>

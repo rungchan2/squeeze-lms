@@ -1,6 +1,21 @@
 import { createClient } from "@/utils/supabase/client";
-import { CreateUser } from "@/types";
 const supabase = createClient();
+
+const getURL = () => {
+  // 현재 환경이 개발(localhost) 환경인지 확인
+  const isDevelopment = 
+    !process.env.NEXT_PUBLIC_VERCEL_ENV || // Vercel 환경 변수가 없거나
+    process.env.NEXT_PUBLIC_VERCEL_ENV === 'development' || // 개발 환경이거나
+    window.location.hostname === 'localhost' || // 호스트가 localhost이거나
+    window.location.hostname === '127.0.0.1'; // 로컬 IP인 경우
+  
+  // 개발 환경이면 localhost 사용, 아니면 production URL 사용
+  if (isDevelopment) {
+    return 'http://localhost:3000/auth/callback';
+  } else {
+    return 'https://squeezeedu.com/auth/callback';
+  }
+}
 
 export async function socialLogin(
   provider: "google" | "github" | "apple" | "twitter" | "facebook"
@@ -10,7 +25,7 @@ export async function socialLogin(
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: getURL(),
         queryParams: {
           access_type: "offline",
           prompt: "consent",
@@ -30,4 +45,3 @@ export async function socialLogin(
     return { data: null, error };
   }
 }
-

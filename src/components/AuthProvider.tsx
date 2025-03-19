@@ -84,14 +84,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const supabase = createClient();
         // 세션 확인 및 필요시 갱신
         const {
-          data: { session },
-        } = await supabase.auth.getSession();
+          data: { user },
+        } = await supabase.auth.getUser();
         const now = Date.now();
         const needsRefresh = !lastUpdated || now - lastUpdated > 30 * 60 * 1000; // 30분
 
-        if (session && (!isAuthenticated || needsRefresh)) {
+        if (user && (!isAuthenticated || needsRefresh)) {
           await refreshUser();
-        } else if (!session && isAuthenticated) {
+        } else if (!user && isAuthenticated) {
           await logout();
         }
       } catch (error) {

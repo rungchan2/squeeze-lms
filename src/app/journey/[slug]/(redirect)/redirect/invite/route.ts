@@ -11,10 +11,10 @@ export async function GET(
 
     // 현재 로그인한 사용자 정보 가져오기
     const {
-      data: { session },
-    } = await supabase_server.auth.getSession();
+      data: { user },
+    } = await supabase_server.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       // 로그인되지 않은 경우 로그인 페이지로 리다이렉트 (로그인 후 다시 이 페이지로 돌아오도록 쿼리 파라미터 추가)
       return NextResponse.redirect(
         new URL(
@@ -26,7 +26,7 @@ export async function GET(
     const { data: profileId } = await supabase_server
       .from("profiles")
       .select("id")
-      .eq("uid", session.user.id)
+      .eq("uid", user.id)
       .single();
 
     if (!profileId) {
