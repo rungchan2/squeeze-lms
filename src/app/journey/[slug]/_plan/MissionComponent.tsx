@@ -21,6 +21,7 @@ import { getMissionTypes } from "@/app/journey/actions";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
 import { JourneyMissionInstanceWithMission } from "@/types";
+import { toaster } from "@/components/ui/toaster";
 interface MissionComponentProps {
   weekId: number;
   weekName: string;
@@ -255,7 +256,13 @@ export default function MissionComponent({
         <Heading level={3}>{weekName} 미션</Heading>
         <AdminOnly>
           <IconContainer
-            onClick={() => deleteWeek(weekId)}
+            onClick={() => {
+              deleteWeek(weekId);
+              toaster.create({
+                title: "주차가 삭제되었습니다.",
+                type: "warning",
+              });
+            }}
             hoverColor="var(--negative-500)"
           >
             <RiDeleteBin6Line size="16px" />

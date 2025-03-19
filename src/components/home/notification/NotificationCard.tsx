@@ -10,6 +10,7 @@ import Button from "../../common/Button";
 import { formatDifference } from "@/utils/dayjs/calcDifference";
 import { Menu, Portal } from "@chakra-ui/react";
 import styled from "@emotion/styled";
+import { useRouter } from "next/navigation";
 
 interface NotificationCardProps {
   notification: Notification;
@@ -18,21 +19,30 @@ interface NotificationCardProps {
 
 export default function NotificationCard({
   notification,
-  readNotification
+  readNotification,
 }: NotificationCardProps) {
   const duration = formatDifference(notification.created_at || "");
   const [isOpen, setIsOpen] = useState(false);
   const isNotificationRead = notification.read_at !== null;
+  const router = useRouter();
   return (
     <Container>
       <div className={styles.notificationCard} onClick={() => setIsOpen(true)}>
         <div className={styles.contentContainer}>
-          <FaBell color={isNotificationRead ? "var(--grey-500)" : "var(--primary-400)"} />
+          <FaBell
+            color={
+              isNotificationRead ? "var(--grey-500)" : "var(--primary-400)"
+            }
+          />
           <div className={styles.textContainer}>
             <Text
               variant="body"
               fontWeight="bold"
-              className={isNotificationRead ? "read notification-title" : "notification-title"}
+              className={
+                isNotificationRead
+                  ? "read notification-title"
+                  : "notification-title"
+              }
             >
               {notification.message}
             </Text>
@@ -77,16 +87,12 @@ export default function NotificationCard({
         {notification.type === "request" && (
           <div className={styles.buttonContainer}>
             <Button
-              variant="outline"
-              onClick={(e) => e.stopPropagation()}
-              maxWidth={60}
-            >
-              <Text variant="small">거절</Text>
-            </Button>
-            <Button
               variant="flat"
-              onClick={(e) => e.stopPropagation()}
               maxWidth={60}
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(notification.link || "");
+              }}
             >
               <Text variant="small">수락</Text>
             </Button>
@@ -105,10 +111,7 @@ export default function NotificationCard({
                 fontWeight="bold"
                 className={styles.link}
                 onClick={() =>
-                  window.open(
-                    window.location.origin + notification.link,
-                    "_blank"
-                  )
+                  router.push(notification.link || "")
                 }
               >
                 {window.location.origin}
@@ -129,7 +132,6 @@ export default function NotificationCard({
     </Container>
   );
 }
-
 
 const Container = styled.div`
   width: 100%;

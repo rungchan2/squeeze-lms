@@ -43,7 +43,7 @@ export default function UsersPage() {
       receiver_id: userId,
       type: "request",
       message: `${journey.name}에 초대되었습니다.`,
-      link: `journey/${uuid}/redirect/invite`,
+      link: `/journey/${uuid}/redirect/invite`,
     });
     if (error) {
       toaster.create({

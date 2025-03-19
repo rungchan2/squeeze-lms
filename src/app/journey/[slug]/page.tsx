@@ -31,7 +31,7 @@ export default async function JourneyPage({
     <div>
       <Tabs usePath={true} flexDirection="column">
         <Tab title="일정" icon={<FaSchool />} path="plan">
-          <PlanTab />
+          <PlanTab slug={slug}/>
         </Tab>
         <Tab title="미션" icon={<FaCalendarAlt />} path="missions">
           <MissionTab/>

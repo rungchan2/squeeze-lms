@@ -9,6 +9,7 @@ import { FiMenu } from "react-icons/fi";
 import dayjs from "@/utils/dayjs/dayjs";
 import { AdminOnly } from "@/components/auth/AdminOnly";
 import { calcDifference } from "@/utils/dayjs/calcDifference";
+import { toaster } from "@/components/ui/toaster";
 interface MissionCardProps {
   mission: Mission;
   isModal?: boolean;
@@ -29,14 +30,23 @@ export default function MissionCard({
   showDetails = false,
   style,
 }: MissionCardProps) {
-  const dDay: string =
-    calcDifference(missionInstance?.expiry_date || "") > 0
-      ? "-" + calcDifference(missionInstance?.expiry_date || "")
-      : "+" +
-        calcDifference(missionInstance?.expiry_date || "")
-          .toString()
-          .split("-")[1];
-  const isDDayPassed = calcDifference(missionInstance?.expiry_date || "") < 0;
+  const difference = calcDifference(missionInstance?.expiry_date || "");
+  const dDay =
+    difference === 0
+      ? "D-Day"
+      : difference > 0
+      ? `D-${difference}`
+      : `D+${Math.abs(difference)}`;
+  const isDDay = difference === 0;
+  const isDDayPassed = difference <= 0;
+  const formattedDateStart =
+    dayjs(missionInstance?.release_date || "").format("M/D") === "Invalid Date"
+      ? "날짜없음"
+      : dayjs(missionInstance?.release_date || "").format("M/D");
+  const formattedDateEnd =
+    dayjs(missionInstance?.expiry_date || "").format("M/D") === "Invalid Date"
+      ? "날짜없음"
+      : dayjs(missionInstance?.expiry_date || "").format("M/D");
   return (
     <StyledMissionCard
       isModal={isModal}
@@ -61,15 +71,21 @@ export default function MissionCard({
           </div>
           {!isModal && missionInstance && (
             <div className="horizontal-mission-container">
-              <Text variant="small">
-                {dayjs(missionInstance.release_date).format("M/D")} ~{" "}
-                {dayjs(missionInstance.expiry_date).format("M/D")}
+              <Text variant="caption" color="var(--grey-600)">
+                {formattedDateStart} ~ {formattedDateEnd}
               </Text>
               {missionInstance.expiry_date && (
-                <div className={`d-day ${isDDayPassed ? "" : "negative"}`}>
-                  <Text variant="small">D{dDay}</Text>
+                <div
+                  className={`d-day ${
+                    isDDay ? "d-day" : isDDayPassed ? "negative" : ""
+                  }`}
+                >
+                  <Text variant="caption">{dDay}</Text>
                 </div>
               )}
+              <div className="mission-meta">
+                <Text variant="caption">{mission.points || 0}PT</Text>
+              </div>
             </div>
           )}
         </div>
@@ -77,16 +93,19 @@ export default function MissionCard({
 
       {!isModal && (
         <>
-          <div className="mission-meta">
-            <Text variant="small">{mission.points || 0}PT</Text>
-          </div>
           <AdminOnly>
             <div className="mission-actions">
               {/* <IconContainer onClick={() => onEdit?.(mission.id)}>
                 <FaEdit />
               </IconContainer> */}
               <IconContainer
-                onClick={() => onDelete?.(mission.id)}
+                onClick={() => {
+                  onDelete?.(mission.id);
+                  toaster.create({
+                    title: "미션이 삭제되었습니다.",
+                    type: "warning",
+                  });
+                }}
                 hoverColor="var(--negative-500)"
               >
                 <RiDeleteBin6Line />
@@ -174,10 +193,7 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
   }
 
   .mission-meta {
-    position: absolute;
     vertical-align: middle;
-    right: -10px;
-    top: -10px;
     display: flex;
     gap: 1rem;
     color: var(--white);
@@ -196,6 +212,11 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
 
     &.negative {
       background-color: var(--negative-600);
+      color: var(--white);
+      border: none;
+    }
+    &.d-day {
+      background-color: var(--primary-400);
       color: var(--white);
       border: none;
     }

@@ -11,10 +11,12 @@ import { AdminOnly } from "@/components/auth/AdminOnly";
 import { Menu, Portal } from "@chakra-ui/react";
 import { useJourney } from "@/hooks/useJourney";
 import { toaster } from "@/components/ui/toaster";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function JourneyCard({ journey }: { journey: Journey }) {
   const defaultImage = "https://picsum.photos/200/200";
   const router = useRouter();
+  const { role } = useAuth();
   const { adminNum, participantNum, teacherNum, isUserJoined } = useJourneyUser(
     journey.id
   );
@@ -22,6 +24,8 @@ export default function JourneyCard({ journey }: { journey: Journey }) {
 
   const handleClick = () => {
     if (isUserJoined) {
+      router.push(`/journey/${journey.uuid}`);
+    } else if (role === "admin") {
       router.push(`/journey/${journey.uuid}`);
     } else {
       toaster.create({

@@ -11,17 +11,26 @@ import LoginSignup from "@/components/auth/LoginSignup";
 import Text from "@/components/Text/Text";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
+import { toaster } from "@/components/ui/toaster";
 export default function LoginPage() {
   const [isOpen, setIsOpen] = useState(false);
   const { id } = useAuth();
   const router = useRouter();
   const [error, setError] = useState("");
+  const isKakao = Boolean(navigator.userAgent.match("KAKAOTALK"));
 
   if (id) {
     router.push("/");
   }
 
   const handleGoogleLogin = async () => {
+    if (isKakao) {
+      toaster.create({
+        title: "카카오톡 브라우저에는 구글 로그인을 지원하지 않습니다.",
+        type: "warning",
+      });
+      return;
+    }
     try {
       const { error } = await socialLogin("google");
       if (error) {
@@ -36,7 +45,7 @@ export default function LoginPage() {
     <LoginContainer>
       <div className="login-container">
         <Heading level={2}>로그인</Heading>
-        <GoogleLoginButton onClick={handleGoogleLogin}>
+        <GoogleLoginButton onClick={handleGoogleLogin} disabled={isKakao}>
           <Image src="/google.svg" alt="Google" width={27} height={27} />
           <Text weight="bold" color="var(--background)">
             Google로 로그인
@@ -114,7 +123,7 @@ const LoginContainer = styled.div`
   }
 `;
 
-const GoogleLoginButton = styled.button`
+const GoogleLoginButton = styled.button<{ disabled: boolean }>`
   margin: 10px 0;
   width: 100%;
   padding: 5px 15px;
@@ -128,4 +137,6 @@ const GoogleLoginButton = styled.button`
   justify-content: center;
   gap: 0.5rem;
   font-weight: 700;
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
 `;
