@@ -3,10 +3,10 @@ import { createClient } from "@/utils/supabase/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
     const supabase_server = await createClient();
 
     // 현재 로그인한 사용자 정보 가져오기

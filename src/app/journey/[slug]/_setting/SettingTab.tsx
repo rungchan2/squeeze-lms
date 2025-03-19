@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { IoMenu } from "react-icons/io5";
 import styled from "@emotion/styled";
 import Heading from "@/components/Text/Heading";
@@ -8,20 +8,24 @@ import Text from "@/components/Text/Text";
 import { FaSchoolFlag } from "react-icons/fa6";
 import { BsEnvelopeArrowUpFill } from "react-icons/bs";
 import { FaUserGroup } from "react-icons/fa6";
-import { Separator } from "@chakra-ui/react";
+import { Input, Separator } from "@chakra-ui/react";
 import { AdminOnly, TeacherOnly } from "@/components/auth/AdminOnly";
 import { FaChalkboardTeacher } from "react-icons/fa";
 import { CgPassword } from "react-icons/cg";
 import { RiAdminFill } from "react-icons/ri";
 import Link from "next/link";
-import {
-  Button,
-  CloseButton,
-  Dialog,
-  Portal,
-} from "@chakra-ui/react";
-
+import { Button, CloseButton, Dialog, Portal } from "@chakra-ui/react";
+import { Clipboard } from "@chakra-ui/react";
+import { FaCheck, FaRegCopy } from "react-icons/fa6";
+import { InputGroup } from "@/components/ui/input-group";
+import { Table } from "@chakra-ui/react";
+import useAccessCode from "@/hooks/useAccessCode";
+import dayjs from "@/utils/dayjs/dayjs";
 export default function SettingTab({ slug }: { slug: string }) {
+  const { accessCodes, deleteAccessCode } = useAccessCode();
+  const filterAccessCodes = accessCodes?.filter(
+    (code) => code.role === "teacher"
+  );
   return (
     <SettingTabContainer>
       <div>
@@ -29,7 +33,7 @@ export default function SettingTab({ slug }: { slug: string }) {
           <div className="first-heading">
             <Heading level={3}>설정</Heading>
             <Text variant="body" color="var(--grey-500)">
-              이곳에서 클라스 설정을 변경할 수 있습니다.
+              클라스 설정을 변경하는 곳입니다.
             </Text>
           </div>
           <Separator size="md" />
@@ -59,7 +63,7 @@ export default function SettingTab({ slug }: { slug: string }) {
                 <FaChalkboardTeacher size={24} />
                 <Heading level={4}>클라스 설정</Heading>
                 <Text variant="caption" color="var(--grey-500)">
-                  (선생님에게만 이 설정이 표시됩니다.)
+                  (선생님만 접근 가능)
                 </Text>
               </div>
               <div className="menu-items">
@@ -104,28 +108,56 @@ export default function SettingTab({ slug }: { slug: string }) {
                   <Portal>
                     <Dialog.Backdrop />
                     <Dialog.Positioner>
-                      <Dialog.Content css={{ position: 'relative' }}>
+                      <Dialog.Content css={{ position: "relative" }}>
                         <Dialog.Header>
-                          <Dialog.Title>Dialog Title</Dialog.Title>
+                          <Dialog.Title>회원가입 코드</Dialog.Title>
                         </Dialog.Header>
                         <Dialog.Body>
-                          {/* TODO:회원가입 코드 발급 페이지 */}
+                          <Table.Root
+                            key={"access-code"}
+                            size={"sm"}
+                            interactive
+                          >
+                            <Table.Header>
+                              <Table.Row>
+                                <Table.ColumnHeader>만료일</Table.ColumnHeader>
+                                <Table.ColumnHeader>권한</Table.ColumnHeader>
+                                <Table.ColumnHeader>코드</Table.ColumnHeader>
+                              </Table.Row>
+                            </Table.Header>
+                            <Table.Body>
+                              {filterAccessCodes?.map((code) => (
+                                <Table.Row key={code.id}>
+                                  <Table.Cell>
+                                    {dayjs(code.expiry_date).format("YYYY-MM-DD a h:m")}
+                                  </Table.Cell>
+                                  <Table.Cell>
+                                    {code.role === "teacher"
+                                      ? "선생님"
+                                      : "학생"}
+                                  </Table.Cell>
+                                  <Table.Cell>
+                                    <CopyInput value={code.code} />
+                                  </Table.Cell>
+                                </Table.Row>
+                              ))}
+                            </Table.Body>
+                          </Table.Root>
                         </Dialog.Body>
                         <Dialog.Footer>
                           <Dialog.ActionTrigger asChild>
-                            <Button variant="outline">Cancel</Button>
+                            <Button variant="outline">취소</Button>
                           </Dialog.ActionTrigger>
-                          <Button>Save</Button>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
-                          <CloseButton 
-                            size="sm" 
-                            css={{ 
-                              position: 'absolute', 
-                              top: '1rem', 
-                              right: '1rem',
-                              zIndex: 10 
-                            }} 
+                          <CloseButton
+                            size="sm"
+                            css={{
+                              position: "absolute",
+                              top: "1rem",
+                              right: "1rem",
+                              zIndex: 10,
+                            }}
                           />
                         </Dialog.CloseTrigger>
                       </Dialog.Content>
@@ -188,6 +220,45 @@ export default function SettingTab({ slug }: { slug: string }) {
     </SettingTabContainer>
   );
 }
+const CopyInput = ({ value }: { value: string }) => {
+  return (
+    <Clipboard.Root maxW="100%" value={value}>
+      <InputGroup endElement={<ClipboardIconButton value={value} />}>
+        <Clipboard.Input asChild>
+          <Input maxW="100%" />
+        </Clipboard.Input>
+      </InputGroup>
+    </Clipboard.Root>
+  );
+};
+
+export const ClipboardIconButton = ({ value }: { value: string }) => {
+  const [isCopied, setIsCopied] = useState(false);
+  const handleCopy = () => {
+    setIsCopied(true);
+    navigator.clipboard.writeText(value);
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 1000);
+  };
+  return (
+    <Clipboard.Root value={value}>
+      <Clipboard.Trigger asChild>
+        <div
+          style={{
+            cursor: "pointer",
+            backgroundColor: "var(--grey-100)",
+            padding: "8px",
+            borderRadius: "4px",
+          }}
+          onClick={handleCopy}
+        >
+          {isCopied ? <FaCheck /> : <FaRegCopy />}
+        </div>
+      </Clipboard.Trigger>
+    </Clipboard.Root>
+  );
+};
 
 const SettingTabContainer = styled.div`
   max-width: var(--breakpoint-tablet);
