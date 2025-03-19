@@ -60,6 +60,7 @@ const MentionInput = forwardRef<MentionInputRef, MentionInputProps>(({
         return false;
       },
     },
+    immediatelyRender: false,
   });
 
   // ref를 통해 에디터 내용을 초기화할 수 있도록 함

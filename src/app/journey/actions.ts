@@ -60,3 +60,10 @@ export async function updateJourney(id: number, journey: CreateJourney) {
   const { data, error } = await supabase.from("journeys").update(journey).eq("id", id);
   return { data, error };
 }
+
+export async function deleteJourney(id: number) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("journeys").delete().eq("id", id);
+  return { data, error };
+}
+

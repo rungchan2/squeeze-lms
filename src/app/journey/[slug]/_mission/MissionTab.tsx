@@ -19,6 +19,7 @@ import { Input } from "@chakra-ui/react";
 import { FaSortAmountDownAlt, FaSortAmountUpAlt } from "react-icons/fa";
 import { IconContainer } from "@/components/common/IconContainer";
 import { useCompletedMissions } from "@/hooks/usePosts";
+import Heading from "@/components/Text/Heading";
 
 export default function MissionTab() {
   const router = useRouter();
@@ -86,9 +87,9 @@ export default function MissionTab() {
 
   return (
     <MissionTabContainer>
-      <Text variant="body" fontWeight="bold" className="mission-title">
+      <Heading level={3} className="mission-title">
         내 미션 목록
-      </Text>
+      </Heading>
       <div className="search-sort-container">
         <InputGroup flex={1} startElement={<IoSearch />} width="100%">
           <Input

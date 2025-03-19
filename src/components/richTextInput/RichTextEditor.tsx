@@ -195,6 +195,7 @@ const RichTextEditor = ({
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
+    immediatelyRender: false,
   });
 
   return (

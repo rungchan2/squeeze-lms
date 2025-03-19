@@ -43,7 +43,7 @@ export default async function JourneyPage({
           <FeedTab />
         </Tab>
         <Tab title="설정" icon={<FiMenu />} path="settings">
-          <SettingTab/>
+          <SettingTab slug={slug} />
         </Tab>
       </Tabs>
     </div>

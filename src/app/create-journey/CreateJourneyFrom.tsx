@@ -3,7 +3,11 @@
 import FileUpload from "@/components/common/FileUpload";
 import styled from "@emotion/styled";
 import { CreateJourney, createJourneySchema, Journey } from "@/types";
-import { createJourney, updateJourney } from "../journey/actions";
+import {
+  createJourney,
+  updateJourney,
+  deleteJourney,
+} from "../journey/actions";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@chakra-ui/react";
@@ -74,9 +78,30 @@ export default function CreateJourneyPage({
   return (
     <StyledContainer onSubmit={handleSubmit(onSubmit)}>
       <div className="input-container">
-        <Heading level={3}>
-          {initialData ? "클라스 수정" : "클라스 생성"}
-        </Heading>
+        <div className="heading-container">
+          <Heading level={3}>
+            {initialData ? "클라스 수정" : "클라스 생성"}
+          </Heading>
+          {initialData && (
+            <Button
+              variant="outline"
+              style={{
+                color: "var(--negative-600)",
+                borderColor: "var(--negative-600)",
+                maxWidth: "100px",
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                if (confirm("정말 삭제하시겠습니까?")) {
+                  deleteJourney(initialData.id);
+                  router.back();
+                }
+              }}
+            >
+              삭제
+            </Button>
+          )}
+        </div>
         <InputAndTitle
           title="클라스 이미지"
           errorMessage={errors.image_url?.message}
@@ -124,6 +149,12 @@ const StyledContainer = styled.form`
   flex-direction: column;
   justify-content: space-between;
   gap: 20px;
+
+  .heading-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
   .input-container {
     display: flex;

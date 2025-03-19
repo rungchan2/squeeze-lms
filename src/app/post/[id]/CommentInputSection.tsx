@@ -10,10 +10,8 @@ import { VscMention } from "react-icons/vsc";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { ProfileImage } from "@/components/navigation/ProfileImage";
 import { useState } from "react";
-import { Comment } from "@/types/comments";
 
 interface CommentInputSectionProps {
-  localComments: Comment[];
   createComment: (content: string) => Promise<any>;
 }
 

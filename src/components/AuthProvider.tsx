@@ -20,6 +20,7 @@ interface AuthContextType {
   profileImage: string | null;
   fullName: string | null;
   error: string | null;
+  organizationId: number | null;
 
   // 액션 메서드
   refreshUser: () => Promise<void>;
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const refreshUser = useAuthStore((state) => state.refreshUser);
   const fetchUser = useAuthStore((state) => state.fetchUser);
   const logout = useAuthStore((state) => state.logout);
-
+  const organizationId = useAuthStore((state) => state.organizationId);
   // 권한 확인 메서드
   const hasPermission = (requiredRole: Role): boolean => {
     return checkPermission(role, requiredRole);
@@ -156,6 +157,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         profileImage,
         fullName,
         error,
+        organizationId,
         refreshUser,
         logout,
         hasPermission,

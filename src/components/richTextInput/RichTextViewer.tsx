@@ -25,6 +25,7 @@ const RichTextViewer = ({ content, style }: RichTextViewerProps) => {
     ],
     content,
     editable: false,
+    immediatelyRender: false,
   });
 
   return (

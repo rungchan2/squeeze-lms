@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-// The client you created from the Server-Side Auth instructions
 import { createClient } from "@/utils/supabase/server";
 import { encrypt } from "@/utils/encryption"; // 암호화 유틸리티 필요
 

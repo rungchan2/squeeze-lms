@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useCallback, useRef } from "react";
 import styled from "@emotion/styled";
 import { useComments } from "@/hooks/useComments";
 import { useParams } from "next/navigation";
@@ -9,7 +9,6 @@ import { formatDifference } from "@/utils/dayjs/calcDifference";
 import Spinner from "@/components/common/Spinner";
 import { useAuth } from "@/components/AuthProvider";
 import { FiTrash2 } from "react-icons/fi";
-import { Comment } from "@/types/comments";
 import CommentInputSection from "./CommentInputSection";
 
 export default function CommentSection() {
@@ -23,21 +22,47 @@ export default function CommentSection() {
     deleteComment,
     refreshComments,
     createComment,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useComments({ postId });
   const { id: userId } = useAuth();
-  const [localComments, setLocalComments] = useState<Comment[]>([]);
-  const [localCount, setLocalCount] = useState(0);
 
-  // 댓글 데이터가 변경될 때마다 로컬 상태 업데이트
-  useEffect(() => {
-    setLocalComments(comments);
-    setLocalCount(count);
-  }, [comments, count]);
+  // 무한 스크롤을 위한 observer ref
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastCommentRef = useRef<HTMLDivElement | null>(null);
 
   // 컴포넌트 마운트 시 댓글 새로고침
   useEffect(() => {
     refreshComments();
   }, [refreshComments]);
+
+  // Intersection Observer 설정
+  useEffect(() => {
+    if (loading) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentObserver = observerRef.current;
+    const lastElement = lastCommentRef.current;
+
+    if (lastElement && hasNextPage) {
+      currentObserver.observe(lastElement);
+    }
+
+    return () => {
+      if (lastElement && currentObserver) {
+        currentObserver.unobserve(lastElement);
+      }
+    };
+  }, [loading, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleDeleteComment = useCallback(
     async (commentId: number) => {
@@ -48,7 +73,7 @@ export default function CommentSection() {
     [deleteComment]
   );
 
-  if (loading && localComments.length === 0)
+  if (loading && comments.length === 0)
     return (
       <div>
         <Spinner size="small" />
@@ -58,48 +83,56 @@ export default function CommentSection() {
 
   return (
     <CommentSectionContainer>
-      <h3 className="comment-count">댓글 {localCount}개</h3>
+      <h3 className="comment-count">댓글 {count}개</h3>
       <div className="comments-list">
-        {localComments.length === 0 ? (
+        {comments.length === 0 ? (
           <div className="no-comments">첫 댓글을 남겨보세요!</div>
         ) : (
-          localComments.map((comment) => (
-            <CommentItem key={comment.id}>
-              <div className="comment-header">
-                <ProfileImage
-                  profileImage={comment.profiles?.profile_image || null}
-                  size="small"
-                />
-                <div className="comment-info">
-                  <div className="comment-author">
-                    {comment.profiles?.first_name} {comment.profiles?.last_name}
+          <>
+            {comments.map((comment, index) => (
+              <CommentItem
+                key={comment.id}
+                ref={index === comments.length - 1 ? lastCommentRef : null}
+              >
+                <div className="comment-header">
+                  <ProfileImage
+                    profileImage={comment.profiles?.profile_image || null}
+                    size="small"
+                  />
+                  <div className="comment-info">
+                    <div className="comment-author">
+                      {comment.profiles?.first_name}{" "}
+                      {comment.profiles?.last_name}
+                    </div>
+                    <div className="comment-date">
+                      {formatDifference(comment.created_at || "")}
+                    </div>
                   </div>
-                  <div className="comment-date">
-                    {formatDifference(comment.created_at || "")}
-                  </div>
+                  {userId === comment.user_id && (
+                    <button
+                      className="delete-button"
+                      onClick={() => handleDeleteComment(comment.id)}
+                      aria-label="댓글 삭제"
+                    >
+                      <FiTrash2 size={16} />
+                    </button>
+                  )}
                 </div>
-                {userId === comment.user_id && (
-                  <button
-                    className="delete-button"
-                    onClick={() => handleDeleteComment(comment.id)}
-                    aria-label="댓글 삭제"
-                  >
-                    <FiTrash2 size={16} />
-                  </button>
-                )}
+                <div
+                  className="comment-content"
+                  dangerouslySetInnerHTML={{ __html: comment.content || "" }}
+                />
+              </CommentItem>
+            ))}
+            {isFetchingNextPage && (
+              <div className="loading-more">
+                <Spinner size="small" />
               </div>
-              <div
-                className="comment-content"
-                dangerouslySetInnerHTML={{ __html: comment.content || "" }}
-              />
-            </CommentItem>
-          ))
+            )}
+          </>
         )}
       </div>
-      <CommentInputSection
-        localComments={localComments}
-        createComment={createComment}
-      />
+      <CommentInputSection createComment={createComment} />
     </CommentSectionContainer>
   );
 }
@@ -126,6 +159,12 @@ const CommentSectionContainer = styled.div`
     color: var(--grey-500);
     text-align: center;
     padding: 2rem 0;
+  }
+
+  .loading-more {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
   }
 `;
 

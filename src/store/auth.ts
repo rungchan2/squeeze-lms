@@ -18,7 +18,7 @@ export interface UserState {
   fullName: string | null;
   error: string | null;
   lastUpdated: number | null;
-
+  organizationId: number | null;
   // 액션
   fetchUser: () => void;
   refreshUser: () => Promise<void>;
@@ -67,7 +67,7 @@ export const useAuthStore = create<UserState>()(
       fullName: null,
       error: null,
       lastUpdated: null,
-
+      organizationId: null,
       // 로컬 스토리지에서 사용자 데이터 가져오기
       fetchUser: () => {
         try {
@@ -100,7 +100,8 @@ export const useAuthStore = create<UserState>()(
               loading: false,
               profileImage: null,
               fullName: null,
-              lastUpdated: null
+              lastUpdated: null,
+              organizationId: null,
             });
             return;
           }
@@ -123,7 +124,8 @@ export const useAuthStore = create<UserState>()(
             loading: false,
             profileImage: profile.profile_image,
             fullName: `${profile.first_name} ${profile.last_name}`,
-            lastUpdated: Date.now()
+            lastUpdated: Date.now(),
+            organizationId: profile.organization_id,
           });
         } catch (error) {
           console.error("refreshUser 오류:", error);
@@ -150,7 +152,8 @@ export const useAuthStore = create<UserState>()(
             profileImage: null,
             fullName: null,
             error: null,
-            lastUpdated: null
+            lastUpdated: null,
+            organizationId: null,
           });
           console.log("상태 초기화 완료");
           
@@ -189,7 +192,8 @@ export const useAuthStore = create<UserState>()(
         isAuthenticated: state.isAuthenticated,
         profileImage: state.profileImage,
         fullName: state.fullName,
-        lastUpdated: state.lastUpdated
+        lastUpdated: state.lastUpdated,
+        organizationId: state.organizationId,
       }),
     }
   )

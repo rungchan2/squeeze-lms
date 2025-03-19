@@ -4,33 +4,54 @@ import styled from "@emotion/styled";
 import { usePosts, useCompletedMissions } from "@/hooks/usePosts";
 import PostCard from "@/components/home/mypage/PostCard";
 import { useAuth } from "@/components/AuthProvider";
-import { PostWithRelations } from "@/types";
 import Spinner from "@/components/common/Spinner";
 import Text from "@/components/Text/Text";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { InputGroup } from "@/components/ui/input-group";
 import { IoSearch } from "react-icons/io5";
 import { Input } from "@chakra-ui/react";
 import { FaSortAmountDownAlt, FaSortAmountUpAlt } from "react-icons/fa";
 import { IconContainer } from "@/components/common/IconContainer";
+import Heading from "@/components/Text/Heading";
 
 export default function FeedTab() {
-  const { data: posts, isLoading } = usePosts();
+  const { data: posts, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts();
   const { id: userId } = useAuth();
   const { completedMissionIds, isLoading: isLoadingCompletedMissions } =
     useCompletedMissions(userId || 0);
-  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortPosts, setSortPosts] = useState<"asc" | "desc">("desc");
+  
+  // 무한 스크롤을 위한 observer ref
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastPostRef = useRef<HTMLDivElement | null>(null);
 
-  // 현재 URL에서 slug 추출
-  const getSlugFromPathname = () => {
-    // pathname 형식: /journey/[slug]/feed
-    const pathParts = pathname.split("/");
-    // journey 다음 부분이 slug
-    return pathParts.length > 2 ? pathParts[2] : "";
-  };
+  // Intersection Observer 설정
+  useEffect(() => {
+    if (isLoading) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentObserver = observerRef.current;
+    const lastElement = lastPostRef.current;
+
+    if (lastElement && hasNextPage) {
+      currentObserver.observe(lastElement);
+    }
+
+    return () => {
+      if (lastElement) {
+        currentObserver.unobserve(lastElement);
+      }
+    };
+  }, [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // 로딩 중이면 스피너 표시
   if (isLoading || isLoadingCompletedMissions) {
@@ -51,10 +72,7 @@ export default function FeedTab() {
     const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
     const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
     
-    // 오름차순 또는 내림차순 정렬
-    return sortPosts === "asc" 
-      ? dateA - dateB  // 오름차순: 오래된 게시물이 먼저
-      : dateB - dateA; // 내림차순: 최신 게시물이 먼저
+    return sortPosts === "asc" ? dateA - dateB : dateB - dateA;
   });
 
   const handleSortPosts = () => {
@@ -63,9 +81,9 @@ export default function FeedTab() {
 
   return (
     <FeedTabContainer>
-      <Text variant="body" fontWeight="bold" className="feed-title">
+      <Heading level={3} className="feed-title">
         피드
-      </Text>
+      </Heading>
       <div className="search-sort-container">
         <InputGroup flex={1} startElement={<IoSearch />} width="100%">
           <Input
@@ -91,9 +109,19 @@ export default function FeedTab() {
       
       {sortedPosts.length > 0 ? (
         <div className="posts-container">
-          {sortedPosts.map((post: any) => (
-            <PostCard key={post.id} post={post} />
+          {sortedPosts.map((post: any, index: number) => (
+            <div
+              key={post.id}
+              ref={index === sortedPosts.length - 1 ? lastPostRef : null}
+            >
+              <PostCard post={post} />
+            </div>
           ))}
+          {isFetchingNextPage && (
+            <div className="loading-more">
+              <Spinner size="24px" />
+            </div>
+          )}
         </div>
       ) : (
         <div className="empty-state">
@@ -143,5 +171,11 @@ const FeedTabContainer = styled.div`
     background-color: var(--grey-50);
     border-radius: 8px;
     border: 1px dashed var(--grey-300);
+  }
+
+  .loading-more {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
   }
 `;

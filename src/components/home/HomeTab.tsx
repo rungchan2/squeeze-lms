@@ -8,18 +8,19 @@ import Spinner from "@/components/common/Spinner";
 import styled from "@emotion/styled";
 import NoJourney from "./space/NoJourney";
 import NotificationCard from "./notification/NotificationCard";
-import { useNotification } from "@/hooks/useNotification";
+import { useNotifications, markAsRead } from "@/hooks/useNotification";
 import MyPage from "./mypage/MyPage";
 import { FloatingButton } from "@/components/common/FloatingButton";
 import Text from "../Text/Text";
 import { useRouter } from "next/navigation";
 import { AdminOnly } from "../auth/AdminOnly";
+import { useCallback, useRef } from "react";
 
 export default function HomeTab() {
 
   return (
     <Tabs usePath={true}>
-      <Tab title="내 조직" icon={<MdSpaceDashboard />} path="home">
+      <Tab title="클라스" icon={<MdSpaceDashboard />} path="home">
         <JourneyTab />
       </Tab>
       <Tab title="알림" icon={<FaBell />} path="notifications">
@@ -72,8 +73,46 @@ const JourneysContainer = styled.div`
 `;
 
 function NotificationTab() {
-  const { data, isLoading, error, readNotification } = useNotification();
-  
+  const { 
+    notifications, 
+    unreadCount, 
+    error, 
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch 
+  } = useNotifications(10);
+
+  // 무한 스크롤을 위한 인터섹션 옵저버
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastItemRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isFetchingNextPage) return;
+      
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      });
+
+      if (node) {
+        observerRef.current.observe(node);
+      }
+    },
+    [isFetchingNextPage, fetchNextPage, hasNextPage]
+  );
+
+  // 알림 읽음 처리
+  const handleReadNotification = async (notificationId: number) => {
+    await markAsRead(notificationId);
+    refetch();
+  };
+
   if (error) {
     return <div>Error: {error.message}</div>;
   }
@@ -84,15 +123,35 @@ function NotificationTab() {
       </div>
     );
   }
+  
   return (
     <NotificationsContainer>
-      {data?.map((notification) => (
-        <NotificationCard
-          key={notification.id}
-          notification={notification}
-          readNotification={readNotification}
-        />
-      ))}
+      {notifications.length === 0 ? (
+        <EmptyState>알림이 없습니다.</EmptyState>
+      ) : (
+        <div className='notification-list'>
+          {notifications.map((notification, index) => {
+            const isLastItem = index === notifications.length - 1;
+            return (
+              <div 
+                key={notification.id}
+                ref={isLastItem ? lastItemRef : null}
+              >
+                <NotificationCard
+                  notification={notification}
+                  readNotification={handleReadNotification}
+                />
+              </div>
+            );
+          })}
+          
+          {isFetchingNextPage && (
+            <div>
+              <Spinner size="24px" style={{ marginTop: "12px" }} />
+            </div>
+          )}
+        </div>
+      )}
     </NotificationsContainer>
   );
 }
@@ -102,6 +161,27 @@ const NotificationsContainer = styled.div`
   flex-direction: column;
   gap: 8px;
   align-items: center;
+  width: 100%;
+
+  .notification-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+  width: 100%;
+  background-color: var(--grey-100);
+  border-radius: 8px;
+  margin-top: 16px;
+  padding: 16px;
+  color: var(--grey-600);
 `;
 
 function ProfileTab() {
