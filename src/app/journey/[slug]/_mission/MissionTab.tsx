@@ -20,8 +20,7 @@ import { FaSortAmountDownAlt, FaSortAmountUpAlt } from "react-icons/fa";
 import { IconContainer } from "@/components/common/IconContainer";
 import { useCompletedMissions } from "@/hooks/usePosts";
 import Heading from "@/components/Text/Heading";
-
-export default function MissionTab() {
+export default function MissionTab({ slug }: { slug: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const { id: userId } = useAuth();

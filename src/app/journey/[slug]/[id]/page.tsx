@@ -15,8 +15,14 @@ import { createPost } from "@/app/journey/actions";
 import { useAuth } from "@/components/AuthProvider";
 import { Input } from "@chakra-ui/react";
 import InputAndTitle from "@/components/InputAndTitle";
+import userPoint from "@/utils/userPoints/userPoint";
+import { useJourneyStore } from "@/store/journey";
 
-export default function DoMissionPage() {
+export default function DoMissionPage({
+  postData,
+}: {
+  postData: { id: string; slug: string };
+}) {
   const { id: userId } = useAuth();
   const params = useParams<{ id: string; slug: string }>();
   const { id, slug } = params;
@@ -24,6 +30,7 @@ export default function DoMissionPage() {
   const { missionInstance, isLoading, error } = useMissionInstance(
     id ? Number(id) : null
   );
+  const { currentJourneyId } = useJourneyStore();
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,7 +53,7 @@ export default function DoMissionPage() {
     try {
       setIsSubmitting(true);
 
-      const result = await createPost({
+      const { data, error } = await createPost({
         content: content,
         user_id: userId,
         mission_instance_id: missionInstance.id,
@@ -54,14 +61,27 @@ export default function DoMissionPage() {
         file_url: "",
         score: missionInstance.mission.points,
       });
-      console.log("result", result);
-      if (result.error) {
-        console.error("미션 제출 오류:", result.error);
+      if (error) {
+        console.error("미션 제출 오류:", error);
         toaster.create({
           title: "미션 제출 중 오류가 발생했습니다.",
           type: "error",
         });
         return;
+      }
+
+      const { error: userPointError } = await userPoint.createUserPoint({
+        user_id: userId,
+        journey_id: currentJourneyId || 0,
+        mission_instance_id: missionInstance.id,
+        post_id: data?.id || 0,
+        amount: missionInstance.mission.points || 0,
+      });
+      if (userPointError) {
+        toaster.create({
+          title: "유저 포인트 생성 중 오류가 발생했습니다.",
+          type: "error",
+        });
       }
 
       // 성공 시 다음 페이지로 이동
@@ -88,9 +108,7 @@ export default function DoMissionPage() {
         <Heading level={3}>{missionInstance.mission.name}</Heading>
         <InputAndTitle
           title="미션 제목"
-          errorMessage={
-            title.length === 0 ? "미션 제목을 입력해주세요." : ""
-          }
+          errorMessage={title.length === 0 ? "미션 제목을 입력해주세요." : ""}
         >
           <Input
             value={title}
@@ -119,7 +137,11 @@ export default function DoMissionPage() {
         />
       </div>
       <div className="button-container">
-        <Button variant="flat" onClick={handleSubmit} disabled={isSubmitting || title.length === 0}>
+        <Button
+          variant="flat"
+          onClick={handleSubmit}
+          disabled={isSubmitting || title.length === 0}
+        >
           {isSubmitting ? <Spinner /> : "제출"}
         </Button>
       </div>

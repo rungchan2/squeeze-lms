@@ -14,9 +14,14 @@ import { FloatingButton } from "@/components/common/FloatingButton";
 import Text from "../Text/Text";
 import { useRouter } from "next/navigation";
 import { AdminOnly } from "../auth/AdminOnly";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { useJourneyStore } from "@/store/journey";
 
 export default function HomeTab() {
+  const { clearCurrentJourney } = useJourneyStore();
+  useEffect(() => {
+    clearCurrentJourney();
+  }, [clearCurrentJourney]);
 
   return (
     <Tabs usePath={true}>

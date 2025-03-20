@@ -12,6 +12,7 @@ import { Menu, Portal } from "@chakra-ui/react";
 import { useJourney } from "@/hooks/useJourney";
 import { toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/components/AuthProvider";
+import { useJourneyStore } from "@/store/journey";
 
 export default function JourneyCard({ journey }: { journey: Journey }) {
   const defaultImage = "https://picsum.photos/200/200";

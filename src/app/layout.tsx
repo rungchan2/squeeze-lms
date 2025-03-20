@@ -37,9 +37,7 @@ export default function RootLayout({
             <SpeedInsights />
           </div>
           <Toaster />
-          <KakaoScript />
         </Providers>
-        <SpeedInsights />
       </body>
     </html>
   );

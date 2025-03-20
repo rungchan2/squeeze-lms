@@ -28,8 +28,9 @@ export default function WeekCard({
   const [isOpen, setIsOpen] = useState(false);
   const [missionCount, setMissionCount] = useState(0);
   
-  // 미션 인스턴스 가져오기 (isOpen 상태와 관계없이)
-  const { missionInstances, isLoading: isLoadingInstances } = useJourneyMissionInstances(week.id);
+  // 미션 인스턴스 가져오기
+  const { missionInstances, isLoading: isLoadingInstances, mutate } =
+    useJourneyMissionInstances(week.id);
   
   // 미션 인스턴스가 로드되면 카운트 업데이트
   useEffect(() => {
@@ -42,10 +43,17 @@ export default function WeekCard({
   const handleToggle = () => {
     setIsOpen((prev) => !prev);
   };
-  
+
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          marginBottom: "10px",
+        }}
+      >
         <FaSquare />
         <Text variant="body" fontWeight="bold">
           {index + 1}

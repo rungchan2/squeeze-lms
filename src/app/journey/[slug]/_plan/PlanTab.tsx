@@ -13,6 +13,7 @@ import { FloatingButton } from "@/components/common/FloatingButton";
 import { FaWandMagicSparkles } from "react-icons/fa6";
 import { useSearchParams } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
+import { useJourneyStore } from "@/store/journey";
 
 // WeekCard 컴포넌트를 메모이제이션
 const MemoizedWeekCard = memo(WeekCard);
@@ -58,16 +59,18 @@ export default function PlanTab({ slug }: { slug: string }) {
   const router = useRouter();
   const [journeyId, setJourneyId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const { setCurrentJourneyUuid, currentJourneyUuid, getCurrentJourneyId } = useJourneyStore();
+  
   useEffect(() => {
     if (status === "success") {
       toaster.create({
         title: "환영합니다! 클라스에 참여하셨습니다.",
         type: "success",
       });
+      setCurrentJourneyUuid(slug);
       router.push(`/journey/${slug}`);
     }
-  }, [status, router, slug]);
+  }, [status, router, slug, currentJourneyUuid]);
 
   // 여행 ID 가져오기
   useEffect(() => {
@@ -89,7 +92,9 @@ export default function PlanTab({ slug }: { slug: string }) {
     };
 
     fetchJourneyId();
-  }, [slug, router]);
+    getCurrentJourneyId();
+    setCurrentJourneyUuid(slug);
+  }, [slug, router, setCurrentJourneyUuid]);
 
   // useWeeks 훅 사용
   const {

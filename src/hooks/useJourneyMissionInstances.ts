@@ -8,24 +8,28 @@ import {
   Mission,
 } from "@/types";
 import { useCallback } from "react";
-import { getMissionInstanceById } from "@/app/journey/actions";
+import { useJourneyStore } from "@/store/journey";
 
-
-export function useJourneyMissionInstances(weekId: number = 0) {
+export function useJourneyMissionInstances(
+  weekId?: number,
+) {
+  const { currentJourneyUuid } = useJourneyStore();
   // 데이터 가져오기 함수
   const fetcher = useCallback(async () => {
     const supabase = createClient();
 
     // 특정 주차의 미션 인스턴스 가져오기
-    const query = supabase.from("journey_mission_instances").select(`*, missions(*)`);
+    const query = supabase
+      .from("journey_mission_instances")
+      .select(`*, missions(*)`)
+      .eq("journey_uuid", currentJourneyUuid || "");
 
     // 주차 ID가 있으면 필터링œ
-    if (weekId > 0) {
+    if (weekId) {
       query.eq("journey_week_id", weekId);
     }
 
     const { data, error } = await query;
-
     if (error) {
       throw new Error(error.message);
     }
@@ -33,7 +37,7 @@ export function useJourneyMissionInstances(weekId: number = 0) {
     // missions를 mission으로 매핑하여 타입 일관성 유지
     return data.map((item: any) => ({
       ...item,
-      mission: item.missions
+      mission: item.missions,
     })) as unknown as (JourneyMissionInstance & {
       mission: Mission;
     })[];

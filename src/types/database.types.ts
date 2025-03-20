@@ -117,11 +117,60 @@ export type Database = {
           },
         ]
       }
+      email_queue: {
+        Row: {
+          content: string
+          content_ref_id: number | null
+          created_at: string | null
+          error_message: string | null
+          id: number
+          processed: boolean | null
+          processed_at: string | null
+          recipient_email: string
+          recipient_name: string | null
+          response: string | null
+          retry_count: number | null
+          status_code: number | null
+          subject: string
+        }
+        Insert: {
+          content: string
+          content_ref_id?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: number
+          processed?: boolean | null
+          processed_at?: string | null
+          recipient_email: string
+          recipient_name?: string | null
+          response?: string | null
+          retry_count?: number | null
+          status_code?: number | null
+          subject: string
+        }
+        Update: {
+          content?: string
+          content_ref_id?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: number
+          processed?: boolean | null
+          processed_at?: string | null
+          recipient_email?: string
+          recipient_name?: string | null
+          response?: string | null
+          retry_count?: number | null
+          status_code?: number | null
+          subject?: string
+        }
+        Relationships: []
+      }
       journey_mission_instances: {
         Row: {
           created_at: string | null
           expiry_date: string | null
           id: number
+          journey_uuid: string | null
           journey_week_id: number
           mission_id: number
           release_date: string | null
@@ -132,6 +181,7 @@ export type Database = {
           created_at?: string | null
           expiry_date?: string | null
           id?: number
+          journey_uuid?: string | null
           journey_week_id: number
           mission_id: number
           release_date?: string | null
@@ -142,6 +192,7 @@ export type Database = {
           created_at?: string | null
           expiry_date?: string | null
           id?: number
+          journey_uuid?: string | null
           journey_week_id?: number
           mission_id?: number
           release_date?: string | null
@@ -551,7 +602,7 @@ export type Database = {
           created_at: string | null
           id: number
           journey_id: number
-          mission_id: number | null
+          mission_instance_id: number
           post_id: number | null
           profile_id: number
           total_points: number | null
@@ -561,7 +612,7 @@ export type Database = {
           created_at?: string | null
           id?: number
           journey_id: number
-          mission_id?: number | null
+          mission_instance_id: number
           post_id?: number | null
           profile_id: number
           total_points?: number | null
@@ -571,7 +622,7 @@ export type Database = {
           created_at?: string | null
           id?: number
           journey_id?: number
-          mission_id?: number | null
+          mission_instance_id?: number
           post_id?: number | null
           profile_id?: number
           total_points?: number | null
@@ -586,10 +637,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "user_points_mission_id_fkey"
-            columns: ["mission_id"]
+            foreignKeyName: "user_points_mission_instance_id_fkey"
+            columns: ["mission_instance_id"]
             isOneToOne: false
-            referencedRelation: "missions"
+            referencedRelation: "journey_mission_instances"
             referencedColumns: ["id"]
           },
           {
@@ -630,16 +681,157 @@ export type Database = {
       }
     }
     Functions: {
+      bytea_to_text: {
+        Args: {
+          data: string
+        }
+        Returns: string
+      }
       get_distinct_mission_types: {
         Args: Record<PropertyKey, never>
         Returns: {
           mission_type: string
         }[]
       }
+      http: {
+        Args: {
+          request: Database["public"]["CompositeTypes"]["http_request"]
+        }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_delete:
+        | {
+            Args: {
+              uri: string
+            }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+          }
+        | {
+            Args: {
+              uri: string
+              content: string
+              content_type: string
+            }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+          }
+      http_get:
+        | {
+            Args: {
+              uri: string
+            }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+          }
+        | {
+            Args: {
+              uri: string
+              data: Json
+            }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+          }
+      http_head: {
+        Args: {
+          uri: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_header: {
+        Args: {
+          field: string
+          value: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["http_header"]
+      }
+      http_list_curlopt: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          curlopt: string
+          value: string
+        }[]
+      }
+      http_patch: {
+        Args: {
+          uri: string
+          content: string
+          content_type: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_post:
+        | {
+            Args: {
+              uri: string
+              content: string
+              content_type: string
+            }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+          }
+        | {
+            Args: {
+              uri: string
+              data: Json
+            }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+          }
+      http_put: {
+        Args: {
+          uri: string
+          content: string
+          content_type: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_reset_curlopt: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      http_set_curlopt: {
+        Args: {
+          curlopt: string
+          value: string
+        }
+        Returns: boolean
+      }
       migrate_missions_to_instances: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      process_email_queue: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      test_send_email: {
+        Args: {
+          recipient_email: string
+          email_subject?: string
+          email_content?: string
+        }
+        Returns: string
+      }
+      text_to_bytea: {
+        Args: {
+          data: string
+        }
+        Returns: string
+      }
+      urlencode:
+        | {
+            Args: {
+              data: Json
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              string: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              string: string
+            }
+            Returns: string
+          }
     }
     Enums: {
       mission_status:
@@ -651,7 +843,23 @@ export type Database = {
       role: "user" | "teacher" | "admin"
     }
     CompositeTypes: {
-      [_ in never]: never
+      http_header: {
+        field: string | null
+        value: string | null
+      }
+      http_request: {
+        method: unknown | null
+        uri: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content_type: string | null
+        content: string | null
+      }
+      http_response: {
+        status: number | null
+        content_type: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content: string | null
+      }
     }
   }
 }

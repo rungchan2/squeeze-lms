@@ -22,6 +22,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
 import { JourneyMissionInstanceWithMission } from "@/types";
 import { toaster } from "@/components/ui/toaster";
+import { useJourneyStore } from "@/store/journey";
 interface MissionComponentProps {
   weekId: number;
   weekName: string;
@@ -49,6 +50,7 @@ export default function MissionComponent({
   deleteWeek,
   onTotalMissionCountChange,
 }: MissionComponentProps) {
+  const { currentJourneyUuid } = useJourneyStore();
   const [showSearch, setShowSearch] = useState(false);
   const [selectedOption, setSelectedOption] = useState<MissionOption>(
     missionOptions[0]
@@ -191,7 +193,8 @@ export default function MissionComponent({
         mission_id: selectedMissionId,
         status: 'not_started' as MissionStatus,
         release_date: releaseDate || null,
-        expiry_date: expiryDate || null
+        expiry_date: expiryDate || null,
+        journey_uuid: currentJourneyUuid || ""
       };
       
       await createMissionInstance(newInstance);
