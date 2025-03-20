@@ -11,7 +11,7 @@ import { useCallback } from "react";
 import { useJourneyStore } from "@/store/journey";
 
 export function useJourneyMissionInstances(
-  weekId?: number,
+  weekId?: number | null,
 ) {
   const { currentJourneyUuid } = useJourneyStore();
   // 데이터 가져오기 함수

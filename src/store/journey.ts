@@ -3,6 +3,9 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { createClient } from '@/utils/supabase/client';
 
 async function getCurrentJourneyId(uuid: string) {
+  if (!uuid || uuid === "") {
+    return null;
+  }
   const supabase = createClient();
   const { data, error } = await supabase.from('journeys').select('id').eq('uuid', uuid).single();
   if (error) {

@@ -28,7 +28,6 @@ export const postSchema = z.object({
   id: z.number(),
   title: z.string(),
   content: z.string().nullable(),
-  file_url: z.string().nullable(),
   user_id: z.number(),
   mission_instance_id: z.number().nullable(),
   score: z.number().nullable(),

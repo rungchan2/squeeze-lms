@@ -18,10 +18,11 @@ import { useCallback, useEffect, useRef } from "react";
 import { useJourneyStore } from "@/store/journey";
 
 export default function HomeTab() {
-  const { clearCurrentJourney } = useJourneyStore();
+  const { clearCurrentJourneyId, clearCurrentJourneyUuid } = useJourneyStore();
   useEffect(() => {
-    clearCurrentJourney();
-  }, [clearCurrentJourney]);
+    clearCurrentJourneyId();
+    clearCurrentJourneyUuid();
+  }, [clearCurrentJourneyId, clearCurrentJourneyUuid]);
 
   return (
     <Tabs usePath={true}>

@@ -75,6 +75,7 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
       onLike(id);
     }
   };
+  const imageUrl = post.content?.match(/<img[^>]*src="([^"]+)"[^>]*>/)?.[1];
 
   const handleShare = useCallback(
     (e: React.MouseEvent) => {
@@ -95,7 +96,7 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
           description: post.content
             ? post.content.replace(/<[^>]*>?/gm, "").substring(0, 100) + "..."
             : "내용이 없습니다.",
-          imageUrl: post.file_url || "https://via.placeholder.com/500",
+          imageUrl: imageUrl || "https://via.placeholder.com/500",
           link: {
             mobileWebUrl: currentUrl,
             webUrl: currentUrl,

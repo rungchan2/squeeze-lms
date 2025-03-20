@@ -11,6 +11,11 @@ import { useAuth } from "@/components/AuthProvider";
 import { usePathname } from "next/navigation";
 import { Box } from "@chakra-ui/react";
 import { z } from "zod";
+import { useJourneyStore } from "@/store/journey";
+import { getUserPointsByJourneyId } from "@/app/journey/actions";
+import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
+import { useWeeks } from "@/hooks/useWeeks";
+import Heading from "@/components/Text/Heading";
 
 // Zod 스키마 정의
 const leaderboardUserSchema = z.object({
@@ -35,153 +40,165 @@ const submissionStatsSchema = z.object({
 type LeaderboardUser = z.infer<typeof leaderboardUserSchema>;
 type SubmissionStats = z.infer<typeof submissionStatsSchema>;
 
+interface WeekProgress {
+  id: number;
+  name: string;
+  weekNumber: number;
+  totalMissions: number;
+  completedMissions: number;
+  completionRate: number;
+}
+
 export default function DashboardTab() {
-  const [leaderboardUsers, setLeaderboardUsers] = useState<LeaderboardUser[]>([]);
-  const [submissionStats, setSubmissionStats] = useState<SubmissionStats | null>(null);
+  const { id: userId } = useAuth();
+  const { currentJourneyId } = useJourneyStore();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { id: userId } = useAuth();
-  const pathname = usePathname();
+  const [leaderboardUsers, setLeaderboardUsers] = useState<LeaderboardUser[]>([]);
+  const [weekProgress, setWeekProgress] = useState<WeekProgress[]>([]);
+  const [totalCompletionRate, setTotalCompletionRate] = useState(0);
 
-  // 현재 여정 ID 추출
-  const getJourneyIdFromPathname = () => {
-    const pathParts = pathname.split("/");
-    return pathParts.length > 2 ? pathParts[2] : "";
-  };
-
-  const journeySlug = getJourneyIdFromPathname();
+  // 주차 데이터 가져오기
+  const { weeks, isLoading: weeksLoading } = useWeeks(currentJourneyId || 0);
+  
+  // 전체 미션 인스턴스 가져오기
+  const { missionInstances, isLoading: missionsLoading } = useJourneyMissionInstances(0);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    if (!userId) return;
+
+    async function fetchDashboardData() {
       try {
         setIsLoading(true);
+        
+        // 1. 점수 데이터 가져오기
+        const { data: pointsData, error: pointsError } = await getUserPointsByJourneyId(currentJourneyId);
+        if (pointsError) {
+          console.error("포인트 데이터 가져오기 오류:", pointsError);
+          throw new Error("포인트 데이터를 가져오는 중 오류 발생");
+        }
+        
+        // 2. 사용자별 점수 계산 및 리더보드 생성
         const supabase = createClient();
-
-        // 먼저 journeySlug로 journey_id 가져오기
-        const { data: journeyData, error: journeyError } = await supabase
-          .from("journeys")
-          .select("id")
-          .eq("uuid", journeySlug)
-          .single();
-
-        if (journeyError) {
-          throw new Error(
-            `여정 데이터를 가져오는 중 오류 발생: ${journeyError.message}`
-          );
-        }
-
-        const journeyId = journeyData.id;
-
-        // 1. 해당 여정의 모든 포스트 데이터 가져오기 (mission_instance 관계 포함)
-        const { data: postsData, error: postsError } = await supabase
-          .from("posts")
+        
+        // 모든 사용자 프로필 가져오기
+        const { data: profiles, error: profilesError } = await supabase
+          .from("profiles")
           .select(`
-            id,
-            title,
-            content,
-            user_id,
-            score,
-            created_at,
-            mission_instance_id,
-            file_url,
-            profiles (
+            id, 
+            first_name, 
+            last_name, 
+            profile_image,
+            organizations (
               id,
-              first_name, 
-              last_name,
-              profile_image,
-              organizations (
-                id,
-                name
-              )
+              name
             )
-          `)
-          .order('created_at', { ascending: false });
-
-        if (postsError) {
-          throw new Error(
-            `게시물 데이터를 가져오는 중 오류 발생: ${postsError.message}`
-          );
-        }
-
-        // 2. 사용자별 점수 계산
+          `);
+        
+        if (profilesError) throw new Error("프로필 데이터를 가져오는 중 오류 발생");
+        
+        // 사용자별 점수 계산
         const userScores: Record<number, number> = {};
-        const userMap: Record<number, any> = {};
-
-        postsData.forEach((post) => {
-          const postUserId = post.user_id;
-          const score = post.score || 0;
-
-          // 사용자별 점수 누적
-          if (!userScores[postUserId]) {
-            userScores[postUserId] = 0;
-            // 사용자 정보 저장
-            if (post.profiles) {
-              userMap[postUserId] = post.profiles;
+        
+        if (pointsData) {
+          pointsData.forEach((point: any) => {
+            const userId = point.profile_id;
+            const score = point.total_points || 0;
+            
+            if (!userScores[userId]) {
+              userScores[userId] = 0;
             }
-          }
-          userScores[postUserId] += score;
-        });
-
-        // 3. 리더보드 데이터 생성
+            userScores[userId] += score;
+          });
+        }
+        
+        // 리더보드 데이터 구성
         const leaderboard = Object.keys(userScores).map((userIdStr) => {
-          const userId = Number(userIdStr);
-          const user = userMap[userId];
+          const profileId = Number(userIdStr);
+          const profile = profiles?.find(p => p.id === profileId);
           
           return {
-            id: userId,
-            first_name: user?.first_name || null,
-            last_name: user?.last_name || null,
-            profile_image: user?.profile_image || null,
-            organization_name: user?.organizations?.name || null,
-            total_score: userScores[userId] || 0,
+            id: profileId,
+            first_name: profile?.first_name || null,
+            last_name: profile?.last_name || null,
+            profile_image: profile?.profile_image || null,
+            organization_name: profile?.organizations?.name || null,
+            total_score: userScores[profileId] || 0,
             rank: 0, // 초기값, 아래에서 계산
-            isCurrentUser: userId === userId,
+            isCurrentUser: profileId === userId,
           };
         });
-
-        // 점수 기준 내림차순 정렬
+        
+        // 점수별 내림차순 정렬 및 순위 할당
         leaderboard.sort((a, b) => b.total_score - a.total_score);
-
-        // 순위 할당
         leaderboard.forEach((user, index) => {
           user.rank = index + 1;
         });
-
-        // 상위 5명만 선택
-        setLeaderboardUsers(leaderboard.slice(0, 5));
-
-        // 4. 제출 현황 통계 계산
-        const totalPosts = postsData.length;
-        const completedPosts = postsData.filter(post => post.score !== null && post.score > 0).length;
-        const pendingPosts = totalPosts - completedPosts;
         
-        const completionRate = totalPosts > 0 
-          ? Math.round((completedPosts / totalPosts) * 100) 
-          : 0;
-
-        setSubmissionStats({
-          totalPosts,
-          completedPosts,
-          pendingPosts,
-          completionRate
-        });
+        setLeaderboardUsers(leaderboard);
+        
+        // 3. 주차별 진행 상황 계산
+        if (weeks && missionInstances && pointsData) {
+          const weekProgressData: WeekProgress[] = weeks.map(week => {
+            // 해당 주차의 미션 인스턴스 찾기
+            const weekMissions = missionInstances.filter(
+              instance => instance.journey_week_id === week.id
+            );
+            
+            // 완료된 미션 수 계산 (user_points 기준)
+            const weekMissionsIds = weekMissions.map(mission => mission.id);
+            const completedMissions = pointsData.filter(
+              (point: any) => {
+                return point.profile_id === userId && 
+                  point.mission_instance_id && 
+                  weekMissionsIds.includes(point.mission_instance_id);
+              }
+            ).length;
+            
+            const totalMissions = weekMissions.length;
+            const completionRate = totalMissions > 0 
+              ? Math.round((completedMissions / totalMissions) * 100) 
+              : 0;
+            
+            return {
+              id: week.id,
+              name: week.name || `Week ${week.week_number}`,
+              weekNumber: week.week_number || 0,
+              totalMissions,
+              completedMissions,
+              completionRate
+            };
+          });
+          
+          // 주차 번호 기준 정렬
+          weekProgressData.sort((a, b) => a.weekNumber - b.weekNumber);
+          setWeekProgress(weekProgressData);
+          
+          // 전체 완료율 계산
+          const totalMissions = weekProgressData.reduce((sum, week) => sum + week.totalMissions, 0);
+          const totalCompleted = weekProgressData.reduce((sum, week) => sum + week.completedMissions, 0);
+          const overallRate = totalMissions > 0 
+            ? Math.round((totalCompleted / totalMissions) * 100) 
+            : 0;
+          
+          setTotalCompletionRate(overallRate);
+        }
         
       } catch (err) {
         console.error("대시보드 데이터를 가져오는 중 오류 발생:", err);
-        setError(
-          err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."
-        );
+        setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.");
       } finally {
         setIsLoading(false);
       }
-    };
-
-    if (journeySlug) {
+    }
+    
+    if (!weeksLoading && !missionsLoading) {
       fetchDashboardData();
     }
-  }, [journeySlug, userId]);
+    
+  }, [currentJourneyId, userId, weeks, missionInstances, weeksLoading, missionsLoading]);
 
-  if (isLoading) {
+  if (isLoading || weeksLoading || missionsLoading) {
     return <Spinner />;
   }
 
@@ -195,70 +212,119 @@ export default function DashboardTab() {
 
   return (
     <DashboardTabContainer>
-      {/* 제출 현황 섹션 */}
+      {/* 전체 미션 진행 상황 */}
       <SectionContainer>
         <Text variant="body" fontWeight="bold" className="section-title">
-          게시물 현황
+          전체 미션 진행 상황
+        </Text>
+        
+        <StatsContainer>
+          <CircularProgressWrapper>
+            <Box position="relative" width="120px" height="120px">
+              <svg viewBox="0 0 36 36" className="circular-chart">
+                <path
+                  className="circle-bg"
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                <path
+                  className="circle"
+                  strokeDasharray={`${totalCompletionRate}, 100`}
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                <text x="18" y="20.35" className="percentage">
+                  {totalCompletionRate}%
+                </text>
+              </svg>
+            </Box>
+            <Text variant="caption">전체 미션 완료율</Text>
+          </CircularProgressWrapper>
+          
+          <StatsDetailsContainer>
+            <StatItem>
+              <Text variant="body">전체 미션 수</Text>
+              <Text variant="body" fontWeight="bold">
+                {weekProgress.reduce((sum, week) => sum + week.totalMissions, 0)}개
+              </Text>
+            </StatItem>
+            <StatItem>
+              <Text variant="body">완료한 미션 수</Text>
+              <Text
+                variant="body"
+                fontWeight="bold"
+                color="var(--primary-500)"
+              >
+                {weekProgress.reduce((sum, week) => sum + week.completedMissions, 0)}개
+              </Text>
+            </StatItem>
+            <StatItem>
+              <Text variant="body">남은 미션 수</Text>
+              <Text
+                variant="body"
+                fontWeight="bold"
+                color="var(--warning-500)"
+              >
+                {weekProgress.reduce((sum, week) => sum + (week.totalMissions - week.completedMissions), 0)}개
+              </Text>
+            </StatItem>
+          </StatsDetailsContainer>
+        </StatsContainer>
+      </SectionContainer>
+
+      {/* 주차별 진행 상황 */}
+      <SectionContainer>
+        <Text variant="body" fontWeight="bold" className="section-title">
+          주차별 진행 상황
         </Text>
 
-        {submissionStats ? (
-          <StatsContainer>
-            <CircularProgressWrapper>
-              <Box position="relative" width="120px" height="120px">
-                <svg viewBox="0 0 36 36" className="circular-chart">
-                  <path
-                    className="circle-bg"
-                    d="M18 2.0845
-                      a 15.9155 15.9155 0 0 1 0 31.831
-                      a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    className="circle"
-                    strokeDasharray={`${submissionStats.completionRate}, 100`}
-                    d="M18 2.0845
-                      a 15.9155 15.9155 0 0 1 0 31.831
-                      a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <text x="18" y="20.35" className="percentage">
-                    {submissionStats.completionRate}%
-                  </text>
-                </svg>
-              </Box>
-              <Text variant="caption">평가 완료율</Text>
-            </CircularProgressWrapper>
+        {weekProgress.length > 0 ? (
+          <WeekProgressContainer>
+            {weekProgress.map(week => (
+              <WeekProgressItem key={week.id}>
+                <WeekHeader>
+                  <Heading level={4}>{week.name}</Heading>
+                  <Text 
+                    variant="body" 
+                    fontWeight="bold" 
+                    color={week.completionRate >= 100 ? "var(--primary-500)" : "var(--warning-500)"}
+                  >
+                    {week.completionRate}%
+                  </Text>
+                </WeekHeader>
 
-            <StatsDetailsContainer>
-              <StatItem>
-                <Text variant="body">전체 게시물</Text>
-                <Text variant="body" fontWeight="bold">
-                  {submissionStats.totalPosts}개
-                </Text>
-              </StatItem>
-              <StatItem>
-                <Text variant="body">평가 완료</Text>
-                <Text
-                  variant="body"
-                  fontWeight="bold"
-                  color="var(--primary-500)"
-                >
-                  {submissionStats.completedPosts}개
-                </Text>
-              </StatItem>
-              <StatItem>
-                <Text variant="body">평가 대기</Text>
-                <Text
-                  variant="body"
-                  fontWeight="bold"
-                  color="var(--warning-500)"
-                >
-                  {submissionStats.pendingPosts}개
-                </Text>
-              </StatItem>
-            </StatsDetailsContainer>
-          </StatsContainer>
+                <ProgressBarContainer>
+                  <ProgressBar progress={week.completionRate} />
+                </ProgressBarContainer>
+
+                <WeekDetailsContainer>
+                  <MissionCountItem>
+                    <Text variant="caption">총 미션</Text>
+                    <Text variant="body" fontWeight="bold">
+                      {week.totalMissions}개
+                    </Text>
+                  </MissionCountItem>
+                  <MissionCountItem>
+                    <Text variant="caption">완료</Text>
+                    <Text variant="body" fontWeight="bold" color="var(--primary-500)">
+                      {week.completedMissions}개
+                    </Text>
+                  </MissionCountItem>
+                  <MissionCountItem>
+                    <Text variant="caption">남음</Text>
+                    <Text variant="body" fontWeight="bold" color="var(--warning-500)">
+                      {week.totalMissions - week.completedMissions}개
+                    </Text>
+                  </MissionCountItem>
+                </WeekDetailsContainer>
+              </WeekProgressItem>
+            ))}
+          </WeekProgressContainer>
         ) : (
           <EmptyState>
-            <Text color="var(--grey-500)">게시물 데이터가 없습니다.</Text>
+            <Text color="var(--grey-500)">주차 데이터가 없습니다.</Text>
           </EmptyState>
         )}
       </SectionContainer>
@@ -313,7 +379,7 @@ export default function DashboardTab() {
           </LeaderboardContainer>
         ) : (
           <EmptyState>
-            <Text color="var(--grey-500)">아직 게시물이 없습니다.</Text>
+            <Text color="var(--grey-500)">아직 리더보드 데이터가 없습니다.</Text>
           </EmptyState>
         )}
       </SectionContainer>
@@ -338,6 +404,134 @@ const SectionContainer = styled.div`
   }
 `;
 
+const StatsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  background-color: var(--white);
+  border-radius: 8px;
+  border: 1px solid var(--grey-200);
+  padding: 1.5rem;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
+`;
+
+const CircularProgressWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+
+  .circular-chart {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .circle-bg {
+    fill: none;
+    stroke: var(--grey-200);
+    stroke-width: 3;
+  }
+
+  .circle {
+    fill: none;
+    stroke: var(--primary-500);
+    stroke-width: 3;
+    stroke-linecap: round;
+    animation: progress 1s ease-out forwards;
+  }
+
+  .percentage {
+    fill: var(--grey-700);
+    font-size: 0.5em;
+    text-anchor: middle;
+    font-weight: bold;
+  }
+
+  @keyframes progress {
+    0% {
+      stroke-dasharray: 0 100;
+    }
+  }
+`;
+
+const StatsDetailsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+`;
+
+const StatItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--grey-100);
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+// 주차별 진행 상황 스타일
+const WeekProgressContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const WeekProgressItem = styled.div`
+  background-color: var(--white);
+  border-radius: 8px;
+  border: 1px solid var(--grey-200);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const WeekHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const ProgressBarContainer = styled.div`
+  width: 100%;
+  height: 8px;
+  background-color: var(--grey-200);
+  border-radius: 4px;
+  overflow: hidden;
+`;
+
+const ProgressBar = styled.div<{ progress: number }>`
+  height: 100%;
+  width: ${(props) => props.progress}%;
+  background-color: var(--primary-500);
+  border-radius: 4px;
+  transition: width 0.5s ease-in-out;
+`;
+
+const WeekDetailsContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
+const MissionCountItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+`;
+
+// 리더보드 스타일
 const LeaderboardContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -423,82 +617,6 @@ const LeaderboardItem = styled.div<{ rank: number; isCurrentUser: boolean }>`
   .score-container {
     margin-left: auto;
     padding-left: 1rem;
-  }
-`;
-
-const StatsContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 2rem;
-  background-color: var(--white);
-  border-radius: 8px;
-  border: 1px solid var(--grey-200);
-  padding: 1.5rem;
-  align-items: center;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-  }
-`;
-
-const CircularProgressWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-
-  .circular-chart {
-    display: block;
-    margin: 0 auto;
-    max-width: 100%;
-    max-height: 100%;
-  }
-
-  .circle-bg {
-    fill: none;
-    stroke: var(--grey-200);
-    stroke-width: 3;
-  }
-
-  .circle {
-    fill: none;
-    stroke: var(--primary-500);
-    stroke-width: 3;
-    stroke-linecap: round;
-    animation: progress 1s ease-out forwards;
-  }
-
-  .percentage {
-    fill: var(--grey-700);
-    font-size: 0.5em;
-    text-anchor: middle;
-    font-weight: bold;
-  }
-
-  @keyframes progress {
-    0% {
-      stroke-dasharray: 0 100;
-    }
-  }
-`;
-
-const StatsDetailsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  flex: 1;
-`;
-
-const StatItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--grey-100);
-
-  &:last-child {
-    border-bottom: none;
   }
 `;
 

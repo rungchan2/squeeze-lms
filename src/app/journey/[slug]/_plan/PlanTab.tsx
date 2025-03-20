@@ -92,9 +92,11 @@ export default function PlanTab({ slug }: { slug: string }) {
     };
 
     fetchJourneyId();
-    getCurrentJourneyId();
     setCurrentJourneyUuid(slug);
-  }, [slug, router, setCurrentJourneyUuid]);
+    if (slug) {
+      getCurrentJourneyId();
+    }
+  }, [slug, router, setCurrentJourneyUuid, getCurrentJourneyId]);
 
   // useWeeks 훅 사용
   const {
