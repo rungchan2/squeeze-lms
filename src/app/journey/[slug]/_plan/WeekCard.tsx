@@ -69,7 +69,7 @@ export default function WeekCard({
             <Text variant="body">{week.name}</Text>
           </div>
           <div className="week-header-right">
-            <Text variant="caption">미션 수: {missionCount}</Text>
+            <Text variant="caption">미션: {missionCount}</Text>
           </div>
         </div>
         {isOpen && (

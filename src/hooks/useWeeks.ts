@@ -142,7 +142,7 @@ export function useWeeks(journeyId: number) {
 
   // 주차에 미션 추가 함수
   const addMissionToWeek = useCallback(
-    async (weekId: number, missionId: number) => {
+    async (weekId: number, missionId: number, journeyUuid: string) => {
       if (!weekId || !missionId) return null;
 
       // 이미 추가된 미션인지 확인
@@ -169,6 +169,7 @@ export function useWeeks(journeyId: number) {
         status: "not_started",
         release_date: null,
         expiry_date: null,
+        journey_uuid: journeyUuid,
       };
 
       const { data, error } = await supabase

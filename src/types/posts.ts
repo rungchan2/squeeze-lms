@@ -44,7 +44,11 @@ export const createPostSchema = postSchema.omit({
   view_count: true,
 });
 
-export const updatePostSchema = createPostSchema.partial();
+export const updatePostSchema = createPostSchema.omit({
+  user_id: true,
+  mission_instance_id: true,
+  score: true,
+});
 
 export const userWithOrganizationSchema = pickedUserSchema.extend({
   organizations: pickedOrganizationSchema.nullable(),

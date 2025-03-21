@@ -151,7 +151,7 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
     align-items: center;
     gap: 10px;
     max-width: ${(props) =>
-      props.isModal ? "100%" : "calc(100% - 80px)"}; /* 오른쪽 버튼 영역 고려 */
+      props.isModal ? "100%" : "calc(100% - 30px)"}; /* 오른쪽 버튼 영역 고려 */
     overflow: hidden;
   }
 

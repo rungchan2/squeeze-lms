@@ -22,17 +22,18 @@ import { UpdatePost } from "@/types";
 export default function DoMissionPage({
   updateData,
   updateDataId,
+  slug,
+  missionInstanceId,
 }: {
   updateData?: UpdatePost;
   updateDataId?: number;
+  slug?: string;
+  missionInstanceId?: number;
 }) {
   const { id: userId } = useAuth();
-  const params = useParams<{ id: string; slug: string }>();
-  const { id, slug } = params;
   const router = useRouter();
-  const { missionInstance, isLoading, error } = useMissionInstance(
-    id ? Number(id) : null
-  );
+  const { missionInstance, isLoading, error } =
+    useMissionInstance(missionInstanceId || null);
   const { currentJourneyId } = useJourneyStore();
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
@@ -122,7 +123,6 @@ export default function DoMissionPage({
         {
           content: content,
           title: title,
-          score: missionInstance.mission.points,
         },
         updateDataId || 0
       );

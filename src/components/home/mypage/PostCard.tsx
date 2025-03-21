@@ -16,11 +16,12 @@ import { useLikes } from "@/hooks/useLikes";
 import RichTextViewer from "@/components/richTextInput/RichTextViewer";
 import { useAuth } from "@/components/AuthProvider";
 import { useComments } from "@/hooks/useComments";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useMemo, memo } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { Menu, Portal } from "@chakra-ui/react";
 import { FaEllipsis } from "react-icons/fa6";
 import { deletePost } from "@/app/post/clientActions";
+
 interface PostCardProps {
   post: PostWithRelations;
   showDetails?: boolean;
@@ -32,7 +33,8 @@ declare global {
   }
 }
 
-export default function PostCard({ post, showDetails = false }: PostCardProps) {
+// memo로 컴포넌트 최적화
+export default memo(function PostCard({ post, showDetails = false }: PostCardProps) {
   const router = useRouter();
   const { id } = useAuth();
   const { onLike, onUnlike, likesCount, useUserLike } = useLikes(post.id);
@@ -41,23 +43,16 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
   const { data: userLike } = useUserLike(id);
   const isUserLike = Boolean(userLike);
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = useCallback((text: string) => {
     navigator.clipboard.writeText(text);
     toaster.create({
       title: "링크가 복사되었습니다.",
       type: "success",
       duration: 1000,
     });
-  };
-
-  // Kakao SDK 로드 확인
-  useEffect(() => {
-    if (!window.Kakao || !window.Kakao.isInitialized()) {
-      console.warn("Kakao SDK가 초기화되지 않았습니다.");
-    }
   }, []);
 
-  const handleLike = (e: React.MouseEvent) => {
+  const handleLike = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
 
     if (!id) {
@@ -74,61 +69,81 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
     } else {
       onLike(id);
     }
-  };
-  const imageUrl = post.content?.match(/<img[^>]*src="([^"]+)"[^>]*>/)?.[1];
+  }, [id, isUserLike, onLike, onUnlike, router]);
+  
+  // imageUrl을 useMemo로 최적화
+  const imageUrl = useMemo(() => 
+    post.content?.match(/<img[^>]*src="([^"]+)"[^>]*>/)?.[1]
+  , [post.content]);
+
+  // 포스트 URL 메모이제이션
+  const postUrl = useMemo(() => 
+    window.location.origin + `/post/${post.id}`
+  , [post.id]);
 
   const handleShare = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
 
       if (!window.Kakao || !window.Kakao.Share) {
-        console.error("Kakao SDK가 로드되지 않았습니다.");
+        toaster.create({
+          title: "카카오 SDK가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.",
+          type: "error",
+          duration: 3000,
+        });
         return;
       }
 
-      // 현재 창의 URL 가져오기
-      const currentUrl = window.location.origin + `/post/${post.id}`;
-
-      window.Kakao.Share.sendDefault({
-        objectType: "feed",
-        content: {
-          title: post.title,
-          description: post.content
-            ? post.content.replace(/<[^>]*>?/gm, "").substring(0, 100) + "..."
-            : "내용이 없습니다.",
-          imageUrl: imageUrl || "https://via.placeholder.com/500",
-          link: {
-            mobileWebUrl: currentUrl,
-            webUrl: currentUrl,
-          },
-        },
-        social: {
-          likeCount: likesCount,
-          commentCount: count,
-          viewCount: post.view_count,
-        },
-        buttons: [
-          {
-            title: "자세히 보기",
+      try {
+        window.Kakao.Share.sendDefault({
+          objectType: "feed",
+          content: {
+            title: post.title,
+            description: post.content
+              ? post.content.replace(/<[^>]*>?/gm, "").substring(0, 100) + "..."
+              : "내용이 없습니다.",
+            imageUrl: imageUrl || "https://via.placeholder.com/500",
             link: {
-              mobileWebUrl: currentUrl,
-              webUrl: currentUrl,
+              mobileWebUrl: postUrl,
+              webUrl: postUrl,
             },
           },
-        ],
-      });
+          social: {
+            likeCount: likesCount,
+            commentCount: count,
+            viewCount: post.view_count,
+          },
+          buttons: [
+            {
+              title: "자세히 보기",
+              link: {
+                mobileWebUrl: postUrl,
+                webUrl: postUrl,
+              },
+            },
+          ],
+        });
+      } catch (error) {
+        console.error("카카오 공유 에러:", error);
+        toaster.create({
+          title: "공유 중 오류가 발생했습니다.",
+          type: "error",
+        });
+      }
     },
-    [post, likesCount, count]
+    [post.id, post.title, post.content, post.view_count, imageUrl, likesCount, count, postUrl]
   );
+
+  const handlePostClick = useCallback(() => {
+    if (!showDetails) {
+      router.push(`/post/${post.id}`);
+    }
+  }, [post.id, router, showDetails]);
 
   return (
     <PostCardContainer
       showDetails={showDetails}
-      onClick={() => {
-        if (!showDetails) {
-          router.push(`/post/${post.id}`);
-        }
-      }}
+      onClick={handlePostClick}
     >
       <ContentWrapper>
         <UserInfoContainer>
@@ -257,7 +272,7 @@ export default function PostCard({ post, showDetails = false }: PostCardProps) {
       </ContentWrapper>
     </PostCardContainer>
   );
-}
+});
 
 const PostCardContainer = styled.div<{ showDetails: boolean }>`
   width: 100%;
