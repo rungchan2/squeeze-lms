@@ -12,4 +12,4 @@ export default function InvitePage() {
   )
 }
 
-//TODO: 클라스 초대 페이지
+//TODO: 3. 클라스 초대 페이지

@@ -128,7 +128,8 @@ async function getCompletedMissionIds(userId: number) {
   
   return completedIds;
 }
-
+// TODO: 1. 게시물 숨김 상태 갖고오기 및 다시 보이게 하기 기능 구현
+// TODO: 2. 클라스 별로 게시물 볼 수 있게 쿼리 수정
 // ✅ SWR을 사용한 usePosts 훅
 export function usePosts(pageSize = 10) {
   const {

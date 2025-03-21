@@ -174,6 +174,16 @@ export default function SettingTab({ slug }: { slug: string }) {
                     멤버 관리
                   </Text>
                 </MenuItem>
+                <MenuItem href={`/journey/${slug}/teacher/posts`}>
+                  <FaUserGroup />
+                  <Text
+                    variant="body"
+                    color="var(--grey-700)"
+                    fontWeight="medium"
+                  >
+                    제출된 과제 관리
+                  </Text>
+                </MenuItem>
               </div>
             </div>
           </TeacherOnly>

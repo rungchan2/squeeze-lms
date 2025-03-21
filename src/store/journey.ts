@@ -57,3 +57,5 @@ export const useJourneyStore = create<JourneyState>()(
     }
   )
 );
+
+//TODO: 3. 이거 스토어 쓰지 말고 아예 pk id를 uuid 로 바꾸자

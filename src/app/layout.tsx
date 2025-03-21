@@ -1,3 +1,4 @@
+import { ReactScan } from "./ReactScan";
 import type { Metadata } from "next";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -29,6 +30,7 @@ export default function RootLayout({
   // 클라이언트 컴포넌트에서 처리하도록 수정
   return (
     <html lang="ko" data-theme="light" style={{ colorScheme: "light" }}>
+      <ReactScan/>
       <body>
         <Providers>
           <Navigation exceptionPath={["/login", "/register"]} />

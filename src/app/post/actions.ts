@@ -3,7 +3,7 @@ import { UpdatePost } from "@/types";
 
 export async function getPost(id: number) {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("posts").select("title, content").eq("id", id).single();
+  const { data, error } = await supabase.from("posts").select("title, content, user_id").eq("id", id).single();
   return { data, error };
 }
 

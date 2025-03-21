@@ -17,6 +17,7 @@ import Heading from "@/components/Text/Heading";
 import { toaster } from "@/components/ui/toaster";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useAuth } from "@/components/AuthProvider";
 
 interface CreateJourneyPageProps {
   initialData?: Journey;
@@ -42,7 +43,16 @@ export default function CreateJourneyPage({
     },
   });
   const router = useRouter();
-
+  const { role } = useAuth();
+  useEffect(() => {
+    if (role !== "teacher" && role !== "admin") {
+      toaster.create({
+        title: "권한이 없습니다.",
+        type: "error",
+      });
+      router.push("/");
+    }
+  }, [role, router]);
   // 초기 데이터 설정은 useEffect 내에서 딱 한 번만 실행
   useEffect(() => {
     if (initialData) {

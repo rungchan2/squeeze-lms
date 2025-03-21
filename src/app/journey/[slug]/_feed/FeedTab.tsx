@@ -16,6 +16,7 @@ import Heading from "@/components/Text/Heading";
 
 export default function FeedTab() {
   const { data: posts, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts();
+  //TODO: 1. 포스트 현재 클라스에서만 보이게 하기
   const { id: userId } = useAuth();
   const { completedMissionIds, isLoading: isLoadingCompletedMissions } =
     useCompletedMissions(userId || 0);

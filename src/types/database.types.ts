@@ -424,6 +424,7 @@ export type Database = {
           created_at: string | null
           file_url: string | null
           id: number
+          is_hidden: boolean
           mission_instance_id: number | null
           score: number | null
           title: string
@@ -436,6 +437,7 @@ export type Database = {
           created_at?: string | null
           file_url?: string | null
           id?: number
+          is_hidden?: boolean
           mission_instance_id?: number | null
           score?: number | null
           title: string
@@ -448,6 +450,7 @@ export type Database = {
           created_at?: string | null
           file_url?: string | null
           id?: number
+          is_hidden?: boolean
           mission_instance_id?: number | null
           score?: number | null
           title?: string

@@ -16,13 +16,18 @@ import { useRouter } from "next/navigation";
 import { AdminOnly } from "../auth/AdminOnly";
 import { useCallback, useEffect, useRef } from "react";
 import { useJourneyStore } from "@/store/journey";
+import { useParams } from "next/navigation";
 
 export default function HomeTab() {
   const { clearCurrentJourneyId, clearCurrentJourneyUuid } = useJourneyStore();
+  const { slug } = useParams();
+  const uuid = slug as string;
   useEffect(() => {
-    clearCurrentJourneyId();
-    clearCurrentJourneyUuid();
-  }, [clearCurrentJourneyId, clearCurrentJourneyUuid]);
+    if (uuid) {
+      clearCurrentJourneyId();
+      clearCurrentJourneyUuid();
+    }
+  }, [clearCurrentJourneyId, clearCurrentJourneyUuid, uuid]);
 
   return (
     <Tabs usePath={true}>
@@ -81,7 +86,6 @@ const JourneysContainer = styled.div`
 function NotificationTab() {
   const { 
     notifications, 
-    unreadCount, 
     error, 
     isLoading,
     fetchNextPage,

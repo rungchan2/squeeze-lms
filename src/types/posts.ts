@@ -45,7 +45,6 @@ export const createPostSchema = postSchema.omit({
 });
 
 export const updatePostSchema = createPostSchema.omit({
-  user_id: true,
   mission_instance_id: true,
   score: true,
 });

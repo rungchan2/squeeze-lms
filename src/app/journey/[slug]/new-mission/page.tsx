@@ -5,4 +5,4 @@ export default function NewMissionPage() {
     </div>
   );
 }
-//TODO: 미션 생성 페이지 및 수정 페이지
+//TODO: 1. 미션 생성 페이지 및 수정 페이지

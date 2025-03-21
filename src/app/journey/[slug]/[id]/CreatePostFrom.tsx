@@ -9,7 +9,7 @@ import Heading from "@/components/Text/Heading";
 import Text from "@/components/Text/Text";
 import styled from "@emotion/styled";
 import Button from "@/components/common/Button";
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { createPost, updatePost } from "@/app/journey/actions";
 import { useAuth } from "@/components/AuthProvider";
@@ -38,6 +38,37 @@ export default function DoMissionPage({
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 권한 없을 때 뒤로 가거나 여정 페이지로 가는 함수
+  const goBackOrJourney = useCallback(() => {
+    try {
+      // 뒤로 가기 시도
+      router.back();
+      
+      // 만약 뒤로 가기가 불가능하면(직접 URL 접근 등) 1초 후 여정 페이지로 리다이렉션
+      setTimeout(() => {
+        // 현재 URL이 여전히 같은 페이지라면 여정 페이지로 리다이렉션
+        if (window.location.pathname.includes(`/journey/${slug}/${updateDataId}`)) {
+          router.push(`/journey/${slug}`);
+        }
+      }, 1000);
+    } catch (e) {
+      // 오류 발생 시 여정 페이지로 리다이렉션
+      router.push(`/journey/${slug}`);
+    }
+  }, [router, slug, updateDataId]);
+  
+  // 권한 체크는 useEffect 내에서 수행, hooks는 조건부로 실행하면 안됨
+  useEffect(() => {
+    if (updateData && userId !== updateData?.user_id) {
+      toaster.create({
+        title: "권한이 없습니다.",
+        type: "error",
+      });
+      goBackOrJourney();
+    }
+  }, [updateData, userId, goBackOrJourney]);
+  
   if (!userId) return <div>로그인이 필요합니다.</div>;
   if (isLoading) return <Spinner />;
   if (error) return <div>오류가 발생했습니다: {error.message}</div>;
@@ -123,6 +154,7 @@ export default function DoMissionPage({
         {
           content: content,
           title: title,
+          user_id: userId,
         },
         updateDataId || 0
       );

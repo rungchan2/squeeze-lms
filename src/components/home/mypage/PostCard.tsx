@@ -20,7 +20,7 @@ import { useEffect, useCallback, useMemo, memo } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { Menu, Portal } from "@chakra-ui/react";
 import { FaEllipsis } from "react-icons/fa6";
-import { deletePost } from "@/app/post/clientActions";
+import { deletePost, hidePost, unhidePost } from "@/app/post/clientActions";
 
 interface PostCardProps {
   post: PostWithRelations;
@@ -34,7 +34,10 @@ declare global {
 }
 
 // memo로 컴포넌트 최적화
-export default memo(function PostCard({ post, showDetails = false }: PostCardProps) {
+export default memo(function PostCard({
+  post,
+  showDetails = false,
+}: PostCardProps) {
   const router = useRouter();
   const { id } = useAuth();
   const { onLike, onUnlike, likesCount, useUserLike } = useLikes(post.id);
@@ -52,34 +55,39 @@ export default memo(function PostCard({ post, showDetails = false }: PostCardPro
     });
   }, []);
 
-  const handleLike = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleLike = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
 
-    if (!id) {
-      toaster.create({
-        title: "로그인이 필요합니다.",
-        type: "error",
-      });
-      router.push("/login");
-      return;
-    }
+      if (!id) {
+        toaster.create({
+          title: "로그인이 필요합니다.",
+          type: "error",
+        });
+        router.push("/login");
+        return;
+      }
 
-    if (isUserLike) {
-      onUnlike(id);
-    } else {
-      onLike(id);
-    }
-  }, [id, isUserLike, onLike, onUnlike, router]);
-  
+      if (isUserLike) {
+        onUnlike(id);
+      } else {
+        onLike(id);
+      }
+    },
+    [id, isUserLike, onLike, onUnlike, router]
+  );
+
   // imageUrl을 useMemo로 최적화
-  const imageUrl = useMemo(() => 
-    post.content?.match(/<img[^>]*src="([^"]+)"[^>]*>/)?.[1]
-  , [post.content]);
+  const imageUrl = useMemo(
+    () => post.content?.match(/<img[^>]*src="([^"]+)"[^>]*>/)?.[1],
+    [post.content]
+  );
 
   // 포스트 URL 메모이제이션
-  const postUrl = useMemo(() => 
-    window.location.origin + `/post/${post.id}`
-  , [post.id]);
+  const postUrl = useMemo(
+    () => window.location.origin + `/post/${post.id}`,
+    [post.id]
+  );
 
   const handleShare = useCallback(
     (e: React.MouseEvent) => {
@@ -131,7 +139,16 @@ export default memo(function PostCard({ post, showDetails = false }: PostCardPro
         });
       }
     },
-    [post.id, post.title, post.content, post.view_count, imageUrl, likesCount, count, postUrl]
+    [
+      post.id,
+      post.title,
+      post.content,
+      post.view_count,
+      imageUrl,
+      likesCount,
+      count,
+      postUrl,
+    ]
   );
 
   const handlePostClick = useCallback(() => {
@@ -140,11 +157,15 @@ export default memo(function PostCard({ post, showDetails = false }: PostCardPro
     }
   }, [post.id, router, showDetails]);
 
+  function OnlyMyPost({ children }: { children: React.ReactNode }) {
+    if (post.profiles?.id === id) {
+      return children;
+    }
+    return null;
+  }
+
   return (
-    <PostCardContainer
-      showDetails={showDetails}
-      onClick={handlePostClick}
-    >
+    <PostCardContainer showDetails={showDetails} onClick={handlePostClick}>
       <ContentWrapper>
         <UserInfoContainer>
           <div className="user-info-wrapper">
@@ -202,24 +223,43 @@ export default memo(function PostCard({ post, showDetails = false }: PostCardPro
                   >
                     링크 복사
                   </Menu.Item>
-                  <Menu.Item value="export" style={{ cursor: "pointer" }}>
-                    수정
-                  </Menu.Item>
-                  <Menu.Item
-                    style={{ cursor: "pointer" }}
-                    value="delete"
-                    color="fg.error"
-                    _hover={{ bg: "bg.error", color: "fg.error" }}
-                    onClick={(e) => {
-                      if (confirm("삭제하시겠습니까?")) {
-                        deletePost(post.id);
-                        router.back();
-                      }
-                      e.stopPropagation();
-                    }}
-                  >
-                    삭제
-                  </Menu.Item>
+                  <OnlyMyPost>
+                    <Menu.Item value="export" style={{ cursor: "pointer" }} onClick={() => {
+                      router.push(`/post/${post.id}/edit`);
+                    }}>
+                      수정
+                    </Menu.Item>
+                    <Menu.Item
+                      style={{ cursor: "pointer" }}
+                      value="hide"
+                      color="var(--grey-700)"
+                      _hover={{ bg: "var(--grey-200)", color: "var(--grey-700)" }}
+                      onClick={(e) => {
+                        if (confirm("이 게시물을 숨기시겠습니까?")) {
+                          hidePost(post.id);
+                        }
+                        e.stopPropagation();
+                      }}
+                      // TODO: 2. 게시물 숨김 상태 갖고오기 및 다시 보이게 하기 기능 구현
+                    >
+                      이 게시물 숨기기
+                    </Menu.Item>
+                    <Menu.Item
+                      style={{ cursor: "pointer" }}
+                      value="delete"
+                      color="fg.error"
+                      _hover={{ bg: "bg.error", color: "fg.error" }}
+                      onClick={(e) => {
+                        if (confirm("삭제하시겠습니까?")) {
+                          deletePost(post.id);
+                          router.back();
+                        }
+                        e.stopPropagation();
+                      }}
+                    >
+                      삭제
+                    </Menu.Item>
+                  </OnlyMyPost>
                 </Menu.Content>
               </Menu.Positioner>
             </Portal>
@@ -244,7 +284,7 @@ export default memo(function PostCard({ post, showDetails = false }: PostCardPro
             />
           )}
         </PostContentContainer>
-        {/* TODO: html formatting 적용하기  (지금은 plain text) */}
+        {/* TODO: 1. html formatting 적용하기  (지금은 plain text) */}
         <InteractionContainer>
           <InteractionItem onClick={handleLike}>
             {isUserLike ? (

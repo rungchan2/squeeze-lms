@@ -6,13 +6,13 @@ const getJourneyUser = async (url: string) => {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("user_journeys")
-    .select("*")
+    .select("*, profiles(*)")
     .eq("journey_id", journey_id);
 
   if (error) {
     throw new Error(error.message);
   }
-  return data;
+  return data || [];
 };
 
 export const useJourneyUser = (journey_id: number) => {
@@ -21,6 +21,7 @@ export const useJourneyUser = (journey_id: number) => {
     key, 
     getJourneyUser
   );
+  let currentJourneyUsers = data?.map((user) => user.profiles);
 
   const { id } = useAuth();
   const isUserJoined = data?.some((user) => user.user_id === id);
@@ -95,6 +96,7 @@ export const useJourneyUser = (journey_id: number) => {
     adminNum, 
     participantNum, 
     teacherNum,
+    currentJourneyUsers,
     addUser,
     removeUser,
     updateUserRole,

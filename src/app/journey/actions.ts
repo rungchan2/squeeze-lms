@@ -57,7 +57,11 @@ export async function createPost(post: CreatePost) {
     title: post.title,
     score: post.score,
   };
-  const { data, error } = await supabase.from("posts").insert(insertData).select("id").single();
+  const { data, error } = await supabase
+    .from("posts")
+    .insert(insertData)
+    .select("id")
+    .single();
   return { data, error, id: data?.id };
 }
 
@@ -69,7 +73,6 @@ export async function updatePost(post: UpdatePost, id: number) {
     .eq("id", id);
   return { data, error };
 }
-
 
 export async function createJourney(journey: CreateJourney) {
   const supabase = await createClient();
@@ -101,5 +104,24 @@ export async function getUserPointsByJourneyId(journeyId: number | null) {
     .from("user_points")
     .select("*")
     .eq("journey_id", journeyId);
+  return { data, error };
+}
+
+export async function getJourneyUserbyJourneyId(journeyId: number) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("user_journeys")
+    .select("*")
+    .eq("journey_id", journeyId);
+  return { data, error };
+}
+
+export async function deleteUserFromJourney(journeyId: number, userId: number) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("user_journeys")
+    .delete()
+    .eq("journey_id", journeyId)
+    .eq("user_id", userId);
   return { data, error };
 }
