@@ -4,6 +4,8 @@ import {
   useEffect,
   useState,
   ReactNode,
+  useMemo,
+  useCallback,
 } from "react";
 import { useAuthStore } from "@/store/auth";
 import { Role } from "@/types";
@@ -47,45 +49,75 @@ const checkPermission = (
   return roleHierarchy[userRole] >= roleHierarchy[requiredRole];
 };
 
+// 하나의 Supabase 클라이언트 인스턴스 생성
+let supabaseClient: ReturnType<typeof createClient> | null = null;
+const getSupabaseClient = () => {
+  if (!supabaseClient && typeof window !== "undefined") {
+    supabaseClient = createClient();
+  }
+  return supabaseClient;
+};
+
 // Provider 컴포넌트
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // 초기 상태를 관리하기 위한 로컬 상태
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Zustand 스토어에서 상태와 액션 가져오기
-  const id = useAuthStore((state) => state.id);
-  const uid = useAuthStore((state) => state.uid);
-  const email = useAuthStore((state) => state.email);
-  const role = useAuthStore((state) => state.role);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const loading = useAuthStore((state) => state.loading);
-  const profileImage = useAuthStore((state) => state.profileImage);
-  const fullName = useAuthStore((state) => state.fullName);
-  const error = useAuthStore((state) => state.error);
-  const lastUpdated = useAuthStore((state) => state.lastUpdated);
+  const {
+    id,
+    uid,
+    email,
+    role,
+    isAuthenticated,
+    loading: storeLoading,
+    profileImage,
+    fullName,
+    error,
+    lastUpdated,
+    organizationId,
+    refreshUser: storeRefreshUser,
+    fetchUser,
+    logout: storeLogout,
+  } = useAuthStore();
 
-  const refreshUser = useAuthStore((state) => state.refreshUser);
-  const fetchUser = useAuthStore((state) => state.fetchUser);
-  const logout = useAuthStore((state) => state.logout);
-  const organizationId = useAuthStore((state) => state.organizationId);
-  // 권한 확인 메서드
-  const hasPermission = (requiredRole: Role): boolean => {
-    return checkPermission(role, requiredRole);
-  };
+  // 권한 확인 메서드 메모이제이션
+  const hasPermission = useCallback(
+    (requiredRole: Role): boolean => {
+      return checkPermission(role, requiredRole);
+    },
+    [role]
+  );
 
-  // 컴포넌트 마운트 시 초기화
+  // refreshUser 메모이제이션
+  const refreshUser = useCallback(async () => {
+    await storeRefreshUser();
+  }, [storeRefreshUser]);
+
+  // logout 메모이제이션
+  const logout = useCallback(async () => {
+    await storeLogout();
+  }, [storeLogout]);
+
+  // 컴포넌트 마운트 시 초기화 - 디바운싱 적용
   useEffect(() => {
     if (typeof window === "undefined") return;
+    
+    let isMounted = true;
+    let initTimer: NodeJS.Timeout | null = null;
 
     const initializeAuth = async () => {
+      if (!isMounted) return;
+      
       // 로컬 스토리지에서 먼저 데이터 가져오기
       fetchUser();
+      
       try {
-        const supabase = createClient();
+        const supabase = getSupabaseClient();
+        if (!supabase) return;
+        
         // 세션 확인 및 필요시 갱신
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         const now = Date.now();
         const needsRefresh = !lastUpdated || now - lastUpdated > 30 * 60 * 1000; // 30분
 
@@ -95,80 +127,119 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           await logout();
         }
       } catch (error) {
-        toaster.create({
-          title: "인증 초기화 오류",
-          type: "error",
-        });
+        if (isMounted) {
+          toaster.create({
+            title: "인증 초기화 오류",
+            type: "error",
+          });
+        }
       } finally {
         // 초기화 완료 표시 (오류가 발생해도 초기화는 완료된 것으로 간주)
-        setIsInitialized(true);
+        if (isMounted) {
+          setIsInitialized(true);
+        }
       }
     };
 
-    initializeAuth();
+    // 초기화 지연 적용 (디바운싱)
+    initTimer = setTimeout(initializeAuth, 10);
 
     // 인증 상태 변경 이벤트 리스너
-    const supabase = createClient();
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event) => {
-      if (event === "SIGNED_IN") {
-        try {
-          await refreshUser();
-        } catch (error) {
-          toaster.create({
-            title: "로그인 후 사용자 정보 갱신 오류",
-            type: "error",
-          });
-        } finally {
-          setIsInitialized(true);
+    const supabase = getSupabaseClient();
+    let subscription: { unsubscribe: () => void } | null = null;
+    
+    if (supabase) {
+      const { data } = supabase.auth.onAuthStateChange(async (event) => {
+        if (!isMounted) return;
+        
+        if (event === "SIGNED_IN") {
+          try {
+            await refreshUser();
+          } catch (error) {
+            if (isMounted) {
+              toaster.create({
+                title: "로그인 후 사용자 정보 갱신 오류",
+                type: "error",
+              });
+            }
+          } finally {
+            if (isMounted) {
+              setIsInitialized(true);
+            }
+          }
+        } else if (event === "SIGNED_OUT") {
+          try {
+            await logout();
+          } catch (error) {
+            if (isMounted) {
+              toaster.create({
+                title: "로그아웃 처리 오류",
+                type: "error",
+              });
+            }
+          } finally {
+            if (isMounted) {
+              setIsInitialized(true);
+            }
+          }
         }
-      } else if (event === "SIGNED_OUT") {
-        try {
-          await logout();
-        } catch (error) {
-          toaster.create({
-            title: "로그아웃 처리 오류",
-            type: "error",
-          });
-        } finally {
-          setIsInitialized(true);
-        }
-      }
-    });
+      });
+      
+      subscription = data.subscription;
+    }
 
     return () => {
-      subscription.unsubscribe();
+      isMounted = false;
+      if (initTimer) clearTimeout(initTimer);
+      if (subscription) subscription.unsubscribe();
     };
   }, []);
 
   // 로딩 상태 계산 - 초기화가 완료되면 로딩 상태 종료
-  const contextLoading = !isInitialized;
+  const contextLoading = !isInitialized || storeLoading;
+
+  // context 값 메모이제이션
+  const contextValue = useMemo(
+    () => ({
+      id,
+      uid,
+      email,
+      role,
+      isAuthenticated,
+      loading: contextLoading,
+      profileImage,
+      fullName,
+      error,
+      organizationId,
+      refreshUser,
+      logout,
+      hasPermission,
+    }),
+    [
+      id,
+      uid,
+      email,
+      role,
+      isAuthenticated,
+      contextLoading,
+      profileImage,
+      fullName,
+      error,
+      organizationId,
+      refreshUser,
+      logout,
+      hasPermission,
+    ]
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        id,
-        uid,
-        email,
-        role,
-        isAuthenticated,
-        loading: contextLoading, // 수정된 로딩 상태
-        profileImage,
-        fullName,
-        error,
-        organizationId,
-        refreshUser,
-        logout,
-        hasPermission,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// useAuth 훅
+// useAuth 훅 - 메모이제이션 적용
 export const useAuth = () => {
   const context = useContext(AuthContext);
 
@@ -200,7 +271,7 @@ export const useRequireAuth = (requiredRole?: Role) => {
 
       setIsAuthorized(true);
     }
-  }, [auth.loading, auth.isAuthenticated, requiredRole]);
+  }, [auth.loading, auth.isAuthenticated, requiredRole, auth.hasPermission]);
 
   return {
     ...auth,

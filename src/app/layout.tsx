@@ -30,7 +30,9 @@ export default function RootLayout({
   // 클라이언트 컴포넌트에서 처리하도록 수정
   return (
     <html lang="ko" data-theme="light" style={{ colorScheme: "light" }}>
-      <ReactScan/>
+      {process.env.NEXT_PUBLIC_VERCEL_ENV === "production" && (
+        <ReactScan />
+      )}
       <body>
         <Providers>
           <Navigation exceptionPath={["/login", "/register"]} />

@@ -34,6 +34,7 @@ export const postSchema = z.object({
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
   view_count: z.number(),
+  is_hidden: z.boolean(),
 });
 
 
@@ -42,6 +43,7 @@ export const createPostSchema = postSchema.omit({
   created_at: true,
   updated_at: true,
   view_count: true,
+  is_hidden: true,
 });
 
 export const updatePostSchema = createPostSchema.omit({

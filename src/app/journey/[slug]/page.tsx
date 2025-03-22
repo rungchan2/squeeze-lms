@@ -39,7 +39,7 @@ export default async function JourneyPage({
           <DashboardTab/>
         </Tab>
         <Tab title="피드" icon={<TbMessages />} path="feed">
-          <FeedTab />
+          <FeedTab slug={slug}/>
         </Tab>
         <Tab title="설정" icon={<FiMenu />} path="settings">
           <SettingTab slug={slug} />

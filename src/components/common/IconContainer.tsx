@@ -7,6 +7,7 @@ type IconContainerProps = {
   onClick?: () => void;
   hoverColor?: string;
   ref?: RefObject<HTMLDivElement | null>;
+  iconColor?: string;
 };
 export function IconContainer({
   children,
@@ -14,9 +15,10 @@ export function IconContainer({
   onClick,
   hoverColor = "var(--grey-600)",
   ref,
+  iconColor = "var(--grey-600)",
 }: IconContainerProps) {
   return (
-    <StyledIconContainer onClick={onClick} padding={padding} hoverColor={hoverColor} ref={ref}>
+    <StyledIconContainer onClick={onClick} padding={padding} hoverColor={hoverColor} ref={ref} iconColor={iconColor}>
       {children}
     </StyledIconContainer>
   );
@@ -31,6 +33,7 @@ const StyledIconContainer = styled.div<IconContainerProps>`
     align-items: center;
     aspect-ratio: 1/1;
     border-radius: 50%;
+    color: ${({ iconColor }) => iconColor};
 
 
   &:hover {

@@ -21,6 +21,11 @@ import { InputGroup } from "@/components/ui/input-group";
 import { Table } from "@chakra-ui/react";
 import useAccessCode from "@/hooks/useAccessCode";
 import dayjs from "@/utils/dayjs/dayjs";
+import constants from "@/utils/contansts";
+import { IoIosBookmarks } from "react-icons/io";
+import { MdOutlinePrivacyTip, MdPolicy, MdUpdate } from "react-icons/md";
+
+
 export default function SettingTab({ slug }: { slug: string }) {
   const { accessCodes, deleteAccessCode } = useAccessCode();
   const filterAccessCodes = accessCodes?.filter(
@@ -213,14 +218,44 @@ export default function SettingTab({ slug }: { slug: string }) {
                   다른 친구 초대
                 </Text>
               </MenuItem>
-              <MenuItemDiv>
-                <FaUserGroup />
+              <MenuItemDiv onClick={() => window.open(constants.GUIDE_URL, "_blank")}>
+                <IoIosBookmarks />
                 <Text
                   variant="body"
                   color="var(--grey-700)"
                   fontWeight="medium"
                 >
-                  이 클라스 나가기
+                  스퀴즈 사용방법
+                </Text>
+              </MenuItemDiv>
+              <MenuItemDiv onClick={() => window.open(constants.TERMS_OF_SERVICE_URL, "_blank")}>
+                <MdOutlinePrivacyTip />
+                <Text
+                  variant="body"
+                  color="var(--grey-700)"
+                  fontWeight="medium"
+                >
+                  서비스 이용약관
+                </Text>
+              </MenuItemDiv>
+              <MenuItemDiv onClick={() => window.open(constants.PRIVACY_POLICY_URL, "_blank")}>
+                <MdPolicy />
+                <Text
+                  variant="body"
+                  color="var(--grey-700)"
+                  fontWeight="medium"
+                >
+                  개인정보 처리방침
+                </Text>
+              </MenuItemDiv>
+              <MenuItemDiv onClick={() => window.open(constants.SERVICE_UPDATE_URL, "_blank")}>
+                <MdUpdate />
+                <Text
+                  variant="body"
+                  color="var(--grey-700)"
+                  fontWeight="medium"
+                >
+                  서비스 업데이트 내역
                 </Text>
               </MenuItemDiv>
             </div>

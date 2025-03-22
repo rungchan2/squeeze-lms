@@ -125,3 +125,9 @@ export async function deleteUserFromJourney(journeyId: number, userId: number) {
     .eq("user_id", userId);
   return { data, error };
 }
+
+export async function deletePost(postId: number) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("posts").delete().eq("id", postId);
+  return { data, error };
+} 

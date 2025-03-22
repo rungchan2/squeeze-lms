@@ -5,7 +5,7 @@ const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || '';
 
 if (!ENCRYPTION_KEY) {
   console.error('암호화 키가 설정되지 않았습니다.');
-  throw new Error('NEXT_PUBLIC_ENCRYPTION_KEY environment variable is required');
+  throw new Error('ENCRYPTION_KEY environment variable is required');
 }
 
 const IV_LENGTH = 16; // AES 블록 크기
