@@ -12,4 +12,3 @@ export default async function Page({ params }: { params: Params }) {
   return <CreateJourneyPage initialData={data || undefined} />;
 }
 
-//TODO: 1. 포스트 자신 포스트만 수정할 수 있게 하기

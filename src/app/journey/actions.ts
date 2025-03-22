@@ -1,6 +1,6 @@
 "use server";
 
-import { CreatePost, CreateJourney, UpdatePost } from "@/types";
+import { CreatePost, CreateJourney, UpdatePost, CreateMission } from "@/types";
 import { createClient } from "@/utils/supabase/server";
 
 export async function getJourney(uuid: string) {
@@ -131,3 +131,9 @@ export async function deletePost(postId: number) {
   const { data, error } = await supabase.from("posts").delete().eq("id", postId);
   return { data, error };
 } 
+
+export async function createMission(mission: CreateMission) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("missions").insert(mission);
+  return { data, error };
+}
