@@ -45,4 +45,4 @@ export default function AdminPage() {
   );
 }
 
-//TODO: 1. 어드민패널 페이지 만들기
+//TODO: 2. 어드민패널 페이지 만들기

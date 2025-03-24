@@ -137,3 +137,11 @@ export async function createMission(mission: CreateMission) {
   const { data, error } = await supabase.from("missions").insert(mission);
   return { data, error };
 }
+
+export async function getMission(id: number) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("missions").select("*").eq("id", id).single();
+  return { data, error };
+}
+
+

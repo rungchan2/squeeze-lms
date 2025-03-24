@@ -284,7 +284,6 @@ export default memo(function PostCard({
             />
           )}
         </PostContentContainer>
-        {/* TODO: 1. html formatting 적용하기  (지금은 plain text) */}
         <InteractionContainer>
           <InteractionItem onClick={handleLike}>
             {isUserLike ? (

@@ -43,7 +43,8 @@ const ViewerContainer = styled.div`
   position: relative;
 `;
 
-const StyledContent = styled(EditorContent)`
+const StyledContent = styled(EditorContent)<{ minHeight?: string }>`
+
   .tiptap {
     :first-child {
       margin-top: 0;
@@ -62,39 +63,23 @@ const StyledContent = styled(EditorContent)`
     }
 
     /* Heading styles */
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      line-height: 1.1;
-      margin-top: 1.5rem;
-      text-wrap: pretty;
-    }
-
-    h1,
-    h2 {
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-    }
-
     h1 {
       font-size: 1.4rem;
     }
-
     h2 {
       font-size: 1.2rem;
     }
-
     h3 {
       font-size: 1.1rem;
     }
-
-    h4,
-    h5,
-    h6 {
+    h4 {
       font-size: 1rem;
+    }
+    h5 {
+      font-size: 0.9rem;
+    }
+    h6 {
+      font-size: 0.8rem;
     }
 
     /* Code and preformatted text styles */
@@ -141,4 +126,4 @@ const StyledContent = styled(EditorContent)`
       margin: 2rem 0;
     }
   }
-`; 
+`;

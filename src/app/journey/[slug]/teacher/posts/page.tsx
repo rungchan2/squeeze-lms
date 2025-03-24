@@ -1,6 +1,6 @@
 "use client";
 
-// TODO: 1. 제출된 과제 관리 페이지 만들기
+// TODO: 1. 제출된 과제 통계 확인할 수 있게 하기
 
 import { usePosts } from "@/hooks/usePosts";
 import { Table } from "@chakra-ui/react";

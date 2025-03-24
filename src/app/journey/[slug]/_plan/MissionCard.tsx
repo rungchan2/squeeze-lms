@@ -7,9 +7,13 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
 import { FiMenu } from "react-icons/fi";
 import dayjs from "@/utils/dayjs/dayjs";
-import { AdminOnly } from "@/components/auth/AdminOnly";
+import { TeacherOnly } from "@/components/auth/AdminOnly";
 import { calcDifference } from "@/utils/dayjs/calcDifference";
 import { toaster } from "@/components/ui/toaster";
+import { FaEdit } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+
 interface MissionCardProps {
   mission: Mission;
   isModal?: boolean;
@@ -30,6 +34,10 @@ export default function MissionCard({
   showDetails = false,
   style,
 }: MissionCardProps) {
+  const router = useRouter();
+  const params = useParams();
+  const slug = params.slug;
+
   const difference = calcDifference(missionInstance?.expiry_date || "");
   const dDay =
     difference === 0
@@ -47,6 +55,11 @@ export default function MissionCard({
     dayjs(missionInstance?.expiry_date || "").format("M/D") === "Invalid Date"
       ? "날짜없음"
       : dayjs(missionInstance?.expiry_date || "").format("M/D");
+
+  const goToEditMission = (missionId: number) => {
+    router.push(`/journey/${slug}/teacher/edit-mission/${missionId}`);
+  };
+
   return (
     <StyledMissionCard
       isModal={isModal}
@@ -93,11 +106,16 @@ export default function MissionCard({
 
       {!isModal && (
         <>
-          <AdminOnly>
+          <TeacherOnly>
             <div className="mission-actions">
-              {/* <IconContainer onClick={() => onEdit?.(mission.id)}>
+              <IconContainer
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToEditMission(mission.id);
+                }}
+              >
                 <FaEdit />
-              </IconContainer> */}
+              </IconContainer>
               <IconContainer
                 onClick={() => {
                   onDelete?.(mission.id);
@@ -111,7 +129,7 @@ export default function MissionCard({
                 <RiDeleteBin6Line />
               </IconContainer>
             </div>
-          </AdminOnly>
+          </TeacherOnly>
         </>
       )}
     </StyledMissionCard>
