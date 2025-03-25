@@ -6,7 +6,7 @@ import { Flex, Table } from "@chakra-ui/react";
 import { useAuth } from "@/components/AuthProvider";
 import Text from "@/components/Text/Text";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Button from "@/components/common/Button";
 import { ProfileImage } from "@/components/navigation/ProfileImage";
 import Select from "react-select";
@@ -21,6 +21,8 @@ import { Tabs } from "@chakra-ui/react";
 import { LuFolder, LuUser } from "react-icons/lu";
 import Heading from "@/components/Text/Heading";
 import { deleteUserFromJourney } from "@/app/journey/actions";
+import Footer from "@/components/common/Footer";
+import { createClient } from "@/utils/supabase/client";
 
 export default function UsersPage() {
   const { currentJourneyId, getCurrentJourneyId, setCurrentJourneyUuid } =
@@ -30,6 +32,11 @@ export default function UsersPage() {
   const { slug } = useParams();
   const uuid = slug as string;
   const [isLoading, setIsLoading] = useState(true);
+  const { users, loadMore, isLoadingMore, isReachingEnd, total } = useOrganizationUsers(organizationId ?? 0);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const [invitedUsers, setInvitedUsers] = useState<number[]>([]);
+  const [invitingUsers, setInvitingUsers] = useState<number[]>([]);
 
   // 권한 없을 때 뒤로 가거나 홈으로 가는 함수
   const goBackOrHome = () => {
@@ -106,6 +113,9 @@ export default function UsersPage() {
   // 현재 여정 ID가 설정된 후에만 여정 사용자 불러오기
   const { currentJourneyUsers } = useJourneyUser(currentJourneyId ?? 0);
 
+  // 현재 여정에 이미 참여 중인 사용자 ID 목록
+  const currentMemberIds = currentJourneyUsers?.map(user => user?.id) || [];
+
   const {
     data: { useOrganizationList },
   } = useOrganization();
@@ -115,25 +125,101 @@ export default function UsersPage() {
     value: organization.id,
   }));
 
+  // 초대된 사용자 목록 불러오기
+  useEffect(() => {
+    const fetchInvitedUsers = async () => {
+      if (!uuid) return;
+      
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("notifications")
+          .select("receiver_id")
+          .eq("type", "request")
+          .like("link", `%/journey/${uuid}/redirect/invite%`);
+        
+        if (error) {
+          console.error("초대 목록 조회 오류:", error);
+          return;
+        }
+        
+        // 초대된 사용자 ID 목록 추출 - null 값 필터링
+        const invitedUserIds = data
+          .map(item => item.receiver_id)
+          .filter((id): id is number => id !== null);
+        setInvitedUsers(invitedUserIds);
+      } catch (error) {
+        console.error("초대 목록 불러오기 실패:", error);
+      }
+    };
+    
+    fetchInvitedUsers();
+  }, [uuid]);
+
+  // 초대 상태 체크 함수
+  const isUserInvited = (userId: number) => {
+    // 이미 멤버인 경우
+    if (currentMemberIds.includes(userId)) {
+      return true;
+    }
+    // 초대된 경우
+    return invitedUsers.includes(userId);
+  };
+
+  // 초대 버튼 텍스트 표시
+  const getInviteButtonText = (userId: number) => {
+    if (invitingUsers.includes(userId)) {
+      return "로딩...";
+    }
+    if (currentMemberIds.includes(userId)) {
+      return "멤버";
+    }
+    if (invitedUsers.includes(userId)) {
+      return "초대됨";
+    }
+    return "초대";
+  };
+
   const handleInvite = async (userId: number) => {
-    const { data: journey } = await fetchJourneyDetail(uuid);
-    const { error } = await createNotification({
-      receiver_id: userId,
-      type: "request",
-      message: `${journey.name}에 초대되었습니다.`,
-      link: `/journey/${uuid}/redirect/invite`,
-    });
-    if (error) {
+    // 이미 멤버이거나 처리 중인 사용자는 무시
+    if (currentMemberIds.includes(userId) || invitingUsers.includes(userId) || invitedUsers.includes(userId)) {
+      return;
+    }
+    
+    try {
+      // 처리 중 상태 설정
+      setInvitingUsers(prev => [...prev, userId]);
+      
+      const { data: journey } = await fetchJourneyDetail(uuid);
+      const { error } = await createNotification({
+        receiver_id: userId,
+        type: "request",
+        message: `${journey.name}에 초대되었습니다.`,
+        link: `/journey/${uuid}/redirect/invite`,
+      });
+      if (error) {
+        toaster.create({
+          title: "초대 실패",
+          type: "error",
+        });
+      } else {
+        // 초대 성공 시 초대된 사용자 목록에 추가
+        setInvitedUsers(prev => [...prev, userId]);
+        toaster.create({
+          title: "초대 완료",
+          type: "success",
+        });
+        //TODO: 2. 초대 이메일 보내기
+      }
+    } catch (error) {
+      console.error("초대 처리 중 오류:", error);
       toaster.create({
         title: "초대 실패",
         type: "error",
       });
-    } else {
-      toaster.create({
-        title: "초대 완료",
-        type: "success",
-      });
-      //TODO: 2. 초대 이메일 보내기
+    } finally {
+      // 처리 중 상태 해제
+      setInvitingUsers(prev => prev.filter(id => id !== userId));
     }
   };
 
@@ -155,7 +241,28 @@ export default function UsersPage() {
     }
   };
 
-  const { users } = useOrganizationUsers(organizationId ?? 0);
+  // 무한 스크롤을 위한 Intersection Observer 설정
+  const lastElementRef = useCallback((node: HTMLDivElement | null) => {
+    if (isLoadingMore) return;
+    if (observerRef.current) observerRef.current.disconnect();
+
+    loadMoreRef.current = node;
+    
+    observerRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && !isReachingEnd) {
+        loadMore();
+      }
+    });
+
+    if (node) observerRef.current.observe(node);
+  }, [isLoadingMore, isReachingEnd, loadMore]);
+
+  // 다음 페이지 직접 로드 처리
+  const handleLoadMore = () => {
+    if (!isReachingEnd && !isLoadingMore) {
+      loadMore();
+    }
+  };
 
   // 로딩 중이거나 권한 체크 중이면 컨텐츠를 렌더링하지 않음
   if (isLoading) {
@@ -179,62 +286,64 @@ export default function UsersPage() {
         <Tabs.Content value="members">
           <Flex flexDirection="column" gap="16px">
             <Heading level={3}>클라스 멤버</Heading>
-            <Table.Root size="sm" interactive showColumnBorder>
-              <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeader textAlign="center">
-                    프로필
-                  </Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="center">
-                    이름
-                  </Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="center">
-                    역할
-                  </Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="center">
-                    초대
-                  </Table.ColumnHeader>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {currentJourneyUsers?.map((user) => (
-                  <Table.Row key={user?.id}>
-                    <Table.Cell
-                      verticalAlign="middle"
-                      justifyContent="center"
-                      alignContent="center"
-                    >
-                      <ProfileImage
-                        profileImage={user?.profile_image ?? null}
-                        width={32}
-                        size="small"
-                      />
-                    </Table.Cell>
-                    <Table.Cell>
-                      {user?.first_name + " " + user?.last_name}
-                    </Table.Cell>
-                    <Table.Cell>{user?.role}</Table.Cell>
-                    <Table.Cell justifyContent="center">
-                      <Button
-                        style={{
-                          maxWidth: "100px",
-                          borderColor: "var(--negative-600)",
-                          color: "var(--negative-600)",
-                        }}
-                        variant="outline"
-                        onClick={() => {
-                          if (confirm("정말로 이 유저를 강퇴하시겠습니까?")) {
-                            handleKick(user?.id ?? 0);
-                          }
-                        }}
-                      >
-                        강퇴
-                      </Button>
-                    </Table.Cell>
+            <TableContainer>
+              <Table.Root size="sm" interactive showColumnBorder>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader textAlign="center">
+                      프로필
+                    </Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="center">
+                      이름
+                    </Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="center">
+                      역할
+                    </Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="center">
+                      초대
+                    </Table.ColumnHeader>
                   </Table.Row>
-                ))}
-              </Table.Body>
-            </Table.Root>
+                </Table.Header>
+                <Table.Body>
+                  {currentJourneyUsers?.map((user) => (
+                    <Table.Row key={user?.id}>
+                      <Table.Cell
+                        verticalAlign="middle"
+                        justifyContent="center"
+                        alignContent="center"
+                      >
+                        <ProfileImage
+                          profileImage={user?.profile_image ?? null}
+                          width={32}
+                          size="small"
+                        />
+                      </Table.Cell>
+                      <Table.Cell>
+                        {user?.first_name + " " + user?.last_name}
+                      </Table.Cell>
+                      <Table.Cell>{user?.role}</Table.Cell>
+                      <Table.Cell justifyContent="center">
+                        <Button
+                          style={{
+                            maxWidth: "100px",
+                            borderColor: "var(--negative-600)",
+                            color: "var(--negative-600)",
+                          }}
+                          variant="outline"
+                          onClick={() => {
+                            if (confirm("정말로 이 유저를 강퇴하시겠습니까?")) {
+                              handleKick(user?.id ?? 0);
+                            }
+                          }}
+                        >
+                          강퇴
+                        </Button>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </TableContainer>
           </Flex>
         </Tabs.Content>
         <Tabs.Content value="projects">
@@ -248,57 +357,87 @@ export default function UsersPage() {
               )}
               isDisabled={role === "teacher"}
             />
-            <Table.Root size="sm" interactive showColumnBorder>
-              <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeader textAlign="center">
-                    프로필
-                  </Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="center">
-                    이름
-                  </Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="center">
-                    역할
-                  </Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="center">
-                    초대
-                  </Table.ColumnHeader>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {users.map((user) => (
-                  <Table.Row key={user.id}>
-                    <Table.Cell
-                      verticalAlign="middle"
-                      justifyContent="center"
-                      alignContent="center"
-                    >
-                      <ProfileImage
-                        profileImage={user.profile_image}
-                        width={32}
-                        size="small"
-                      />
-                    </Table.Cell>
-                    <Table.Cell>
-                      {user.first_name + " " + user.last_name}
-                    </Table.Cell>
-                    <Table.Cell>{user.role}</Table.Cell>
-                    <Table.Cell justifyContent="center">
-                      <Button
-                        style={{ maxWidth: "100px", alignSelf: "center" }}
-                        variant="outline"
-                        onClick={() => handleInvite(user.id)}
-                      >
-                        초대
-                      </Button>
-                    </Table.Cell>
+            <TableContainer>
+              <Table.Root size="sm" interactive showColumnBorder>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader textAlign="center">
+                      프로필
+                    </Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="center">
+                      이름
+                    </Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="center">
+                      역할
+                    </Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="center">
+                      초대
+                    </Table.ColumnHeader>
                   </Table.Row>
-                ))}
-              </Table.Body>
-            </Table.Root>
+                </Table.Header>
+                <Table.Body>
+                  {users.map((user, index) => (
+                    <Table.Row key={user.id}>
+                      <Table.Cell
+                        verticalAlign="middle"
+                        justifyContent="center"
+                        alignContent="center"
+                      >
+                        <ProfileImage
+                          profileImage={user.profile_image}
+                          width={32}
+                          size="small"
+                        />
+                      </Table.Cell>
+                      <Table.Cell>
+                        {user.first_name + " " + user.last_name}
+                      </Table.Cell>
+                      <Table.Cell>{user.role}</Table.Cell>
+                      <Table.Cell justifyContent="center">
+                        <Button
+                          style={{ 
+                            maxWidth: "100px", 
+                            alignSelf: "center",
+                            opacity: isUserInvited(user.id) ? 0.6 : 1
+                          }}
+                          variant={isUserInvited(user.id) ? "flat" : "outline"}
+                          onClick={() => handleInvite(user.id)}
+                          disabled={isUserInvited(user.id) || invitingUsers.includes(user.id)}
+                        >
+                          {getInviteButtonText(user.id)}
+                        </Button>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </TableContainer>
+            {!isReachingEnd && (
+              <div ref={lastElementRef} style={{ height: "20px", margin: "10px 0" }}>
+                {isLoadingMore && <div style={{ textAlign: "center" }}>로딩 중...</div>}
+              </div>
+            )}
+            {users.length > 0 && (
+              <Flex flexDirection="column" gap="8px" alignItems="center">
+                <Text variant="caption">
+                  {users.length}명 / 총 {total}명
+                </Text>
+                {!isReachingEnd && (
+                  <Button 
+                    variant="outline" 
+                    onClick={handleLoadMore} 
+                    disabled={isLoadingMore}
+                    style={{ maxWidth: "200px" }}
+                  >
+                    {isLoadingMore ? "로딩 중..." : "더 보기"}
+                  </Button>
+                )}
+              </Flex>
+            )}
           </Flex>
         </Tabs.Content>
       </Tabs.Root>
+      <Footer />
     </Container>
   );
 }
@@ -309,4 +448,10 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+`;
+
+const TableContainer = styled.div`
+  width: 100%;
+  max-height: 600px;
+  overflow-y: auto;
 `;

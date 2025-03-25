@@ -80,7 +80,7 @@ export async function GET(
     }
 
     // 성공적으로 처리된 경우 여정 페이지로 리다이렉트
-    return NextResponse.redirect(new URL(`/journey/${slug}/status=success`, request.url));
+    return NextResponse.redirect(new URL(`/journey/${slug}?tab=plan&status=success`, request.url));
   } catch (error) {
     console.error("초대 처리 중 예외 발생:", error);
     return NextResponse.redirect(

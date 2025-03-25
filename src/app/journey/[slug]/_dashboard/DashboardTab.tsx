@@ -15,6 +15,7 @@ import { getUserPointsByJourneyId } from "@/app/journey/actions";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import { useWeeks } from "@/hooks/useWeeks";
 import Heading from "@/components/Text/Heading";
+import Footer from "@/components/common/Footer";
 
 // Zod 스키마 정의
 const leaderboardUserSchema = z.object({
@@ -425,6 +426,7 @@ export default function DashboardTab() {
           </EmptyState>
         )}
       </SectionContainer>
+      <Footer />
     </DashboardTabContainer>
   );
 }

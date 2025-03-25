@@ -71,7 +71,7 @@ export default function LoginSignup({ type }: { type: "login" | "signup" }) {
       return;
     }
     if (error) {
-      setError("회원가입에 실패했습니다.");
+      setError("회원가입에 실패했습니다. 비밀번호는 최소 6자리 이상 입니다.");
       return;
     }
     decryptedAuthData = {

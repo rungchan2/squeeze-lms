@@ -17,7 +17,7 @@ import { toaster } from "@/components/ui/toaster";
 import { auth } from "@/utils/auth/auth";
 
 export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
-  const { profileImage, id, logout } = useAuth();
+  const { profileImage, id, logout, isAuthenticated } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const isException = exceptionPath.some((path) => pathname?.includes(path));
@@ -145,15 +145,26 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
                 >
                   버그 신고
                 </Menu.Item>
+                {isAuthenticated && (
                 <Menu.Item
                   value="logout"
                   color="fg.error"
                   _hover={{ bg: "bg.error", color: "fg.error" }}
                   onClick={handleLogout}
                   style={{ cursor: "pointer" }}
-                >
-                  로그아웃
-                </Menu.Item>
+                  >
+                    로그아웃
+                  </Menu.Item>
+                )}
+                {!isAuthenticated && (
+                  <Menu.Item
+                    value="login"
+                    onClick={() => router.push("/login")}
+                    style={{ cursor: "pointer" }}
+                  >
+                    로그인
+                  </Menu.Item>
+                )}
               </Menu.Content>
             </Menu.Positioner>
           </Portal>

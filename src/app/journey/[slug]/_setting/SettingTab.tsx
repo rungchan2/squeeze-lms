@@ -24,6 +24,7 @@ import dayjs from "@/utils/dayjs/dayjs";
 import constants from "@/utils/contansts";
 import { IoIosBookmarks } from "react-icons/io";
 import { MdOutlinePrivacyTip, MdPolicy, MdUpdate } from "react-icons/md";
+import Footer from "@/components/common/Footer";
 
 
 export default function SettingTab({ slug }: { slug: string }) {
@@ -198,7 +199,7 @@ export default function SettingTab({ slug }: { slug: string }) {
               <Heading level={4}>공통설정</Heading>
             </div>
             <div className="menu-items">
-              <MenuItem href={`/journey/${slug}/info`}>
+              {/* <MenuItem href={`/journey/${slug}/info`}>
                 <FaUserGroup />
                 <Text
                   variant="body"
@@ -217,7 +218,7 @@ export default function SettingTab({ slug }: { slug: string }) {
                 >
                   다른 친구 초대
                 </Text>
-              </MenuItem>
+              </MenuItem> */}
               <MenuItemDiv onClick={() => window.open(constants.GUIDE_URL, "_blank")}>
                 <IoIosBookmarks />
                 <Text
@@ -262,6 +263,7 @@ export default function SettingTab({ slug }: { slug: string }) {
           </div>
         </div>
       </div>
+      <Footer />
     </SettingTabContainer>
   );
 }

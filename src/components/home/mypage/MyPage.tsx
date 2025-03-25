@@ -11,7 +11,7 @@ import MyPost from "./MyPost";
 import { BsFillAirplaneFill } from "react-icons/bs";
 import { FaRegHeart } from "react-icons/fa6";
 import { SideMenu, MenuItem } from "@/components/sidemenu/SideMenu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Separator } from "@chakra-ui/react";
 import { MdPrivacyTip, MdFeedback, MdLogout, MdLanguage } from "react-icons/md";
@@ -23,15 +23,27 @@ import { useRef } from "react";
 import { useMyLikedPosts } from "@/hooks/usePosts";
 import PostCard from "./PostCard";
 import styles from "./Mypage.module.css";
-
+import { organization } from "@/utils/organization/organization";
 export default function MyPage() {
+  const [orgData, setOrgData] = useState<any>(null);
   const { data: myLikedPosts } = useMyLikedPosts();
-  const { logout } = useAuthStore();
   const router = useRouter();
-  const { profileImage, email, fullName } = useAuthStore();
+  const { profileImage, email, fullName, logout, organizationId } = useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
   const getAnchorRect = () => ref.current!.getBoundingClientRect();
+
+  useEffect(() => {
+    const fetchOrgData = async () => {
+      const { data, error } = await organization.getOrganization(organizationId || 0);
+      if (error) {
+        console.error("Error fetching organization data:", error);
+      } else {
+        setOrgData(data);
+      }
+    };
+    fetchOrgData();
+  }, [organizationId]);
 
   const handleLogout = useCallback(() => {
     logout();
@@ -45,7 +57,7 @@ export default function MyPage() {
           <IconContainer padding="5px" onClick={() => router.push("/profile")}>
             <FiEdit />
           </IconContainer>
-          <Menu.Root positioning={{ getAnchorRect }}>
+          {/* <Menu.Root positioning={{ getAnchorRect }}>
             <Menu.Trigger asChild>
               <IconContainer padding="5px" ref={ref}>
                 <MdLanguage />
@@ -59,7 +71,7 @@ export default function MyPage() {
                 </Menu.Content>
               </Menu.Positioner>
             </Portal>
-          </Menu.Root>
+          </Menu.Root> */}
           <IconContainer padding="5px" onClick={() => setIsMenuOpen(true)}>
             <IoSettingsOutline />
             <SideMenu
@@ -95,7 +107,7 @@ export default function MyPage() {
           <ProfileImage profileImage={profileImage || ""} width={80} />
 
           <div className="profileInfo">
-            <Heading level={3}>
+            <Heading level={4}>
               안녕하세요 <br /> {fullName}님!
             </Heading>
             <Text
@@ -109,6 +121,18 @@ export default function MyPage() {
               }}
             >
               {email}
+            </Text>
+            <Text
+              variant="body"
+              color="var(--grey-500)"
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                wordBreak: "break-word",
+                maxWidth: "100%",
+              }}
+            >
+              ({orgData ? orgData[0].name : "조직 정보를 불러오는 중입니다."})
             </Text>
           </div>
         </div>
@@ -165,7 +189,6 @@ const PostContainer = styled.div`
       .profileInfo {
         display: flex;
         flex-direction: column;
-        gap: 5px;
       }
     }
   }

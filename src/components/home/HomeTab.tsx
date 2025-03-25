@@ -18,9 +18,12 @@ import { useCallback, useEffect, useRef } from "react";
 import { useJourneyStore } from "@/store/journey";
 import { useParams } from "next/navigation";
 import Footer from "../common/Footer";
+import { useAuth } from "../AuthProvider";
+import { Error } from "../common/Error";
 
 export default function HomeTab() {
   const { clearCurrentJourneyId, clearCurrentJourneyUuid } = useJourneyStore();
+  const { isAuthenticated } = useAuth();
   const { slug } = useParams();
   const uuid = slug as string;
   useEffect(() => {
@@ -29,6 +32,9 @@ export default function HomeTab() {
       clearCurrentJourneyUuid();
     }
   }, [clearCurrentJourneyId, clearCurrentJourneyUuid, uuid]);
+  if (!isAuthenticated) {
+    return <Error message="로그인 후 이용해주세요." />;
+  }
 
   return (
     <Tabs usePath={true}>

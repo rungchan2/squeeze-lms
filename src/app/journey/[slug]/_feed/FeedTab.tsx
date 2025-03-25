@@ -13,6 +13,7 @@ import { Input } from "@chakra-ui/react";
 import { FaSortAmountDownAlt, FaSortAmountUpAlt } from "react-icons/fa";
 import { IconContainer } from "@/components/common/IconContainer";
 import Heading from "@/components/Text/Heading";
+import Footer from "@/components/common/Footer";
 
 export default function FeedTab({ slug }: { slug: string }) {
   const { data: posts, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(10, slug);
@@ -132,6 +133,7 @@ export default function FeedTab({ slug }: { slug: string }) {
           </Text>
         </div>
       )}
+      <Footer />
     </FeedTabContainer>
   );
 }

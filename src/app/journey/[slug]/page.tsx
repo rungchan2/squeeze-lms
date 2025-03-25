@@ -10,6 +10,7 @@ import MissionTab from "./_mission/MissionTab";
 import FeedTab from "./_feed/FeedTab";
 import DashboardTab from "./_dashboard/DashboardTab";
 import SettingTab from "./_setting/SettingTab";
+import { toaster } from "@/components/ui/toaster";
 
 // params 타입을 Promise로 정의
 type Params = Promise<{ slug: string }>;
@@ -24,6 +25,10 @@ export default async function JourneyPage({
   const { slug } = resolvedParams;
   const { error } = await getJourney(slug);
   if (error) {
+    toaster.create({
+      title: "여정을 찾을 수 없습니다",
+      type: "error",
+    });
     redirect("/");
   }
   return (
