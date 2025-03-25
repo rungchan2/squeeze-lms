@@ -10,7 +10,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Button from "@/components/common/Button";
 import { ProfileImage } from "@/components/navigation/ProfileImage";
 import Select from "react-select";
-import { useOrganization } from "@/hooks/useOrganization";
+import { useOrganizationList } from "@/hooks/useOrganization";
 import { toaster } from "@/components/ui/toaster";
 import { createNotification } from "@/hooks/useNotification";
 import { fetchJourneyDetail } from "@/hooks/useJourney";
@@ -32,7 +32,8 @@ export default function UsersPage() {
   const { slug } = useParams();
   const uuid = slug as string;
   const [isLoading, setIsLoading] = useState(true);
-  const { users, loadMore, isLoadingMore, isReachingEnd, total } = useOrganizationUsers(organizationId ?? 0);
+  const { users = [], loadMore, isLoadingMore = false, isReachingEnd = false, total = 0 } = 
+    useOrganizationUsers(organizationId ?? 0);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const [invitedUsers, setInvitedUsers] = useState<number[]>([]);
@@ -111,19 +112,18 @@ export default function UsersPage() {
   ]);
 
   // 현재 여정 ID가 설정된 후에만 여정 사용자 불러오기
-  const { currentJourneyUsers } = useJourneyUser(currentJourneyId ?? 0);
+  const { currentJourneyUsers = [] } = useJourneyUser(currentJourneyId ?? 0);
 
   // 현재 여정에 이미 참여 중인 사용자 ID 목록
-  const currentMemberIds = currentJourneyUsers?.map(user => user?.id) || [];
+  const currentMemberIds = currentJourneyUsers?.map(user => user?.id).filter(Boolean) || [];
 
-  const {
-    data: { useOrganizationList },
-  } = useOrganization();
-  const { organizations } = useOrganizationList();
+  // useOrganizationList 직접 불러오기
+  const { organizations = [], isLoading: orgsLoading } = useOrganizationList();
+  
   const organizationOptions = organizations?.map((organization) => ({
-    label: organization.name,
-    value: organization.id,
-  }));
+    label: organization?.name || '알 수 없음',
+    value: organization?.id || 0,
+  })) || [];
 
   // 초대된 사용자 목록 불러오기
   useEffect(() => {
@@ -157,17 +157,19 @@ export default function UsersPage() {
   }, [uuid]);
 
   // 초대 상태 체크 함수
-  const isUserInvited = (userId: number) => {
+  const isUserInvited = useCallback((userId: number) => {
+    if (!userId) return false;
     // 이미 멤버인 경우
     if (currentMemberIds.includes(userId)) {
       return true;
     }
     // 초대된 경우
     return invitedUsers.includes(userId);
-  };
+  }, [currentMemberIds, invitedUsers]);
 
   // 초대 버튼 텍스트 표시
-  const getInviteButtonText = (userId: number) => {
+  const getInviteButtonText = useCallback((userId: number) => {
+    if (!userId) return "초대";
     if (invitingUsers.includes(userId)) {
       return "로딩...";
     }
@@ -178,9 +180,10 @@ export default function UsersPage() {
       return "초대됨";
     }
     return "초대";
-  };
+  }, [currentMemberIds, invitedUsers, invitingUsers]);
 
   const handleInvite = async (userId: number) => {
+    if (!userId) return;
     // 이미 멤버이거나 처리 중인 사용자는 무시
     if (currentMemberIds.includes(userId) || invitingUsers.includes(userId) || invitedUsers.includes(userId)) {
       return;
@@ -191,10 +194,18 @@ export default function UsersPage() {
       setInvitingUsers(prev => [...prev, userId]);
       
       const { data: journey } = await fetchJourneyDetail(uuid);
+      if (!journey) {
+        toaster.create({
+          title: "여정 정보를 불러올 수 없습니다.",
+          type: "error",
+        });
+        return;
+      }
+      
       const { error } = await createNotification({
         receiver_id: userId,
         type: "request",
-        message: `${journey.name}에 초대되었습니다.`,
+        message: `${journey.name || '새 클라스'}에 초대되었습니다.`,
         link: `/journey/${uuid}/redirect/invite`,
       });
       if (error) {
@@ -265,7 +276,7 @@ export default function UsersPage() {
   };
 
   // 로딩 중이거나 권한 체크 중이면 컨텐츠를 렌더링하지 않음
-  if (isLoading) {
+  if (isLoading || orgsLoading) {
     return <div>로딩 중...</div>;
   }
 
@@ -305,42 +316,51 @@ export default function UsersPage() {
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                  {currentJourneyUsers?.map((user) => (
-                    <Table.Row key={user?.id}>
-                      <Table.Cell
-                        verticalAlign="middle"
-                        justifyContent="center"
-                        alignContent="center"
-                      >
-                        <ProfileImage
-                          profileImage={user?.profile_image ?? null}
-                          width={32}
-                          size="small"
-                        />
-                      </Table.Cell>
-                      <Table.Cell>
-                        {user?.first_name + " " + user?.last_name}
-                      </Table.Cell>
-                      <Table.Cell>{user?.role}</Table.Cell>
-                      <Table.Cell justifyContent="center">
-                        <Button
-                          style={{
-                            maxWidth: "100px",
-                            borderColor: "var(--negative-600)",
-                            color: "var(--negative-600)",
-                          }}
-                          variant="outline"
-                          onClick={() => {
-                            if (confirm("정말로 이 유저를 강퇴하시겠습니까?")) {
-                              handleKick(user?.id ?? 0);
-                            }
-                          }}
+                  {currentJourneyUsers && currentJourneyUsers.length > 0 ? (
+                    currentJourneyUsers.map((user) => (
+                      <Table.Row key={user?.id || 'unknown'}>
+                        <Table.Cell
+                          verticalAlign="middle"
+                          justifyContent="center"
+                          alignContent="center"
                         >
-                          강퇴
-                        </Button>
+                          <ProfileImage
+                            profileImage={user?.profile_image ?? null}
+                            width={32}
+                            size="small"
+                          />
+                        </Table.Cell>
+                        <Table.Cell>
+                          {(user?.first_name || '') + " " + (user?.last_name || '')}
+                        </Table.Cell>
+                        <Table.Cell>{user?.role || '일반'}</Table.Cell>
+                        <Table.Cell justifyContent="center">
+                          <Button
+                            style={{
+                              maxWidth: "100px",
+                              borderColor: "var(--negative-600)",
+                              color: "var(--negative-600)",
+                            }}
+                            variant="outline"
+                            onClick={() => {
+                              if (confirm("정말로 이 유저를 강퇴하시겠습니까?")) {
+                                handleKick(user?.id ?? 0);
+                              }
+                            }}
+                            disabled={!user?.id}
+                          >
+                            강퇴
+                          </Button>
+                        </Table.Cell>
+                      </Table.Row>
+                    ))
+                  ) : (
+                    <Table.Row>
+                      <Table.Cell colSpan={4} textAlign="center">
+                        클라스 멤버가 없습니다
                       </Table.Cell>
                     </Table.Row>
-                  ))}
+                  )}
                 </Table.Body>
               </Table.Root>
             </TableContainer>
@@ -350,13 +370,19 @@ export default function UsersPage() {
           {/* 클라스 멤버 목록 */}
           <Flex flexDirection="column" gap="16px">
             <Heading level={3}>전체 유저</Heading>
-            <Select
-              options={organizationOptions}
-              defaultValue={organizationOptions?.find(
-                (option) => option.value === organizationId
-              )}
-              isDisabled={role === "teacher"}
-            />
+            {organizationOptions.length > 0 ? (
+              <Select
+                options={organizationOptions}
+                defaultValue={organizationOptions?.find(
+                  (option) => option.value === organizationId
+                )}
+                isDisabled={role === "teacher"}
+              />
+            ) : (
+              <Text variant="caption" style={{ textAlign: "center" }}>
+                사용 가능한 조직이 없습니다
+              </Text>
+            )}
             <TableContainer>
               <Table.Root size="sm" interactive showColumnBorder>
                 <Table.Header>
@@ -376,43 +402,51 @@ export default function UsersPage() {
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                  {users.map((user, index) => (
-                    <Table.Row key={user.id}>
-                      <Table.Cell
-                        verticalAlign="middle"
-                        justifyContent="center"
-                        alignContent="center"
-                      >
-                        <ProfileImage
-                          profileImage={user.profile_image}
-                          width={32}
-                          size="small"
-                        />
-                      </Table.Cell>
-                      <Table.Cell>
-                        {user.first_name + " " + user.last_name}
-                      </Table.Cell>
-                      <Table.Cell>{user.role}</Table.Cell>
-                      <Table.Cell justifyContent="center">
-                        <Button
-                          style={{ 
-                            maxWidth: "100px", 
-                            alignSelf: "center",
-                            opacity: isUserInvited(user.id) ? 0.6 : 1
-                          }}
-                          variant={isUserInvited(user.id) ? "flat" : "outline"}
-                          onClick={() => handleInvite(user.id)}
-                          disabled={isUserInvited(user.id) || invitingUsers.includes(user.id)}
+                  {users && users.length > 0 ? (
+                    users.map((user, index) => (
+                      <Table.Row key={user.id || `user-${index}`}>
+                        <Table.Cell
+                          verticalAlign="middle"
+                          justifyContent="center"
+                          alignContent="center"
                         >
-                          {getInviteButtonText(user.id)}
-                        </Button>
+                          <ProfileImage
+                            profileImage={user.profile_image || null}
+                            width={32}
+                            size="small"
+                          />
+                        </Table.Cell>
+                        <Table.Cell>
+                          {(user.first_name || '') + " " + (user.last_name || '')}
+                        </Table.Cell>
+                        <Table.Cell>{user.role || '일반'}</Table.Cell>
+                        <Table.Cell justifyContent="center">
+                          <Button
+                            style={{ 
+                              maxWidth: "100px", 
+                              alignSelf: "center",
+                              opacity: isUserInvited(user.id) ? 0.6 : 1
+                            }}
+                            variant={isUserInvited(user.id) ? "flat" : "outline"}
+                            onClick={() => handleInvite(user.id)}
+                            disabled={!user.id || isUserInvited(user.id) || invitingUsers.includes(user.id)}
+                          >
+                            {getInviteButtonText(user.id)}
+                          </Button>
+                        </Table.Cell>
+                      </Table.Row>
+                    ))
+                  ) : (
+                    <Table.Row>
+                      <Table.Cell colSpan={4} textAlign="center">
+                        사용자가 없습니다
                       </Table.Cell>
                     </Table.Row>
-                  ))}
+                  )}
                 </Table.Body>
               </Table.Root>
             </TableContainer>
-            {!isReachingEnd && (
+            {!isReachingEnd && users.length > 0 && (
               <div ref={lastElementRef} style={{ height: "20px", margin: "10px 0" }}>
                 {isLoadingMore && <div style={{ textAlign: "center" }}>로딩 중...</div>}
               </div>
