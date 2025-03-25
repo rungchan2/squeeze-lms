@@ -42,7 +42,7 @@ export default function MyPage() {
       <div className="header">
         <Heading level={3}>내 정보</Heading>
         <div className="iconContainer">
-          <IconContainer padding="5px">
+          <IconContainer padding="5px" onClick={() => router.push("/profile")}>
             <FiEdit />
           </IconContainer>
           <Menu.Root positioning={{ getAnchorRect }}>

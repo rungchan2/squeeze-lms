@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/AuthProvider";
 import styled from "@emotion/styled";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { FaHome } from "react-icons/fa";
 import { ProfileImage } from "@/components/navigation/ProfileImage";
 import { Logo } from "@/components/navigation/Logo";
@@ -12,9 +12,12 @@ import { IconContainer } from "../common/IconContainer";
 import { UserJourneyWithJourney } from "@/types";
 import { getJourney } from "@/utils/journey";
 import { Separator } from "@chakra-ui/react";
+import { Menu, Portal } from "@chakra-ui/react";
+import { toaster } from "@/components/ui/toaster";
+import { auth } from "@/utils/auth/auth";
 
 export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
-  const { profileImage, id } = useAuth();
+  const { profileImage, id, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const isException = exceptionPath.some((path) => pathname?.includes(path));
@@ -23,7 +26,7 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
   const [journeyList, setJourneyList] = useState<UserJourneyWithJourney[]>([]);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
-
+  
   useEffect(() => {
     // 초기 스크롤 위치 설정
     lastScrollY.current = window.scrollY;
@@ -75,6 +78,17 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
     router.push(`/journey/${journeyId}`);
   };
 
+  const handleLogout = useCallback(async () => {
+    await logout();
+    await auth.userLogout();
+    toaster.create({
+      title: "로그아웃 되었습니다.",
+      type: "success",
+    });
+    router.replace("/login");
+  }, [logout]);
+
+  
   return (
     <StyledNavigation $isVisible={isVisible && !isException}>
       <div className="outside-container">
@@ -103,9 +117,47 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
             <Logo width={100} />
           )}
         </div>
-        <div className="right-container">
-          <ProfileImage profileImage={profileImage} width={30} />
-        </div>
+
+        <Menu.Root>
+          <Menu.Trigger asChild>
+            <div className="right-container">
+              <ProfileImage
+                profileImage={profileImage}
+                width={30}
+                blockClick={true}
+              />
+            </div>
+          </Menu.Trigger>
+          <Portal>
+            <Menu.Positioner>
+              <Menu.Content>
+                <Menu.Item
+                  value="profile"
+                  onClick={() => router.push("/profile")}
+                  style={{ cursor: "pointer" }}
+                >
+                  내 프로필
+                </Menu.Item>
+                <Menu.Item
+                  value="bug-report"
+                  onClick={() => router.push("/bug-report")}
+                  style={{ cursor: "pointer" }}
+                >
+                  버그 신고
+                </Menu.Item>
+                <Menu.Item
+                  value="logout"
+                  color="fg.error"
+                  _hover={{ bg: "bg.error", color: "fg.error" }}
+                  onClick={handleLogout}
+                  style={{ cursor: "pointer" }}
+                >
+                  로그아웃
+                </Menu.Item>
+              </Menu.Content>
+            </Menu.Positioner>
+          </Portal>
+        </Menu.Root>
       </div>
     </StyledNavigation>
   );

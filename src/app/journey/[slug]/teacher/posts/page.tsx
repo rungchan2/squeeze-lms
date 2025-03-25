@@ -9,20 +9,43 @@ import styled from "@emotion/styled";
 import { useParams } from "next/navigation";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { IconContainer } from "@/components/common/IconContainer";
-import { deletePost } from "@/app/journey/actions";
+import { posts } from "@/utils/posts/posts";
 import dayjs from "@/utils/dayjs/dayjs";
-import Spinner from "@/components/common/Spinner";
+import { toaster } from "@/components/ui/toaster";
+import { Loading } from "@/components/common/Loading";
+import { Error } from "@/components/common/Error";
 export default function TeacherPostsPage() {
   const { slug } = useParams();
-  const { data: posts, isLoading, error } = usePosts(10, slug as string);
+  const { data: postsData, isLoading, error } = usePosts(10, slug as string, true);
   const { id: userId } = useAuth();
+
+  //TODO: 2. 과제 통계 확인할 수 있게 하기
+  //TODO: 2. ERROR, LOADING 컴포넌트 추가
 
   const handleDelete = async (postId: number) => {
     if (confirm("정말 삭제하시겠습니까?")) {
-      await deletePost(postId);
+      await posts.deletePost(postId);
     }
   };
-  if (isLoading) return <Spinner />;
+
+  const handleHide = async (postId: number, value: string) => {
+    if (value === "hide") {
+      await posts.hidePost(postId);
+      toaster.create({
+        title: "게시물이 숨김 처리되었습니다.",
+        type: "success",
+      });
+    } else {
+      await posts.unhidePost(postId);
+      toaster.create({
+        title: "게시물이 숨김 해제되었습니다.",
+        type: "success",
+      });
+    }
+  };
+
+  if (isLoading) return <Loading />;
+  if (error) return <Error message={error.message} />;
 
   return (
     <TeacherPostsPageContainer>
@@ -37,13 +60,18 @@ export default function TeacherPostsPage() {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {posts.map((post) => (
+            {postsData.map((post) => (
               <Table.Row key={post.id}>
                 <Table.Cell>{post.title}</Table.Cell>
                 <Table.Cell>
                   {post.profiles?.first_name} {post.profiles?.last_name}
                 </Table.Cell>
-                <Table.Cell>{post.is_hidden ? "숨김" : "보임"}</Table.Cell>
+                <Table.Cell>
+                    <select defaultValue={post.is_hidden ? "hide" : "show"} onChange={(e) => handleHide(post.id, e.target.value)}>
+                        <option value="show">보임</option>
+                        <option value="hide">숨김</option>
+                    </select>
+                </Table.Cell>
                 <Table.Cell>{dayjs(post.created_at).format("YYYY-MM-DD")}</Table.Cell>
                 <Table.Cell textAlign="end">
                   <IconContainer

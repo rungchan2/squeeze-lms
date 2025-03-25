@@ -33,6 +33,7 @@ export default function LoginPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roleAccessCode, setRoleAccessCode] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [authData, setAuthData] = useState<NeededUserMetadata | null>(null);
   const [roleAccessType, setRoleAccessType] = useState<{
     label: string;
     value: Omit<Role, "user">;
@@ -49,22 +50,101 @@ export default function LoginPage() {
     useOrganizationList();
   const { refreshUser } = useAuth();
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateUser>({
+    resolver: zodResolver(createUserSchema),
+    mode: "onChange",
+    defaultValues: {
+      email: "",
+      first_name: "",
+      last_name: "",
+      phone: "",
+      role: "user",
+      uid: "",
+      profile_image: "",
+      marketing_opt_in: false,
+      privacy_agreed: false,
+    },
+  });
+
+  // 사용자 데이터 로드
   useEffect(() => {
-    async function checkUser() {
+    let isMounted = true;
+    
+    async function loadUserData() {
+      if (!isMounted) return;
+      
       try {
+        // 서버에서 사용자 확인
         const userData = await getUser();
-        if (!userData) {
+        if (!userData && isMounted) {
           router.push("/error?message=로그인 정보가 없거나 유효하지 않습니다");
+          return;
         }
-        setIsLoading(false);
+        
+        // 쿠키에서 인증 데이터 가져오기
+        const cookieAuthData = Cookies.get("auth_data");
+        if (!cookieAuthData || typeof cookieAuthData !== "string") {
+          if (isMounted) {
+            router.push("/error?message=로그인 정보가 없거나 유효하지 않습니다");
+          }
+          return;
+        }
+
+        try {
+          const decryptedString = decrypt(cookieAuthData);
+          if (!decryptedString) {
+            throw new Error("복호화된 데이터가 없습니다");
+          }
+          
+          const decryptedAuthData: NeededUserMetadata = JSON.parse(decryptedString);
+          
+          if (isMounted) {
+            setAuthData(decryptedAuthData);
+            
+            // 폼 값 설정
+            setValue("email", decryptedAuthData.email || "");
+            setValue("first_name", decryptedAuthData.first_name || "");
+            setValue("last_name", decryptedAuthData.last_name || "");
+            setValue("uid", decryptedAuthData.uid || "");
+            setValue("profile_image", decryptedAuthData.profile_image || "");
+            
+            setIsLoading(false);
+          }
+        } catch (error) {
+          if (isMounted) {
+            const errorMessage =
+              error instanceof Error
+                ? error.message
+                : "알 수 없는 에러가 발생했습니다";
+            router.push(`/error?message=${encodeURIComponent(errorMessage)}`);
+          }
+        }
       } catch (error) {
-        console.error("사용자 정보 확인 중 오류:", error);
-        router.push("/error?message=로그인 정보를 확인하는 중 오류가 발생했습니다");
+        if (isMounted) {
+          console.error("사용자 정보 확인 중 오류:", error);
+          router.push("/error?message=로그인 정보를 확인하는 중 오류가 발생했습니다");
+        }
       }
     }
     
-    checkUser();
-  }, [router]);
+    loadUserData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [router, setValue]);
+
+  useEffect(() => {
+    // 체크박스 상태가 변경될 때 폼 값 업데이트
+    setValue("marketing_opt_in", isChecked.includes("mailAgreement"));
+    setValue("privacy_agreed", isChecked.includes("cookieAgreement"));
+  }, [isChecked, setValue]);
 
   const handleCheckboxChangeAll = () => {
     if (isChecked.length === 2) {
@@ -82,58 +162,12 @@ export default function LoginPage() {
     }
   };
 
-  function getDecryptedAuthData() {
-    const authData = Cookies.get("auth_data");
-
-    if (!authData || typeof authData !== "string") {
-      router.push("/error?message=로그인 정보가 없거나 유효하지 않습니다");
-      return;
-    }
-
-    try {
-      const decryptedString = decrypt(authData);
-      if (!decryptedString) {
-        throw new Error("복호화된 데이터가 없습니다");
-      }
-      const decryptedAuthData: NeededUserMetadata = JSON.parse(decryptedString);
-      return decryptedAuthData;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "알 수 없는 에러가 발생했습니다";
-      window.location.href = `/error?message=${encodeURIComponent(
-        errorMessage
-      )}`;
-    }
-  }
-  const decryptedAuthData = getDecryptedAuthData();
-  const {
-    register,
-    handleSubmit,
-    control,
-    setValue,
-    formState: { errors, isSubmitting },
-  } = useForm<CreateUser>({
-    resolver: zodResolver(createUserSchema),
-    mode: "onChange",
-    defaultValues: {
-      email: decryptedAuthData?.email || "",
-      first_name: decryptedAuthData?.first_name || "",
-      last_name: decryptedAuthData?.last_name || "",
-      phone: "",
-      role: "user",
-      uid: decryptedAuthData?.uid || "",
-      profile_image: decryptedAuthData?.profile_image || "",
-      marketing_opt_in: isChecked.includes("mailAgreement"),
-      privacy_agreed: isChecked.includes("cookieAgreement"),
-    },
-  });
   const organizationOptions: { label: string; value: number }[] =
     organizations?.map((organization) => ({
       label: organization.name,
       value: organization.id,
     })) || [];
+
   const formatedKrRole = (role: Role) => {
     if (role === "admin") return "관리자";
     if (role === "teacher") return "교사";
@@ -141,14 +175,19 @@ export default function LoginPage() {
   };
 
   const onSubmit = async (data: CreateUser) => {
-    console.log(data);
-    const { error } = await createProfile(data);
-    if (error) {
-      router.push(`/error?message=회원가입 실패: ${error.message}`);
-      return;
+    try {
+      const { error } = await createProfile(data);
+      if (error) {
+        router.push(`/error?message=회원가입 실패: ${error.message}`);
+        return;
+      }
+      
+      await refreshUser();
+      router.push("/");
+    } catch (error) {
+      console.error("회원가입 오류:", error);
+      router.push("/error?message=회원가입 중 오류가 발생했습니다");
     }
-    router.push("/");
-    refreshUser()
   };
 
   if (isLoading) {
@@ -166,7 +205,7 @@ export default function LoginPage() {
     <Container onSubmit={handleSubmit(onSubmit)}>
       <FormContainer>
         <Heading level={4}>
-          환영합니다! {decryptedAuthData?.first_name}님
+          환영합니다! {authData?.first_name}님
         </Heading>
         <InputContainer>
           <HorizontalContainer>

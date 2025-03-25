@@ -21,6 +21,8 @@ export default function FeedTab({ slug }: { slug: string }) {
     useCompletedMissions(userId || 0);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortPosts, setSortPosts] = useState<"asc" | "desc">("desc");
+
+  //TODO: 1. 게시물 필터
   
   // 무한 스크롤을 위한 observer ref
   const observerRef = useRef<IntersectionObserver | null>(null);

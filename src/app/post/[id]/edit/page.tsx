@@ -1,8 +1,9 @@
 import CreatePostFrom from "@/app/journey/[slug]/[id]/CreatePostFrom";
-import { getPost } from "@/app/post/actions";
+import { posts } from "@/utils/posts/posts";
+
 export default async function EditPostPage({ params }: { params: Promise<{ id: number }> }) {
   const { id } = await params;
-  const post = await getPost(id);
+  const post = await posts.getPost(id);
   if (post.error || !post.data) {
     return <div>Error: {post.error?.message}</div>;
   }

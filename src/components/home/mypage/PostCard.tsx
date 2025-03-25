@@ -20,8 +20,7 @@ import { useEffect, useCallback, useMemo, memo } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { Menu, Portal } from "@chakra-ui/react";
 import { FaEllipsis } from "react-icons/fa6";
-import { deletePost, hidePost, unhidePost } from "@/app/post/clientActions";
-
+import { posts } from "@/utils/posts/posts";
 interface PostCardProps {
   post: PostWithRelations;
   showDetails?: boolean;
@@ -236,7 +235,7 @@ export default memo(function PostCard({
                       _hover={{ bg: "var(--grey-200)", color: "var(--grey-700)" }}
                       onClick={(e) => {
                         if (confirm("이 게시물을 숨기시겠습니까?")) {
-                          hidePost(post.id);
+                          posts.hidePost(post.id);
                         }
                         e.stopPropagation();
                       }}
@@ -251,7 +250,7 @@ export default memo(function PostCard({
                       _hover={{ bg: "bg.error", color: "fg.error" }}
                       onClick={(e) => {
                         if (confirm("삭제하시겠습니까?")) {
-                          deletePost(post.id);
+                          posts.deletePost(post.id);
                           router.back();
                         }
                         e.stopPropagation();

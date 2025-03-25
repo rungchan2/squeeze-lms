@@ -119,8 +119,10 @@ const suggestionConfig = {
       },
 
       onExit() {
-        popup[0].destroy()
-        component.destroy()
+        if (popup && popup[0] && !popup[0].state.isDestroyed) {
+          popup[0].destroy();
+        }
+        component.destroy();
       },
     }
   },

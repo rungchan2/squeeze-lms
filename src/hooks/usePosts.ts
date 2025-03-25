@@ -9,6 +9,7 @@ type FetchPostsParams = {
   pageParam: number;
   pageSize: number;
   journeySlug?: string;
+  showHidden?: boolean;
 };
 
 // 포스트 페이지 결과 타입
@@ -19,7 +20,7 @@ interface PostsPage {
 }
 
 // 게시물을 페이지네이션으로 가져오는 함수
-async function getPosts({ pageParam = 0, pageSize = 10, journeySlug }: FetchPostsParams): Promise<PostsPage> {
+async function getPosts({ pageParam = 0, pageSize = 10, journeySlug, showHidden = false }: FetchPostsParams): Promise<PostsPage> {
   const supabase = createClient();
   
   const from = pageParam * pageSize;
@@ -36,8 +37,11 @@ async function getPosts({ pageParam = 0, pageSize = 10, journeySlug }: FetchPost
         )
       )
     `, { count: 'exact' })
-    .eq("is_hidden", false)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    
+  if (!showHidden) {
+    query = query.eq("is_hidden", false);
+  }
   
   // journeySlug가 제공된 경우 해당 journey의 게시물만 필터링
   if (journeySlug) {
@@ -246,7 +250,7 @@ async function togglePostHidden(postId: number, isHidden: boolean) {
 // TODO: 1. ✅ 게시물 숨김 상태 갖고오기 및 다시 보이게 하기 기능 구현
 // TODO: 2. ✅ 클라스 별로 게시물 볼 수 있게 쿼리 수정
 // ✅ SWR을 사용한 usePosts 훅
-export function usePosts(pageSize = 10, journeySlug?: string) {
+export function usePosts(pageSize = 10, journeySlug?: string, showHidden = false) {
   const {
     data,
     error,
@@ -260,7 +264,8 @@ export function usePosts(pageSize = 10, journeySlug?: string) {
     queryFn: ({ pageParam }) => getPosts({ 
       pageParam: pageParam as number, 
       pageSize,
-      journeySlug
+      journeySlug,
+      showHidden
     }),
     getNextPageParam: (lastPage: PostsPage) => lastPage.nextPage,
     initialPageParam: 0
