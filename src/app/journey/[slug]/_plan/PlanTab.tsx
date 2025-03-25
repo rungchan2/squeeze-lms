@@ -13,28 +13,30 @@ import { FloatingButton } from "@/components/common/FloatingButton";
 import { FaWandMagicSparkles } from "react-icons/fa6";
 import { useSearchParams } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
-import { useJourneyStore } from "@/store/journey";
 import Footer from "@/components/common/Footer";
 import Button from "@/components/common/Button";
 import { Modal } from "@/components/modal/Modal";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
-
-
+import MissionCard from "./MissionCard";
 
 export default function PlanTab({ slug }: { slug: string }) {
-  // 컴포넌트 마운트 시점 로깅
+
 
   return (
     <PlanContainer>
-      <Heading level={2}>{slug}</Heading>
+      <div className="header">
+        <Heading level={3}>여행 일정</Heading>
+        <Heading level={3}>{slug}</Heading>
+      </div>
+      <div className="weeks-list">
+        
+      </div>
       <Footer />
     </PlanContainer>
   );
 }
 
-// WeekCard 컴포넌트를 메모이제이션
 
-// 최상위 컨테이너만 styled component로 정의
 const PlanContainer = styled.div`
   .header {
     display: flex;

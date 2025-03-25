@@ -13,6 +13,7 @@ interface JourneyWeekCardProps {
   updateWeek: (id: number, data: Partial<JourneyWeek>) => void;
   deleteWeek: (id: number) => void;
   journeyId: number;
+  journeyUuid: string;
 }
 
 // MissionComponent를 메모이제이션하여 불필요한 리렌더링 방지
@@ -24,13 +25,14 @@ export default function WeekCard({
   deleteWeek,
   index,
   journeyId,
+  journeyUuid,
 }: JourneyWeekCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [missionCount, setMissionCount] = useState(0);
   
   // 미션 인스턴스 가져오기
   const { missionInstances, isLoading: isLoadingInstances, mutate } =
-    useJourneyMissionInstances(week.id);
+    useJourneyMissionInstances(journeyUuid, week.id);
   
   // 미션 인스턴스가 로드되면 카운트 업데이트
   useEffect(() => {
@@ -77,6 +79,7 @@ export default function WeekCard({
             weekId={week.id}
             weekName={week.name}
             journeyId={journeyId}
+            journeyUuid={journeyUuid}
             deleteWeek={deleteWeek}
             onTotalMissionCountChange={setMissionCount}
           />

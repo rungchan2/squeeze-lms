@@ -6,7 +6,6 @@ import { FloatingButton } from "@/components/common/FloatingButton";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import MissionCard from "@/app/journey/[slug]/_plan/MissionCard";
 import Spinner from "@/components/common/Spinner";
-import { JourneyMissionInstanceWithMission } from "@/types";
 import { useRouter, usePathname } from "next/navigation";
 import Text from "@/components/Text/Text";
 import { AdminOnly } from "@/components/auth/AdminOnly";
@@ -29,7 +28,7 @@ export default function MissionTab({ slug }: { slug: string }) {
     missionInstances,
     isLoading: missionInstancesLoading,
     error: missionInstancesError,
-  } = useJourneyMissionInstances(null, slug);
+  } = useJourneyMissionInstances(slug, 0);
   const { completedMissionIds, isLoading: isLoadingCompletedMissions } =
     useCompletedMissions(userId || 0);
   const [searchQuery, setSearchQuery] = useState("");

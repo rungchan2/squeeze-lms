@@ -14,27 +14,21 @@ import { useEffect, useState } from "react";
 import { useJourneyStore } from "@/store/journey";
 import { Suspense } from "react";
 import Spinner from "@/components/common/Spinner";
-
+import { journey } from "@/utils/journey/journey";
 export default function JourneyClient({ slug }: { slug: string }) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const { setCurrentJourneyUuid, currentJourneyUuid } = useJourneyStore();
+  const { setCurrentJourneyId } = useJourneyStore();
   
   // 페이지 진입 시 slug 설정 - 한 번만 실행
   useEffect(() => {
     if (!slug) return;
     
-    console.log("[JourneyClient] 초기화 상태:", {
-      slug,
-      currentUuid: currentJourneyUuid,
-      isInitialized
-    });
-    
     if (isInitialized) return;
     
-    const initJourney = () => {
+    const initJourney = async () => {
       try {
-        console.log("[JourneyClient] UUID 설정:", slug);
-        setCurrentJourneyUuid(slug);
+        const journeyData = await journey.getJourneyByUuidRetrieveId(slug);
+        setCurrentJourneyId(journeyData[0].id);
         setIsInitialized(true);
       } catch (err) {
         console.error("[JourneyClient] 초기화 오류:", err);
@@ -44,7 +38,7 @@ export default function JourneyClient({ slug }: { slug: string }) {
     // 실행 지연을 통해 상태 초기화 경쟁 조건 방지
     const timer = setTimeout(initJourney, 10);
     return () => clearTimeout(timer);
-  }, [slug, currentJourneyUuid, setCurrentJourneyUuid, isInitialized]);
+  }, [slug, setCurrentJourneyId, isInitialized]);
   
   return (
     <div>

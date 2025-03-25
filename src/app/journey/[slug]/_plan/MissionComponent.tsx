@@ -22,11 +22,11 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
 import { JourneyMissionInstanceWithMission } from "@/types";
 import { toaster } from "@/components/ui/toaster";
-import { useJourneyStore } from "@/store/journey";
 interface MissionComponentProps {
   weekId: number;
   weekName: string;
   journeyId: number;
+  journeyUuid: string;
   deleteWeek: (weekId: number) => void;
   onTotalMissionCountChange: (count: number) => void;
 }
@@ -47,10 +47,10 @@ export default function MissionComponent({
   weekId,
   weekName,
   journeyId,
+  journeyUuid,
   deleteWeek,
   onTotalMissionCountChange,
 }: MissionComponentProps) {
-  const { currentJourneyUuid } = useJourneyStore();
   const [showSearch, setShowSearch] = useState(false);
   const [selectedOption, setSelectedOption] = useState<MissionOption>(
     missionOptions[0]
@@ -81,7 +81,7 @@ export default function MissionComponent({
     createMissionInstance,
     deleteMissionInstance,
     mutate: mutateMissionInstances,
-  } = useJourneyMissionInstances(weekId);
+  } = useJourneyMissionInstances(journeyUuid, weekId);
 
   // useMission 훅 사용 (전체 미션 목록 가져오기)
   const {
@@ -194,7 +194,7 @@ export default function MissionComponent({
         status: 'not_started' as MissionStatus,
         release_date: releaseDate || null,
         expiry_date: expiryDate || null,
-        journey_uuid: currentJourneyUuid || ""
+        journey_uuid: journeyUuid || ""
       };
       
       await createMissionInstance(newInstance);

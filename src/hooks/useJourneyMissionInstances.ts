@@ -8,17 +8,15 @@ import {
   Mission,
 } from "@/types";
 import { useCallback, useState, useEffect } from "react";
-import { useJourneyStore } from "@/store/journey";
 
 export function useJourneyMissionInstances(
+  specificJourneyUuid: string,
   weekId?: number | null,
-  specificJourneyUuid?: string
 ) {
-  const { currentJourneyUuid } = useJourneyStore();
   const [retryCount, setRetryCount] = useState(0);
   
   // 외부에서 주입된 UUID 또는 스토어에서 가져온 UUID 사용
-  const journeyUuid = specificJourneyUuid || currentJourneyUuid;
+  const journeyUuid = specificJourneyUuid;
   
   // 데이터 가져오기 함수
   const fetcher = useCallback(async (key: string) => {

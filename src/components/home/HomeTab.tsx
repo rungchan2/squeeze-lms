@@ -22,7 +22,7 @@ import { Loading } from "../common/Loading";
 import Footer from "../common/Footer";
 
 export default function HomeTab() {
-  const { clearCurrentJourneyId, clearCurrentJourneyUuid } = useJourneyStore();
+  const { clearCurrentJourneyId } = useJourneyStore();
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -33,9 +33,8 @@ export default function HomeTab() {
     if (currentTab === 'home') {
       console.log('Clearing journey state in HomeTab');
       clearCurrentJourneyId();
-      clearCurrentJourneyUuid();
     }
-  }, [currentTab, clearCurrentJourneyId, clearCurrentJourneyUuid]);
+  }, [currentTab, clearCurrentJourneyId]);
 
   if (!isAuthenticated) {
     if (loading) {

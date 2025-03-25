@@ -11,7 +11,6 @@ import { useAuth } from "@/components/AuthProvider";
 import { Box } from "@chakra-ui/react";
 import { z } from "zod";
 import { useJourneyStore } from "@/store/journey";
-import { getUserPointsByJourneyId } from "@/app/journey/actions";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import { useWeeks } from "@/hooks/useWeeks";
 import Heading from "@/components/Text/Heading";
@@ -29,16 +28,8 @@ const leaderboardUserSchema = z.object({
   isCurrentUser: z.boolean(),
 });
 
-const submissionStatsSchema = z.object({
-  totalPosts: z.number(),
-  completedPosts: z.number(),
-  pendingPosts: z.number(),
-  completionRate: z.number(),
-});
-
 // 타입 정의
 type LeaderboardUser = z.infer<typeof leaderboardUserSchema>;
-type SubmissionStats = z.infer<typeof submissionStatsSchema>;
 
 interface WeekProgress {
   id: number;
@@ -50,78 +41,37 @@ interface WeekProgress {
 }
 
 export default function DashboardTab({ slug }: { slug?: string }) {
-  // 개선된 로깅 추가
-  console.log("DashboardTab 렌더링 시작:", slug);
-  
   const { id: userId } = useAuth();
-  
-  // journeyStore 안전하게 접근
-  const journeyStore = useJourneyStore();
-  console.log("DashboardTab: journeyStore 상태:", {
-    store: !!journeyStore,
-    uuid: journeyStore?.currentJourneyUuid,
-    id: journeyStore?.currentJourneyId
-  });
-  
-  const currentJourneyId = journeyStore?.currentJourneyId;
-  const currentJourneyUuid = journeyStore?.currentJourneyUuid;
-  const setCurrentJourneyUuid = journeyStore?.setCurrentJourneyUuid;
-  const getCurrentJourneyId = journeyStore?.getCurrentJourneyId;
-  
-  // slug가 제공되면 UUID 설정 - 개선된 로직 유지
-  useEffect(() => {
-    console.log("DashboardTab: UUID 설정 useEffect 실행", {
-      slug, 
-      currentUuid: currentJourneyUuid
-    });
-    
-    if (!slug || !setCurrentJourneyUuid) {
-      console.log("DashboardTab: UUID 설정 건너뜀 - 값 없음");
-      return;
-    }
-    
-    if (slug === currentJourneyUuid) {
-      console.log("DashboardTab: UUID 이미 설정됨");
-      return;
-    }
-    
-    console.log("DashboardTab: UUID 설정:", slug);
-    setCurrentJourneyUuid(slug);
-  }, [slug, setCurrentJourneyUuid, currentJourneyUuid]);
-
-  // UUID가 설정되면 ID 가져오기
-  useEffect(() => {
-    if (!getCurrentJourneyId || !currentJourneyUuid) return;
-    
-    console.log("Fetching journey ID for UUID:", currentJourneyUuid);
-    getCurrentJourneyId().catch(error => {
-      console.error("Error getting journey ID:", error);
-    });
-  }, [currentJourneyUuid, getCurrentJourneyId]);
-  
+  const { currentJourneyId } = useJourneyStore();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [leaderboardUsers, setLeaderboardUsers] = useState<LeaderboardUser[]>([]);
+  const [leaderboardUsers, setLeaderboardUsers] = useState<LeaderboardUser[]>(
+    []
+  );
   const [weekProgress, setWeekProgress] = useState<WeekProgress[]>([]);
   const [totalCompletionRate, setTotalCompletionRate] = useState(0);
 
   // 주차 데이터 가져오기 - 안전하게 기본값 제공
-  const { weeks = [], isLoading: weeksLoading = false } = useWeeks(currentJourneyId || 0) || {};
+  const { weeks = [], isLoading: weeksLoading = false } =
+    useWeeks(currentJourneyId || 0) || {};
 
   // 전체 미션 인스턴스 가져오기 - slug 직접 전달하도록 개선
-  const { missionInstances = [], isLoading: missionsLoading = false } = 
-    useJourneyMissionInstances(currentJourneyId || 0, slug) || {};
+  const { missionInstances = [], isLoading: missionsLoading = false } =
+    useJourneyMissionInstances(slug || "", currentJourneyId || 0) || {};
 
   useEffect(() => {
-    console.log("DashboardTab useEffect 실행 - 데이터 확인:", { 
-      userId, 
-      currentJourneyId, 
-      weeks: weeks?.length, 
-      missionInstances: missionInstances?.length 
+    console.log("DashboardTab useEffect 실행 - 데이터 확인:", {
+      userId,
+      currentJourneyId,
+      weeks: weeks?.length,
+      missionInstances: missionInstances?.length,
     });
-    
+
     if (!userId || !currentJourneyId) {
-      console.log("userId 또는 currentJourneyId가 없음:", { userId, currentJourneyId });
+      console.log("userId 또는 currentJourneyId가 없음:", {
+        userId,
+        currentJourneyId,
+      });
       setIsLoading(false);
       return;
     }
@@ -135,30 +85,33 @@ export default function DashboardTab({ slug }: { slug?: string }) {
         const supabase = createClient();
 
         // 1. 점수 데이터 가져오기 - POST 방식으로 변경
-        console.log("포인트 데이터 가져오기 시작 - currentJourneyId:", currentJourneyId);
-        
+        console.log(
+          "포인트 데이터 가져오기 시작 - currentJourneyId:",
+          currentJourneyId
+        );
+
         // POST 메서드로 API 호출
-        const response = await fetch('/api/user-points', {
-          method: 'POST',
+        const response = await fetch("/api/user-points", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ journeyId: currentJourneyId }),
         });
-        
+
         console.log("API 응답 상태:", response.status);
-        
+
         if (!response.ok) {
           throw new Error(`API 응답 오류: ${response.status}`);
         }
-        
+
         const pointsData = await response.json();
         console.log("받은 포인트 데이터:", { count: pointsData?.length || 0 });
-        
+
         if (!pointsData) {
           throw new Error("포인트 데이터를 가져올 수 없습니다");
         }
-        
+
         // 2. 사용자별 점수 계산 및 리더보드 생성
         // 모든 사용자 프로필 가져오기
         const { data: profiles, error: profilesError } = await supabase.from(
@@ -288,7 +241,14 @@ export default function DashboardTab({ slug }: { slug?: string }) {
       // 데이터가 없지만 로딩이 끝난 경우에는 로딩 상태를 false로 설정
       setIsLoading(false);
     }
-  }, [currentJourneyId, userId, weeks, missionInstances, weeksLoading, missionsLoading]);
+  }, [
+    currentJourneyId,
+    userId,
+    weeks,
+    missionInstances,
+    weeksLoading,
+    missionsLoading,
+  ]);
 
   // 모든 데이터가 로드될 때까지 스피너 표시
   if (isLoading || weeksLoading || missionsLoading) {
