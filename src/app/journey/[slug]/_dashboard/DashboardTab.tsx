@@ -54,30 +54,32 @@ export default function DashboardTab({ slug }: { slug?: string }) {
   
   // 안전한 journeyStore 접근
   const journeyStore = useJourneyStore();
-  const currentJourneyId = journeyStore?.currentJourneyId || 0;
-  const currentJourneyUuid = journeyStore?.currentJourneyUuid || "";
+  const currentJourneyId = journeyStore?.currentJourneyId;
+  const currentJourneyUuid = journeyStore?.currentJourneyUuid;
   const setCurrentJourneyUuid = journeyStore?.setCurrentJourneyUuid;
+  const getCurrentJourneyId = journeyStore?.getCurrentJourneyId;
   
-  // slug가 제공되면 설정 - 의존성에서 journeyStore 제거하고 필요한 함수만 참조
+  // slug가 제공되면 UUID 설정
   useEffect(() => {
-    if (!slug) return;
+    if (!slug || !setCurrentJourneyUuid) return;
     
-    // Check if the current journey UUID is already set correctly
-    if (currentJourneyUuid === slug) return;
+    console.log("Setting journey UUID:", slug);
+    setCurrentJourneyUuid(slug);
+  }, [slug, setCurrentJourneyUuid]);
+
+  // UUID가 설정되면 ID 가져오기
+  useEffect(() => {
+    if (!getCurrentJourneyId || !currentJourneyUuid) return;
     
-    try {
-      console.log("Setting current journey UUID in DashboardTab:", slug);
-      setCurrentJourneyUuid(slug);
-    } catch (error) {
-      console.error("Error setting current journey UUID:", error);
-    }
-  }, [slug, currentJourneyUuid, setCurrentJourneyUuid]);
+    console.log("Fetching journey ID for UUID:", currentJourneyUuid);
+    getCurrentJourneyId().catch(error => {
+      console.error("Error getting journey ID:", error);
+    });
+  }, [currentJourneyUuid, getCurrentJourneyId]);
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [leaderboardUsers, setLeaderboardUsers] = useState<LeaderboardUser[]>(
-    []
-  );
+  const [leaderboardUsers, setLeaderboardUsers] = useState<LeaderboardUser[]>([]);
   const [weekProgress, setWeekProgress] = useState<WeekProgress[]>([]);
   const [totalCompletionRate, setTotalCompletionRate] = useState(0);
 
@@ -86,33 +88,55 @@ export default function DashboardTab({ slug }: { slug?: string }) {
 
   // 전체 미션 인스턴스 가져오기 - 안전하게 기본값 제공
   const { missionInstances = [], isLoading: missionsLoading = false } = 
-    useJourneyMissionInstances(0) || {};
+    useJourneyMissionInstances(currentJourneyId || 0) || {};
 
   useEffect(() => {
+    console.log("DashboardTab useEffect 실행 - 데이터 확인:", { 
+      userId, 
+      currentJourneyId, 
+      weeks: weeks?.length, 
+      missionInstances: missionInstances?.length 
+    });
+    
     if (!userId || !currentJourneyId) {
+      console.log("userId 또는 currentJourneyId가 없음:", { userId, currentJourneyId });
       setIsLoading(false);
       return;
     }
 
     async function fetchDashboardData() {
+      console.log("fetchDashboardData 시작");
       try {
         setIsLoading(true);
         setError(null);
 
         const supabase = createClient();
 
-        // 1. 점수 데이터 가져오기
-        const result = await getUserPointsByJourneyId(currentJourneyId);
-        if (!result) {
+        // 1. 점수 데이터 가져오기 - POST 방식으로 변경
+        console.log("포인트 데이터 가져오기 시작 - currentJourneyId:", currentJourneyId);
+        
+        // POST 메서드로 API 호출
+        const response = await fetch('/api/user-points', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ journeyId: currentJourneyId }),
+        });
+        
+        console.log("API 응답 상태:", response.status);
+        
+        if (!response.ok) {
+          throw new Error(`API 응답 오류: ${response.status}`);
+        }
+        
+        const pointsData = await response.json();
+        console.log("받은 포인트 데이터:", { count: pointsData?.length || 0 });
+        
+        if (!pointsData) {
           throw new Error("포인트 데이터를 가져올 수 없습니다");
         }
         
-        const { data: pointsData, error: pointsError } = result;
-        if (pointsError) {
-          console.error("포인트 데이터 가져오기 오류:", pointsError);
-          throw new Error("포인트 데이터를 가져오는 중 오류 발생");
-        }
-
         // 2. 사용자별 점수 계산 및 리더보드 생성
         // 모든 사용자 프로필 가져오기
         const { data: profiles, error: profilesError } = await supabase.from(
