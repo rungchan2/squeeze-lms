@@ -24,6 +24,7 @@ import { useMyLikedPosts } from "@/hooks/usePosts";
 import PostCard from "./PostCard";
 import styles from "./Mypage.module.css";
 import { organization } from "@/utils/organization/organization";
+import { Error } from "@/components/common/Error";
 export default function MyPage() {
   const [orgData, setOrgData] = useState<any>(null);
   const { data: myLikedPosts } = useMyLikedPosts();
@@ -141,11 +142,13 @@ export default function MyPage() {
             <MyPost />
           </Tab>
           <Tab title="좋아요 게시글" icon={<FaRegHeart />}>
+          { myLikedPosts?.length === 0 ? <Error message="좋아요 게시글이 없습니다." /> :
             <div className={styles.postContainer}>
               {myLikedPosts?.map((post: any) => (
                 <PostCard key={post.id} post={post} />
               ))}
             </div>
+          }
           </Tab>
         </Tabs>
       </div>

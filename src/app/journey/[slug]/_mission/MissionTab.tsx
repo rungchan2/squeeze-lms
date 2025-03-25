@@ -20,6 +20,7 @@ import { IconContainer } from "@/components/common/IconContainer";
 import { useCompletedMissions } from "@/hooks/usePosts";
 import Heading from "@/components/Text/Heading";
 import Footer from "@/components/common/Footer";
+
 export default function MissionTab({ slug }: { slug: string }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -29,10 +30,28 @@ export default function MissionTab({ slug }: { slug: string }) {
     isLoading: missionInstancesLoading,
     error: missionInstancesError,
   } = useJourneyMissionInstances(slug, 0);
-  const { completedMissionIds, isLoading: isLoadingCompletedMissions } =
-    useCompletedMissions(userId || 0);
+  const { completedMissionIds, isLoading: isLoadingCompletedMissions, refetch: refetchCompletedMissions } =
+    useCompletedMissions(userId || 0, slug);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortMission, setSortMission] = useState<"asc" | "desc">("asc");
+  
+  // 디버깅용 useEffect
+  useEffect(() => {
+    console.log("MissionTab 컴포넌트 렌더링:", {
+      userId,
+      slug,
+      completedMissionIds: completedMissionIds,
+      missionInstancesCount: missionInstances?.length
+    });
+    
+    // 컴포넌트가 마운트 된 후 3초 후에 자동 refetch
+    const timer = setTimeout(() => {
+      refetchCompletedMissions();
+    }, 3000);
+    
+    return () => clearTimeout(timer);
+  }, [completedMissionIds, missionInstances, userId, slug, refetchCompletedMissions]);
+  
   // 현재 URL에서 slug 추출
   const getSlugFromPathname = () => {
     if (!pathname) return slug || "";
@@ -62,7 +81,12 @@ export default function MissionTab({ slug }: { slug: string }) {
 
   // 완료하지 않은 미션만 필터링
   const pendingMissions = missionInstances.filter(
-    (instance) => !completedMissionIds.includes(instance.mission_id)
+    (instance) => {
+      // mission_instance_id로 직접 완료 여부 확인
+      const isCompleted = completedMissionIds.some(id => id === instance.id);
+      console.log(`미션 인스턴스 ID ${instance.id} 완료 여부:`, isCompleted);
+      return !isCompleted;
+    }
   );
 
   // 검색어로 미션 필터링

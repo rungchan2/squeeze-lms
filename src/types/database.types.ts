@@ -332,7 +332,6 @@ export type Database = {
           mission_type: string | null
           name: string
           points: number | null
-          release_date: string | null
           updated_at: string | null
         }
         Insert: {
@@ -343,7 +342,6 @@ export type Database = {
           mission_type?: string | null
           name: string
           points?: number | null
-          release_date?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -354,7 +352,6 @@ export type Database = {
           mission_type?: string | null
           name?: string
           points?: number | null
-          release_date?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -604,41 +601,31 @@ export type Database = {
         Row: {
           created_at: string | null
           id: number
-          journey_id: number
           mission_instance_id: number
           post_id: number | null
           profile_id: number
           total_points: number | null
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           created_at?: string | null
           id?: number
-          journey_id: number
           mission_instance_id: number
           post_id?: number | null
           profile_id: number
           total_points?: number | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
           created_at?: string | null
           id?: number
-          journey_id?: number
           mission_instance_id?: number
           post_id?: number | null
           profile_id?: number
           total_points?: number | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "user_points_journey_id_fkey"
-            columns: ["journey_id"]
-            isOneToOne: false
-            referencedRelation: "journeys"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "user_points_mission_instance_id_fkey"
             columns: ["mission_instance_id"]

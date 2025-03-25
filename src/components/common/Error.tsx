@@ -9,6 +9,7 @@ export function Error({ message }: { message: string }) {
 }
 
 const ErrorContainer = styled.div`
+  min-height: 100px;
   padding: 20px;
   display: flex;
   justify-content: center;

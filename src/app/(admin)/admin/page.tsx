@@ -1,12 +1,13 @@
 "use client";
-
-import { useAuthStore } from "@/store/auth";
 import { toaster } from "@/components/ui/toaster";
 import Button from "@/components/common/Button";
 import Select from "react-select";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useAuth } from "@/components/AuthProvider";
+import { Error } from "@/components/common/Error";
 export default function AdminPage() {
-  const { fetchUser } = useAuthStore();
+  const { isAuthenticated, role } = useAuth();
+
   const {
     data: { useOrganizationList },
   } = useOrganization();
@@ -15,31 +16,13 @@ export default function AdminPage() {
     label: organization.name,
     value: organization.id,
   }));
+  if (!isAuthenticated || role !== "admin") {
+    return <Error message="관리자 권한이 없습니다." />;
+  }
 
   return (
     <div>
-      <Select options={organizationOptions} />
-
-      <h1>관리자 페이지</h1>
-      <Button
-        variant="flat"
-        onClick={() => {
-          fetchUser();
-        }}
-      >
-        초기화
-      </Button>
-      <Button
-        variant="flat"
-        onClick={() => {
-          toaster.success({
-            title: "관리자 페이지",
-            description: "관리자 페이지입니다.",
-          });
-        }}
-      >
-        로그아웃
-      </Button>
+      <h1>관리자 페이지 입니다. (빠른 시일 내 개발 예정입니다.)</h1>
     </div>
   );
 }

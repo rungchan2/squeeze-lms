@@ -26,7 +26,6 @@ import { IoIosBookmarks } from "react-icons/io";
 import { MdOutlinePrivacyTip, MdPolicy, MdUpdate } from "react-icons/md";
 import Footer from "@/components/common/Footer";
 
-
 export default function SettingTab({ slug }: { slug: string }) {
   const { accessCodes } = useAccessCode();
   const filterAccessCodes = accessCodes?.filter(
@@ -84,7 +83,7 @@ export default function SettingTab({ slug }: { slug: string }) {
                   </Text>
                 </MenuItem>
                 <MenuItem href={`/journey/${slug}/users`}>
-                  <BsEnvelopeArrowUpFill />
+                  <FaUserGroup />
                   <Text
                     variant="body"
                     color="var(--grey-700)"
@@ -94,6 +93,16 @@ export default function SettingTab({ slug }: { slug: string }) {
                   </Text>
                 </MenuItem>
 
+                <MenuItem href={`/journey/${slug}/teacher/posts`}>
+                  <BsEnvelopeArrowUpFill />
+                  <Text
+                    variant="body"
+                    color="var(--grey-700)"
+                    fontWeight="medium"
+                  >
+                    제출된 과제 관리
+                  </Text>
+                </MenuItem>
                 <Dialog.Root
                   key={"center"}
                   placement={"center"}
@@ -135,7 +144,9 @@ export default function SettingTab({ slug }: { slug: string }) {
                               {filterAccessCodes?.map((code) => (
                                 <Table.Row key={code.id}>
                                   <Table.Cell>
-                                    {dayjs(code.expiry_date).format("YYYY-MM-DD a h:m")}
+                                    {dayjs(code.expiry_date).format(
+                                      "YYYY-MM-DD a h:m"
+                                    )}
                                   </Table.Cell>
                                   <Table.Cell>
                                     {code.role === "teacher"
@@ -170,26 +181,6 @@ export default function SettingTab({ slug }: { slug: string }) {
                     </Dialog.Positioner>
                   </Portal>
                 </Dialog.Root>
-                <MenuItem href={`/journey/${slug}/users`}>
-                  <FaUserGroup />
-                  <Text
-                    variant="body"
-                    color="var(--grey-700)"
-                    fontWeight="medium"
-                  >
-                    멤버 관리
-                  </Text>
-                </MenuItem>
-                <MenuItem href={`/journey/${slug}/teacher/posts`}>
-                  <FaUserGroup />
-                  <Text
-                    variant="body"
-                    color="var(--grey-700)"
-                    fontWeight="medium"
-                  >
-                    제출된 과제 관리
-                  </Text>
-                </MenuItem>
               </div>
             </div>
           </TeacherOnly>
@@ -219,7 +210,9 @@ export default function SettingTab({ slug }: { slug: string }) {
                   다른 친구 초대
                 </Text>
               </MenuItem> */}
-              <MenuItemDiv onClick={() => window.open(constants.GUIDE_URL, "_blank")}>
+              <MenuItemDiv
+                onClick={() => window.open(constants.GUIDE_URL, "_blank")}
+              >
                 <IoIosBookmarks />
                 <Text
                   variant="body"
@@ -229,7 +222,11 @@ export default function SettingTab({ slug }: { slug: string }) {
                   스퀴즈 사용방법
                 </Text>
               </MenuItemDiv>
-              <MenuItemDiv onClick={() => window.open(constants.TERMS_OF_SERVICE_URL, "_blank")}>
+              <MenuItemDiv
+                onClick={() =>
+                  window.open(constants.TERMS_OF_SERVICE_URL, "_blank")
+                }
+              >
                 <MdOutlinePrivacyTip />
                 <Text
                   variant="body"
@@ -239,7 +236,11 @@ export default function SettingTab({ slug }: { slug: string }) {
                   서비스 이용약관
                 </Text>
               </MenuItemDiv>
-              <MenuItemDiv onClick={() => window.open(constants.PRIVACY_POLICY_URL, "_blank")}>
+              <MenuItemDiv
+                onClick={() =>
+                  window.open(constants.PRIVACY_POLICY_URL, "_blank")
+                }
+              >
                 <MdPolicy />
                 <Text
                   variant="body"
@@ -249,7 +250,11 @@ export default function SettingTab({ slug }: { slug: string }) {
                   개인정보 처리방침
                 </Text>
               </MenuItemDiv>
-              <MenuItemDiv onClick={() => window.open(constants.SERVICE_UPDATE_URL, "_blank")}>
+              <MenuItemDiv
+                onClick={() =>
+                  window.open(constants.SERVICE_UPDATE_URL, "_blank")
+                }
+              >
                 <MdUpdate />
                 <Text
                   variant="body"

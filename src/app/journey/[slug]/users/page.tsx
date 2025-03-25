@@ -31,17 +31,20 @@ export default function UsersPage() {
   const { slug } = useParams();
   const uuid = slug as string;
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<number>(
+    organizationId ?? 0
+  );
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const [invitedUsers, setInvitedUsers] = useState<number[]>([]);
+  const [invitingUsers, setInvitingUsers] = useState<number[]>([]);
   const {
     users = [],
     loadMore,
     isLoadingMore = false,
     isReachingEnd = false,
     total = 0,
-  } = useOrganizationUsers(organizationId ?? 0);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
-  const [invitedUsers, setInvitedUsers] = useState<number[]>([]);
-  const [invitingUsers, setInvitingUsers] = useState<number[]>([]);
+  } = useOrganizationUsers(selectedOrganizationId ?? 0);
 
   // 권한 없을 때 뒤로 가거나 홈으로 가는 함수
   const goBackOrHome = useCallback(() => {
@@ -105,13 +108,12 @@ export default function UsersPage() {
     loadJourneyData();
   }, [organizationId, role, router, currentJourneyId, goBackOrHome]);
 
-
   // 현재 여정 ID가 설정된 후에만 여정 사용자 불러오기
   const { currentJourneyUsers = [] } = useJourneyUser(currentJourneyId ?? 0);
 
   // 현재 여정에 이미 참여 중인 사용자 ID 목록
-  const currentMemberIds = useMemo(() => 
-    currentJourneyUsers?.map((user) => user?.id).filter(Boolean) || [],
+  const currentMemberIds = useMemo(
+    () => currentJourneyUsers?.map((user) => user?.id).filter(Boolean) || [],
     [currentJourneyUsers]
   );
 
@@ -384,6 +386,7 @@ export default function UsersPage() {
         </Tabs.Content>
         <Tabs.Content value="projects">
           {/* 클라스 멤버 목록 */}
+
           <Flex flexDirection="column" gap="16px">
             <Heading level={3}>전체 유저</Heading>
             {organizationOptions.length > 0 ? (
@@ -392,7 +395,10 @@ export default function UsersPage() {
                 defaultValue={organizationOptions?.find(
                   (option) => option.value === organizationId
                 )}
-                isDisabled={role === "teacher"}
+                isDisabled={role === "teacher" || role === "user"}
+                onChange={(value) => {
+                  setSelectedOrganizationId(value?.value ?? 0);
+                }}
               />
             ) : (
               <Text variant="caption" style={{ textAlign: "center" }}>
@@ -504,7 +510,7 @@ export default function UsersPage() {
     </Container>
   );
 }
-
+//TODO: 1. 전반적인 페이지 권한 및 라우팅 설정
 const Container = styled.div`
   max-width: var(--breakpoint-tablet);
   margin: 0 auto;

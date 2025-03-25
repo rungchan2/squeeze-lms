@@ -187,44 +187,86 @@ async function getMyLikedPosts(userId: number, journeySlug?: string) {
 async function getCompletedMissionIds(userId: number, journeySlug?: string) {
   if (!userId) return [];
   
+  console.log("getCompletedMissionIds 호출:", { userId, journeySlug });
+  
   const supabase = createClient();
   
-  let query = supabase
-    .from("posts")
-    .select("mission_instance_id")
-    .eq("user_id", userId)
-    .eq("is_hidden", false); // 숨겨진 게시물 제외
-  
-  // journeySlug가 제공된 경우 해당 journey의 게시물만 필터링
-  if (journeySlug) {
-    // mission_instance_id를 통해 journey와 연결
-    const { data: missionInstances } = await supabase
-      .from("journey_mission_instances")
-      .select("id")
-      .eq("journey_uuid", journeySlug);
+  try {
+    // 방법 1: posts 테이블에서 직접 완료된 미션 확인
+    let query = supabase
+      .from("posts")
+      .select("mission_instance_id")
+      .eq("user_id", userId)
+      .eq("is_hidden", false); // 숨겨진 게시물 제외
     
-    if (missionInstances && missionInstances.length > 0) {
-      const instanceIds = missionInstances.map(instance => instance.id);
-      query = query.in("mission_instance_id", instanceIds);
-    } else {
-      // 해당 journey에 대한 mission instance가 없으면 빈 결과 반환
+    // journeySlug가 제공된 경우 해당 journey의 게시물만 필터링
+    if (journeySlug) {
+      // mission_instance_id를 통해 journey와 연결
+      const { data: missionInstances, error: instanceError } = await supabase
+        .from("journey_mission_instances")
+        .select("id")
+        .eq("journey_uuid", journeySlug);
+      
+      if (instanceError) {
+        console.error("미션 인스턴스 조회 오류:", instanceError);
+      }
+      
+      if (missionInstances && missionInstances.length > 0) {
+        const instanceIds = missionInstances.map(instance => instance.id);
+        console.log(`journey ${journeySlug}의 미션 인스턴스 ID:`, instanceIds);
+        query = query.in("mission_instance_id", instanceIds);
+      } else {
+        console.log(`journey ${journeySlug}에 미션 인스턴스가 없음`);
+        // 해당 journey에 대한 mission instance가 없으면 빈 결과 반환
+        return [];
+      }
+    }
+    
+    const { data: postsData, error: postsError } = await query;
+    
+    if (postsError) {
+      console.error("Posts 조회 오류:", postsError);
       return [];
     }
-  }
-  
-  const { data, error } = await query;
-  
-  if (error) {
-    console.error("Error fetching completed missions:", error);
+    
+    // 방법 2: 추가로 user_points 테이블에서도 완료된 미션 확인 (더 정확한 결과)
+    const { data: pointsData, error: pointsError } = await supabase
+      .from("user_points")
+      .select("mission_instance_id")
+      .eq("profile_id", userId)
+      .not("mission_instance_id", "is", null);
+    
+    if (pointsError) {
+      console.error("User points 조회 오류:", pointsError);
+    }
+    
+    // 두 결과 병합
+    const completedFromPosts = postsData
+      .filter((post) => post.mission_instance_id !== null)
+      .map((post) => post.mission_instance_id as number);
+    
+    const completedFromPoints = pointsData
+      ? pointsData
+          .filter((point) => point.mission_instance_id !== null)
+          .map((point) => point.mission_instance_id as number)
+      : [];
+    
+    // 중복 제거하여 병합
+    const completedIds = [...new Set([...completedFromPosts, ...completedFromPoints])];
+    
+    console.log("완료된 미션 ID 목록:", {
+      userId,
+      journeySlug,
+      fromPosts: completedFromPosts.length,
+      fromPoints: completedFromPoints.length,
+      total: completedIds.length
+    });
+    
+    return completedIds;
+  } catch (error) {
+    console.error("완료된 미션 조회 중 예외 발생:", error);
     return [];
   }
-  
-  // 제출한 미션 ID 목록 추출
-  const completedIds = data
-    .filter((post) => post.mission_instance_id !== null)
-    .map((post) => post.mission_instance_id as number);
-  
-  return completedIds;
 }
 
 // 게시물 숨김 상태 변경 함수
@@ -337,7 +379,14 @@ export function useCompletedMissions(userId: number, journeySlug?: string) {
     queryFn: () => getCompletedMissionIds(userId, journeySlug),
     initialPageParam: 0,
     getNextPageParam: () => null, // 페이지네이션이 필요 없으므로 null 반환
-    enabled: !!userId
+    enabled: !!userId,
+    // 캐싱 시간 줄이기
+    staleTime: 10 * 1000, // 10초 후 데이터 재검증
+    // 자동 다시 가져오기 활성화
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    // 주기적으로 데이터 다시 가져오기
+    refetchInterval: 15 * 1000, // 15초마다 자동 갱신
   });
   
   const completedMissionIds = data?.pages[0] || [];

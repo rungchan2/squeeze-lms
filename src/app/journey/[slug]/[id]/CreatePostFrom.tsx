@@ -18,6 +18,7 @@ import InputAndTitle from "@/components/InputAndTitle";
 import userPoint from "@/utils/userPoints/userPoint";
 import { useJourneyStore } from "@/store/journey";
 import { UpdatePost } from "@/types";
+import { useCompletedMissions } from "@/hooks/usePosts";
 
 export default function DoMissionPage({
   updateData,
@@ -38,6 +39,16 @@ export default function DoMissionPage({
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 완료된 미션 목록 관리를 위한 훅 추가
+  const { refetch: refetchCompletedMissions } = useCompletedMissions(userId || 0);
+  
+  useEffect(() => {
+    if (updateData) {
+      setContent(updateData.content || "");
+      setTitle(updateData.title || "");
+    }
+  }, [updateData]);
   
   // 권한 없을 때 뒤로 가거나 여정 페이지로 가는 함수
   const goBackOrJourney = useCallback(() => {
@@ -88,6 +99,14 @@ export default function DoMissionPage({
     try {
       setIsSubmitting(true);
 
+      // 포스트 생성
+      console.log("미션 제출 시도:", {
+        user_id: userId,
+        mission_instance_id: missionInstance.id,
+        title,
+        score: missionInstance.mission.points
+      });
+      
       const { data, error } = await createPost({
         content: content,
         user_id: userId,
@@ -95,6 +114,7 @@ export default function DoMissionPage({
         title: title,
         score: missionInstance.mission.points,
       });
+      
       if (error) {
         console.error("미션 제출 오류:", error);
         toaster.create({
@@ -103,27 +123,44 @@ export default function DoMissionPage({
         });
         return;
       }
+      
+      console.log("미션 제출 성공:", data);
 
+      // 유저 포인트 생성
       const { error: userPointError } = await userPoint.createUserPoint({
         user_id: userId,
-        journey_id: currentJourneyId || 0,
         mission_instance_id: missionInstance.id,
         post_id: data?.id || 0,
         amount: missionInstance.mission.points || 0,
+        journey_id: currentJourneyId || 0
       });
+      
       if (userPointError) {
+        console.error("유저 포인트 생성 오류:", userPointError);
         toaster.create({
           title: "유저 포인트 생성 중 오류가 발생했습니다.",
+          description: typeof userPointError === 'object' ? 
+            (userPointError as any)?.message || JSON.stringify(userPointError).substring(0, 50) + "..." : 
+            String(userPointError),
           type: "error",
         });
+      } else {
+        console.log("유저 포인트 생성 성공");
       }
 
-      // 성공 시 다음 페이지로 이동
+      // 완료된 미션 목록 갱신
+      await refetchCompletedMissions();
+      
+      // 성공 알림 후 캐시 무효화 리다이렉션
       toaster.create({
         title: "미션이 성공적으로 제출되었습니다!",
         type: "success",
       });
-      router.push(`/journey/${slug}`);
+
+      // 캐시 무효화를 위해 reload 후 리다이렉션
+      setTimeout(() => {
+        router.push(`/journey/${slug}`);
+      }, 500);
     } catch (error: any) {
       console.error("미션 제출 중 예외 발생:", error);
       toaster.create({
