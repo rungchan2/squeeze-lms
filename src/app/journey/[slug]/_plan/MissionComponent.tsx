@@ -17,7 +17,7 @@ import { IoSearch } from "react-icons/io5";
 import ChipGroup from "@/components/common/ChipGroup";
 import { useWeeks } from "@/hooks/useWeeks";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
-import { getMissionTypes } from "@/app/journey/actions";
+import { getMissionTypes } from "@/app/journey/clientActions";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
 import { JourneyMissionInstanceWithMission } from "@/types";
@@ -67,7 +67,7 @@ export default function MissionComponent({
   const [releaseDate, setReleaseDate] = useState<string>("");
   const [expiryDate, setExpiryDate] = useState<string>("");
 
-  // useWeeks 훅 사용
+  //useWeeks 훅 사용
   const {
     isLoading: isLoadingWeeks,
     error: weeksError,
@@ -90,7 +90,7 @@ export default function MissionComponent({
     error: allMissionsError,
   } = useMission();
 
-  // 검색 결과 필터링
+  //검색 결과 필터링
   const searchResults = useMemo(() => {
     if (!allMissions) return [];
 
@@ -134,7 +134,7 @@ export default function MissionComponent({
     };
 
     fetchMissions();
-  }, [weekId, getWeekMissions, missionInstances]);
+  }, [weekId, getWeekMissions, missionInstances, isLoadingInstances]);
 
   // missionInstances가 변경될 때마다 부모 컴포넌트에 알림
   useEffect(() => {
@@ -143,7 +143,7 @@ export default function MissionComponent({
     }
   }, [missionInstances, isLoadingInstances, onTotalMissionCountChange]);
 
-  // 미션 추가 핸들러
+  //미션 추가 핸들러
   const handleAddMission = async (missionId: number) => {
     // 이미 추가된 미션인지 확인
     const isAlreadyAdded = missionInstances.some(
@@ -180,62 +180,36 @@ export default function MissionComponent({
     // 검색 모달은 닫지 않음 (날짜 입력 모달이 표시됨)
   };
 
-  // 날짜 입력 후 미션 추가 확인
+  //날짜 입력 후 미션 추가 확인
   const handleConfirmAddMission = async () => {
     if (!selectedMissionId) return;
-    
+
     try {
       setIsLoadingMissions(true);
-      
+
       // 미션 인스턴스 생성
       const newInstance = {
         journey_week_id: weekId,
         mission_id: selectedMissionId,
-        status: 'not_started' as MissionStatus,
+        status: "not_started" as MissionStatus,
         release_date: releaseDate || null,
         expiry_date: expiryDate || null,
-        journey_uuid: journeyUuid || ""
+        journey_uuid: journeyUuid || "",
       };
-      
+
       await createMissionInstance(newInstance);
-      
+
       // UI 즉시 업데이트
       await mutateMissionInstances();
       // 카운트 업데이트는 useEffect에서 처리됨
-      
+
       // 모달 닫기
       setShowDateModal(false);
       setShowSearch(false);
-      
     } catch (error) {
       console.error("Error adding mission:", error);
     } finally {
       setIsLoadingMissions(false);
-    }
-  };
-
-  // 미션 제거 핸들러
-  const DeleteMission = async (missionId: number) => {
-    if (window.confirm("정말로 이 미션을 제거하시겠습니까?")) {
-      try {
-        setIsLoadingMissions(true);
-
-        // 해당 미션 ID를 가진 인스턴스 찾기
-        const instanceToRemove = missionInstances.find(
-          (m) => m.mission_id === missionId
-        );
-
-        if (instanceToRemove) {
-          await deleteMissionInstance(instanceToRemove.id);
-
-          // UI 즉시 업데이트
-          mutateMissionInstances();
-        }
-      } catch (error) {
-        console.error("Error removing mission:", error);
-      } finally {
-        setIsLoadingMissions(false);
-      }
     }
   };
 
@@ -286,13 +260,23 @@ export default function MissionComponent({
                   await deleteMissionInstance(instance.id);
                   // UI 즉시 업데이트
                   await mutateMissionInstances();
+                  toaster.create({
+                    title: "미션이 삭제되었습니다.",
+                    type: "success",
+                  });
                 } catch (error) {
                   console.error("Error removing mission:", error);
+                  toaster.create({
+                    title: error instanceof Error ? error.message : "미션 삭제 중 오류가 발생했습니다.",
+                    type: "error",
+                  });
                 } finally {
                   setIsLoadingMissions(false);
                 }
               }}
-              missionInstance={instance as unknown as JourneyMissionInstanceWithMission}
+              missionInstance={
+                instance as unknown as JourneyMissionInstanceWithMission
+              }
             />
           ))}
         </div>
@@ -352,7 +336,7 @@ export default function MissionComponent({
                           const instanceToRemove = missionInstances.find(
                             (m) => m.mission_id === mission.id
                           );
-                          
+
                           if (instanceToRemove) {
                             await deleteMissionInstance(instanceToRemove.id);
                             // UI 즉시 업데이트

@@ -21,18 +21,11 @@ export function useJourneyMissionInstances(
   // 데이터 가져오기 함수
   const fetcher = useCallback(async (key: string) => {
     // 키에서 데이터 추출 (SWR 키는 `mission-instances-${weekId}-${journeyUuid}` 형식)
-    console.log("useJourneyMissionInstances: fetcher 호출", { key });
     
     if (!journeyUuid) {
-      console.log("useJourneyMissionInstances: journeyUuid가 없음");
       // 데이터가 없는 빈 배열 반환 (에러 발생 방지)
       return [];
     }
-    
-    console.log("useJourneyMissionInstances: 데이터 로딩 시작", {
-      weekId,
-      journeyUuid
-    });
     
     try {
       // 지연 처리 - 첫 번째 요청에서만 지연 적용
@@ -67,9 +60,6 @@ export function useJourneyMissionInstances(
       }
       
       const instances = result.data || [];
-      console.log("useJourneyMissionInstances: 데이터 로딩 완료", {
-        count: instances.length
-      });
       
       // 재시도 횟수 초기화 (성공 시)
       setRetryCount(0);
@@ -96,7 +86,6 @@ export function useJourneyMissionInstances(
     (weekId ? `mission-instances-${weekId}-${journeyUuid}` : `all-mission-instances-${journeyUuid}`) 
     : null;
   
-  console.log("useJourneyMissionInstances: SWR 키", swrKey);
 
   // SWR 훅 사용
   const {
@@ -209,19 +198,37 @@ export function useJourneyMissionInstances(
   const deleteMissionInstance = useCallback(
     async (id: number) => {
       const supabase = createClient();
-      const { error } = await supabase
-        .from("journey_mission_instances")
-        .delete()
-        .eq("id", id);
 
-      if (error) {
-        throw new Error(error.message);
+      try {
+        // 1. 먼저 관련된 user_points 레코드 삭제
+        const { error: pointsError } = await supabase
+          .from("user_points")
+          .delete()
+          .eq("mission_instance_id", id);
+
+        if (pointsError) {
+          console.error("Error deleting user points:", pointsError);
+          throw new Error(`포인트 데이터 삭제 중 오류: ${pointsError.message}`);
+        }
+
+        // 2. 그 다음 미션 인스턴스 삭제
+        const { error: instanceError } = await supabase
+          .from("journey_mission_instances")
+          .delete()
+          .eq("id", id);
+
+        if (instanceError) {
+          throw new Error(`미션 인스턴스 삭제 중 오류: ${instanceError.message}`);
+        }
+
+        // 캐시 업데이트
+        mutate();
+
+        return true;
+      } catch (error) {
+        console.error("Error in deleteMissionInstance:", error);
+        throw error;
       }
-
-      // 캐시 업데이트
-      mutate();
-
-      return true;
     },
     [mutate]
   );

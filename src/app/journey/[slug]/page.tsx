@@ -13,22 +13,16 @@ export default async function JourneyPage({
 }) {
   try {
     // 디버깅 정보 기록
-    console.log("[JourneyPage] 시작");
     
     // params 전체를 await
     const resolvedParams = await params;
     const { slug } = resolvedParams;
     
-    console.log("[JourneyPage] slug:", slug);
     
     // 서버 사이드에서 먼저 확인
     let journeyResult;
     try {
-      console.log("[JourneyPage] getJourney 호출 전");
       journeyResult = await getJourney(slug);
-      console.log("[JourneyPage] getJourney 결과:", 
-        journeyResult ? "결과 있음" : "결과 없음", 
-        "에러:", journeyResult?.error ? "있음" : "없음");
     } catch (fetchError) {
       console.error("[JourneyPage] getJourney 에러:", fetchError);
       journeyResult = { error: fetchError };
@@ -44,9 +38,7 @@ export default async function JourneyPage({
       });
       redirect("/");
     }
-    
-    console.log("[JourneyPage] 렌더링 시작");
-    
+      
     // 클라이언트 컴포넌트에 slug만 전달
     return <JourneyClient slug={slug} />;
     

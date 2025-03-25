@@ -15,7 +15,9 @@ export const createJourneyWeekSchema = journeyWeekSchema.omit({
   updated_at: true,
 })
 
-export const updateJourneyWeekSchema = createJourneyWeekSchema.partial()
+export const updateJourneyWeekSchema = createJourneyWeekSchema.omit({
+  journey_id: true,
+})
 
 export type JourneyWeek = z.infer<typeof journeyWeekSchema>;
 export type CreateJourneyWeek = z.infer<typeof createJourneyWeekSchema>;

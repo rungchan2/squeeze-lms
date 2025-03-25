@@ -1,4 +1,4 @@
-import { JourneyWeek } from "@/types";
+import { JourneyWeek, UpdateJourneyWeek } from "@/types";
 import Text from "@/components/Text/Text";
 import styled from "@emotion/styled";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6";
@@ -6,22 +6,22 @@ import { useState, memo, useEffect } from "react";
 import MissionComponent from "./MissionComponent";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import { FaSquare } from "react-icons/fa";
+import { Editable } from "@chakra-ui/react";
+import { toaster } from "@/components/ui/toaster";
+import { useAuth } from "@/components/AuthProvider";
+import { useWeeks } from "@/hooks/useWeeks";
+const MemoizedMissionComponent = memo(MissionComponent);
 
 interface JourneyWeekCardProps {
   week: JourneyWeek;
   index: number;
-  updateWeek: (id: number, data: Partial<JourneyWeek>) => void;
   deleteWeek: (id: number) => void;
   journeyId: number;
   journeyUuid: string;
 }
 
-// MissionComponent를 메모이제이션하여 불필요한 리렌더링 방지
-const MemoizedMissionComponent = memo(MissionComponent);
-
 export default function WeekCard({
   week,
-  updateWeek,
   deleteWeek,
   index,
   journeyId,
@@ -29,11 +29,14 @@ export default function WeekCard({
 }: JourneyWeekCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [missionCount, setMissionCount] = useState(0);
-  
-  // 미션 인스턴스 가져오기
-  const { missionInstances, isLoading: isLoadingInstances, mutate } =
-    useJourneyMissionInstances(journeyUuid, week.id);
-  
+  const [weekName, setWeekName] = useState(week.name);
+  const { role } = useAuth();
+  const {
+    missionInstances,
+    isLoading: isLoadingInstances,
+    mutate,
+  } = useJourneyMissionInstances(journeyUuid, week.id);
+  const { updateWeek } = useWeeks(journeyId);
   // 미션 인스턴스가 로드되면 카운트 업데이트
   useEffect(() => {
     if (!isLoadingInstances && missionInstances) {
@@ -45,30 +48,48 @@ export default function WeekCard({
   const handleToggle = () => {
     setIsOpen((prev) => !prev);
   };
+  const handleUpdateWeekName = () => {
+    console.log("updateWeek", week.id, weekName, week.week_number);
+    updateWeek(week.id, { name: weekName, week_number: week.week_number });
+    toaster.create({
+      title: "주차 이름이 수정되었습니다.",
+      type: "success",
+    });
+  };
 
   return (
-    <div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          marginBottom: "10px",
-        }}
-      >
-        <FaSquare />
-        <Text variant="body" fontWeight="bold">
+    <WeekCardContainer>
+      <IndexContainer>
+        <FaSquare size={12} />
+        <Text variant="body" color="var(--grey-700)" fontWeight="bold">
           {index + 1}
         </Text>
-      </div>
-      <StyledWeekCard key={week.id}>
+      </IndexContainer>
+      <StyledWeekCard>
         <div className="week-header" onClick={handleToggle}>
           <div className="week-header-left">
             {isOpen ? <FaChevronUp /> : <FaChevronDown />}
             <Text color="var(--grey-500)" variant="body">
               {week.week_number ? `${week.week_number}주차` : "미정"}
             </Text>
-            <Text variant="body">{week.name}</Text>
+            {role === "teacher" || role === "admin" ? (
+              <Editable.Root
+                defaultValue={week.name}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Editable.Preview />
+                <Editable.Input
+                  onChange={(e) => {
+                    setWeekName(e.target.value);
+                  }}
+                  onBlur={handleUpdateWeekName}
+                />
+              </Editable.Root>
+            ) : (
+              <Text variant="body" style={{ flex: 1, minWidth: 0 }}>
+                {weekName}
+              </Text>
+            )}
           </div>
           <div className="week-header-right">
             <Text variant="caption">미션: {missionCount}</Text>
@@ -85,47 +106,96 @@ export default function WeekCard({
           />
         )}
       </StyledWeekCard>
-    </div>
+    </WeekCardContainer>
   );
 }
 
-const StyledWeekCard = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px solid var(--grey-200);
-  background-color: var(--white);
-  justify-content: space-between;
-  transition: 0.2s;
+const WeekCardContainer = styled.div`
+  margin-bottom: 16px;
+`;
 
-  &:hover {
-    background-color: var(--grey-50);
-    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+const IndexContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-left: 4px;
+
+  svg {
+    color: var(--grey-500);
+    font-size: 12px;
   }
+`;
+
+const StyledWeekCard = styled.div`
+  background: var(--white);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   .week-header {
-    width: 100%;
     display: flex;
-    flex-direction: row;
-    gap: 1rem;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     cursor: pointer;
+    padding: 4px 0;
+  }
 
-    .week-header-left {
-      display: flex;
-      flex-direction: row;
-      gap: 0.5rem;
-      align-items: center;
+  .week-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0; /* 텍스트 오버플로우 방지 */
+
+    svg {
+      width: 16px;
+      height: 16px;
+      color: var(--grey-500);
+      flex-shrink: 0;
     }
 
-    .week-header-right {
-      display: flex;
-      flex-direction: row;
-      gap: 0.5rem;
-      align-items: center;
+    /* 주차 텍스트 */
+    & > p:first-of-type {
+      flex-shrink: 0;
+    }
+  }
+
+  .week-header-right {
+    margin-left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    span {
+      color: var(--grey-500);
+      white-space: nowrap;
+    }
+  }
+
+  /* Editable 컴포넌트 스타일링 */
+  [data-editable-root] {
+    min-width: 0; /* 텍스트 오버플로우 방지 */
+  }
+
+  [data-editable-input],
+  [data-editable-preview] {
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 2px 4px;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  [data-editable-input] {
+    border: 1px solid var(--grey-300);
+    border-radius: 4px;
+    outline: none;
+
+    &:focus {
+      border-color: var(--blue-500);
     }
   }
 `;

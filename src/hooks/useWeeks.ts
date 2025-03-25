@@ -17,7 +17,6 @@ const fetcher = async (journeyId: number) => {
   }
 
   try {
-    console.log("useWeeks: 주차 데이터 요청 시작 - journeyId:", journeyId);
     const supabase = createClient();
     
     // Supabase 요청 자체에 try-catch 추가
@@ -33,7 +32,6 @@ const fetcher = async (journeyId: number) => {
       }
 
       const safeData = data || [];
-      console.log("useWeeks: 주차 데이터 요청 성공 -", safeData.length, "건 받음");
       return safeData as JourneyWeek[];
     } catch (dbError) {
       console.error("useWeeks: Supabase 쿼리 에러:", dbError);
@@ -75,7 +73,6 @@ export function useWeeks(journeyId: number) {
   
   // 훅의 키를 체크하는 로그 추가
   const swrKey = validJourneyId ? `journey-weeks-${validJourneyId}` : null;
-  console.log("useWeeks: 훅 키 생성:", swrKey, "- journeyId:", journeyId);
   
   const {
     data: weeks,
@@ -91,7 +88,6 @@ export function useWeeks(journeyId: number) {
       errorRetryCount: 3, // 최대 3번 재시도
       onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
         // 메시지 로깅
-        console.log(`useWeeks: 재시도 ${retryCount}/3 - journeyId:`, validJourneyId);
         
         // 네트워크 에러일 경우만 재시도
         if (error.name === 'SyntaxError') return;
@@ -132,6 +128,7 @@ export function useWeeks(journeyId: number) {
   // 주차 업데이트 함수
   const updateWeek = useCallback(
     async (id: number, weekData: UpdateJourneyWeek) => {
+      console.log("updateWeek", id, weekData);
       const supabase = createClient();
       const { data, error } = await supabase
         .from("journey_weeks")

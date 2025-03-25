@@ -15,7 +15,7 @@ const nextConfig = {
   // 프로덕션 빌드에서도 콘솔 로그 유지
   compiler: {
     removeConsole: {
-      exclude: ['log', 'warn', 'error', 'info', 'debug'],
+      exclude: ['error'],
     },
   },
 };

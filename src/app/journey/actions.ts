@@ -4,7 +4,6 @@ import { CreatePost, CreateJourney, UpdatePost, CreateMission } from "@/types";
 import { createClient } from "@/utils/supabase/server";
 
 export async function getJourney(uuid: string) {
-  console.log("[SERVER] getJourney 호출됨:", uuid);
   
   if (!uuid) {
     console.error("[SERVER] getJourney: uuid가 제공되지 않았습니다");
@@ -13,7 +12,6 @@ export async function getJourney(uuid: string) {
   
   try {
     const supabase = await createClient();
-    console.log("[SERVER] supabase 클라이언트 생성됨");
     
     const response = await supabase
       .from("journeys")
@@ -21,14 +19,8 @@ export async function getJourney(uuid: string) {
       .eq("uuid", uuid)
       .single();
     
-    console.log("[SERVER] 쿼리 완료:", 
-      response ? "응답 있음" : "응답 없음",
-      "데이터:", response?.data ? "있음" : "없음", 
-      "에러:", response?.error ? "있음" : "없음");
-    
     return response;
   } catch (error) {
-    console.error("[SERVER] getJourney 오류:", error);
     return { data: null, error };
   }
 }
@@ -39,14 +31,6 @@ export async function getJourneyWeeks(journeyId: number) {
     .from("journey_weeks")
     .select("*")
     .eq("journey_id", journeyId);
-  return { data, error };
-}
-
-export async function getMissionTypes() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc(
-    "get_distinct_mission_types" as any
-  );
   return { data, error };
 }
 

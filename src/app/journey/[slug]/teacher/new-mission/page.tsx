@@ -10,12 +10,11 @@ import { Textarea } from "@chakra-ui/react";
 import Button from "@/components/common/Button";
 import styled from "@emotion/styled";
 import Heading from "@/components/Text/Heading";
-import { createMission } from "../../../actions";
 import { toaster } from "@/components/ui/toaster";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { useEffect } from "react";
-
+import { mission } from "@/utils/mission/mission";
 export default function NewMissionPage({ editMissionData }: { editMissionData?: Mission }) {
   const router = useRouter();
   const { role } = useAuth();
@@ -41,17 +40,27 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
 
   const onSubmit = async (data: CreateMission) => {
     console.log(data);
-    const { error } = await createMission(data);
-    if (error) {
-      toaster.create({
-        title: "미션 생성 실패",
-        type: "error",
-      });
-      return;
+    if (editMissionData) {
+      const { error: updateError } = await mission.updateMission(editMissionData.id, data);
+      if (updateError) {
+        toaster.create({
+          title: "미션 수정 실패",
+          type: "error",
+        });
+        return;
+      }
+    } else {
+      const { error: createError } = await mission.createMission(data);
+      if (createError) {
+        toaster.create({
+          title: "미션 생성 실패",
+          type: "error",
+        });
+        return;
+      }
     }
-
     toaster.create({
-      title: "미션 생성 성공",
+      title: `${editMissionData ? "미션 수정" : "미션 생성"} 성공`,
       type: "success",
     });
 
@@ -69,7 +78,7 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
   return (
     <NewMissionPageContainer>
       <div className="input-container">
-        <Heading level={3}>미션 생성</Heading>
+        <Heading level={3}>미션 {editMissionData ? "수정" : "생성"}</Heading>
         <InputAndTitle title="미션 이름" errorMessage={errors.name?.message}>
           <Input {...register("name")} placeholder="미션 이름을 입력해주세요." />
         </InputAndTitle>
@@ -121,7 +130,7 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
         </InputAndTitle>
       </div>
       <Button variant="flat" onClick={handleSubmit(onSubmit)}>
-        미션 생성
+        미션 {editMissionData ? "수정" : "생성"}
       </Button>
     </NewMissionPageContainer>
   );

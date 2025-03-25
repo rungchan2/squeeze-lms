@@ -12,35 +12,50 @@ export async function getJourney(uuid: string) {
 
   // 임시 객체를 명시적으로 생성하여 반환
   let result;
-  
+
   try {
     console.log("[CLIENT] Supabase 클라이언트 생성 시작");
     const supabase = createClient();
     console.log("[CLIENT] Supabase 클라이언트 생성 완료");
-    
+
     console.log("[CLIENT] Supabase 쿼리 시작:", uuid);
     const response = await supabase
       .from("journeys")
       .select("*")
       .eq("uuid", uuid)
       .single();
-    console.log("[CLIENT] Supabase 쿼리 완료:", 
-      "응답:", response ? "있음" : "없음", 
-      "데이터:", response?.data ? "있음" : "없음");
-    
+    console.log(
+      "[CLIENT] Supabase 쿼리 완료:",
+      "응답:",
+      response ? "있음" : "없음",
+      "데이터:",
+      response?.data ? "있음" : "없음"
+    );
+
     // 결과 명시적으로 생성
     result = {
       data: response?.data || null,
-      error: response?.error || null
+      error: response?.error || null,
     };
   } catch (error) {
     console.error("[CLIENT] getJourney 오류:", error);
     result = { data: null, error };
   }
-  
-  console.log("[CLIENT] getJourney 최종 결과:", 
-    "데이터:", result.data ? "있음" : "없음", 
-    "에러:", result.error ? "있음" : "없음");
-  
+
+  console.log(
+    "[CLIENT] getJourney 최종 결과:",
+    "데이터:",
+    result.data ? "있음" : "없음",
+    "에러:",
+    result.error ? "있음" : "없음"
+  );
+
   return result;
+}
+export async function getMissionTypes() {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc(
+    "get_distinct_mission_types" as any
+  );
+  return { data, error };
 }
