@@ -62,10 +62,14 @@ export default function UsersPage() {
   useEffect(() => {
     const loadJourneyData = async () => {
       try {
-        // 1. UUID 저장 (이렇게 하면 getCurrentJourneyId에서 사용됨)
-        setCurrentJourneyUuid(uuid);
-
-        // 2. Journey ID 불러오기
+        // 여정 UUID 설정은 별도의 useEffect로 분리
+        
+        // 2. Journey ID 불러오기 - 이미 로드된 경우 다시 로드하지 않음
+        if (currentJourneyId) {
+          setIsLoading(false);
+          return;
+        }
+        
         const journeyId = await getCurrentJourneyId();
 
         if (!journeyId) {
@@ -103,13 +107,21 @@ export default function UsersPage() {
 
     loadJourneyData();
   }, [
-    uuid,
     organizationId,
     role,
     router,
     getCurrentJourneyId,
-    setCurrentJourneyUuid,
+    currentJourneyId,
+    goBackOrHome,
   ]);
+  
+  // 여정 UUID 설정을 별도 useEffect로 분리
+  useEffect(() => {
+    if (!uuid || !setCurrentJourneyUuid) return;
+    
+    // 이전 상태와 비교하여 중복 설정 방지
+    setCurrentJourneyUuid(uuid);
+  }, [uuid, setCurrentJourneyUuid]);
 
   // 현재 여정 ID가 설정된 후에만 여정 사용자 불러오기
   const { currentJourneyUsers = [] } = useJourneyUser(currentJourneyId ?? 0);

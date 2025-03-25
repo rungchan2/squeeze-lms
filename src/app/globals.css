@@ -86,13 +86,12 @@ body {
 }
 
 body {
-  padding-top: 70px; /* 네비게이션 바 높이만큼 상단 패딩 추가 */
+  padding-top: 82px; /* 네비게이션 바 높이만큼 상단 패딩 추가 */
   padding-left: 16px;
   padding-right: 16px;
 }
 
 .container {
-  min-height: calc(100vh - 70px);
-  padding: 16px 16px 0px 16px;
+  min-height: calc(100vh - 82px);
   overflow-y: auto;
 }

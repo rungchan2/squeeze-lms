@@ -33,6 +33,10 @@ export const useJourneyStore = create<JourneyState>()(
       currentJourneyId: null,
       currentJourneyUuid: null,
       setCurrentJourneyUuid: (uuid: string) => {
+        const currentUuid = get().currentJourneyUuid;
+        if (currentUuid === uuid) {
+          return;
+        }
         console.log('Journey UUID가 설정됨:', uuid);
         set({ currentJourneyUuid: uuid });
       },
@@ -45,7 +49,10 @@ export const useJourneyStore = create<JourneyState>()(
         set({ currentJourneyUuid: null });
       },
       getCurrentJourneyId: async () => {
-        const { currentJourneyUuid } = get();
+        const { currentJourneyUuid, currentJourneyId } = get();
+        if (currentJourneyId !== null) {
+          return currentJourneyId;
+        }
         const id = await getCurrentJourneyId(currentJourneyUuid || "");
         set({ currentJourneyId: id });
         return id;

@@ -15,6 +15,8 @@ import { useSearchParams } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
 import { useJourneyStore } from "@/store/journey";
 import Footer from "@/components/common/Footer";
+import Button from "@/components/common/Button";
+import { Modal } from "@/components/modal/Modal";
 
 // WeekCard 컴포넌트를 메모이제이션
 const MemoizedWeekCard = memo(WeekCard);
@@ -60,7 +62,14 @@ export default function PlanTab({ slug }: { slug: string }) {
   const router = useRouter();
   const [journeyId, setJourneyId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { setCurrentJourneyUuid, currentJourneyUuid, getCurrentJourneyId } = useJourneyStore();
+  const [weekName, setWeekName] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // 안전하게 객체 가져오기 및 기본값 제공
+  const journeyStore = useJourneyStore();
+  const setCurrentJourneyUuid = journeyStore?.setCurrentJourneyUuid || (() => {});
+  const currentJourneyUuid = journeyStore?.currentJourneyUuid || '';
+  const getCurrentJourneyId = journeyStore?.getCurrentJourneyId || (() => Promise.resolve(null));
   
   useEffect(() => {
     if (status === "success") {
@@ -71,18 +80,26 @@ export default function PlanTab({ slug }: { slug: string }) {
       setCurrentJourneyUuid(slug);
       router.push(`/journey/${slug}`);
     }
-  }, [status, router, slug, currentJourneyUuid]);
+  }, [status, router, slug, setCurrentJourneyUuid]);
 
   // 여행 ID 가져오기
   useEffect(() => {
     const fetchJourneyId = async () => {
+      if (!slug) {
+        setIsLoading(false);
+        return;
+      }
+      
       try {
-        const { data, error } = await getJourney(slug);
+        const result = await getJourney(slug);
+        const { data, error } = result || { data: null, error: null };
+        
         if (error) {
           console.error("Error fetching journey ID:", error);
           router.push("/");
           return;
         }
+        
         setJourneyId(data?.id || null);
       } catch (error) {
         console.error("Error:", error);
@@ -93,36 +110,48 @@ export default function PlanTab({ slug }: { slug: string }) {
     };
 
     fetchJourneyId();
-    setCurrentJourneyUuid(slug);
-    if (slug) {
-      getCurrentJourneyId();
-    }
-  }, [slug, router, setCurrentJourneyUuid, getCurrentJourneyId]);
+  }, [slug, router]);
 
-  // useWeeks 훅 사용
+  // Journey UUID 설정을 위한 별도 useEffect
+  useEffect(() => {
+    if (!slug || !setCurrentJourneyUuid) return;
+    
+    // 이미 같은 UUID가 설정되어 있는지 확인
+    if (currentJourneyUuid === slug) return;
+    
+    try {
+      setCurrentJourneyUuid(slug);
+    } catch (error) {
+      console.error("Error setting current journey UUID:", error);
+    }
+  }, [slug, currentJourneyUuid, setCurrentJourneyUuid]);
+
+  // useWeeks 훅 사용 - 안전한 값 제공
   const {
-    weeks,
-    isLoading: weeksLoading,
-    error: weeksError,
+    weeks = [],
+    isLoading: weeksLoading = false,
+    error: weeksError = null,
     createWeek,
     updateWeek,
     deleteWeek,
-  } = useWeeks(journeyId || 0);
+  } = useWeeks(journeyId || 0) || {};
 
   // 새 주차 추가 핸들러 예시
   const handleAddWeek = useCallback(async () => {
+    if (!journeyId || !createWeek || !weekName) return;
+    
     try {
-      if (!journeyId) return;
-
       await createWeek({
         journey_id: journeyId,
-        name: `Week ${weeks.length + 1}`,
+        name: weekName || `Week ${weeks.length + 1}`,
         week_number: weeks.length + 1,
       });
       toaster.create({
         title: "주차가 추가되었습니다.",
         type: "success",
       });
+      setWeekName("");
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error adding week:", error);
       toaster.create({
@@ -130,7 +159,12 @@ export default function PlanTab({ slug }: { slug: string }) {
         type: "error",
       });
     }
-  }, [journeyId, weeks, createWeek]);
+  }, [journeyId, weeks, createWeek, weekName]);
+
+  const openModal = useCallback(() => {
+    setWeekName(`Week ${weeks.length + 1}`);
+    setIsModalOpen(true);
+  }, [weeks]);
 
   if (isLoading) {
     return (
@@ -158,7 +192,7 @@ export default function PlanTab({ slug }: { slug: string }) {
       <Suspense fallback={<Spinner />}>
         {weeksLoading ? (
           <Spinner />
-        ) : weeks.length > 0 ? (
+        ) : weeks && weeks.length > 0 ? (
           <div className="weeks-list">
             {weeks
               .sort((a, b) => (a.week_number ?? 0) - (b.week_number ?? 0))
@@ -166,8 +200,8 @@ export default function PlanTab({ slug }: { slug: string }) {
                 <MemoizedWeekCard
                   key={week.id}
                   week={week}
-                  updateWeek={updateWeek}
-                  deleteWeek={deleteWeek}
+                  updateWeek={updateWeek || (() => {})}
+                  deleteWeek={deleteWeek || (() => {})}
                   index={index}
                   journeyId={journeyId || 0}
                 />
@@ -180,12 +214,43 @@ export default function PlanTab({ slug }: { slug: string }) {
         )}
       </Suspense>
       <AdminOnly>
-        <FloatingButton onClick={handleAddWeek}>
+        <FloatingButton onClick={openModal}>
           <FaWandMagicSparkles />
           <Text variant="body" fontWeight="bold" color="var(--white)">
             새 주차
           </Text>
         </FloatingButton>
+        
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <div style={{ width: '100%' }}>
+            <Heading level={4}>새 주차 추가</Heading>
+            <div style={{ marginBottom: '16px' }}></div>
+            <Text style={{ marginBottom: '8px' }}>추가할 주차의 이름을 입력하세요</Text>
+            <input
+              value={weekName}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWeekName(e.target.value)}
+              placeholder="예: Week 1"
+              style={{
+                width: '100%', 
+                padding: '8px 12px',
+                border: '1px solid var(--grey-300)',
+                borderRadius: '4px',
+                marginBottom: '16px'
+              }}
+              autoFocus
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>취소</Button>
+              <Button 
+                variant="flat"
+                onClick={handleAddWeek}
+                disabled={!weekName.trim()}
+              >
+                추가
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </AdminOnly>
       <Footer />
     </PlanContainer>

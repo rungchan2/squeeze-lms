@@ -49,9 +49,29 @@ interface WeekProgress {
   completionRate: number;
 }
 
-export default function DashboardTab() {
+export default function DashboardTab({ slug }: { slug?: string }) {
   const { id: userId } = useAuth();
-  const { currentJourneyId } = useJourneyStore();
+  
+  // 안전한 journeyStore 접근
+  const journeyStore = useJourneyStore();
+  const currentJourneyId = journeyStore?.currentJourneyId || 0;
+  const currentJourneyUuid = journeyStore?.currentJourneyUuid || "";
+  const setCurrentJourneyUuid = journeyStore?.setCurrentJourneyUuid;
+  
+  // slug가 제공되면 설정 - 의존성에서 journeyStore 제거하고 필요한 함수만 참조
+  useEffect(() => {
+    if (!slug) return;
+    
+    // Check if the current journey UUID is already set correctly
+    if (currentJourneyUuid === slug) return;
+    
+    try {
+      setCurrentJourneyUuid(slug);
+    } catch (error) {
+      console.error("Error setting current journey UUID:", error);
+    }
+  }, [slug, currentJourneyUuid, setCurrentJourneyUuid]);
+  
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [leaderboardUsers, setLeaderboardUsers] = useState<LeaderboardUser[]>(
@@ -60,15 +80,16 @@ export default function DashboardTab() {
   const [weekProgress, setWeekProgress] = useState<WeekProgress[]>([]);
   const [totalCompletionRate, setTotalCompletionRate] = useState(0);
 
-  // 주차 데이터 가져오기
-  const { weeks, isLoading: weeksLoading } = useWeeks(currentJourneyId || 0);
+  // 주차 데이터 가져오기 - 안전하게 기본값 제공
+  const { weeks = [], isLoading: weeksLoading = false } = useWeeks(currentJourneyId || 0) || {};
 
-  // 전체 미션 인스턴스 가져오기
-  const { missionInstances, isLoading: missionsLoading } =
-    useJourneyMissionInstances(0);
+  // 전체 미션 인스턴스 가져오기 - 안전하게 기본값 제공
+  const { missionInstances = [], isLoading: missionsLoading = false } = 
+    useJourneyMissionInstances(0) || {};
 
   useEffect(() => {
     if (!userId || !currentJourneyId) {
+      setIsLoading(false);
       return;
     }
 
@@ -80,8 +101,12 @@ export default function DashboardTab() {
         const supabase = createClient();
 
         // 1. 점수 데이터 가져오기
-        const { data: pointsData, error: pointsError } =
-          await getUserPointsByJourneyId(currentJourneyId);
+        const result = await getUserPointsByJourneyId(currentJourneyId);
+        if (!result) {
+          throw new Error("포인트 데이터를 가져올 수 없습니다");
+        }
+        
+        const { data: pointsData, error: pointsError } = result;
         if (pointsError) {
           console.error("포인트 데이터 가져오기 오류:", pointsError);
           throw new Error("포인트 데이터를 가져오는 중 오류 발생");
@@ -210,21 +235,37 @@ export default function DashboardTab() {
       }
     }
 
-    // 주차 및 미션 데이터가 로딩되었거나 로딩 중이 아닐때 대시보드 데이터 가져오기
-    if (weeks && missionInstances) {
+    // 주차 및 미션 데이터가 모두 로드되었을 때만 대시보드 데이터 가져오기
+    if (weeks && !weeksLoading && missionInstances && !missionsLoading) {
       fetchDashboardData();
+    } else if (!weeksLoading && !missionsLoading) {
+      // 데이터가 없지만 로딩이 끝난 경우에는 로딩 상태를 false로 설정
+      setIsLoading(false);
     }
-  }, [currentJourneyId, userId, weeks, missionInstances]);
+  }, [currentJourneyId, userId, weeks, missionInstances, weeksLoading, missionsLoading]);
 
+  // 모든 데이터가 로드될 때까지 스피너 표시
   if (isLoading || weeksLoading || missionsLoading) {
     return <Spinner />;
   }
 
+  // 오류가 있는 경우 오류 메시지 표시
   if (error) {
     return (
-      <ErrorContainer>
-        <Text color="var(--negative-500)">오류: {error}</Text>
-      </ErrorContainer>
+      <div>
+        <Heading level={2}>오류 발생</Heading>
+        <Text>{error}</Text>
+      </div>
+    );
+  }
+
+  // 데이터가 없는 경우 메시지 표시
+  if (!currentJourneyId || !userId) {
+    return (
+      <div>
+        <Heading level={2}>데이터를 불러올 수 없습니다</Heading>
+        <Text>여정 또는 사용자 정보를 찾을 수 없습니다.</Text>
+      </div>
     );
   }
 
