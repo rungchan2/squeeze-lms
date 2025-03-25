@@ -86,7 +86,7 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
       type: "success",
     });
     router.replace("/login");
-  }, [logout]);
+  }, [logout, router]);
 
   
   return (

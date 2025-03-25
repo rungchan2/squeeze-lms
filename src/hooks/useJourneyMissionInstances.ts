@@ -7,41 +7,98 @@ import {
   MissionStatus,
   Mission,
 } from "@/types";
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useJourneyStore } from "@/store/journey";
 
 export function useJourneyMissionInstances(
   weekId?: number | null,
+  specificJourneyUuid?: string
 ) {
   const { currentJourneyUuid } = useJourneyStore();
+  const [retryCount, setRetryCount] = useState(0);
+  
+  // 외부에서 주입된 UUID 또는 스토어에서 가져온 UUID 사용
+  const journeyUuid = specificJourneyUuid || currentJourneyUuid;
+  
   // 데이터 가져오기 함수
-  const fetcher = useCallback(async () => {
-    const supabase = createClient();
-
-    // 특정 주차의 미션 인스턴스 가져오기
-    const query = supabase
-      .from("journey_mission_instances")
-      .select(`*, missions(*)`)
-      .eq("journey_uuid", currentJourneyUuid || "");
-
-    // 주차 ID가 있으면 필터링œ
-    if (weekId) {
-      query.eq("journey_week_id", weekId);
+  const fetcher = useCallback(async (key: string) => {
+    // 키에서 데이터 추출 (SWR 키는 `mission-instances-${weekId}-${journeyUuid}` 형식)
+    console.log("useJourneyMissionInstances: fetcher 호출", { key });
+    
+    if (!journeyUuid) {
+      console.log("useJourneyMissionInstances: journeyUuid가 없음");
+      // 데이터가 없는 빈 배열 반환 (에러 발생 방지)
+      return [];
     }
-
-    const { data, error } = await query;
-    if (error) {
-      throw new Error(error.message);
+    
+    console.log("useJourneyMissionInstances: 데이터 로딩 시작", {
+      weekId,
+      journeyUuid
+    });
+    
+    try {
+      // 지연 처리 - 첫 번째 요청에서만 지연 적용
+      if (retryCount === 0) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      // API 라우트를 통해 데이터 가져오기
+      const response = await fetch("/api/journey-mission-instances", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          journeyUuid,
+          weekId: weekId || undefined
+        }),
+        // 캐시 사용 방지
+        cache: 'no-store'
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API 에러 (${response.status}): ${errorText}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.error) {
+        console.error("useJourneyMissionInstances: API 에러 응답", result.error);
+        throw new Error(`API 에러: ${result.error}`);
+      }
+      
+      const instances = result.data || [];
+      console.log("useJourneyMissionInstances: 데이터 로딩 완료", {
+        count: instances.length
+      });
+      
+      // 재시도 횟수 초기화 (성공 시)
+      setRetryCount(0);
+      
+      return instances;
+    } catch (err) {
+      console.error("useJourneyMissionInstances: 예외 발생", err);
+      
+      // 최대 3번까지 재시도 증가
+      setRetryCount(prev => prev < 3 ? prev + 1 : prev);
+      
+      if (retryCount >= 3) {
+        console.error("useJourneyMissionInstances: 최대 재시도 횟수 초과");
+        return [];
+      }
+      
+      // 빈 배열 반환 (에러 발생 방지)
+      throw err;
     }
+  }, [weekId, journeyUuid, retryCount]);
 
-    // missions를 mission으로 매핑하여 타입 일관성 유지
-    return data.map((item: any) => ({
-      ...item,
-      mission: item.missions,
-    })) as unknown as (JourneyMissionInstance & {
-      mission: Mission;
-    })[];
-  }, [weekId, currentJourneyUuid]);
+  // SWR 키 생성 (로그 추가)
+  const swrKey = journeyUuid ? 
+    (weekId ? `mission-instances-${weekId}-${journeyUuid}` : `all-mission-instances-${journeyUuid}`) 
+    : null;
+  
+  console.log("useJourneyMissionInstances: SWR 키", swrKey);
 
   // SWR 훅 사용
   const {
@@ -50,13 +107,29 @@ export function useJourneyMissionInstances(
     isLoading,
     mutate,
   } = useSWR<(JourneyMissionInstance & { mission: Mission })[]>(
-    currentJourneyUuid ? (weekId ? `mission-instances-${weekId}-${currentJourneyUuid}` : `all-mission-instances-${currentJourneyUuid}`) : null,
+    swrKey,
     fetcher,
     {
       revalidateOnFocus: false,
       dedupingInterval: 60000, // 1분 동안 중복 요청 방지
+      fallbackData: [], // 기본값 제공하여 에러 방지
+      suspense: false, // suspense 모드 비활성화로 에러 방지
+      revalidateOnMount: true, // 마운트 시 항상 재검증
+      shouldRetryOnError: true, // 에러 발생 시 재시도
+      errorRetryCount: 3, // 에러 재시도 횟수
+      errorRetryInterval: 1000, // 에러 재시도 간격
+      onError: (err) => {
+        console.error("[useJourneyMissionInstances] 데이터 로딩 중 오류:", err);
+      }
     }
   );
+
+  // 효과적인 에러 로깅
+  useEffect(() => {
+    if (error) {
+      console.error("[useJourneyMissionInstances] SWR 오류:", error);
+    }
+  }, [error]);
 
   const createMissionInstance = useCallback(
     async (instanceData: CreateJourneyMissionInstance) => {

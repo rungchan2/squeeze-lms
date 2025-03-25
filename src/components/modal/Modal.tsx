@@ -40,7 +40,7 @@ export function Modal({ children, isOpen, onClose }: ModalProps) {
     } else {
       window.removeEventListener("keydown", handleKeyDown);
     }
-  }, [isOpen]);
+  }, [isOpen, handleKeyDown]);
   
   useEffect(() => {
     if (isOpen) {

@@ -12,27 +12,31 @@ import { useNotifications, markAsRead } from "@/hooks/useNotification";
 import MyPage from "./mypage/MyPage";
 import { FloatingButton } from "@/components/common/FloatingButton";
 import Text from "../Text/Text";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AdminOnly } from "../auth/AdminOnly";
 import { useCallback, useEffect, useRef } from "react";
 import { useJourneyStore } from "@/store/journey";
-import { useParams } from "next/navigation";
-import Footer from "../common/Footer";
 import { useAuth } from "../AuthProvider";
 import { Error } from "../common/Error";
 import { Loading } from "../common/Loading";
+import Footer from "../common/Footer";
 
 export default function HomeTab() {
   const { clearCurrentJourneyId, clearCurrentJourneyUuid } = useJourneyStore();
   const { isAuthenticated, loading } = useAuth();
-  const { slug } = useParams();
-  const uuid = slug as string;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get('tab');
+
+  // 홈탭으로 돌아올 때만 상태 초기화
   useEffect(() => {
-    if (uuid) {
+    if (currentTab === 'home') {
+      console.log('Clearing journey state in HomeTab');
       clearCurrentJourneyId();
       clearCurrentJourneyUuid();
     }
-  }, [clearCurrentJourneyId, clearCurrentJourneyUuid, uuid]);
+  }, [currentTab, clearCurrentJourneyId, clearCurrentJourneyUuid]);
+
   if (!isAuthenticated) {
     if (loading) {
       return <Loading />;

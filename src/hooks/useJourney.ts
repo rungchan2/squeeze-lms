@@ -4,7 +4,7 @@ import { Journey } from "@/types";
 import { CreateJourney } from "@/types";
 
 
-const fetchJourneys = async (url: string) => {
+const fetchJourneys = async () => {
   const supabase = createClient();
   const { data, error } = await supabase.from("journeys").select("*");
   if (error) {

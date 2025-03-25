@@ -25,18 +25,29 @@ export default function MissionTab({ slug }: { slug: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const { id: userId } = useAuth();
-  const { missionInstances, isLoading: isLoadingMissions } =
-    useJourneyMissionInstances();
+  const {
+    missionInstances,
+    isLoading: missionInstancesLoading,
+    error: missionInstancesError,
+  } = useJourneyMissionInstances(null, slug);
   const { completedMissionIds, isLoading: isLoadingCompletedMissions } =
     useCompletedMissions(userId || 0);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortMission, setSortMission] = useState<"asc" | "desc">("asc");
   // 현재 URL에서 slug 추출
   const getSlugFromPathname = () => {
-    // pathname 형식: /journey/[slug]/mission
-    const pathParts = pathname.split("/");
-    // journey 다음 부분이 slug
-    return pathParts.length > 2 ? pathParts[2] : "";
+    if (!pathname) return slug || "";
+    
+    try {
+      // pathname 형식: /journey/[slug]/mission
+      const pathParts = pathname.split("/");
+      // journey 다음 부분이 slug
+      return pathParts.length > 2 ? pathParts[2] : slug || "";
+    } catch (error) {
+      console.error("URL 파싱 오류:", error);
+      // 실패 시 props에서 받은 slug 사용
+      return slug || "";
+    }
   };
 
   // 미션 카드 클릭 핸들러
@@ -46,7 +57,7 @@ export default function MissionTab({ slug }: { slug: string }) {
   };
 
   // 로딩 중이면 스피너 표시
-  if (isLoadingMissions || isLoadingCompletedMissions) {
+  if (missionInstancesLoading || isLoadingCompletedMissions) {
     return <Spinner />;
   }
 

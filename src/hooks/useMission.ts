@@ -8,7 +8,7 @@ import { useCallback } from 'react';
  * @param weekId 주차 ID (0이면 모든 미션 가져오기)
  * @returns 미션 데이터와 CRUD 함수들
  */
-export function useMission(weekId: number = 0) {
+export function useMission() {
   // 데이터 가져오기 함수
   const fetcher = useCallback(async () => {
     const supabase = createClient();

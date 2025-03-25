@@ -7,7 +7,7 @@ export default async function Page({ params }: { params: Params }) {
   const { slug } = await params;
   const { data, error } = await getJourney(slug);
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return <div>Error</div>;
   }
   return <CreateJourneyPage initialData={data || undefined} />;
 }

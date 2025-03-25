@@ -28,7 +28,7 @@ import Footer from "@/components/common/Footer";
 
 
 export default function SettingTab({ slug }: { slug: string }) {
-  const { accessCodes, deleteAccessCode } = useAccessCode();
+  const { accessCodes } = useAccessCode();
   const filterAccessCodes = accessCodes?.filter(
     (code) => code.role === "teacher"
   );

@@ -50,22 +50,44 @@ interface WeekProgress {
 }
 
 export default function DashboardTab({ slug }: { slug?: string }) {
+  // 개선된 로깅 추가
+  console.log("DashboardTab 렌더링 시작:", slug);
+  
   const { id: userId } = useAuth();
   
-  // 안전한 journeyStore 접근
+  // journeyStore 안전하게 접근
   const journeyStore = useJourneyStore();
+  console.log("DashboardTab: journeyStore 상태:", {
+    store: !!journeyStore,
+    uuid: journeyStore?.currentJourneyUuid,
+    id: journeyStore?.currentJourneyId
+  });
+  
   const currentJourneyId = journeyStore?.currentJourneyId;
   const currentJourneyUuid = journeyStore?.currentJourneyUuid;
   const setCurrentJourneyUuid = journeyStore?.setCurrentJourneyUuid;
   const getCurrentJourneyId = journeyStore?.getCurrentJourneyId;
   
-  // slug가 제공되면 UUID 설정
+  // slug가 제공되면 UUID 설정 - 개선된 로직 유지
   useEffect(() => {
-    if (!slug || !setCurrentJourneyUuid) return;
+    console.log("DashboardTab: UUID 설정 useEffect 실행", {
+      slug, 
+      currentUuid: currentJourneyUuid
+    });
     
-    console.log("Setting journey UUID:", slug);
+    if (!slug || !setCurrentJourneyUuid) {
+      console.log("DashboardTab: UUID 설정 건너뜀 - 값 없음");
+      return;
+    }
+    
+    if (slug === currentJourneyUuid) {
+      console.log("DashboardTab: UUID 이미 설정됨");
+      return;
+    }
+    
+    console.log("DashboardTab: UUID 설정:", slug);
     setCurrentJourneyUuid(slug);
-  }, [slug, setCurrentJourneyUuid]);
+  }, [slug, setCurrentJourneyUuid, currentJourneyUuid]);
 
   // UUID가 설정되면 ID 가져오기
   useEffect(() => {
@@ -86,9 +108,9 @@ export default function DashboardTab({ slug }: { slug?: string }) {
   // 주차 데이터 가져오기 - 안전하게 기본값 제공
   const { weeks = [], isLoading: weeksLoading = false } = useWeeks(currentJourneyId || 0) || {};
 
-  // 전체 미션 인스턴스 가져오기 - 안전하게 기본값 제공
+  // 전체 미션 인스턴스 가져오기 - slug 직접 전달하도록 개선
   const { missionInstances = [], isLoading: missionsLoading = false } = 
-    useJourneyMissionInstances(currentJourneyId || 0) || {};
+    useJourneyMissionInstances(currentJourneyId || 0, slug) || {};
 
   useEffect(() => {
     console.log("DashboardTab useEffect 실행 - 데이터 확인:", { 
@@ -186,7 +208,6 @@ export default function DashboardTab({ slug }: { slug?: string }) {
             isCurrentUser: profileId === userId,
           };
         });
-
 
         // 점수별 내림차순 정렬 및 순위 할당
         leaderboard.sort((a, b) => b.total_score - a.total_score);

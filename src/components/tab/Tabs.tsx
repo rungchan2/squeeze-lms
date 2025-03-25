@@ -60,19 +60,33 @@ function Tabs({
       const defaultPath = tabs[0].props.path;
       setActiveIndex(defaultPath);
       
-      const newParams = new URLSearchParams(searchParams.toString());
-      newParams.set('tab', defaultPath);
-      router.push(`?${newParams.toString()}`);
+      try {
+        const newParams = new URLSearchParams(searchParams.toString());
+        newParams.set('tab', defaultPath);
+        const newUrl = `?${newParams.toString()}`;
+        
+        if (window.location.search !== newUrl) {
+          router.push(newUrl, { scroll: false });
+        }
+      } catch (error) {
+        console.error("탭 라우팅 오류:", error);
+      }
     }
   }, [activeIndex, tabs, router, searchParams, usePath]);
 
   const handleTabClick = (path: string | undefined, index: number) => {
     if (usePath && path) {
+      if (activeIndex === path) return;
+      
       setActiveIndex(path);
       
-      const newParams = new URLSearchParams(searchParams.toString());
-      newParams.set('tab', path);
-      router.push(`?${newParams.toString()}`);
+      try {
+        const newParams = new URLSearchParams(searchParams.toString());
+        newParams.set('tab', path);
+        router.push(`?${newParams.toString()}`, { scroll: false });
+      } catch (error) {
+        console.error("탭 클릭 라우팅 오류:", error);
+      }
     } else {
       setActiveIndex(String(index));
     }

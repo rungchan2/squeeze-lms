@@ -76,7 +76,6 @@ async function getUserLike({ postId, userId }: LikeParams) {
 }
 
 export function useLikes(postId: number) {
-  const supabase = createClient();
   const queryClient = useQueryClient();
   const likesCountQueryKey = ["likes-count", postId] as const;
   const userLikeQueryKeyPrefix = ["user-like", postId] as const;

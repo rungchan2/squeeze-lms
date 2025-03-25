@@ -4,7 +4,6 @@ import { getUser, getUserProfile, logout } from "@/app/(auth)/actions";
 import { encrypt, decrypt } from "@/utils/encryption";
 import { redirect } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
-import Cookies from "js-cookie";
 
 // 역할 타입 정의
 export type Role = "user" | "teacher" | "admin";

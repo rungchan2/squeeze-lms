@@ -12,6 +12,12 @@ const nextConfig = {
   experimental: {
     // ... 다른 experimental 설정들 ...
   },
+  // 프로덕션 빌드에서도 콘솔 로그 유지
+  compiler: {
+    removeConsole: {
+      exclude: ['log', 'warn', 'error', 'info', 'debug'],
+    },
+  },
 };
 
 module.exports = nextConfig; 

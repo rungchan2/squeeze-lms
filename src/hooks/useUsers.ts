@@ -3,12 +3,6 @@ import { User, CreateUser } from "@/types";
 import useSWRInfinite from "swr/infinite";
 import useSWR from "swr";
 
-// 기본 페이지네이션 타입 정의
-interface PaginationParams {
-  pageIndex: number;
-  pageSize: number;
-}
-
 // 단일 사용자 조회 함수
 async function fetchUser(userId: number) {
   if (!userId) return null;
