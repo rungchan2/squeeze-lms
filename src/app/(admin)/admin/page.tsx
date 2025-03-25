@@ -3,7 +3,6 @@
 import { useAuthStore } from "@/store/auth";
 import { toaster } from "@/components/ui/toaster";
 import Button from "@/components/common/Button";
-import { Table } from "@chakra-ui/react";
 import Select from "react-select";
 import { useOrganization } from "@/hooks/useOrganization";
 export default function AdminPage() {

@@ -119,7 +119,6 @@
 .buttonContainer {
   align-self: flex-end;
   margin-top: 10px;
-  min-width: 100px;
   display: flex;
   flex-direction: row;
   align-items: center;

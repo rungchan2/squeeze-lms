@@ -32,6 +32,7 @@ const fetchNotificationsPage = async ({
     .from("notifications")
     .select("*", { count: 'exact' })
     .eq("receiver_id", userId)
+    .order("read_at", { ascending: true, nullsFirst: true })
     .order("created_at", { ascending: false })
     .range(from, to);
     

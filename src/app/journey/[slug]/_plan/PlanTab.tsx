@@ -14,6 +14,7 @@ import { FaWandMagicSparkles } from "react-icons/fa6";
 import { useSearchParams } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
 import { useJourneyStore } from "@/store/journey";
+import Footer from "@/components/common/Footer";
 
 // WeekCard 컴포넌트를 메모이제이션
 const MemoizedWeekCard = memo(WeekCard);
@@ -151,7 +152,7 @@ export default function PlanTab({ slug }: { slug: string }) {
   return (
     <PlanContainer>
       <div className="header">
-        <Heading level={2}>여행 일정</Heading>
+        <Heading level={3}>여행 일정</Heading>
       </div>
 
       <Suspense fallback={<Spinner />}>
@@ -186,6 +187,7 @@ export default function PlanTab({ slug }: { slug: string }) {
           </Text>
         </FloatingButton>
       </AdminOnly>
+      <Footer />
     </PlanContainer>
   );
 }

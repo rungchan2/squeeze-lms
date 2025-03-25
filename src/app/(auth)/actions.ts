@@ -45,6 +45,7 @@ export async function logout() {
   await supabase.auth.signOut();
   Cookies.remove("sb-");
   Cookies.remove("auth-token");
+  Cookies.remove("auth_data");
 }
 
 export async function signUpWithEmail(email: string, password: string) {

@@ -25,7 +25,7 @@ export interface UserState {
   // 액션
   fetchUser: () => void;
   refreshUser: () => Promise<void>;
-  logout: () => Promise<{ success: boolean; error?: unknown }>;
+  logout: () => Promise<void>;
 }
 
 // 암호화된 스토리지 구현
@@ -152,9 +152,10 @@ export const useAuthStore = create<UserState>()(
           console.error("refreshUser 오류:", error);
           set({
             loading: false,
-            error: error instanceof Error
-              ? error.message
-              : "사용자 정보 갱신 중 오류가 발생했습니다",
+            error:
+              error instanceof Error
+                ? error.message
+                : "사용자 정보 갱신 중 오류가 발생했습니다",
           });
         }
       },
@@ -162,6 +163,8 @@ export const useAuthStore = create<UserState>()(
       // 로그아웃 처리
       logout: async () => {
         try {
+          console.log("logout 함수 호출됨");
+
           // 상태를 먼저 초기화하고 나서 supabase.auth.signOut() 호출
           set({
             id: null,
@@ -176,21 +179,20 @@ export const useAuthStore = create<UserState>()(
             lastUpdated: null,
             organizationId: null,
           });
+          console.log("상태 초기화 완료");
 
           // 로컬 스토리지에서 auth-store 데이터 삭제
           if (typeof window !== "undefined") {
             localStorage.removeItem("auth-store");
-            // 쿠키 삭제
-            Object.keys(Cookies.get()).forEach(cookieName => {
-              if (cookieName.startsWith('sb-') || cookieName === 'auth-token' || cookieName === 'auth_data') {
-                Cookies.remove(cookieName);
-              }
-            });
           }
 
-          // actions의 logout 함수 호출 제거 - 순환 참조 방지
-          
-          return { success: true };
+          // 마지막으로 supabase.auth.signOut() 호출
+          // 이 함수가 실패하더라도 이미 상태와 로컬 스토리지는 초기화됨
+          try {
+            await logout();
+          } catch (error) {
+            console.error("supabase.auth.signOut() 오류:", error);
+          }
         } catch (error) {
           console.error("logout 함수 오류:", error);
           set({
@@ -200,7 +202,6 @@ export const useAuthStore = create<UserState>()(
                 ? error.message
                 : "로그아웃 중 오류가 발생했습니다",
           });
-          return { success: false, error };
         }
       },
     }),
@@ -212,6 +213,7 @@ export const useAuthStore = create<UserState>()(
         removeItem: encryptedStorage.removeItem,
       },
       partialize: (state) => ({
+        id: state.id,
         uid: state.uid,
         email: state.email,
         role: state.role,

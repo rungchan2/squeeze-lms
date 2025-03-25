@@ -27,7 +27,10 @@ export default function NotificationCard({
   const router = useRouter();
   return (
     <Container>
-      <div className={styles.notificationCard} onClick={() => setIsOpen(true)}>
+      <div className={styles.notificationCard} onClick={() => {
+        setIsOpen(true)
+        readNotification(notification.id)
+      }}>
         <div className={styles.contentContainer}>
           <FaBell
             color={
@@ -88,13 +91,13 @@ export default function NotificationCard({
           <div className={styles.buttonContainer}>
             <Button
               variant="flat"
-              maxWidth={60}
+              maxWidth={100}
               onClick={(e) => {
                 e.stopPropagation();
                 router.push(notification.link || "");
               }}
             >
-              <Text variant="small">수락</Text>
+              <Text variant="caption">수락</Text>
             </Button>
           </div>
         )}
@@ -104,7 +107,7 @@ export default function NotificationCard({
               알림 상세
             </Text>
             <Text>{notification.message}</Text>
-            {notification.link && (
+            {notification.link && notification.type !== "request" && (
               <Text
                 variant="small"
                 color="var(--primary-400)"

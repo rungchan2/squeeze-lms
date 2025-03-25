@@ -72,6 +72,9 @@
   --bronze-300: #FFD962;
   --bronze-400: #FFCC31;
   --bronze-500: #FFC200;
+
+  --footer-height: 70px;
+  --navigation-height: 70px;
 }
 
 html,
@@ -89,7 +92,7 @@ body {
 }
 
 .container {
-  min-height: calc(100vh - 70px);
+  min-height: calc(100vh - 140px);
   padding: 16px 16px 0px 16px;
   overflow-y: auto;
 }

@@ -41,7 +41,7 @@ export function useJourneyMissionInstances(
     })) as unknown as (JourneyMissionInstance & {
       mission: Mission;
     })[];
-  }, [weekId]);
+  }, [weekId, currentJourneyUuid]);
 
   // SWR 훅 사용
   const {
@@ -50,7 +50,7 @@ export function useJourneyMissionInstances(
     isLoading,
     mutate,
   } = useSWR<(JourneyMissionInstance & { mission: Mission })[]>(
-    weekId ? `mission-instances-${weekId}` : "all-mission-instances",
+    currentJourneyUuid ? (weekId ? `mission-instances-${weekId}-${currentJourneyUuid}` : `all-mission-instances-${currentJourneyUuid}`) : null,
     fetcher,
     {
       revalidateOnFocus: false,

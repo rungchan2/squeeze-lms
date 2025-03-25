@@ -121,9 +121,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const now = Date.now();
         const needsRefresh = !lastUpdated || now - lastUpdated > 30 * 60 * 1000; // 30분
 
-        if (user && (!isAuthenticated || needsRefresh)) {
-          await refreshUser();
-        } else if (!user && isAuthenticated) {
+        if (user) {
+          // 로그인은 되어 있지만 id가 없거나 인증 상태가 아니거나 리프레시가 필요한 경우
+          if (!id || !isAuthenticated || needsRefresh) {
+            await refreshUser();
+          }
+        } else if (isAuthenticated) {
+          // Supabase 세션은 없는데 인증 상태인 경우 로그아웃
           await logout();
         }
       } catch (error) {
@@ -193,7 +197,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (initTimer) clearTimeout(initTimer);
       if (subscription) subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchUser, id, isAuthenticated, lastUpdated, logout, refreshUser]);
 
   // 로딩 상태 계산 - 초기화가 완료되면 로딩 상태 종료
   const contextLoading = !isInitialized || storeLoading;

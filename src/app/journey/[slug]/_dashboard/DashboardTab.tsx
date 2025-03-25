@@ -8,7 +8,6 @@ import Spinner from "@/components/common/Spinner";
 import { FaTrophy } from "react-icons/fa";
 import { ProfileImage } from "@/components/navigation/ProfileImage";
 import { useAuth } from "@/components/AuthProvider";
-import { usePathname } from "next/navigation";
 import { Box } from "@chakra-ui/react";
 import { z } from "zod";
 import { useJourneyStore } from "@/store/journey";
@@ -26,14 +25,14 @@ const leaderboardUserSchema = z.object({
   organization_name: z.string().nullable(),
   total_score: z.number(),
   rank: z.number(),
-  isCurrentUser: z.boolean()
+  isCurrentUser: z.boolean(),
 });
 
 const submissionStatsSchema = z.object({
   totalPosts: z.number(),
   completedPosts: z.number(),
   pendingPosts: z.number(),
-  completionRate: z.number()
+  completionRate: z.number(),
 });
 
 // 타입 정의
@@ -54,37 +53,44 @@ export default function DashboardTab() {
   const { currentJourneyId } = useJourneyStore();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [leaderboardUsers, setLeaderboardUsers] = useState<LeaderboardUser[]>([]);
+  const [leaderboardUsers, setLeaderboardUsers] = useState<LeaderboardUser[]>(
+    []
+  );
   const [weekProgress, setWeekProgress] = useState<WeekProgress[]>([]);
   const [totalCompletionRate, setTotalCompletionRate] = useState(0);
 
   // 주차 데이터 가져오기
   const { weeks, isLoading: weeksLoading } = useWeeks(currentJourneyId || 0);
-  
+
   // 전체 미션 인스턴스 가져오기
-  const { missionInstances, isLoading: missionsLoading } = useJourneyMissionInstances(0);
+  const { missionInstances, isLoading: missionsLoading } =
+    useJourneyMissionInstances(0);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !currentJourneyId) {
+      return;
+    }
 
     async function fetchDashboardData() {
       try {
         setIsLoading(true);
-        
+        setError(null);
+
+        const supabase = createClient();
+
         // 1. 점수 데이터 가져오기
-        const { data: pointsData, error: pointsError } = await getUserPointsByJourneyId(currentJourneyId);
+        const { data: pointsData, error: pointsError } =
+          await getUserPointsByJourneyId(currentJourneyId);
         if (pointsError) {
           console.error("포인트 데이터 가져오기 오류:", pointsError);
           throw new Error("포인트 데이터를 가져오는 중 오류 발생");
         }
-        
+
         // 2. 사용자별 점수 계산 및 리더보드 생성
-        const supabase = createClient();
-        
         // 모든 사용자 프로필 가져오기
-        const { data: profiles, error: profilesError } = await supabase
-          .from("profiles")
-          .select(`
+        const { data: profiles, error: profilesError } = await supabase.from(
+          "profiles"
+        ).select(`
             id, 
             first_name, 
             last_name, 
@@ -94,29 +100,30 @@ export default function DashboardTab() {
               name
             )
           `);
-        
-        if (profilesError) throw new Error("프로필 데이터를 가져오는 중 오류 발생");
-        
+
+        if (profilesError)
+          throw new Error("프로필 데이터를 가져오는 중 오류 발생");
+
         // 사용자별 점수 계산
         const userScores: Record<number, number> = {};
-        
+
         if (pointsData) {
           pointsData.forEach((point: any) => {
             const userId = point.profile_id;
             const score = point.total_points || 0;
-            
+
             if (!userScores[userId]) {
               userScores[userId] = 0;
             }
             userScores[userId] += score;
           });
         }
-        
+
         // 리더보드 데이터 구성
         const leaderboard = Object.keys(userScores).map((userIdStr) => {
           const profileId = Number(userIdStr);
-          const profile = profiles?.find(p => p.id === profileId);
-          
+          const profile = profiles?.find((p) => p.id === profileId);
+
           return {
             id: profileId,
             first_name: profile?.first_name || null,
@@ -128,75 +135,85 @@ export default function DashboardTab() {
             isCurrentUser: profileId === userId,
           };
         });
-        
+
+
         // 점수별 내림차순 정렬 및 순위 할당
         leaderboard.sort((a, b) => b.total_score - a.total_score);
         leaderboard.forEach((user, index) => {
           user.rank = index + 1;
         });
-        
+
         setLeaderboardUsers(leaderboard);
-        
+
         // 3. 주차별 진행 상황 계산
         if (weeks && missionInstances && pointsData) {
-          const weekProgressData: WeekProgress[] = weeks.map(week => {
+          const weekProgressData: WeekProgress[] = weeks.map((week) => {
             // 해당 주차의 미션 인스턴스 찾기
             const weekMissions = missionInstances.filter(
-              instance => instance.journey_week_id === week.id
+              (instance) => instance.journey_week_id === week.id
             );
-            
+
             // 완료된 미션 수 계산 (user_points 기준)
-            const weekMissionsIds = weekMissions.map(mission => mission.id);
-            const completedMissions = pointsData.filter(
-              (point: any) => {
-                return point.profile_id === userId && 
-                  point.mission_instance_id && 
-                  weekMissionsIds.includes(point.mission_instance_id);
-              }
-            ).length;
-            
+            const weekMissionsIds = weekMissions.map((mission) => mission.id);
+            const completedMissions = pointsData.filter((point: any) => {
+              return (
+                point.profile_id === userId &&
+                point.mission_instance_id &&
+                weekMissionsIds.includes(point.mission_instance_id)
+              );
+            }).length;
+
             const totalMissions = weekMissions.length;
-            const completionRate = totalMissions > 0 
-              ? Math.round((completedMissions / totalMissions) * 100) 
-              : 0;
-            
+            const completionRate =
+              totalMissions > 0
+                ? Math.round((completedMissions / totalMissions) * 100)
+                : 0;
+
             return {
               id: week.id,
               name: week.name || `Week ${week.week_number}`,
               weekNumber: week.week_number || 0,
               totalMissions,
               completedMissions,
-              completionRate
+              completionRate,
             };
           });
-          
+
           // 주차 번호 기준 정렬
           weekProgressData.sort((a, b) => a.weekNumber - b.weekNumber);
           setWeekProgress(weekProgressData);
-          
+
           // 전체 완료율 계산
-          const totalMissions = weekProgressData.reduce((sum, week) => sum + week.totalMissions, 0);
-          const totalCompleted = weekProgressData.reduce((sum, week) => sum + week.completedMissions, 0);
-          const overallRate = totalMissions > 0 
-            ? Math.round((totalCompleted / totalMissions) * 100) 
-            : 0;
-          
+          const totalMissions = weekProgressData.reduce(
+            (sum, week) => sum + week.totalMissions,
+            0
+          );
+          const totalCompleted = weekProgressData.reduce(
+            (sum, week) => sum + week.completedMissions,
+            0
+          );
+          const overallRate =
+            totalMissions > 0
+              ? Math.round((totalCompleted / totalMissions) * 100)
+              : 0;
+
           setTotalCompletionRate(overallRate);
         }
-        
       } catch (err) {
         console.error("대시보드 데이터를 가져오는 중 오류 발생:", err);
-        setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.");
+        setError(
+          err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."
+        );
       } finally {
         setIsLoading(false);
       }
     }
-    
-    if (!weeksLoading && !missionsLoading) {
+
+    // 주차 및 미션 데이터가 로딩되었거나 로딩 중이 아닐때 대시보드 데이터 가져오기
+    if (weeks && missionInstances) {
       fetchDashboardData();
     }
-    
-  }, [currentJourneyId, userId, weeks, missionInstances, weeksLoading, missionsLoading]);
+  }, [currentJourneyId, userId, weeks, missionInstances]);
 
   if (isLoading || weeksLoading || missionsLoading) {
     return <Spinner />;
@@ -217,7 +234,7 @@ export default function DashboardTab() {
         <Text variant="body" fontWeight="bold" className="section-title">
           전체 미션 진행 상황
         </Text>
-        
+
         <StatsContainer>
           <CircularProgressWrapper>
             <Box position="relative" width="120px" height="120px">
@@ -242,32 +259,43 @@ export default function DashboardTab() {
             </Box>
             <Text variant="caption">전체 미션 완료율</Text>
           </CircularProgressWrapper>
-          
+
           <StatsDetailsContainer>
             <StatItem>
-              <Text variant="body">전체 미션 수</Text>
+              <Text variant="body" color="var(--grey-500)">
+                전체 미션 수
+              </Text>
               <Text variant="body" fontWeight="bold">
-                {weekProgress.reduce((sum, week) => sum + week.totalMissions, 0)}개
+                {weekProgress.reduce(
+                  (sum, week) => sum + week.totalMissions,
+                  0
+                )}
+                개
               </Text>
             </StatItem>
             <StatItem>
-              <Text variant="body">완료한 미션 수</Text>
-              <Text
-                variant="body"
-                fontWeight="bold"
-                color="var(--primary-500)"
-              >
-                {weekProgress.reduce((sum, week) => sum + week.completedMissions, 0)}개
+              <Text variant="body" color="var(--grey-500)">
+                완료한 미션 수
+              </Text>
+              <Text variant="body" fontWeight="bold" color="var(--primary-500)">
+                {weekProgress.reduce(
+                  (sum, week) => sum + week.completedMissions,
+                  0
+                )}
+                개
               </Text>
             </StatItem>
             <StatItem>
-              <Text variant="body">남은 미션 수</Text>
-              <Text
-                variant="body"
-                fontWeight="bold"
-                color="var(--warning-500)"
-              >
-                {weekProgress.reduce((sum, week) => sum + (week.totalMissions - week.completedMissions), 0)}개
+              <Text variant="body" color="var(--grey-500)">
+                남은 미션 수
+              </Text>
+              <Text variant="body" fontWeight="bold" color="var(--warning-500)">
+                {weekProgress.reduce(
+                  (sum, week) =>
+                    sum + (week.totalMissions - week.completedMissions),
+                  0
+                )}
+                개
               </Text>
             </StatItem>
           </StatsDetailsContainer>
@@ -282,14 +310,18 @@ export default function DashboardTab() {
 
         {weekProgress.length > 0 ? (
           <WeekProgressContainer>
-            {weekProgress.map(week => (
+            {weekProgress.map((week) => (
               <WeekProgressItem key={week.id}>
                 <WeekHeader>
                   <Heading level={4}>{week.name}</Heading>
-                  <Text 
-                    variant="body" 
-                    fontWeight="bold" 
-                    color={week.completionRate >= 100 ? "var(--primary-500)" : "var(--warning-500)"}
+                  <Text
+                    variant="body"
+                    fontWeight="bold"
+                    color={
+                      week.completionRate >= 100
+                        ? "var(--primary-500)"
+                        : "var(--warning-500)"
+                    }
                   >
                     {week.completionRate}%
                   </Text>
@@ -308,13 +340,21 @@ export default function DashboardTab() {
                   </MissionCountItem>
                   <MissionCountItem>
                     <Text variant="caption">완료</Text>
-                    <Text variant="body" fontWeight="bold" color="var(--primary-500)">
+                    <Text
+                      variant="body"
+                      fontWeight="bold"
+                      color="var(--primary-500)"
+                    >
                       {week.completedMissions}개
                     </Text>
                   </MissionCountItem>
                   <MissionCountItem>
                     <Text variant="caption">남음</Text>
-                    <Text variant="body" fontWeight="bold" color="var(--warning-500)">
+                    <Text
+                      variant="body"
+                      fontWeight="bold"
+                      color="var(--warning-500)"
+                    >
                       {week.totalMissions - week.completedMissions}개
                     </Text>
                   </MissionCountItem>
@@ -379,7 +419,9 @@ export default function DashboardTab() {
           </LeaderboardContainer>
         ) : (
           <EmptyState>
-            <Text color="var(--grey-500)">아직 리더보드 데이터가 없습니다.</Text>
+            <Text color="var(--grey-500)">
+              아직 리더보드 데이터가 없습니다.
+            </Text>
           </EmptyState>
         )}
       </SectionContainer>
@@ -391,7 +433,6 @@ const DashboardTabContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  padding: 1rem;
 `;
 
 const SectionContainer = styled.div`
@@ -462,6 +503,7 @@ const CircularProgressWrapper = styled.div`
 `;
 
 const StatsDetailsContainer = styled.div`
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -469,6 +511,7 @@ const StatsDetailsContainer = styled.div`
 `;
 
 const StatItem = styled.div`
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;

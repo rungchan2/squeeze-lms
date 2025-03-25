@@ -49,12 +49,17 @@ export default function MissionCard({
   const isDDayPassed = difference <= 0;
   const formattedDateStart =
     dayjs(missionInstance?.release_date || "").format("M/D") === "Invalid Date"
-      ? "날짜없음"
+      ? ""
       : dayjs(missionInstance?.release_date || "").format("M/D");
   const formattedDateEnd =
     dayjs(missionInstance?.expiry_date || "").format("M/D") === "Invalid Date"
-      ? "날짜없음"
+      ? ""
       : dayjs(missionInstance?.expiry_date || "").format("M/D");
+
+  const dateString =
+    formattedDateStart || formattedDateEnd
+      ? `${formattedDateStart} ~ ${formattedDateEnd}`
+      : "날짜없음";
 
   const goToEditMission = (missionId: number) => {
     router.push(`/journey/${slug}/teacher/edit-mission/${missionId}`);
@@ -85,7 +90,7 @@ export default function MissionCard({
           {!isModal && missionInstance && (
             <div className="horizontal-mission-container">
               <Text variant="caption" color="var(--grey-600)">
-                {formattedDateStart} ~ {formattedDateEnd}
+                {dateString}
               </Text>
               {missionInstance.expiry_date && (
                 <div

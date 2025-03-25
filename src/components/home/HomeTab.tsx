@@ -17,6 +17,7 @@ import { AdminOnly } from "../auth/AdminOnly";
 import { useCallback, useEffect, useRef } from "react";
 import { useJourneyStore } from "@/store/journey";
 import { useParams } from "next/navigation";
+import Footer from "../common/Footer";
 
 export default function HomeTab() {
   const { clearCurrentJourneyId, clearCurrentJourneyUuid } = useJourneyStore();
@@ -72,6 +73,7 @@ function JourneyTab() {
           </Text>
         </FloatingButton>
       </AdminOnly>
+      <Footer />
     </JourneysContainer>
   );
 }
@@ -162,6 +164,7 @@ function NotificationTab() {
           )}
         </div>
       )}
+      <Footer />
     </NotificationsContainer>
   );
 }
@@ -195,5 +198,10 @@ const EmptyState = styled.div`
 `;
 
 function ProfileTab() {
-  return <MyPage />;
+  return (
+    <>
+      <MyPage />
+      <Footer />
+    </>
+  );
 }
