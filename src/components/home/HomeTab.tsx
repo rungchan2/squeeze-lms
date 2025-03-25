@@ -20,10 +20,11 @@ import { useParams } from "next/navigation";
 import Footer from "../common/Footer";
 import { useAuth } from "../AuthProvider";
 import { Error } from "../common/Error";
+import { Loading } from "../common/Loading";
 
 export default function HomeTab() {
   const { clearCurrentJourneyId, clearCurrentJourneyUuid } = useJourneyStore();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const { slug } = useParams();
   const uuid = slug as string;
   useEffect(() => {
@@ -33,6 +34,9 @@ export default function HomeTab() {
     }
   }, [clearCurrentJourneyId, clearCurrentJourneyUuid, uuid]);
   if (!isAuthenticated) {
+    if (loading) {
+      return <Loading />;
+    }
     return <Error message="로그인 후 이용해주세요." />;
   }
 
@@ -57,7 +61,7 @@ function JourneyTab() {
   if (error) {
     return <div>Error: {error.message}</div>;
   }
-  
+
   return (
     <JourneysContainer>
       {isLoading ? (
@@ -92,14 +96,14 @@ const JourneysContainer = styled.div`
 `;
 
 function NotificationTab() {
-  const { 
-    notifications, 
-    error, 
+  const {
+    notifications,
+    error,
     isLoading,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    refetch 
+    refetch,
   } = useNotifications(10);
 
   // 무한 스크롤을 위한 인터섹션 옵저버
@@ -107,7 +111,7 @@ function NotificationTab() {
   const lastItemRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (isFetchingNextPage) return;
-      
+
       if (observerRef.current) {
         observerRef.current.disconnect();
       }
@@ -141,20 +145,17 @@ function NotificationTab() {
       </div>
     );
   }
-  
+
   return (
     <NotificationsContainer>
       {notifications.length === 0 ? (
         <EmptyState>알림이 없습니다.</EmptyState>
       ) : (
-        <div className='notification-list'>
+        <div className="notification-list">
           {notifications.map((notification, index) => {
             const isLastItem = index === notifications.length - 1;
             return (
-              <div 
-                key={notification.id}
-                ref={isLastItem ? lastItemRef : null}
-              >
+              <div key={notification.id} ref={isLastItem ? lastItemRef : null}>
                 <NotificationCard
                   notification={notification}
                   readNotification={handleReadNotification}
@@ -162,7 +163,7 @@ function NotificationTab() {
               </div>
             );
           })}
-          
+
           {isFetchingNextPage && (
             <div>
               <Spinner size="24px" style={{ marginTop: "12px" }} />

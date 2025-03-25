@@ -12,7 +12,6 @@ import { Menu, Portal } from "@chakra-ui/react";
 import { useJourney } from "@/hooks/useJourney";
 import { toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/components/AuthProvider";
-import { useJourneyStore } from "@/store/journey";
 
 export default function JourneyCard({ journey }: { journey: Journey }) {
   const defaultImage = "https://picsum.photos/200/200";
@@ -32,6 +31,7 @@ export default function JourneyCard({ journey }: { journey: Journey }) {
       toaster.create({
         title: "초대되지 않은 클라스 입니다. 담당 선생님에게 초대를 요구해주세요.",
         type: "warning",
+        duration: 1400,
       });
     }
   };

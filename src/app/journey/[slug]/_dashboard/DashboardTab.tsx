@@ -66,6 +66,7 @@ export default function DashboardTab({ slug }: { slug?: string }) {
     if (currentJourneyUuid === slug) return;
     
     try {
+      console.log("Setting current journey UUID in DashboardTab:", slug);
       setCurrentJourneyUuid(slug);
     } catch (error) {
       console.error("Error setting current journey UUID:", error);

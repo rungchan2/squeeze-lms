@@ -108,7 +108,8 @@ export const useAuthStore = create<UserState>()(
           }
 
           const { profile, error } = await getUserProfile();
-
+          console.log("profile", profile);
+          console.log("error", error);
           let currentPath = "";
           if (typeof window !== "undefined") {
             currentPath = window.location.pathname;

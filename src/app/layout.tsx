@@ -5,6 +5,8 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/toaster";
 import { Navigation } from "@/components/navigation/Navigation";
 import { KakaoScript } from "@/components/KaKao";
+import { GoogleAnalytics } from "@next/third-parties/google";
+
 
 export const metadata: Metadata = {
   title: "스퀴즈!",
@@ -35,6 +37,7 @@ export default function RootLayout({
           <SpeedInsights />
           <KakaoScript />
         </Providers>
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
       </body>
     </html>
   );
