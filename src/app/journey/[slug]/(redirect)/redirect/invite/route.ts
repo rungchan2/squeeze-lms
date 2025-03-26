@@ -23,13 +23,13 @@ export async function GET(
         )
       );
     }
-    const { data: profileId } = await supabase_server
+    const { data: profileIdAndRole } = await supabase_server
       .from("profiles")
-      .select("id")
+      .select("id, role")
       .eq("uid", user.id)
       .single();
 
-    if (!profileId) {
+    if (!profileIdAndRole) {
       return NextResponse.redirect(
         new URL("/error?message=프로필을 찾을 수 없습니다", request.url)
       );
@@ -53,7 +53,7 @@ export async function GET(
     const { data: existingRecord } = await supabase_server
       .from("user_journeys")
       .select("id")
-      .eq("user_id", profileId.id)
+      .eq("user_id", profileIdAndRole.id)
       .eq("journey_id", journey.id)
       .maybeSingle();
 
@@ -66,9 +66,9 @@ export async function GET(
     const { error: insertError } = await supabase_server
       .from("user_journeys")
       .insert({
-        user_id: profileId.id,
+        user_id: profileIdAndRole.id,
         journey_id: journey.id,
-        role_in_journey: "member", // 기본 역할 설정
+        role_in_journey: profileIdAndRole.role,
         joined_at: new Date().toISOString(),
       });
 

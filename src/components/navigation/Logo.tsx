@@ -14,6 +14,7 @@ export function Logo({ width }: { width: number }) {
       src={logo}
       alt="Logo"
       width={width}
+      priority
       onClick={() => router.push("/")}
       style={{ cursor: "pointer" }}
     />

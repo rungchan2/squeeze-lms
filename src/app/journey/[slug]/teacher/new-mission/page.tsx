@@ -15,9 +15,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { useEffect } from "react";
 import { mission } from "@/utils/mission/mission";
+import Tiptap from "@/components/richTextInput/RichTextEditor";
+import { useState } from "react";
 export default function NewMissionPage({ editMissionData }: { editMissionData?: Mission }) {
   const router = useRouter();
   const { role } = useAuth();
+  const [content, setContent] = useState<string | null>(editMissionData?.description || "");
   useEffect(() => {
     if (role === "user") {
       router.push("/");
@@ -126,7 +129,16 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
           title="미션 설명"
           errorMessage={errors.description?.message}
         >
-          <Textarea {...register("description")} minHeight="150px" placeholder="미션 설명 및 수행방법을 입력해주세요." />
+          <Tiptap
+          inputHeight="300px"
+          placeholder={
+            "미션가이드에 따라 미션을 완료해주세요."
+          }
+          content={content || ""}
+          onChange={(value) => {
+            setContent(value);
+          }}
+        />
         </InputAndTitle>
       </div>
       <Button variant="flat" onClick={handleSubmit(onSubmit)}>

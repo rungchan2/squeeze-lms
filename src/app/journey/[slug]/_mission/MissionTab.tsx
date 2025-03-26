@@ -8,7 +8,7 @@ import MissionCard from "@/app/journey/[slug]/_plan/MissionCard";
 import Spinner from "@/components/common/Spinner";
 import { useRouter, usePathname } from "next/navigation";
 import Text from "@/components/Text/Text";
-import { AdminOnly } from "@/components/auth/AdminOnly";
+import { TeacherOnly } from "@/components/auth/AdminOnly";
 import { FaWandMagicSparkles } from "react-icons/fa6";
 import { useAuth } from "@/components/AuthProvider";
 import Link from "next/link";
@@ -177,7 +177,7 @@ export default function MissionTab({ slug }: { slug: string }) {
         </div>
       )}
 
-      <AdminOnly>
+      <TeacherOnly>
         <FloatingButton
           onClick={() =>
             router.push(`/journey/${getSlugFromPathname()}/teacher/new-mission`)
@@ -188,7 +188,7 @@ export default function MissionTab({ slug }: { slug: string }) {
             새 미션
           </Text>
         </FloatingButton>
-      </AdminOnly>
+      </TeacherOnly>
       <Footer />
     </MissionTabContainer>
   );

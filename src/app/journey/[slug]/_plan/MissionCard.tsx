@@ -13,6 +13,9 @@ import { toaster } from "@/components/ui/toaster";
 import { FaEdit } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { BiGridVertical } from "react-icons/bi";
+import { useEffect, useState } from "react";
 
 interface MissionCardProps {
   mission: Mission;
@@ -37,14 +40,16 @@ export default function MissionCard({
   const router = useRouter();
   const params = useParams();
   const slug = params.slug;
+  const searchParams = useSearchParams();
+  const isTabMission = searchParams.get("tab") === "missions";
 
   const difference = calcDifference(missionInstance?.expiry_date || "");
   const dDay =
     difference === 0
       ? "D-Day"
       : difference > 0
-      ? `D-${difference}`
-      : `D+${Math.abs(difference)}`;
+      ? `D+${difference}(지남)`
+      : `D-${Math.abs(difference)}`;
   const isDDay = difference === 0;
   const isDDayPassed = difference <= 0;
   const formattedDateStart =
@@ -70,10 +75,13 @@ export default function MissionCard({
       isModal={isModal}
       maxWidth={maxWidth}
       showDetails={showDetails}
+      isTabMission={isTabMission}
       style={style}
     >
       <div className="left-container">
-        {!isModal && <FiMenu size="16px" style={{ minWidth: "16px" }} />}
+        {!isModal && (
+          <BiGridVertical size="16px" style={{ minWidth: "16px" }} className="menu-icon"/>
+        )}
         <div className="mission-item-header">
           <div className="description-container">
             <Text variant="body" fontWeight="bold" className="description-text">
@@ -145,6 +153,7 @@ interface StyledMissionCardProps {
   isModal: boolean;
   maxWidth: string;
   showDetails: boolean;
+  isTabMission: boolean;
 }
 
 const StyledMissionCard = styled.div<StyledMissionCardProps>`
@@ -176,6 +185,12 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
     max-width: ${(props) =>
       props.isModal ? "100%" : "calc(100% - 30px)"}; /* 오른쪽 버튼 영역 고려 */
     overflow: hidden;
+
+    @media (max-width: 420px) {
+      .menu-icon {
+        display: none;
+      }
+    }
   }
 
   &:hover {
@@ -210,8 +225,8 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
   }
 
   .mission-actions {
-    display: flex;
-    gap: 0.5rem;
+    display: ${(props) => (props.isTabMission ? "none" : "flex")};
+    gap: 0.3rem;
     flex-shrink: 0;
   }
 

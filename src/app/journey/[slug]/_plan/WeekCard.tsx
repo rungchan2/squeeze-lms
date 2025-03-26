@@ -130,7 +130,7 @@ const IndexContainer = styled.div`
 const StyledWeekCard = styled.div`
   background: var(--white);
   border-radius: 8px;
-  padding: 16px;
+  padding: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   .week-header {

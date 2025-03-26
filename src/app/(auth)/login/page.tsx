@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styled from "@emotion/styled";
 import Heading from "@/components/Text/Heading";
 import { HStack, Separator } from "@chakra-ui/react";
@@ -12,16 +12,20 @@ import Text from "@/components/Text/Text";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { toaster } from "@/components/ui/toaster";
+
 export default function LoginPage() {
   const [isOpen, setIsOpen] = useState(false);
-  const { id } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [error, setError] = useState("");
   const isKakao = Boolean(navigator.userAgent.match("KAKAOTALK"));
 
-  if (id) {
-    router.push("/");
-  }
+  // 인증 상태에 따른 리다이렉션 처리
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
 
   const handleGoogleLogin = async () => {
     if (isKakao) {
@@ -46,7 +50,7 @@ export default function LoginPage() {
       <div className="login-container">
         <Heading level={2}>로그인</Heading>
         <GoogleLoginButton onClick={handleGoogleLogin} disabled={isKakao}>
-          <Image src="/google.svg" alt="Google" width={27} height={27} />
+          <Image src="/google.svg" alt="Google" width={27} height={27} priority />
           <Text weight="bold" color="var(--background)">
             Google로 로그인
           </Text>
@@ -80,6 +84,7 @@ export default function LoginPage() {
     </LoginContainer>
   );
 }
+
 const LoginContainer = styled.div`
   display: flex;
   max-width: 500px;

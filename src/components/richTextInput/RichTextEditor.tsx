@@ -39,9 +39,9 @@ const MenuBar = ({ editor }: MenuBarProps) => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -171,11 +171,14 @@ const RichTextEditor = ({
   placeholder,
   style,
   onChange,
+  inputHeight = "350px",
+  content
 }: {
   placeholder: string;
   style?: React.CSSProperties;
   content: string;
   onChange: (value: string) => void;
+  inputHeight?: string;
 }) => {
   const editor = useEditor({
     extensions: [
@@ -187,7 +190,7 @@ const RichTextEditor = ({
       Image,
       Underline,
     ],
-    content: `
+    content: content || `
       <p>
         ${placeholder}
       </p>
@@ -201,7 +204,15 @@ const RichTextEditor = ({
   return (
     <EditorContainer style={style}>
       <MenuBar editor={editor} />
-      <StyledContent editor={editor} />
+      <EditorWrapper>
+        <StyledContent 
+          editor={editor} 
+          className={inputHeight ? "custom-height" : ""}
+          style={{ 
+            "--editor-height": inputHeight
+          } as React.CSSProperties}
+        />
+      </EditorWrapper>
     </EditorContainer>
   );
 };
@@ -212,20 +223,14 @@ const EditorContainer = styled.div`
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   position: relative;
+  display: flex;
+  flex-direction: column;
+`;
 
-  .ProseMirror {
-  background-color: var(--white);
-  border: 1px solid var(--grey-300);
-  border-radius: 4px;
-  padding: 16px;
-  margin-bottom: 16px;
-
-  &:focus {
-    border-color: var(--primary-500);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(255, 143, 43, 0.2);
-  }
-}
+const EditorWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 const ControlGroup = styled.div<{ $isSticky: boolean }>`
@@ -243,10 +248,13 @@ const ButtonGroup = styled.div<{ $isSticky: boolean }>`
   gap: 4px;
   padding: 4px;
   border-radius: 0.5rem;
-  background-color: ${props => props.$isSticky ? 'var(--grey-50)' : 'var(--white)'};
-  backdrop-filter: ${props => props.$isSticky ? 'blur(5px) saturate(180%)' : 'none'};
+  background-color: ${(props) =>
+    props.$isSticky ? "var(--grey-50)" : "var(--white)"};
+  backdrop-filter: ${(props) =>
+    props.$isSticky ? "blur(5px) saturate(180%)" : "none"};
   transition: all 0.3s ease;
-  box-shadow: ${props => props.$isSticky ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none'};
+  box-shadow: ${(props) =>
+    props.$isSticky ? "0 2px 8px rgba(0, 0, 0, 0.1)" : "none"};
 `;
 
 const Button = styled.button<{ isActive: boolean }>`
@@ -266,88 +274,111 @@ const Button = styled.button<{ isActive: boolean }>`
 `;
 
 const StyledContent = styled(EditorContent)`
+  &.custom-height .tiptap.ProseMirror {
+    height: var(--editor-height) !important;
+  }
 
   .tiptap {
-    min-height: max(200px, 40dvh);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    
     :first-child {
       margin-top: 0;
     }
+  }
 
-    /* List styles */
-    ul,
-    ol {
-      padding: 0 1rem;
-      margin: 1.25rem 1rem 1.25rem 0.4rem;
+  .tiptap.ProseMirror {
+    height: 350px;
+    background-color: var(--white);
+    border: 1px solid var(--grey-300);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 16px;
+    min-height: 150px;
+    overflow-y: auto;
 
-      li p {
-        margin-top: 0.25em;
-        margin-bottom: 0.25em;
-      }
+    &:focus {
+      border-color: var(--primary-500);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(255, 143, 43, 0.2);
     }
+  }
 
-    /* Heading styles */
-    h1 {
-      font-size: 1.4rem;
-    }
-    h2 {
-      font-size: 1.2rem;
-    }
-    h3 {
-      font-size: 1.1rem;
-    }
-    h4 {
-      font-size: 1rem;
-    }
-    h5 {
-      font-size: 0.9rem;
-    }
-    h6 {
-      font-size: 0.8rem;
-    }
+  /* List styles */
+  ul,
+  ol {
+    padding: 0 1rem;
+    margin: 1.25rem 1rem 1.25rem 0.4rem;
 
-    /* Code and preformatted text styles */
+    li p {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+  }
+
+  /* Heading styles */
+  h1 {
+    font-size: 1.4rem;
+  }
+  h2 {
+    font-size: 1.2rem;
+  }
+  h3 {
+    font-size: 1.1rem;
+  }
+  h4 {
+    font-size: 1rem;
+  }
+  h5 {
+    font-size: 0.9rem;
+  }
+  h6 {
+    font-size: 0.8rem;
+  }
+
+  /* Code and preformatted text styles */
+  code {
+    background-color: #f3f0ff;
+    border-radius: 0.4rem;
+    color: #000;
+    font-size: 0.85rem;
+    padding: 0.25em 0.3em;
+  }
+
+  pre {
+    background: #000;
+    border-radius: 0.5rem;
+    color: #fff;
+    font-family: "JetBrainsMono", monospace;
+    margin: 1.5rem 0;
+    padding: 0.75rem 1rem;
+
     code {
-      background-color: #f3f0ff;
-      border-radius: 0.4rem;
-      color: #000;
-      font-size: 0.85rem;
-      padding: 0.25em 0.3em;
+      background: none;
+      color: inherit;
+      font-size: 0.8rem;
+      padding: 0;
     }
+  }
 
-    pre {
-      background: #000;
-      border-radius: 0.5rem;
-      color: #fff;
-      font-family: "JetBrainsMono", monospace;
-      margin: 1.5rem 0;
-      padding: 0.75rem 1rem;
+  mark {
+    background-color: #faf594;
+    border-radius: 0.4rem;
+    box-decoration-break: clone;
+    padding: 0.1rem 0.3rem;
+  }
 
-      code {
-        background: none;
-        color: inherit;
-        font-size: 0.8rem;
-        padding: 0;
-      }
-    }
+  blockquote {
+    border-left: 3px solid #d1d5db;
+    margin: 1.5rem 0;
+    padding-left: 1rem;
+  }
 
-    mark {
-      background-color: #faf594;
-      border-radius: 0.4rem;
-      box-decoration-break: clone;
-      padding: 0.1rem 0.3rem;
-    }
-
-    blockquote {
-      border-left: 3px solid #d1d5db;
-      margin: 1.5rem 0;
-      padding-left: 1rem;
-    }
-
-    hr {
-      border: none;
-      border-top: 1px solid #e5e7eb;
-      margin: 2rem 0;
-    }
+  hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 2rem 0;
   }
 `;
 

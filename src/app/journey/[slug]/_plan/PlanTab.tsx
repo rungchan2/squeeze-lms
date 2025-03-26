@@ -7,7 +7,7 @@ import Spinner from "@/components/common/Spinner";
 import { useWeeks } from "@/hooks/useWeeks";
 import styled from "@emotion/styled";
 import WeekCard from "./WeekCard";
-import { AdminOnly } from "@/components/auth/AdminOnly";
+import { TeacherOnly } from "@/components/auth/AdminOnly";
 import { FloatingButton } from "@/components/common/FloatingButton";
 import { FaWandMagicSparkles } from "react-icons/fa6";
 import { useSearchParams } from "next/navigation";
@@ -118,11 +118,11 @@ export default function PlanTab({ slug }: { slug: string }) {
           </div>
         ) : (
           <div className="empty-state">
-            <Text>등록된 주차가 없습니다. 새 주차를 추가해보세요.</Text>
+            <Text color="var(--grey-500)">등록된 주차가 없습니다. 새 주차를 추가해보세요.</Text>
           </div>
         )}
       </Suspense>
-      <AdminOnly>
+      <TeacherOnly>
         <FloatingButton onClick={openModal}>
           <FaWandMagicSparkles />
           <Text variant="body" fontWeight="bold" color="var(--white)">
@@ -160,7 +160,7 @@ export default function PlanTab({ slug }: { slug: string }) {
             </div>
           </div>
         </Modal>
-      </AdminOnly>
+      </TeacherOnly>
       <Footer />
     </PlanContainer>
   );
@@ -197,5 +197,6 @@ const PlanContainer = styled.div`
   .empty-state {
     text-align: center;
     padding: 2rem 0;
+    color: var(--grey-500);
   }
 `;

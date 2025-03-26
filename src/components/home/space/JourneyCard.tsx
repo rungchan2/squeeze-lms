@@ -47,7 +47,12 @@ export default function JourneyCard({ journey }: { journey: Journey }) {
           alt="space"
           width={65}
           height={65}
-          style={{ borderRadius: "10px" }}
+          style={{ 
+            borderRadius: "10px", 
+            objectFit: "cover",
+            width: "65px",
+            height: "65px"
+          }}
         />
         <TextContainer>
           <Text variant="body" fontWeight="bold">
@@ -63,7 +68,6 @@ export default function JourneyCard({ journey }: { journey: Journey }) {
           </DateContainer>
         </TextContainer>
       </InnerContainer>
-      <AdminOnly>
         <Menu.Root>
           <Menu.Trigger asChild onClick={(e) => e.stopPropagation()}>
             <div className="menu-trigger">
@@ -83,6 +87,7 @@ export default function JourneyCard({ journey }: { journey: Journey }) {
                 >
                   수정
                 </Menu.Item>
+                <AdminOnly>
                 <Menu.Item
                   style={{ cursor: "pointer" }}
                   value="delete"
@@ -97,11 +102,11 @@ export default function JourneyCard({ journey }: { journey: Journey }) {
                 >
                   삭제
                 </Menu.Item>
+                </AdminOnly>
               </Menu.Content>
             </Menu.Positioner>
           </Portal>
         </Menu.Root>
-      </AdminOnly>
     </Container>
   );
 }

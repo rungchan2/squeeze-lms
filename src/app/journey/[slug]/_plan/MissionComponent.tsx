@@ -11,7 +11,7 @@ import { Modal } from "@/components/modal/Modal";
 import { Input } from "@chakra-ui/react";
 import MissionCard from "./MissionCard";
 import { FaPlus, FaCheck } from "react-icons/fa6";
-import { AdminOnly } from "@/components/auth/AdminOnly";
+import { TeacherOnly } from "@/components/auth/AdminOnly";
 import { InputGroup } from "@/components/ui/input-group";
 import { IoSearch } from "react-icons/io5";
 import ChipGroup from "@/components/common/ChipGroup";
@@ -231,7 +231,7 @@ export default function MissionComponent({
     <MissionContainer>
       <div className="mission-header">
         <Heading level={3}>{weekName} 미션</Heading>
-        <AdminOnly>
+        <TeacherOnly>
           <IconContainer
             onClick={() => {
               deleteWeek(weekId);
@@ -244,7 +244,7 @@ export default function MissionComponent({
           >
             <RiDeleteBin6Line size="16px" />
           </IconContainer>
-        </AdminOnly>
+        </TeacherOnly>
       </div>
 
       {missionInstances.length > 0 ? (
@@ -260,10 +260,6 @@ export default function MissionComponent({
                   await deleteMissionInstance(instance.id);
                   // UI 즉시 업데이트
                   await mutateMissionInstances();
-                  toaster.create({
-                    title: "미션이 삭제되었습니다.",
-                    type: "success",
-                  });
                 } catch (error) {
                   console.error("Error removing mission:", error);
                   toaster.create({
@@ -286,7 +282,7 @@ export default function MissionComponent({
         </div>
       )}
 
-      <AdminOnly>
+      <TeacherOnly>
         <button
           className="add-mission-button"
           onClick={() => setShowSearch(true)}
@@ -294,7 +290,7 @@ export default function MissionComponent({
           <FaPlus />
           <span>미션 추가</span>
         </button>
-      </AdminOnly>
+      </TeacherOnly>
 
       <Modal isOpen={showSearch} onClose={() => setShowSearch(false)}>
         <ShowSearchContainer>

@@ -8,6 +8,8 @@ export function Loading() {
         flexDirection: "column",
         padding: "10px",
         gap: "10px",
+        maxWidth: "var(--breakpoint-tablet)",
+        margin: "0 auto",
       }}
     >
       <SkeletonText />

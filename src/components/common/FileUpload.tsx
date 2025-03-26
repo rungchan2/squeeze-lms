@@ -308,6 +308,11 @@ export default function FileUpload({
             alt={file.name}
             width={100}
             height={100}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover"
+            }}
           />
           <button className={styles.removeButton} onClick={removeFile}>
             ✕
@@ -329,6 +334,11 @@ export default function FileUpload({
               alt="업로드된 이미지"
               width={100}
               height={100}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover"
+              }}
             />
             <button
               className={styles.removeButton}

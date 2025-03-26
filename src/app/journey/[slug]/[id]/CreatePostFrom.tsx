@@ -1,7 +1,7 @@
 "use client";
 
 import MissionCard from "../_plan/MissionCard";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Spinner from "@/components/common/Spinner";
 import { useMissionInstance } from "@/hooks/useMissionInstance";
 import Tiptap from "@/components/richTextInput/RichTextEditor";
@@ -227,12 +227,12 @@ export default function DoMissionPage({
         <Heading level={3}>{missionInstance.mission.name}</Heading>
         <InputAndTitle
           title="미션 제목"
-          errorMessage={title.length === 0 ? "미션 제목을 입력해주세요." : ""}
+          errorMessage={title.length === 0 ? "미션 제목을 입력해주세요. (이름을 포함해 주세요)" : ""}
         >
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="미션 제목을 입력해주세요."
+            placeholder="학년 미션 제목을 입력해주세요."
           />
         </InputAndTitle>
         <Tiptap

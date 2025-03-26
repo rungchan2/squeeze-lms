@@ -49,6 +49,7 @@ export function ProfileImage({
         alt="Profile Image"
         width={500}
         height={500}
+        priority
         style={{
           width: "100%",
           height: "100%",
