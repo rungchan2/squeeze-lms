@@ -186,9 +186,7 @@ async function getMyLikedPosts(userId: number, journeySlug?: string) {
 
 async function getCompletedMissionIds(userId: number, journeySlug?: string) {
   if (!userId) return [];
-  
-  console.log("getCompletedMissionIds 호출:", { userId, journeySlug });
-  
+    
   const supabase = createClient();
   
   try {
@@ -216,7 +214,6 @@ async function getCompletedMissionIds(userId: number, journeySlug?: string) {
         console.log(`journey ${journeySlug}의 미션 인스턴스 ID:`, instanceIds);
         query = query.in("mission_instance_id", instanceIds);
       } else {
-        console.log(`journey ${journeySlug}에 미션 인스턴스가 없음`);
         // 해당 journey에 대한 mission instance가 없으면 빈 결과 반환
         return [];
       }
@@ -254,13 +251,6 @@ async function getCompletedMissionIds(userId: number, journeySlug?: string) {
     // 중복 제거하여 병합
     const completedIds = [...new Set([...completedFromPosts, ...completedFromPoints])];
     
-    console.log("완료된 미션 ID 목록:", {
-      userId,
-      journeySlug,
-      fromPosts: completedFromPosts.length,
-      fromPoints: completedFromPoints.length,
-      total: completedIds.length
-    });
     
     return completedIds;
   } catch (error) {

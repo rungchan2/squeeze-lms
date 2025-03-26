@@ -37,12 +37,7 @@ export default function MissionTab({ slug }: { slug: string }) {
   
   // 디버깅용 useEffect
   useEffect(() => {
-    console.log("MissionTab 컴포넌트 렌더링:", {
-      userId,
-      slug,
-      completedMissionIds: completedMissionIds,
-      missionInstancesCount: missionInstances?.length
-    });
+
     
     // 컴포넌트가 마운트 된 후 3초 후에 자동 refetch
     const timer = setTimeout(() => {

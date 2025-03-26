@@ -23,6 +23,7 @@ import Heading from "@/components/Text/Heading";
 import { deleteUserFromJourney } from "@/app/journey/actions";
 import Footer from "@/components/common/Footer";
 import { createClient } from "@/utils/supabase/client";
+import { sendEmail } from "@/utils/edge-functions/email";
 
 export default function UsersPage() {
   const { currentJourneyId } = useJourneyStore();
@@ -189,7 +190,7 @@ export default function UsersPage() {
     [currentMemberIds, invitedUsers, invitingUsers]
   );
 
-  const handleInvite = async (userId: number) => {
+  const handleInvite = async (userId: number, email: string) => {
     if (!userId) return;
     // 이미 멤버이거나 처리 중인 사용자는 무시
     if (
@@ -227,11 +228,23 @@ export default function UsersPage() {
       } else {
         // 초대 성공 시 초대된 사용자 목록에 추가
         setInvitedUsers((prev) => [...prev, userId]);
-        toaster.create({
-          title: "초대 완료",
-          type: "success",
-        });
-        //TODO: 2. 초대 이메일 보내기
+
+        const { error } = await sendEmail(
+          email ?? "",
+          `${journey.name}에 초대되었습니다.`,
+          `<p>안녕하세요, ${journey.name}에 초대되었습니다.</p> <p>클릭하여 여정에 참여해주세요.</p> <a href="${window.location.origin}/journey/${uuid}/redirect/invite">${journey.name}</a>`
+        );
+        if (error) {
+          toaster.create({
+            title: "초대 이메일 보내기 실패",
+            type: "error",
+          });
+        } else {
+          toaster.create({
+            title: "초대 완료",
+            type: "success",
+          });
+        }
       }
     } catch (error) {
       console.error("초대 처리 중 오류:", error);
@@ -454,7 +467,7 @@ export default function UsersPage() {
                             variant={
                               isUserInvited(user.id) ? "flat" : "outline"
                             }
-                            onClick={() => handleInvite(user.id)}
+                            onClick={() => handleInvite(user.id, user.email)}
                             disabled={
                               !user.id ||
                               isUserInvited(user.id) ||

@@ -7,14 +7,12 @@ export const userApi = {
 
   createUser: async (user: CreateUser) => {
     try {
-      console.log("Supabase createUser 호출 시작");
       const supabase = createClient();
       const { data, error } = await supabase
         .from("profiles")
         .insert(user)
         .select()
         .single();
-      console.log("Supabase createUser 호출 완료", data, error);
       return { data, error };
     } catch (e) {
       console.error("Supabase createUser 오류:", e);

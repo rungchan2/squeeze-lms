@@ -128,11 +128,10 @@ export default function DoMissionPage({
 
       // 유저 포인트 생성
       const { error: userPointError } = await userPoint.createUserPoint({
-        user_id: userId,
+        profile_id: userId,
         mission_instance_id: missionInstance.id,
         post_id: data?.id || 0,
-        amount: missionInstance.mission.points || 0,
-        journey_id: currentJourneyId || 0
+        total_points: missionInstance.mission.points || 0,
       });
       
       if (userPointError) {
@@ -159,7 +158,8 @@ export default function DoMissionPage({
 
       // 캐시 무효화를 위해 reload 후 리다이렉션
       setTimeout(() => {
-        router.push(`/journey/${slug}`);
+        // replace 메서드를 사용하여 캐시 무효화
+        window.location.href = `/journey/${slug}`;
       }, 500);
     } catch (error: any) {
       console.error("미션 제출 중 예외 발생:", error);
@@ -208,7 +208,8 @@ export default function DoMissionPage({
         title: "미션이 성공적으로 수정되었습니다!",
         type: "success",
       });
-      router.push(`/journey/${slug}`);
+      // 캐시 무효화를 위해 페이지 새로고침
+      window.location.href = `/journey/${slug}`;
     } catch (error: any) {
       console.error("미션 수정 중 예외 발생:", error);
       toaster.create({

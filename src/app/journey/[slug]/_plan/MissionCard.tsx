@@ -70,6 +70,12 @@ export default function MissionCard({
     router.push(`/journey/${slug}/teacher/edit-mission/${missionId}`);
   };
 
+  const RemoveHtmlTags = (text: string) => {
+    return text.replace(/<[^>]*>?/g, "");
+  };
+
+  const description = RemoveHtmlTags(mission.description || "");
+
   return (
     <StyledMissionCard
       isModal={isModal}
@@ -92,7 +98,7 @@ export default function MissionCard({
               className="description-text"
               color="var(--grey-600)"
             >
-              {mission.description}
+              {description}
             </Text>
           </div>
           {!isModal && missionInstance && (

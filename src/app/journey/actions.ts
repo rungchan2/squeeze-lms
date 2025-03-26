@@ -138,7 +138,6 @@ export async function getUserPointsByJourneyId(journeyId: number | null) {
     }
     
     if (!journeyMissionInstances || journeyMissionInstances.length === 0) {
-      console.log("[getUserPointsByJourneyId] 해당 주차들에 미션 인스턴스가 없음");
       return { data: [], error: null };
     }
     

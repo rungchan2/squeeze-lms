@@ -8,7 +8,7 @@ export type UserPoints = Database["public"]["Tables"]["user_points"]["Row"];
 const userPoint = {
   getUserPoints: async (userId: number) => {
     const supabase = createClient();
-    const { data, error } = await supabase.from("user_points").select("*").eq("profile_id", userId);
+    const { data, error } = await supabase.from("user_points").select("*, mission_instances(*)").eq("profile_id", userId);
     return { data, error };
   },
   
@@ -18,14 +18,7 @@ const userPoint = {
     try {
       // mission_instance_id가 null이면 기본값 0 사용
       const missionInstanceId = UserPointData.mission_instance_id || 0;
-      
-      console.log("createUserPoint 함수가 호출됨:", { 
-        user_id: UserPointData.user_id,
-        mission_instance_id: missionInstanceId,
-        post_id: UserPointData.post_id,
-        amount: UserPointData.amount
-      });
-      
+
       // 접근 방식 1: post_id가 있는 경우에만 중복 체크
       if (UserPointData.post_id) {
         // post_id를 기준으로 중복 검사 (더 정확한 중복 검사)
@@ -41,7 +34,6 @@ const userPoint = {
         
         // post_id로 이미 존재하면 중복으로 간주하고 기존 레코드를 반환
         if (existingByPostId) {
-          console.log("이미 해당 post_id의 유저 포인트가 존재함:", existingByPostId.id);
           return { data: existingByPostId, error: null };
         }
       }
@@ -50,7 +42,7 @@ const userPoint = {
       const { data: existingPoint, error: checkError } = await supabase
         .from("user_points")
         .select("id")
-        .eq("profile_id", UserPointData.user_id)
+        .eq("profile_id", UserPointData.profile_id)
         .eq("mission_instance_id", missionInstanceId)
         .maybeSingle();
       
@@ -60,9 +52,8 @@ const userPoint = {
         
       // 이미 존재하는 경우 충돌 방지를 위해 업데이트
       if (existingPoint) {
-        console.log("기존 포인트를 업데이트:", existingPoint.id);
         const updateData: any = {
-          total_points: UserPointData.amount
+          total_points: UserPointData.total_points
         };
         
         // post_id가 있는 경우에만 업데이트 필드에 추가
@@ -83,20 +74,18 @@ const userPoint = {
         return { data, error };
       }
       
-      // 새 레코드 생성 (DB 테이블에서 journey_id 제거 가정)
-      console.log("새 유저 포인트 생성 시도");
+      // 새 레코드 생성
       
       const { data, error } = await supabase.from("user_points").insert({
-        profile_id: UserPointData.user_id,
+        profile_id: UserPointData.profile_id,
         mission_instance_id: missionInstanceId,
         post_id: UserPointData.post_id,
-        total_points: UserPointData.amount
+        total_points: UserPointData.total_points
       });
       
       if (error) {
         console.error("포인트 생성 오류:", error);
       } else {
-        console.log("포인트 생성 성공:", data);
       }
       
       return { data, error: null };

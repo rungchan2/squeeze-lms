@@ -6,21 +6,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createMissionSchema } from "@/types";
 import InputAndTitle from "@/components/InputAndTitle";
 import { createListCollection, Input, Portal, Select } from "@chakra-ui/react";
-import { Textarea } from "@chakra-ui/react";
 import Button from "@/components/common/Button";
 import styled from "@emotion/styled";
 import Heading from "@/components/Text/Heading";
 import { toaster } from "@/components/ui/toaster";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { mission } from "@/utils/mission/mission";
 import Tiptap from "@/components/richTextInput/RichTextEditor";
-import { useState } from "react";
+
 export default function NewMissionPage({ editMissionData }: { editMissionData?: Mission }) {
   const router = useRouter();
   const { role } = useAuth();
   const [content, setContent] = useState<string | null>(editMissionData?.description || "");
+  const [descriptionError, setDescriptionError] = useState<string | null>(null);
+  
   useEffect(() => {
     if (role === "user") {
       router.push("/");
@@ -30,6 +31,7 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
       });
     }
   }, [role, router]);
+  
   const {
     register,
     handleSubmit,
@@ -42,9 +44,20 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
   console.log(errors);
 
   const onSubmit = async (data: CreateMission) => {
+    // 컨텐츠 검증
+    if (!content || content === "" || content === "<p>미션가이드에 따라 미션을 완료해주세요.</p>") {
+      setDescriptionError("미션 설명을 입력해주세요.");
+      return;
+    } else {
+      setDescriptionError(null);
+    }
+    
     console.log(data);
     if (editMissionData) {
-      const { error: updateError } = await mission.updateMission(editMissionData.id, data);
+      const { error: updateError } = await mission.updateMission(editMissionData.id, {
+        ...data,
+        description: content
+      });
       if (updateError) {
         toaster.create({
           title: "미션 수정 실패",
@@ -53,7 +66,10 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
         return;
       }
     } else {
-      const { error: createError } = await mission.createMission(data);
+      const { error: createError } = await mission.createMission({
+        ...data,
+        description: content
+      });
       if (createError) {
         toaster.create({
           title: "미션 생성 실패",
@@ -127,7 +143,7 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
         </InputAndTitle>
         <InputAndTitle
           title="미션 설명"
-          errorMessage={errors.description?.message}
+          errorMessage={descriptionError || errors.description?.message}
         >
           <Tiptap
           inputHeight="300px"
@@ -137,6 +153,7 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
           content={content || ""}
           onChange={(value) => {
             setContent(value);
+            setDescriptionError(null);
           }}
         />
         </InputAndTitle>
