@@ -18,25 +18,28 @@ import { MdPrivacyTip, MdFeedback, MdLogout, MdLanguage } from "react-icons/md";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
-import { Menu, Portal } from "@chakra-ui/react";
-import { useRef } from "react";
 import { useMyLikedPosts } from "@/hooks/usePosts";
 import PostCard from "./PostCard";
 import styles from "./Mypage.module.css";
 import { organization } from "@/utils/organization/organization";
 import { Error } from "@/components/common/Error";
+import constants from "@/utils/constants";
+import { AdminOnly } from "@/components/auth/AdminOnly";
+import { MdAdminPanelSettings } from "react-icons/md";
+
 export default function MyPage() {
   const [orgData, setOrgData] = useState<any>(null);
   const { data: myLikedPosts } = useMyLikedPosts();
   const router = useRouter();
-  const { profileImage, email, fullName, logout, organizationId } = useAuthStore();
+  const { profileImage, email, fullName, logout, organizationId } =
+    useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const ref = useRef<HTMLDivElement | null>(null);
-  const getAnchorRect = () => ref.current!.getBoundingClientRect();
 
   useEffect(() => {
     const fetchOrgData = async () => {
-      const { data, error } = await organization.getOrganization(organizationId || 0);
+      const { data, error } = await organization.getOrganization(
+        organizationId || 0
+      );
       if (error) {
         console.error("Error fetching organization data:", error);
       } else {
@@ -80,7 +83,7 @@ export default function MyPage() {
               onClose={() => setIsMenuOpen(false)}
               width="100%"
             >
-              <Link href="/privacy-policy">
+              <Link href={`${constants.PRIVACY_POLICY_URL}`}>
                 <MenuItem title="" icon={<MdPrivacyTip />}>
                   <Text>개인정보처리방침</Text>
                 </MenuItem>
@@ -90,11 +93,18 @@ export default function MyPage() {
                   <Text>피드백</Text>
                 </MenuItem>
               </Link>
-              <Link href="/guide">
+              <Link href={`${constants.GUIDE_URL}`}>
                 <MenuItem title="" icon={<FaRegQuestionCircle />}>
                   <Text>가이드</Text>
                 </MenuItem>
               </Link>
+              <AdminOnly>
+                <Link href={`/admin`}>
+                  <MenuItem title="" icon={<MdAdminPanelSettings />}>
+                    <Text>어드민 페이지</Text>
+                  </MenuItem>
+                </Link>
+              </AdminOnly>
               <Separator style={{ margin: "10px 0" }} />
               <MenuItem title="" icon={<MdLogout />} onClick={handleLogout}>
                 <Text>로그아웃</Text>
@@ -142,13 +152,15 @@ export default function MyPage() {
             <MyPost />
           </Tab>
           <Tab title="좋아요 게시글" icon={<FaRegHeart />}>
-          { myLikedPosts?.length === 0 ? <Error message="좋아요 게시글이 없습니다." /> :
-            <div className={styles.postContainer}>
-              {myLikedPosts?.map((post: any) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </div>
-          }
+            {myLikedPosts?.length === 0 ? (
+              <Error message="좋아요 게시글이 없습니다." />
+            ) : (
+              <div className={styles.postContainer}>
+                {myLikedPosts?.map((post: any) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+            )}
           </Tab>
         </Tabs>
       </div>

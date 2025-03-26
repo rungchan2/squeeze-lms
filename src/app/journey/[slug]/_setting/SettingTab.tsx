@@ -21,7 +21,7 @@ import { InputGroup } from "@/components/ui/input-group";
 import { Table } from "@chakra-ui/react";
 import useAccessCode from "@/hooks/useAccessCode";
 import dayjs from "@/utils/dayjs/dayjs";
-import constants from "@/utils/contansts";
+import constants from "@/utils/constants";
 import { IoIosBookmarks } from "react-icons/io";
 import { MdOutlinePrivacyTip, MdPolicy, MdUpdate } from "react-icons/md";
 import Footer from "@/components/common/Footer";

@@ -5,6 +5,12 @@ import Select from "react-select";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/components/AuthProvider";
 import { Error } from "@/components/common/Error";
+import { Modal } from "@/components/modal/Modal";
+import { Input } from "@chakra-ui/react";
+import { useState } from "react";
+import { Tabs } from "@chakra-ui/react"
+import OrganizationManagement from "./OrganizationManagement";
+import { LuUser, LuFolder, LuSquareCheck } from "react-icons/lu";
 export default function AdminPage() {
   const { isAuthenticated, role } = useAuth();
 
@@ -22,7 +28,28 @@ export default function AdminPage() {
 
   return (
     <div>
-      <h1>관리자 페이지 입니다. (빠른 시일 내 개발 예정입니다.)</h1>
+      <Tabs.Root defaultValue="members" variant="plain">
+      <Tabs.List bg="bg.muted" rounded="l3" p="1">
+        <Tabs.Trigger value="members">
+          <LuUser />
+          소속
+        </Tabs.Trigger>
+        <Tabs.Trigger value="projects">
+          <LuFolder />
+          회원
+        </Tabs.Trigger>
+        <Tabs.Trigger value="tasks">
+          <LuSquareCheck />
+          게시글
+        </Tabs.Trigger>
+        <Tabs.Indicator rounded="l2" />
+      </Tabs.List>
+      <Tabs.Content value="members">
+        <OrganizationManagement />
+      </Tabs.Content>
+      <Tabs.Content value="projects">기능 구현중입니다.</Tabs.Content>
+      <Tabs.Content value="tasks">기능 구현중입니다.</Tabs.Content>
+    </Tabs.Root>
     </div>
   );
 }

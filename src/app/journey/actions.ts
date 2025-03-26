@@ -1,7 +1,5 @@
-"use server";
-
 import { CreatePost, CreateJourney, UpdatePost, CreateMission } from "@/types";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/client";
 
 export async function getJourney(uuid: string) {
   
