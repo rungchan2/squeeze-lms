@@ -18,7 +18,7 @@ export const auth = {
     });
     return { userData: data, error };
   },
-  loginWithEmail: async (email: string, password: string) => {
+  signInWithEmail: async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -31,6 +31,6 @@ export const auth = {
       .select("*")
       .eq("email", email)
       .single();
-    return { data, error };
+    return { profileData: data, error };
   },
 };

@@ -17,7 +17,7 @@ import Cookies from "js-cookie";
 import { encrypt } from "@/utils/encryption";
 import { createClient } from "@/utils/supabase/client";
 import { NeededUserMetadata } from "@/app/(auth)/auth/callback/route";
-
+import { useAuthStore } from "@/store/auth";
 let decryptedAuthData: NeededUserMetadata = {
   uid: "",
   email: "",
@@ -44,7 +44,7 @@ export default function LoginSignup({ type }: { type: "login" | "signup" }) {
     control,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>();
-
+  const { refreshUser } = useAuthStore();
   const email = watch("email");
   const password = watch("password");
 
@@ -61,7 +61,9 @@ export default function LoginSignup({ type }: { type: "login" | "signup" }) {
       router.push("/login/info");
       return;
     }
+    refreshUser();
     router.push("/");
+    return;
   };
   const onSubmitSignup = async (data: LoginFormData) => {
     const { userData: { user }, error } = await signUpWithEmail(data.email, data.password);
@@ -100,11 +102,16 @@ export default function LoginSignup({ type }: { type: "login" | "signup" }) {
           type="email"
           placeholder="email@example.com"
           {...register("email")}
+          autoComplete="username"
         />
       </InputAndTitle>
 
       <InputAndTitle title="비밀번호" errorMessage={errors.password?.message}>
-        <PasswordInput placeholder="비밀번호" {...register("password")} />
+        <PasswordInput
+          placeholder="비밀번호"
+          {...register("password")}
+          autoComplete="current-password"
+        />
         <ForgotPassword
           variant="small"
           weight="medium"

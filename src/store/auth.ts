@@ -118,12 +118,19 @@ export const useAuthStore = create<UserState>()(
           }
 
           if ((error || !profile) && !currentPath.includes("/login/info")) {
+            // 에러 처리 개선
             get().logout();
             toaster.create({
               title: "로그인 정보가 없거나 유효하지 않습니다",
               type: "error",
             });
-            redirect("/error?message=로그인 정보가 없거나 유효하지 않습니다");
+            
+            // 클라이언트 사이드인 경우 window.location 사용, 서버 사이드인 경우 redirect 사용
+            if (typeof window !== "undefined") {
+              window.location.href = "/error?message=로그인 정보가 없거나 유효하지 않습니다";
+            } else {
+              redirect("/error?message=로그인 정보가 없거나 유효하지 않습니다");
+            }
           } else if (profile) {
             set({
               id: profile.id,

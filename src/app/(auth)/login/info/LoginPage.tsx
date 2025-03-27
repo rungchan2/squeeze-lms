@@ -198,12 +198,22 @@ export default function LoginPage() {
           title: "회원가입 성공. 이메일 로그인 후 이용해주세요.",
           type: "success",
         });
-        router.push("/login");
+        window.location.href = "/login";
         return;
       }
 
-      await refreshUser();
-      router.push("/");
+      try {
+        await refreshUser();
+        // 프로필 생성 성공 후 홈페이지로 리다이렉트
+        window.location.href = "/";
+      } catch (refreshError) {
+        console.error("사용자 정보 갱신 중 오류:", refreshError);
+        toaster.create({
+          title: "회원가입은 성공했으나 로그인 처리 중 오류가 발생했습니다.",
+          type: "warning",
+        });
+        window.location.href = "/login";
+      }
     } catch (error) {
       console.error("회원가입 오류:", error);
       router.push("/error?message=회원가입 중 오류가 발생했습니다");
