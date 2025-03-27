@@ -213,7 +213,6 @@ export async function getJourneyParticipants(journeyId: number | string) {
 
 export async function getJourneyWeeklyStats(journeyId: number | string) {
   try {
-    console.log('[getJourneyWeeklyStats] 시작:', { journeyId });
     const supabase = await createClient();
     
     const journeyIdNumber = typeof journeyId === 'string' ? parseInt(journeyId, 10) : journeyId;
@@ -227,11 +226,9 @@ export async function getJourneyWeeklyStats(journeyId: number | string) {
 
     if (weeksError) throw weeksError;
     if (!weeks || weeks.length === 0) {
-      console.log('[getJourneyWeeklyStats] 주차 데이터 없음:', journeyId);
       return { data: [], error: null };
     }
     
-    console.log('[getJourneyWeeklyStats] 주차 데이터:', { count: weeks.length });
     
     // 주차 ID 목록
     const weekIds = weeks.map(week => week.id);
@@ -247,7 +244,6 @@ export async function getJourneyWeeklyStats(journeyId: number | string) {
       .in("journey_week_id", weekIds);
 
     if (missionError) throw missionError;
-    console.log('[getJourneyWeeklyStats] 미션 인스턴스:', { count: missionInstances?.length || 0 });
 
     // 3. posts 테이블에서 모든 제출 데이터 가져오기
     const { data: posts, error: postsError } = await supabase
@@ -260,7 +256,6 @@ export async function getJourneyWeeklyStats(journeyId: number | string) {
       .not("mission_instance_id", "is", null);
 
     if (postsError) throw postsError;
-    console.log('[getJourneyWeeklyStats] 포스트 데이터:', { count: posts?.length || 0 });
 
     // 4. 각 미션 인스턴스에 대한 사용자 포인트 데이터 가져오기
     const { data: userPoints, error: pointsError } = await supabase
@@ -274,7 +269,6 @@ export async function getJourneyWeeklyStats(journeyId: number | string) {
       .not("mission_instance_id", "is", null);
 
     if (pointsError) throw pointsError;
-    console.log('[getJourneyWeeklyStats] 유저 포인트 데이터:', { count: userPoints?.length || 0 });
 
     // 5. 해당 Journey의 모든 참여 학생 수 계산
     const { data: journeyParticipants, error: participantsError } = await supabase
@@ -285,7 +279,6 @@ export async function getJourneyWeeklyStats(journeyId: number | string) {
 
     if (participantsError) throw participantsError;
     const totalStudents = journeyParticipants?.length || 0;
-    console.log('[getJourneyWeeklyStats] 학생 수:', totalStudents);
 
     // 학생이 없으면 계산할 수 없으므로, 최소한 1명으로 설정
     const effectiveStudentCount = Math.max(totalStudents, 1);
@@ -307,12 +300,6 @@ export async function getJourneyWeeklyStats(journeyId: number | string) {
       ...Array.from(submittedMissionInstanceIds),
       ...Array.from(pointsMissionInstanceIds)
     ]);
-    
-    console.log('[getJourneyWeeklyStats] 완료된 미션 인스턴스:', { 
-      posts: submittedMissionInstanceIds.size,
-      points: pointsMissionInstanceIds.size,
-      combined: completedMissionInstanceIds.size
-    });
 
     // 6. 주차별 통계 계산
     const weeklyStats = weeks.map((week) => {
@@ -323,7 +310,6 @@ export async function getJourneyWeeklyStats(journeyId: number | string) {
       
       // 전체 미션 수
       const totalMissions = weekMissionIds.length;
-      console.log(`[Week ${week.week_number}] 총 미션 수:`, totalMissions);
       
       // 전체 가능한 제출 수: 전체 학생 수 x 미션 수
       const totalPossibleSubmissions = effectiveStudentCount * totalMissions;
@@ -332,9 +318,7 @@ export async function getJourneyWeeklyStats(journeyId: number | string) {
       const submittedMissions = weekMissionIds
         .filter(id => completedMissionInstanceIds.has(id))
         .length;
-      
-      console.log(`[Week ${week.week_number}] 완료된 미션 수:`, submittedMissions);
-      
+            
       // 제출률 계산
       const submissionRate = totalPossibleSubmissions > 0
         ? Math.round((submittedMissions / totalPossibleSubmissions) * 100)
@@ -356,7 +340,6 @@ export async function getJourneyWeeklyStats(journeyId: number | string) {
     // 주차 번호 기준 정렬 후 반환
     weeklyStats.sort((a, b) => a.weekNumber - b.weekNumber);
     
-    console.log('[getJourneyWeeklyStats] 완료:', { weeklyStats: weeklyStats.length });
     return { data: weeklyStats, error: null };
   } catch (error) {
     console.error("주차별 통계 가져오기 오류:", error);

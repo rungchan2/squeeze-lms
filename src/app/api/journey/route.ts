@@ -6,9 +6,7 @@ export async function GET(request: NextRequest) {
     // UUID 파라미터 가져오기
     const searchParams = request.nextUrl.searchParams;
     const uuid = searchParams.get('uuid');
-    
-    console.log("[API] Journey 요청 받음:", { uuid });
-    
+        
     if (!uuid) {
       return NextResponse.json(
         { error: "UUID가 제공되지 않았습니다" },
@@ -25,11 +23,7 @@ export async function GET(request: NextRequest) {
       .single();
     
     // 응답 로깅
-    console.log("[API] Journey 응답:", {
-      status: response.status,
-      hasData: !!response.data,
-      hasError: !!response.error
-    });
+
     
     // 데이터 반환
     if (response.error) {

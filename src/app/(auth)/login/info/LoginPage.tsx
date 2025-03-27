@@ -8,7 +8,7 @@ import Button from "@/components/common/Button";
 import Text from "@/components/Text/Text";
 import Checkbox from "@/components/common/Checkbox";
 import { Separator, Stack, Spinner } from "@chakra-ui/react";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createUserSchema, Role, type CreateUser } from "@/types";
@@ -24,6 +24,7 @@ import { Modal } from "@/components/modal/Modal";
 import { confirmRoleAccessCode, getUser } from "../../actions";
 import { toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/components/AuthProvider";
+import constants from "@/utils/constants";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
 
@@ -34,6 +35,7 @@ export default function LoginPage() {
   const [roleAccessCode, setRoleAccessCode] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [authData, setAuthData] = useState<NeededUserMetadata | null>(null);
+  const [isSignUpUseEmail, setIsSignUpUseEmail] = useState(false);
   const [roleAccessType, setRoleAccessType] = useState<{
     label: string;
     value: Omit<Role, "user">;
@@ -75,10 +77,10 @@ export default function LoginPage() {
   // 사용자 데이터 로드
   useEffect(() => {
     let isMounted = true;
-    
+
     async function loadUserData() {
       if (!isMounted) return;
-      
+
       try {
         // 서버에서 사용자 확인
         const userData = await getUser();
@@ -86,12 +88,14 @@ export default function LoginPage() {
           router.push("/error?message=로그인 정보가 없거나 유효하지 않습니다");
           return;
         }
-        
+
         // 쿠키에서 인증 데이터 가져오기
         const cookieAuthData = Cookies.get("auth_data");
         if (!cookieAuthData || typeof cookieAuthData !== "string") {
           if (isMounted) {
-            router.push("/error?message=로그인 정보가 없거나 유효하지 않습니다");
+            router.push(
+              "/error?message=로그인 정보가 없거나 유효하지 않습니다"
+            );
           }
           return;
         }
@@ -101,19 +105,24 @@ export default function LoginPage() {
           if (!decryptedString) {
             throw new Error("복호화된 데이터가 없습니다");
           }
-          
-          const decryptedAuthData: NeededUserMetadata = JSON.parse(decryptedString);
-          
+
+          const decryptedAuthData: NeededUserMetadata =
+            JSON.parse(decryptedString);
+
           if (isMounted) {
             setAuthData(decryptedAuthData);
-            
+
             // 폼 값 설정
             setValue("email", decryptedAuthData.email || "");
             setValue("first_name", decryptedAuthData.first_name || "");
             setValue("last_name", decryptedAuthData.last_name || "");
             setValue("uid", decryptedAuthData.uid || "");
             setValue("profile_image", decryptedAuthData.profile_image || "");
-            
+
+            if (decryptedAuthData.isEmailSignup) {
+              setIsSignUpUseEmail(true);
+            }
+
             setIsLoading(false);
           }
         } catch (error) {
@@ -128,13 +137,15 @@ export default function LoginPage() {
       } catch (error) {
         if (isMounted) {
           console.error("사용자 정보 확인 중 오류:", error);
-          router.push("/error?message=로그인 정보를 확인하는 중 오류가 발생했습니다");
+          router.push(
+            "/error?message=로그인 정보를 확인하는 중 오류가 발생했습니다"
+          );
         }
       }
     }
-    
+
     loadUserData();
-    
+
     return () => {
       isMounted = false;
     };
@@ -153,7 +164,7 @@ export default function LoginPage() {
       setIsChecked(["mailAgreement", "cookieAgreement"]);
     }
   };
-  
+
   const handleCheckboxChange = (value: Agreement) => {
     if (isChecked.includes(value)) {
       setIsChecked(isChecked.filter((item) => item !== value));
@@ -181,7 +192,16 @@ export default function LoginPage() {
         router.push(`/error?message=회원가입 실패: ${error.message}`);
         return;
       }
-      
+
+      if (isSignUpUseEmail) {
+        toaster.create({
+          title: "회원가입 성공. 이메일 로그인 후 이용해주세요.",
+          type: "success",
+        });
+        router.push("/login");
+        return;
+      }
+
       await refreshUser();
       router.push("/");
     } catch (error) {
@@ -204,9 +224,7 @@ export default function LoginPage() {
   return (
     <Container onSubmit={handleSubmit(onSubmit)}>
       <FormContainer>
-        <Heading level={4}>
-          환영합니다! {authData?.first_name}님
-        </Heading>
+        <Heading level={4}>환영합니다! {authData?.first_name}님</Heading>
         <InputContainer>
           <HorizontalContainer>
             <InputAndTitle title="성" errorMessage={errors.last_name?.message}>
@@ -228,6 +246,7 @@ export default function LoginPage() {
               type="email"
               placeholder="example@gmail.com"
               {...register("email")}
+              disabled
             />
           </InputAndTitle>
           <InputAndTitle title="전화번호" errorMessage={errors.phone?.message}>
@@ -268,7 +287,13 @@ export default function LoginPage() {
         <Stack className="agreement-container">
           <div className="agreement-container-line">
             <Text variant="caption" weight="bold">
-              개인정보 보호정책 및 메일 수신에 동의합니다
+              <a
+                href={constants.PRIVACY_POLICY_URL || ""}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                개인정보 보호정책 및 메일 수신에 동의합니다
+              </a>
             </Text>
             <Checkbox
               checked={
@@ -290,7 +315,13 @@ export default function LoginPage() {
           </div>
           <div className="agreement-container-line">
             <Text variant="small" weight="medium">
-              개인정보 보호정책 및 쿠키 사용에 동의합니다(필수)
+              <a
+                href={constants.PRIVACY_POLICY_URL || ""}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                개인정보 보호정책 및 쿠키 사용에 동의합니다(필수)
+              </a>
             </Text>
             <Checkbox
               checked={isChecked.includes("cookieAgreement")}
@@ -425,6 +456,13 @@ const FormContainer = styled.form`
       align-items: center;
       gap: 10px;
       flex-direction: row;
+
+      a {
+        &:hover {
+          text-decoration: underline;
+          color: var(--grey-500);
+        }
+      }
     }
   }
 `;

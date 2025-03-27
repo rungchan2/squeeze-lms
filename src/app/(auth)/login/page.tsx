@@ -109,7 +109,7 @@ const LoginContainer = styled.div`
   }
   & > .signup-link {
     margin-top: 10px;
-    font-size: 12px;
+    font-size: 14px;
     color: var(--grey-500);
     text-align: center;
     display: flex;

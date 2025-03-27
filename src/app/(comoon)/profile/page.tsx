@@ -8,11 +8,8 @@ import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import { Field, Switch } from "@chakra-ui/react";
-
 import { useAuth } from "@/components/AuthProvider"; // 수정된 인증 컨텍스트 사용
-import { createClient } from "@/utils/supabase/client";
 import Heading from "@/components/Text/Heading";
-import Spinner from "@/components/common/Spinner";
 import InputAndTitle from "@/components/InputAndTitle";
 import Button from "@/components/common/Button";
 import { toaster } from "@/components/ui/toaster";
@@ -24,7 +21,8 @@ import { MdLockOpen } from "react-icons/md";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { Modal } from "@/components/modal/Modal";
 import Text from "@/components/Text/Text";
-import { deleteUser } from "../actions";
+import { user } from "@/utils/data/user";
+import { Loading } from "@/components/common/Loading";
 
 // 유효성 검증 스키마
 const minLength = "이름은 1자 이상 입력해주세요.";
@@ -48,8 +46,9 @@ export default function ProfilePage() {
   const [opendModal, setOpendModal] = useState<"password" | "delete" | null>(
     null
   );
+  const [password, setPassword] = useState("");
   // useAuth 훅 사용
-  const { isAuthenticated, loading, uid, refreshUser, profileImage } =
+  const { isAuthenticated, loading, uid, refreshUser, profileImage, loginMethod } =
     useAuth();
 
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
@@ -91,7 +90,7 @@ export default function ProfilePage() {
     };
 
     fetchProfile();
-  }, [isAuthenticated, setValue]);
+  }, [isAuthenticated, setValue, uid]);
 
   // 폼 제출 처리
   const onSubmit = async (data: ProfileForm) => {
@@ -99,17 +98,13 @@ export default function ProfilePage() {
     console.log("data", data);
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          first_name: data.first_name,
-          last_name: data.last_name,
-          profile_image: data.profileImage,
-          phone: data.phone,
-          marketing_opt_in: data.marketing_opt_in,
-        })
-        .eq("uid", uid);
+      const { error } = await user.updateProfile(uid, {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        profile_image: data.profileImage,
+        phone: data.phone,
+        marketing_opt_in: data.marketing_opt_in,
+      });
 
       if (error) throw error;
 
@@ -133,15 +128,11 @@ export default function ProfilePage() {
 
   // 로딩 상태 표시 (인증 로딩 또는 프로필 로딩 중)
   if (loading || isLoadingProfile) {
-    return (
-      <Container>
-        <Spinner />
-      </Container>
-    );
+    return <Loading />;
   }
 
   const handleDelete = async () => {
-    const { error } = await deleteUser(uid);
+    const { error } = await user.deleteUser(uid);
     if (error) throw error;
     await logout();
     toaster.create({
@@ -150,8 +141,18 @@ export default function ProfilePage() {
       type: "success",
     });
     redirect("/login");
+    setOpendModal(null);  
   };
 
+  const handlePassword = async (data: string) => {
+    const { error } = await user.updatePassword(data);
+    if (error) throw error;
+    toaster.create({
+      title: "비밀번호 업데이트 성공",
+      description: "비밀번호가 성공적으로 업데이트되었습니다.",
+    });
+    setOpendModal(null);
+  };
   return (
     <Container>
       <Form onSubmit={handleSubmit(onSubmit)}>
@@ -224,10 +225,12 @@ export default function ProfilePage() {
       <Separator size="lg" />
       <Heading level={4}>보안</Heading>
       <div className="button-container">
-        <div className="menu-item" onClick={() => setOpendModal("password")}>
-          <MdLockOpen />
-          비밀번호 초기화
-        </div>
+        {loginMethod === "email" && (
+          <div className="menu-item" onClick={() => setOpendModal("password")}>
+            <MdLockOpen />
+            비밀번호 초기화
+          </div>
+        )}  
         <div className="menu-item" onClick={() => setOpendModal("delete")}>
           <FaRegTrashAlt />
           회원 탈퇴
@@ -239,8 +242,10 @@ export default function ProfilePage() {
       >
         <ModalContainer>
           <Heading level={4}>비밀번호 초기화</Heading>
-          <Input type="password" />
-          <Button variant="outline" type="submit">
+          <InputAndTitle title="변경할 비밀번호" errorMessage={password.length < 6 ? "비밀번호는 6자 이상 입력해주세요." : ""}>
+            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          </InputAndTitle>
+          <Button variant="outline" type="submit" onClick={() => handlePassword(password)}>
             초기화
           </Button>
         </ModalContainer>
@@ -251,9 +256,11 @@ export default function ProfilePage() {
       >
         <ModalContainer>
           <Heading level={3}>회원 탈퇴</Heading>
-          <Text variant="body" color="var(--negative-500)" fontWeight="bold">
-            이 작업은 돌이킬 수 없습니다. 회원 탈퇴 시 모든 데이터가 삭제됩니다.
-          </Text>
+          <div className="modal-text">
+            <Text variant="body" color="var(--negative-500)" fontWeight="bold">
+              이 작업은 돌이킬 수 없습니다. 회원 탈퇴 시 모든 데이터가 삭제됩니다.
+            </Text>
+          </div>
           <Button variant="outline" type="submit" onClick={handleDelete}>
             탈퇴
           </Button>
@@ -269,6 +276,11 @@ const Container = styled.div`
   gap: 1rem;
   max-width: var(--breakpoint-tablet);
   margin: 0 auto;
+
+  .modal-text {
+    text-align: center;
+    padding: 2rem;
+  }
 
   .container-modal {
     display: flex;
@@ -311,7 +323,6 @@ const ModalContainer = styled.div`
   gap: 2rem;
   align-items: center;
   justify-content: center;
-  text-align: center;
 `;
 
 const Form = styled.form`

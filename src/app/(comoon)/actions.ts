@@ -53,14 +53,3 @@ export async function updatePassword(password: string) {
 
   return data;
 }
-
-export async function deleteProfile(uid: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("profiles").delete().eq("uid", uid);
-  return { data, error };
-}
-export async function deleteUser(uid: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.admin.deleteUser(uid);
-  return { data, error };
-}

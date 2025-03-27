@@ -89,7 +89,7 @@ export default function OrganizationManagement() {
         </Button>
       </Stack>
       
-      <Table.Root size="sm" variant="outline">
+      <Table.Root size="sm" variant="outline" backgroundColor="var(--white)">
         <Table.ColumnGroup>
           <Table.Column htmlWidth="70%" />
           <Table.Column htmlWidth="30%" />

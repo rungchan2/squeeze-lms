@@ -286,7 +286,7 @@ export default function TeacherPostsPage() {
 }
 
 const TeacherPostsPageContainer = styled.div`
-  max-width: var(--breakpoint-desktop);
+  max-width: var(--breakpoint-tablet);
   margin: 0 auto;
   width: 100%;
   display: flex;

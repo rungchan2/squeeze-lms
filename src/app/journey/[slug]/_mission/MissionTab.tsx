@@ -79,7 +79,6 @@ export default function MissionTab({ slug }: { slug: string }) {
     (instance) => {
       // mission_instance_id로 직접 완료 여부 확인
       const isCompleted = completedMissionIds.some(id => id === instance.id);
-      console.log(`미션 인스턴스 ID ${instance.id} 완료 여부:`, isCompleted);
       return !isCompleted;
     }
   );

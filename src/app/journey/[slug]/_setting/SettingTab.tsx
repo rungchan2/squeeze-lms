@@ -82,7 +82,7 @@ export default function SettingTab({ slug }: { slug: string }) {
                     클라스 수정 및 삭제
                   </Text>
                 </MenuItem>
-                <MenuItem href={`/journey/${slug}/users`}>
+                <MenuItem href={`/journey/${slug}/teacher/users`}>
                   <FaUserGroup />
                   <Text
                     variant="body"

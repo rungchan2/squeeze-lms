@@ -211,7 +211,6 @@ async function getCompletedMissionIds(userId: number, journeySlug?: string) {
       
       if (missionInstances && missionInstances.length > 0) {
         const instanceIds = missionInstances.map(instance => instance.id);
-        console.log(`journey ${journeySlug}의 미션 인스턴스 ID:`, instanceIds);
         query = query.in("mission_instance_id", instanceIds);
       } else {
         // 해당 journey에 대한 mission instance가 없으면 빈 결과 반환

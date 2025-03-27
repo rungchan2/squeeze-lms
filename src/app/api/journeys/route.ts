@@ -3,7 +3,6 @@ import { createClient } from '@/utils/supabase/server';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("[API] GET journeys 호출됨");
     const supabase = await createClient();
     const { data, error } = await supabase.from("journeys").select("*");
     
@@ -47,7 +46,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("[API] POST journeys/by-uuid 호출됨");
     const body = await request.json();
     const { uuid } = body;
     
@@ -59,7 +57,6 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    console.log("[API] journeys/by-uuid 파라미터:", { uuid });
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("journeys")

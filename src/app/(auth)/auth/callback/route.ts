@@ -8,6 +8,7 @@ export type NeededUserMetadata = {
   first_name: string;
   last_name: string;
   profile_image: string;
+  isEmailSignup?: boolean;
 };
 
 export async function GET(request: Request) {

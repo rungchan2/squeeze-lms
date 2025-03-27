@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Navigation } from "@/components/navigation/Navigation";
 import { KakaoScript } from "@/components/KaKao";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { MetadataHandler } from "./MetadataHandler";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -37,7 +36,6 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body>
         <Providers>
-          <MetadataHandler />
           <Navigation exceptionPath={["/login", "/register"]} />
           {children}
           <Toaster />

@@ -17,12 +17,10 @@ export const useJourneyStore = create<JourneyState>()(
           console.warn("유효하지 않은 journey ID");
           return;
         }
-        console.log('Journey ID 설정:', id);
         set({ currentJourneyId: id });
       },
       
       clearCurrentJourneyId: () => {
-        console.log('Journey ID 초기화');
         set({ currentJourneyId: null });
       },
     }),

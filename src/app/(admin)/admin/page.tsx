@@ -1,16 +1,11 @@
 "use client";
-import { toaster } from "@/components/ui/toaster";
-import Button from "@/components/common/Button";
-import Select from "react-select";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/components/AuthProvider";
 import { Error } from "@/components/common/Error";
-import { Modal } from "@/components/modal/Modal";
-import { Input } from "@chakra-ui/react";
-import { useState } from "react";
 import { Tabs } from "@chakra-ui/react"
 import OrganizationManagement from "./OrganizationManagement";
 import { LuUser, LuFolder, LuSquareCheck } from "react-icons/lu";
+import styled from "@emotion/styled";
 export default function AdminPage() {
   const { isAuthenticated, role } = useAuth();
 
@@ -27,7 +22,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div>
+    <AdminPageContainer>
       <Tabs.Root defaultValue="members" variant="plain">
       <Tabs.List bg="bg.muted" rounded="l3" p="1">
         <Tabs.Trigger value="members">
@@ -50,8 +45,14 @@ export default function AdminPage() {
       <Tabs.Content value="projects">기능 구현중입니다.</Tabs.Content>
       <Tabs.Content value="tasks">기능 구현중입니다.</Tabs.Content>
     </Tabs.Root>
-    </div>
+    </AdminPageContainer>
   );
 }
+
+const AdminPageContainer = styled.div`
+  max-width: var(--breakpoint-tablet);
+  margin: 0 auto;
+  width: 100%;
+`;
 
 //TODO: 2. 어드민패널 페이지 만들기

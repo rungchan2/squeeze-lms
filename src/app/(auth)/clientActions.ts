@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/client";
 const supabase = createClient();
 
-const getURL = () => {
+export const getURL = () => {
   // 현재 환경이 개발(localhost) 환경인지 확인
   const isDevelopment = 
     !process.env.NEXT_PUBLIC_VERCEL_ENV || // Vercel 환경 변수가 없거나

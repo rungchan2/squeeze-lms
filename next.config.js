@@ -13,11 +13,11 @@ const nextConfig = {
     // ... 다른 experimental 설정들 ...
   },
   // 프로덕션 빌드에서도 콘솔 로그 유지
-  // compiler: {
-  //   removeConsole: {
-  //     exclude: ['error'],
-  //   },
-  // },
+  compiler: {
+    removeConsole: {
+      exclude: ['error'],
+    },
+  },
 };
 
 module.exports = nextConfig; 

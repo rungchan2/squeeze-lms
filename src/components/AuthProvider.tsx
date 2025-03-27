@@ -23,7 +23,7 @@ interface AuthContextType {
   fullName: string | null;
   error: string | null;
   organizationId: number | null;
-
+  loginMethod: string | null;
   // 액션 메서드
   refreshUser: () => Promise<void>;
   logout: () => Promise<void>;
@@ -76,6 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     error,
     lastUpdated,
     organizationId,
+    loginMethod,
     refreshUser: storeRefreshUser,
     fetchUser,
     logout: storeLogout,
@@ -131,6 +132,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           await logout();
         }
       } catch (error) {
+        console.error("인증 초기화 오류:", error);
         if (isMounted) {
           toaster.create({
             title: "인증 초기화 오류",
@@ -160,6 +162,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           try {
             await refreshUser();
           } catch (error) {
+            console.error("로그인 후 사용자 정보 갱신 오류:", error);
             if (isMounted) {
               toaster.create({
                 title: "로그인 후 사용자 정보 갱신 오류",
@@ -175,6 +178,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           try {
             await logout();
           } catch (error) {
+            console.error("로그아웃 처리 오류:", error);
             if (isMounted) {
               toaster.create({
                 title: "로그아웃 처리 오류",
@@ -215,6 +219,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       fullName,
       error,
       organizationId,
+      loginMethod,
       refreshUser,
       logout,
       hasPermission,
@@ -230,6 +235,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       fullName,
       error,
       organizationId,
+      loginMethod,
       refreshUser,
       logout,
       hasPermission,

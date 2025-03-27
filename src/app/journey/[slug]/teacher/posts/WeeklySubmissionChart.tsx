@@ -120,13 +120,10 @@ export default function WeeklySubmissionChart() {
     
     const initJourney = async () => {
       try {
-        console.log("[WeeklySubmissionChart] 초기화 시작:", { slug });
         const journeyData = await journey.getJourneyByUuidRetrieveId(slug as string);
-        console.log("[WeeklySubmissionChart] 여정 데이터:", journeyData);
         
         if (journeyData && journeyData.length > 0) {
           const id = journeyData[0].id;
-          console.log("[WeeklySubmissionChart] 여정 ID:", id);
           setCurrentJourneyId(id);
           setLocalJourneyId(id);
         } else {
@@ -261,7 +258,7 @@ const ChartContainer = styled.div`
 
 const PercentageDisplay = styled.div<{ submissionRate: number }>`
   position: absolute;
-  top: 50%;
+  top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;

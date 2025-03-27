@@ -3,7 +3,6 @@ import { createClient } from '@/utils/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("[API] POST mission-instances 호출됨");
     const body = await request.json();
     const { journeyUuid, weekId } = body;
     
@@ -15,7 +14,6 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    console.log("[API] mission-instances 파라미터:", { journeyUuid, weekId });
     const supabase = await createClient();
     
     // 쿼리 생성

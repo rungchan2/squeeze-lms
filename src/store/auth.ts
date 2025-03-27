@@ -21,6 +21,7 @@ export interface UserState {
   error: string | null;
   lastUpdated: number | null;
   organizationId: number | null;
+  loginMethod: string | null;
   // 액션
   fetchUser: () => void;
   refreshUser: () => Promise<void>;
@@ -70,6 +71,7 @@ export const useAuthStore = create<UserState>()(
       error: null,
       lastUpdated: null,
       organizationId: null, // 로컬 스토리지에서 사용자 데이터 가져오기
+      loginMethod: null,
       fetchUser: () => {
         try {
           if (typeof window === "undefined") return;
@@ -102,6 +104,7 @@ export const useAuthStore = create<UserState>()(
               fullName: null,
               lastUpdated: null,
               organizationId: null,
+              loginMethod: null,
             });
             return;
           }
@@ -133,6 +136,7 @@ export const useAuthStore = create<UserState>()(
               fullName: `${profile.first_name} ${profile.last_name}`,
               lastUpdated: Date.now(),
               organizationId: profile.organization_id,
+              loginMethod: user.identities?.[0]?.provider || null,
             });
           } else {
             set({
@@ -146,6 +150,7 @@ export const useAuthStore = create<UserState>()(
               fullName: null,
               lastUpdated: Date.now(),
               organizationId: null,
+              loginMethod: null,
             });
           }
         } catch (error) {
@@ -178,6 +183,7 @@ export const useAuthStore = create<UserState>()(
             error: null,
             lastUpdated: null,
             organizationId: null,
+            loginMethod: null,
           });
           console.log("상태 초기화 완료");
 

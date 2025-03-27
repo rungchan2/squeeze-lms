@@ -1,5 +1,5 @@
+import { Metadata, ResolvingMetadata } from "next";
 import { createClient } from "@/utils/supabase/server";
-import type { Metadata, ResolvingMetadata } from "next";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -16,9 +16,9 @@ export async function generateMetadata(
     const slug = resolvedParams?.slug || '';
     
     if (!slug) {
-      console.error("Slug is missing or invalid");
+      console.error("Slug is missing or invalid in edit layout");
       return {
-        title: "클라스",
+        title: "클라스 편집",
         openGraph: {
           images: [],
         },
@@ -34,9 +34,9 @@ export async function generateMetadata(
       .single();
 
     if (error || !journeyData) {
-      console.error("Journey metadata fetch error:", error);
+      console.error("Journey metadata fetch error in edit layout:", error);
       return {
-        title: "클라스",
+        title: "클라스 편집",
         openGraph: {
           images: [],
         },
@@ -46,7 +46,7 @@ export async function generateMetadata(
     const previousImages = (await parent).openGraph?.images || [];
 
     return {
-      title: "클라스 : " + journeyData.name || "클라스",
+      title: "클라스 편집 : " + journeyData.name || "클라스 편집",
       openGraph: {
         images: [
           ...(journeyData.image_url ? [journeyData.image_url] : []),
@@ -55,9 +55,9 @@ export async function generateMetadata(
       },
     };
   } catch (error) {
-    console.error("Metadata generation error:", error);
+    console.error("Metadata generation error in edit layout:", error);
     return {
-      title: "클라스",
+      title: "클라스 편집",
       openGraph: {
         images: [],
       },
@@ -65,6 +65,6 @@ export async function generateMetadata(
   }
 }
 
-export default function JourneyLayout({ children, params }: LayoutProps) {
+export default function EditLayout({ children, params }: LayoutProps) {
   return <>{children}</>;
-} 
+}
