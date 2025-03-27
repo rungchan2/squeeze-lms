@@ -23,4 +23,16 @@ export const journey = {
     }
     return data as { id: number }[];
   },
+  getJourneyBySlug: async (slug: string) => {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("journeys")
+      .select("*")
+      .eq("slug", slug)
+      .single();
+    if (error) {
+      throw error;
+    }
+    return data;
+  },
 };

@@ -20,7 +20,7 @@ import { useEffect, useCallback, useMemo, memo } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { Menu, Portal } from "@chakra-ui/react";
 import { FaEllipsis } from "react-icons/fa6";
-import { posts } from "@/utils/posts/posts";
+import { posts } from "@/utils/data/posts";
 interface PostCardProps {
   post: PostWithRelations;
   showDetails?: boolean;

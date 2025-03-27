@@ -13,7 +13,7 @@ import { toaster } from "@/components/ui/toaster";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { useEffect, useState } from "react";
-import { mission } from "@/utils/mission/mission";
+import { mission } from "@/utils/data/mission";
 import Tiptap from "@/components/richTextInput/RichTextEditor";
 
 export default function NewMissionPage({ editMissionData }: { editMissionData?: Mission }) {

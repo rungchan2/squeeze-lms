@@ -24,6 +24,7 @@ export async function getJourney(userId: number) {
     return data
 }
 
+
 export async function createJourney(userId: number, journey: UserJourneyWithJourney) {
   const supabase = await createClient();
   const { data, error } = await supabase

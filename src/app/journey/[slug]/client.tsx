@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { useJourneyStore } from "@/store/journey";
 import { Suspense } from "react";
 import Spinner from "@/components/common/Spinner";
-import { journey } from "@/utils/journey/journey";
+import { journey } from "@/utils/data/journey";
 export default function JourneyClient({ slug }: { slug: string }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const { setCurrentJourneyId } = useJourneyStore();

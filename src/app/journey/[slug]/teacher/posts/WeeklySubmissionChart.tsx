@@ -9,7 +9,7 @@ import Text from "@/components/Text/Text";
 import Spinner from "@/components/common/Spinner";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { useParams } from "next/navigation";
-import { journey } from "@/utils/journey/journey";
+import { journey } from "@/utils/data/journey";
 
 // 도넛 차트 컴포넌트 (메모이제이션)
 const DonutChart = memo(({ weekStat }: { weekStat: WeeklyStat }) => {

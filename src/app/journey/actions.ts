@@ -9,7 +9,7 @@ export async function getJourney(uuid: string) {
   }
   
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     
     const response = await supabase
       .from("journeys")
@@ -24,7 +24,7 @@ export async function getJourney(uuid: string) {
 }
 
 export async function getJourneyWeeks(journeyId: number) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("journey_weeks")
     .select("*")

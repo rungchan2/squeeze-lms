@@ -21,7 +21,7 @@ import { useCallback } from "react";
 import { useMyLikedPosts } from "@/hooks/usePosts";
 import PostCard from "./PostCard";
 import styles from "./Mypage.module.css";
-import { organization } from "@/utils/organization/organization";
+import { organization } from "@/utils/data/organization";
 import { Error } from "@/components/common/Error";
 import constants from "@/utils/constants";
 import { AdminOnly } from "@/components/auth/AdminOnly";

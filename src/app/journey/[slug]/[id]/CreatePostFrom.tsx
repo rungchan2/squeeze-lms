@@ -15,7 +15,7 @@ import { createPost, updatePost } from "@/app/journey/actions";
 import { useAuth } from "@/components/AuthProvider";
 import { Input } from "@chakra-ui/react";
 import InputAndTitle from "@/components/InputAndTitle";
-import userPoint from "@/utils/userPoints/userPoint";
+import userPoint from "@/utils/data/userPoint";
 import { useJourneyStore } from "@/store/journey";
 import { UpdatePost } from "@/types";
 import { useCompletedMissions } from "@/hooks/usePosts";

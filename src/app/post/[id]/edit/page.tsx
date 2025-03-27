@@ -1,5 +1,5 @@
 import CreatePostFrom from "@/app/journey/[slug]/[id]/CreatePostFrom";
-import { posts } from "@/utils/posts/posts";
+import { posts } from "@/utils/data/posts";
 
 export default async function EditPostPage({ params }: { params: Promise<{ id: number }> }) {
   const { id } = await params;

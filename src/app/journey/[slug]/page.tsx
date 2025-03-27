@@ -3,21 +3,17 @@ import { toaster } from "@/components/ui/toaster";
 import { redirect } from "next/navigation";
 import JourneyClient from "./client";
 
-// params 타입을 Promise로 정의
-type Params = Promise<{ slug: string }>;
+type Params = {
+  params: Promise<{ slug: string }>;
+};
 
-export default async function JourneyPage({
-  params,
-}: {
-  params: Params;
-}) {
+export default async function JourneyPage({ params }: Params) {
   try {
     // 디버깅 정보 기록
     
     // params 전체를 await
     const resolvedParams = await params;
     const { slug } = resolvedParams;
-    
     
     // 서버 사이드에서 먼저 확인
     let journeyResult;

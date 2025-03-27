@@ -31,7 +31,6 @@ export default function HomeTab() {
   // 홈탭으로 돌아올 때만 상태 초기화
   useEffect(() => {
     if (currentTab === 'home') {
-      console.log('Clearing journey state in HomeTab');
       clearCurrentJourneyId();
     }
   }, [currentTab, clearCurrentJourneyId]);

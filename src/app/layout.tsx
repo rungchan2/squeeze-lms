@@ -6,7 +6,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Navigation } from "@/components/navigation/Navigation";
 import { KakaoScript } from "@/components/KaKao";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { MetadataHandler } from "./MetadataHandler";
 
+type LayoutProps = {
+  children: React.ReactNode;
+  params: { [key: string]: string };
+};
 
 export const metadata: Metadata = {
   title: "스퀴즈!",
@@ -14,6 +19,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: "스퀴즈!",
     description: "스퀴즈와 함께 학습을 디자인 해봐요!",
+    siteName: "스퀴즈",
+    locale: "ko_KR",
+    type: "website",
     images: [
       {
         url: "https://lsaveangkauvxmfurksh.supabase.co/storage/v1/object/public/images/public/og-image.png",
@@ -24,13 +32,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: LayoutProps) {
   return (
     <html lang="ko" suppressHydrationWarning>
       <body>
         <Providers>
+          <MetadataHandler />
           <Navigation exceptionPath={["/login", "/register"]} />
           {children}
           <Toaster />

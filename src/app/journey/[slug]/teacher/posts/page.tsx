@@ -11,7 +11,7 @@ import styled from "@emotion/styled";
 import { useParams, useRouter } from "next/navigation";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { IconContainer } from "@/components/common/IconContainer";
-import { posts } from "@/utils/posts/posts";
+import { posts } from "@/utils/data/posts";
 import dayjs from "@/utils/dayjs/dayjs";
 import { toaster } from "@/components/ui/toaster";
 import { Loading } from "@/components/common/Loading";

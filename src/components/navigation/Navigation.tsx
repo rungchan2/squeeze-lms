@@ -10,11 +10,11 @@ import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { IconContainer } from "../common/IconContainer";
 import { UserJourneyWithJourney } from "@/types";
-import { getJourney } from "@/utils/journey";
+import { getJourney } from "@/utils/data/userJourney";
 import { Separator } from "@chakra-ui/react";
 import { Menu, Portal } from "@chakra-ui/react";
 import { toaster } from "@/components/ui/toaster";
-import { auth } from "@/utils/auth/auth";
+import { auth } from "@/utils/data/auth";
 
 export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
   const { profileImage, id, logout, isAuthenticated } = useAuth();
