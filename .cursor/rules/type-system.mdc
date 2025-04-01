@@ -1,3 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
 # 타입 시스템 규칙
 
 ## Zod 스키마

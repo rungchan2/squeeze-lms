@@ -288,7 +288,7 @@ export default function LoginPage() {
                 }),
               }}
               onChange={(e) => {
-                setValue("organization_id", e?.value || null);
+                setValue("organization_id", e?.value || 0);
                 console.log(e?.value);
               }}
             />

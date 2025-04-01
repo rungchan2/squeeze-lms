@@ -1,0 +1,414 @@
+"use client";
+
+import styled from "@emotion/styled";
+import InputAndTitle from "@/components/InputAndTitle";
+import Heading from "@/components/Text/Heading";
+import { Input } from "@chakra-ui/react";
+import Button from "@/components/common/Button";
+import Text from "@/components/Text/Text";
+import Checkbox from "@/components/common/Checkbox";
+import { Separator, Stack, Spinner } from "@chakra-ui/react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DevTool } from "@hookform/devtools";
+import { useState, useEffect } from "react";
+import { useOrganization } from "@/hooks/useOrganization";
+import Select from "react-select";
+import { toaster } from "@/components/ui/toaster";
+import constants from "@/utils/constants";
+import { user } from "@/utils/data/user";
+import { signupPageSchema, type SignupPage } from "@/types";
+import { auth } from "@/utils/data/auth";
+
+type Agreement = "mailAgreement" | "cookieAgreement";
+
+export default function SignupPage() {
+  const router = useRouter();
+  const [isChecked, setIsChecked] = useState<Agreement[]>([]);
+
+  const {
+    data: { useOrganizationList },
+  } = useOrganization();
+  const { organizations, isLoading: isOrganizationLoading } =
+    useOrganizationList();
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupPage>({
+    resolver: zodResolver(signupPageSchema),
+    mode: "onBlur",
+    defaultValues: {
+      email: "",
+      first_name: "",
+      last_name: "",
+      phone: "",
+      role: "user",
+      marketing_opt_in: false,
+      privacy_agreed: false,
+      profile_image: "",
+      uid: "",
+    },
+  });
+  console.log("errors", errors);
+
+  // 필수 필드 감시
+  const email = watch("email");
+  const password = watch("password");
+  const password_confirmation = watch("password_confirmation");
+  const first_name = watch("first_name");
+  const last_name = watch("last_name");
+  const phone = watch("phone");
+  const organization_id = watch("organization_id");
+
+  // 모든 필수 필드가 입력되었는지 확인
+  const allRequiredFieldsFilled =
+    !!email &&
+    !!password &&
+    !!password_confirmation &&
+    !!first_name &&
+    !!last_name &&
+    !!phone &&
+    !!organization_id &&
+    watch("password") === watch("password_confirmation");
+
+  useEffect(() => {
+    setValue("marketing_opt_in", isChecked.includes("mailAgreement"));
+    setValue("privacy_agreed", isChecked.includes("cookieAgreement"));
+  }, [isChecked, setValue]);
+
+  const handleCheckboxChangeAll = () => {
+    if (isChecked.length === 2) {
+      setIsChecked([]);
+    } else {
+      setIsChecked(["mailAgreement", "cookieAgreement"]);
+    }
+  };
+
+  const handleCheckboxChange = (value: Agreement) => {
+    if (isChecked.includes(value)) {
+      setIsChecked(isChecked.filter((item) => item !== value));
+    } else {
+      setIsChecked([...isChecked, value]);
+    }
+  };
+
+  const organizationOptions =
+    organizations?.map((organization) => ({
+      label: organization.name,
+      value: organization.id,
+    })) || [];
+
+  const onSubmit = async (data: SignupPage) => {
+    try {
+      // 1. 인증 계정 생성
+      const { userData, error } = await auth.signUpWithEmail(data.email, data.password);
+      
+      console.log("회원가입 응답:", userData, error);
+      
+      if (error) {
+        console.error("회원가입 오류:", error);
+        toaster.create({
+          title: `회원가입 실패: ${error.message}`,
+          type: "error",
+        });
+        return;
+      }
+      
+      // 2. 프로필 생성
+      if (userData.user) {
+        // 사용자 ID 가져오기
+        const uid = userData.user.id;
+        console.log("생성된 사용자 ID:", uid);
+        
+        // 프로필 데이터에 uid 추가
+        const profileData: SignupPage = {
+          ...data,
+          uid: uid,
+          profile_image: ""
+        };
+                
+        // 프로필 생성
+        const { error: profileError } = await user.createProfile(profileData);
+        
+        if (profileError) {
+          console.error("프로필 생성 오류:", profileError);
+          toaster.create({
+            title: `프로필 생성 실패: ${profileError.message}`,
+            type: "error",
+          });
+          return;
+        }
+        
+        console.log("회원가입 프로세스 완료!");
+        toaster.create({
+          title: "회원가입이 완료되었습니다.",
+          type: "success",
+        });
+        
+        router.push("/login");
+
+      } else {
+        console.error("사용자 정보 없음");
+        toaster.create({
+          title: "사용자 정보를 찾을 수 없습니다.",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("회원가입 오류:", error);
+      toaster.create({
+        title: "회원가입 중 오류가 발생했습니다",
+        type: "error",
+      });
+    }
+  };
+
+  return (
+    <Container>
+      <FormContainer onSubmit={handleSubmit(onSubmit)}>
+        <Heading level={4}>환영합니다!</Heading>
+
+        <InputContainer>
+          <InputAndTitle title="이메일" errorMessage={errors.email?.message}>
+            <Input
+              type="email"
+              placeholder="example@gmail.com"
+              {...register("email")}
+              autoComplete="email"
+            />
+          </InputAndTitle>
+
+          <InputAndTitle
+            title="비밀번호"
+            errorMessage={errors.password?.message}
+          >
+            <Input
+              type="password"
+              placeholder="비밀번호를 입력해주세요"
+              {...register("password")}
+              autoComplete="new-password"
+            />
+          </InputAndTitle>
+
+          <InputAndTitle
+            title="비밀번호 확인"
+            errorMessage={
+              errors.password_confirmation?.message ||
+              watch("password") !== watch("password_confirmation")
+                ? "비밀번호가 일치하지 않습니다."
+                : ""
+            }
+          >
+            <Input
+              type="password"
+              placeholder="비밀번호를 입력해주세요"
+              {...register("password_confirmation")}
+              autoComplete="new-password"
+            />
+          </InputAndTitle>
+
+          <HorizontalContainer>
+            <InputAndTitle title="성" errorMessage={errors.last_name?.message}>
+              <Input
+                type="text"
+                placeholder="홍"
+                {...register("last_name")}
+                autoComplete="family-name"
+              />
+            </InputAndTitle>
+
+            <InputAndTitle
+              title="이름"
+              errorMessage={errors.first_name?.message}
+            >
+              <Input
+                type="text"
+                placeholder="길동"
+                {...register("first_name")}
+                autoComplete="given-name"
+              />
+            </InputAndTitle>
+          </HorizontalContainer>
+
+          <InputAndTitle title="전화번호" errorMessage={errors.phone?.message}>
+            <Input
+              type="tel"
+              placeholder="010-1234-5678"
+              {...register("phone")}
+              autoComplete="tel"
+            />
+          </InputAndTitle>
+
+          <InputAndTitle
+            title="나의 소속"
+            errorMessage={errors.organization_id?.message}
+          >
+            <Select
+              placeholder="소속을 선택해주세요"
+              className="basic-single"
+              classNamePrefix="select"
+              isDisabled={isOrganizationLoading}
+              isLoading={isOrganizationLoading}
+              isClearable={true}
+              isSearchable={true}
+              options={organizationOptions}
+              name="organization_id"
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  border: "1px solid var(--grey-300)",
+                }),
+              }}
+              onChange={(e) => {
+                setValue("organization_id", e?.value || 0);
+              }}
+            />
+          </InputAndTitle>
+        </InputContainer>
+
+        <Stack className="agreement-container">
+          <div className="agreement-container-line">
+            <Text variant="caption" weight="bold">
+              개인정보 보호정책 및 메일 수신에 동의합니다
+            </Text>
+            <Checkbox
+              checked={
+                isChecked.includes("mailAgreement") &&
+                isChecked.includes("cookieAgreement")
+              }
+              onChange={handleCheckboxChangeAll}
+            />
+          </div>
+
+          <Separator orientation="horizontal" style={{ width: "100%" }} />
+
+          <div className="agreement-container-line">
+            <Text variant="small" weight="medium">
+              메일 수신 동의하기(선택)
+            </Text>
+            <Checkbox
+              checked={isChecked.includes("mailAgreement")}
+              onChange={() => handleCheckboxChange("mailAgreement")}
+            />
+          </div>
+
+          <div className="agreement-container-line">
+            <Text variant="small" weight="medium">
+              <a
+                href={constants.PRIVACY_POLICY_URL || ""}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                개인정보 보호정책 및 쿠키 사용에 동의합니다(필수)
+              </a>
+            </Text>
+            <Checkbox
+              checked={isChecked.includes("cookieAgreement")}
+              onChange={() => handleCheckboxChange("cookieAgreement")}
+            />
+          </div>
+        </Stack>
+
+        <Button
+          variant="flat"
+          type="submit"
+          disabled={
+            isSubmitting ||
+            !isChecked.includes("cookieAgreement") ||
+            !allRequiredFieldsFilled ||
+            Object.keys(errors).length > 0
+          }
+        >
+          {isSubmitting ? (
+            <>
+              <Spinner /> 회원가입 중
+            </>
+          ) : (
+            "회원가입"
+          )}
+        </Button>
+
+        {process.env.NODE_ENV === "development" && (
+          <DevTool control={control} />
+        )}
+      </FormContainer>
+    </Container>
+  );
+}
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 100px;
+`;
+
+const FormContainer = styled.form`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 500px;
+  padding: 32px 12px;
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  .agreement-container {
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-direction: column;
+    background-color: var(--grey-50);
+    padding: 16px;
+    border-radius: 6px;
+    width: 100%;
+
+    .agreement-container-line {
+      width: 100%;
+      justify-content: space-between;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-direction: row;
+
+      a {
+        &:hover {
+          text-decoration: underline;
+          color: var(--grey-500);
+        }
+      }
+    }
+  }
+`;
+
+const InputContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+
+  input {
+    background-color: var(--white);
+  }
+`;
+
+const HorizontalContainer = styled.div`
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  flex-direction: row;
+  align-items: flex-start;
+`;

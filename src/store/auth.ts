@@ -92,6 +92,17 @@ export const useAuthStore = create<UserState>()(
         try {
           const user = await getUser();
 
+          // 현재 경로 가져오기
+          let currentPath = "";
+          if (typeof window !== "undefined") {
+            currentPath = window.location.pathname;
+          }
+
+          // 로그인 관련 경로인지 확인
+          const isLoginPath = currentPath.includes("/login") || 
+                            currentPath.includes("/signup") || 
+                            currentPath.includes("/forgot-password");
+
           if (!user) {
             set({
               id: null,
@@ -112,22 +123,32 @@ export const useAuthStore = create<UserState>()(
           const { profile, error } = await getUserProfile();
           console.log("profile", profile);
           console.log("error", error);
-          let currentPath = "";
-          if (typeof window !== "undefined") {
-            currentPath = window.location.pathname;
+
+          // 로그인 관련 경로에서는 프로필 검증 및 리다이렉트 건너뛰기
+          if (isLoginPath) {
+            set({
+              uid: user.id || null,
+              email: user.email || null,
+              isAuthenticated: true,
+              loading: false,
+              lastUpdated: Date.now(),
+            });
+            return;
           }
 
-          if ((error || !profile) && !currentPath.includes("/login/info")) {
+          // 로그인 관련 경로가 아닌데 프로필이 없거나 오류가 있는 경우
+          if (error || !profile) {
             // 에러 처리 개선
             get().logout();
             toaster.create({
               title: "로그인 정보가 없거나 유효하지 않습니다",
               type: "error",
             });
-            
+
             // 클라이언트 사이드인 경우 window.location 사용, 서버 사이드인 경우 redirect 사용
             if (typeof window !== "undefined") {
-              window.location.href = "/error?message=로그인 정보가 없거나 유효하지 않습니다";
+              window.location.href =
+                "/error?message=로그인 정보가 없거나 유효하지 않습니다";
             } else {
               redirect("/error?message=로그인 정보가 없거나 유효하지 않습니다");
             }

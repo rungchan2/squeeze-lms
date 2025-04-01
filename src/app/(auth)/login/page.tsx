@@ -49,7 +49,7 @@ export default function LoginPage() {
     <LoginContainer>
       <div className="login-container">
         <Heading level={2}>로그인</Heading>
-        <GoogleLoginButton onClick={handleGoogleLogin} disabled={isKakao}>
+        <GoogleLoginButton onClick={handleGoogleLogin}>
           <Image src="/google.svg" alt="Google" width={27} height={27} priority />
           <Text weight="bold" color="var(--background)">
             Google로 로그인
@@ -75,12 +75,8 @@ export default function LoginPage() {
         <LoginSignup type="login" />
       </div>
       <div className="signup-link">
-        계정이 없으신가요? <p onClick={() => setIsOpen(true)}>회원가입</p>
+        계정이 없으신가요? <p onClick={() => router.push("/signup")}>회원가입</p>
       </div>
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <Heading level={3}>회원가입</Heading>
-        <LoginSignup type="signup" />
-      </Modal>
     </LoginContainer>
   );
 }
@@ -128,7 +124,7 @@ const LoginContainer = styled.div`
   }
 `;
 
-const GoogleLoginButton = styled.button<{ disabled: boolean }>`
+const GoogleLoginButton = styled.button`
   margin: 10px 0;
   width: 100%;
   padding: 5px 15px;
@@ -142,6 +138,4 @@ const GoogleLoginButton = styled.button<{ disabled: boolean }>`
   justify-content: center;
   gap: 0.5rem;
   font-weight: 700;
-  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
-  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
 `;

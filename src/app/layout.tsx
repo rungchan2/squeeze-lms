@@ -36,7 +36,7 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body>
         <Providers>
-          <Navigation exceptionPath={["/login", "/register"]} />
+          <Navigation exceptionPath={["/login", "/signup"]} />
           {children}
           <Toaster />
           <SpeedInsights />

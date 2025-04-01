@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
-import { getURL } from "@/app/(auth)/clientActions";
+
 const supabase = createClient();
 
 export const auth = {
