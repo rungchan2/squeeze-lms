@@ -16,6 +16,8 @@ import { createBugReport } from "../clientActions";
 import FileUpload from "@/components/common/FileUpload";
 import { redirect } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
+import { createIssue } from "@/utils/github/createIssue";
+
 export default function BugReport() {
   const { isAuthenticated, id } = useAuth();
   if (!isAuthenticated) {
@@ -35,7 +37,7 @@ export default function BugReport() {
       file_url: "",
     },
   });
-  console.log("errors", errors);
+
   const onSubmit: SubmitHandler<CreateBugReport> = async (data) => {
     if (!id) {
       alert("로그인이 필요합니다.");
@@ -49,6 +51,33 @@ export default function BugReport() {
       file_url: data.file_url,
     };
     const { error } = await createBugReport(insertData);
+
+    // 심각성에 따른 버그 타입 매핑
+    let bugType: "bug-low" | "bug-mid" | "bug-serious" = "bug-low";
+    if (data.status === "사소한 문제") {
+      bugType = "bug-low";
+    } else if (data.status === "조금 불편함") {
+      bugType = "bug-mid";
+    } else if (data.status === "심각함") {
+      bugType = "bug-serious";
+    }
+
+    // GitHub 이슈 생성 시도 - 오류가 발생해도 나머지 동작은 계속 진행
+    try {
+      console.log('GitHub 이슈 생성 요청 시작...');
+      const issueResponse = await createIssue(data.title, data.description, bugType);
+      console.log('GitHub 이슈 생성 응답:', JSON.stringify(issueResponse, null, 2));
+      
+      if (issueResponse.success) {
+        console.log("GitHub 이슈가 생성되었습니다:", issueResponse.data.html_url);
+      } else {
+        console.error("GitHub 이슈 생성에 실패했습니다:", issueResponse.error);
+      }
+    } catch (issueError) {
+      console.error("GitHub 이슈 생성 중 오류가 발생했습니다:", issueError);
+      // 이슈 생성 실패해도 기존 버그 리포트 처리는 계속 진행
+    }
+
     if (error) {
       toaster.error({
         description: "버그 신고에 실패했습니다.",
