@@ -8,7 +8,8 @@ const supabase = createClient();
 async function getOrganizationList() {
   const { data, error } = await supabase.from("organizations").select("*");
   if (error) throw error;
-  return data as Organization[];
+  const filteredData = data.filter((item) => item.name !== "스퀴즈팀");
+  return filteredData as Organization[];
 }
 
 // 단일 조직 조회 함수

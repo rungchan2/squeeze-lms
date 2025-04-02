@@ -35,7 +35,6 @@ export default function DoMissionPage({
   const router = useRouter();
   const { missionInstance, isLoading, error } =
     useMissionInstance(missionInstanceId || null);
-  const { currentJourneyId } = useJourneyStore();
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);

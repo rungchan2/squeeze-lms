@@ -17,7 +17,6 @@ import { AdminOnly } from "../auth/AdminOnly";
 import { useCallback, useEffect, useRef } from "react";
 import { useJourneyStore } from "@/store/journey";
 import { useAuth } from "../AuthProvider";
-import { Error } from "../common/Error";
 import { Loading } from "../common/Loading";
 import Footer from "../common/Footer";
 import { toaster } from "../ui/toaster";

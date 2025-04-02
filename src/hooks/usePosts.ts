@@ -370,12 +370,10 @@ export function useCompletedMissions(userId: number, journeySlug?: string) {
     getNextPageParam: () => null, // 페이지네이션이 필요 없으므로 null 반환
     enabled: !!userId,
     // 캐싱 시간 줄이기
-    staleTime: 10 * 1000, // 10초 후 데이터 재검증
-    // 자동 다시 가져오기 활성화
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    // 주기적으로 데이터 다시 가져오기
-    refetchInterval: 15 * 1000, // 15초마다 자동 갱신
+    staleTime: 5 * 60 * 1000, // 5분동안 캐시 유지
+    refetchOnMount: false,    // 컴포넌트 마운트 시 자동 리페치 비활성화
+    refetchOnWindowFocus: false,  // 창 포커스 시 자동 리페치 비활성화
+    // refetchInterval 제거 - 주기적 자동 갱신 제거
   });
   
   const completedMissionIds = data?.pages[0] || [];

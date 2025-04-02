@@ -236,7 +236,7 @@ const EditorWrapper = styled.div`
 const ControlGroup = styled.div<{ $isSticky: boolean }>`
   position: sticky;
   z-index: 100;
-  margin-bottom: 8px;
+  margin-bottom: 2px;
   top: 0px;
   transition: all 0.3s ease;
 `;
