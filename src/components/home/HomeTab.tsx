@@ -69,6 +69,7 @@ export default function HomeTab() {
 
 function JourneyTab() {
   const router = useRouter();
+  //TODO: 0. 자기가 초대된 조직만 보이게 하기
   const { journeys, error, isLoading } = useJourney();
   if (error) {
     return <div>Error: {error.message}</div>;

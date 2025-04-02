@@ -64,12 +64,9 @@ export default function BugReport() {
 
     // GitHub 이슈 생성 시도 - 오류가 발생해도 나머지 동작은 계속 진행
     try {
-      console.log('GitHub 이슈 생성 요청 시작...');
       const issueResponse = await createIssue(data.title, data.description, bugType);
-      console.log('GitHub 이슈 생성 응답:', JSON.stringify(issueResponse, null, 2));
       
       if (issueResponse.success) {
-        console.log("GitHub 이슈가 생성되었습니다:", issueResponse.data.html_url);
       } else {
         console.error("GitHub 이슈 생성에 실패했습니다:", issueResponse.error);
       }
