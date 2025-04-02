@@ -68,7 +68,7 @@ export async function createPost(post: CreatePost) {
 }
 
 export async function updatePost(post: UpdatePost, id: number) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("posts")
     .update(post)
