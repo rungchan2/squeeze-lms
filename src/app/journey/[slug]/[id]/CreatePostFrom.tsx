@@ -19,7 +19,7 @@ import userPoint from "@/utils/data/userPoint";
 import { UpdatePost } from "@/types";
 import { useCompletedMissions } from "@/hooks/usePosts";
 import { Error } from "@/components/common/Error";
-
+import { JourneyMissionInstanceWithMission } from "@/types";
 export default function DoMissionPage({
   updateData,
   updateDataId,
@@ -31,7 +31,6 @@ export default function DoMissionPage({
   slug?: string;
   missionInstanceId?: number;
 }) {
-  console.log("updateDataId", Number(updateDataId), missionInstanceId, updateData);
   const { id: userId } = useAuth();
   const router = useRouter();
   const { missionInstance, isLoading, error } = useMissionInstance(
@@ -88,11 +87,11 @@ export default function DoMissionPage({
   if (!userId) return <Error message="로그인이 필요합니다." />;
   if (isLoading) return <Spinner />;
   if (error) return <Error message={`오류가 발생했습니다: ${error.message}`} />;
-  if (!missionInstance) return <Error message="미션을 찾을 수 없습니다." />;
+  // if (!missionInstance) return <Error message="미션을 찾을 수 없습니다." />;
 
-  const handleSubmit = async (e: React.MouseEvent) => {
-    e.preventDefault(); // 폼 기본 제출 동작 방지
-
+  const handleSubmit = async (
+    missionInstance: JourneyMissionInstanceWithMission
+  ) => {
     if (!content.trim()) {
       toaster.create({
         title: "미션 내용을 입력해주세요.",
@@ -120,9 +119,6 @@ export default function DoMissionPage({
         });
         return;
       }
-
-      console.log("미션 제출 성공:", data);
-
       // 유저 포인트 생성
       const { error: userPointError } = await userPoint.createUserPoint({
         profile_id: userId,
@@ -142,8 +138,6 @@ export default function DoMissionPage({
               : String(userPointError),
           type: "error",
         });
-      } else {
-        console.log("유저 포인트 생성 성공");
       }
 
       // 완료된 미션 목록 갱신
@@ -208,7 +202,11 @@ export default function DoMissionPage({
         type: "success",
       });
       // 캐시 무효화를 위해 페이지 새로고침
-      window.location.href = `/journey/${slug}`;
+      if (!slug) {
+        router.back();
+      } else {
+        window.location.href = `/journey/${slug}`;
+      }
     } catch (error: any) {
       console.error("미션 수정 중 예외 발생:", error);
       toaster.create({
@@ -224,7 +222,11 @@ export default function DoMissionPage({
   return (
     <MissionContainer>
       <div className="mission-container">
-        <Heading level={3}>{missionInstance.mission.name}</Heading>
+        <Heading level={4}>
+          {missionInstance
+            ? missionInstance.mission.name
+            : "미션 (삭제된 과제 입니다)"}
+        </Heading>
         <InputAndTitle
           title="미션 제목"
           errorMessage={
@@ -241,8 +243,7 @@ export default function DoMissionPage({
         </InputAndTitle>
         <Tiptap
           placeholder={
-            missionInstance.mission.description ||
-            "미션가이드에 따라 미션을 완료해주세요."
+            updateData?.content || "미션가이드에 따라 미션을 완료해주세요."
           }
           content={content}
           onChange={(value) => {
@@ -253,7 +254,7 @@ export default function DoMissionPage({
           미션 상세 설명
         </Text>
         <MissionCard
-          mission={missionInstance.mission}
+          mission={missionInstance?.mission}
           showDetails={true}
           isModal={true}
           missionInstance={missionInstance as any}
@@ -262,7 +263,11 @@ export default function DoMissionPage({
       <div className="button-container">
         <Button
           variant="flat"
-          onClick={updateData ? handleUpdate : handleSubmit}
+          onClick={
+            updateData
+              ? handleUpdate
+              : () => handleSubmit(missionInstance as any)
+          }
           disabled={isSubmitting || title.length === 0}
         >
           {isSubmitting ? <Spinner /> : updateData ? "수정완료" : "제출"}
@@ -284,7 +289,7 @@ const MissionContainer = styled.div`
   .mission-container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
   }
 
   .button-container {

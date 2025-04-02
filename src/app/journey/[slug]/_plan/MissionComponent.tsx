@@ -197,7 +197,7 @@ export default function MissionComponent({
         journey_uuid: journeyUuid || "",
       };
 
-      await createMissionInstance(newInstance);
+      await createMissionInstance(newInstance as any);
 
       // UI 즉시 업데이트
       await mutateMissionInstances();

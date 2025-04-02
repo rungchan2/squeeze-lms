@@ -123,7 +123,7 @@ export function useJourneyMissionInstances(
       const supabase = createClient();
       const { data, error } = await supabase
         .from("journey_mission_instances")
-        .insert(instanceData)
+        .insert(instanceData as any)
         .select(
           `
         *,
@@ -155,7 +155,7 @@ export function useJourneyMissionInstances(
       const supabase = createClient();
       const { data, error } = await supabase
         .from("journey_mission_instances")
-        .update(instanceData)
+        .update(instanceData as any)
         .eq("id", id)
         .select(
           `

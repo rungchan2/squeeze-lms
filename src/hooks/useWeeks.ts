@@ -209,8 +209,8 @@ export function useWeeks(journeyId: number) {
         journey_week_id: weekId,
         mission_id: missionId,
         status: "not_started",
-        release_date: null,
-        expiry_date: null,
+        release_date: "",
+        expiry_date: "",
         journey_uuid: journeyUuid,
       };
 

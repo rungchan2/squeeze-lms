@@ -5,7 +5,6 @@ import Text from "@/components/Text/Text";
 import styled from "@emotion/styled";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
-import { FiMenu } from "react-icons/fi";
 import dayjs from "@/utils/dayjs/dayjs";
 import { TeacherOnly } from "@/components/auth/AdminOnly";
 import { calcDifference } from "@/utils/dayjs/calcDifference";
@@ -15,10 +14,9 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { BiGridVertical } from "react-icons/bi";
-import { useEffect, useState } from "react";
 
 interface MissionCardProps {
-  mission: Mission;
+  mission?: Mission;
   isModal?: boolean;
   onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
@@ -42,6 +40,22 @@ export default function MissionCard({
   const slug = params.slug;
   const searchParams = useSearchParams();
   const isTabMission = searchParams.get("tab") === "missions";
+
+  if (!missionInstance || !mission) {
+    return (
+      <StyledMissionCard
+        isModal={isModal}
+        maxWidth={maxWidth}
+        showDetails={showDetails}
+        isTabMission={isTabMission}
+        style={style}
+      >
+        <Text variant="body" color="var(--grey-500)" fontWeight="bold" className="description-text" style={{ padding: "16px" }}>
+          미션을 찾을 수 없습니다.
+        </Text>
+      </StyledMissionCard>
+    );
+  }
 
   const difference = calcDifference(missionInstance?.expiry_date || "");
   const dDay =
@@ -86,7 +100,11 @@ export default function MissionCard({
     >
       <div className="left-container">
         {!isModal && (
-          <BiGridVertical size="16px" style={{ minWidth: "16px" }} className="menu-icon"/>
+          <BiGridVertical
+            size="16px"
+            style={{ minWidth: "16px" }}
+            className="menu-icon"
+          />
         )}
         <div className="mission-item-header">
           <div className="description-container">

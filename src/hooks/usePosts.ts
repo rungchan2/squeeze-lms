@@ -72,7 +72,7 @@ async function getPosts({ pageParam = 0, pageSize = 10, journeySlug, showHidden 
   const nextPage = hasNextPage ? pageParam + 1 : null;
   
   return {
-    data: data as PostWithRelations[],
+    data: data as unknown as PostWithRelations[],
     nextPage,
     total: count ?? 0
   };

@@ -14,10 +14,10 @@ export const journeyMissionInstanceSchema = z.object({
   journey_week_id: z.number(),
   mission_id: z.number(),
   status: z.any(),
-  release_date: z.date(),
-  expiry_date: z.date(),
-  created_at: z.date(),
-  updated_at: z.date(),
+  release_date: z.string(),
+  expiry_date: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
   journey_uuid: z.string(),
 });
 
@@ -28,7 +28,7 @@ export const createJourneyMissionInstanceSchema = journeyMissionInstanceSchema.o
 });
 
 export const journeyMissionInstanceSchemaWithMission = journeyMissionInstanceSchema.extend({
-  missions: missionSchema,
+  mission: missionSchema,
 });
 
 export const updateJourneyMissionInstanceSchema = createJourneyMissionInstanceSchema.partial();
