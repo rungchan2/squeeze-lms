@@ -28,14 +28,14 @@ export const metadata: Metadata = {
     ],
   },
   icons: {
-    icon: [{ url: "/favicon.ico" }, { url: "/icon.png", type: "image/png" }],
-    apple: [{ url: "/apple-icon.png" }],
+    icon: ['/icon.png', { url: '/icon.png', type: 'image/png' }],
+    apple: '/apple-icon.png',
   },
 };
 
 export default function RootLayout({ children }: LayoutProps) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="ko">
       <body>
         <Providers>
           <Navigation exceptionPath={["/login", "/signup"]} />
