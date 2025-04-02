@@ -19,7 +19,7 @@ export function useJourneyMissionInstances(
   const journeyUuid = specificJourneyUuid;
   
   // 데이터 가져오기 함수
-  const fetcher = useCallback(async (key: string) => {
+  const fetcher = useCallback(async () => {
     // 키에서 데이터 추출 (SWR 키는 `mission-instances-${weekId}-${journeyUuid}` 형식)
     
     if (!journeyUuid) {

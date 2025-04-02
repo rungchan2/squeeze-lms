@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { createClient } from "@/utils/supabase/server";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://sqeezeedu.co.kr';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://squeezeedu.co.kr';
 
 async function getJourneys() {
   const supabase = await createClient();

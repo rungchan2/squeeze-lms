@@ -14,7 +14,7 @@ import { SideMenu, MenuItem } from "@/components/sidemenu/SideMenu";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Separator } from "@chakra-ui/react";
-import { MdPrivacyTip, MdFeedback, MdLogout, MdLanguage } from "react-icons/md";
+import { MdPrivacyTip, MdFeedback, MdLogout } from "react-icons/md";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
@@ -52,7 +52,7 @@ export default function MyPage() {
   const handleLogout = useCallback(() => {
     logout();
     router.push("/login");
-  }, [logout]);
+  }, [logout, router]);
   return (
     <PostContainer>
       <div className="header">

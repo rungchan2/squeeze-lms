@@ -10,7 +10,7 @@ export function useRole(requiredRole: Role) {
     if (!loading && isAuthenticated && role !== requiredRole) {
       router.push("/login");
     }
-  }, [role, isAuthenticated, loading, router]);
+  }, [role, isAuthenticated, loading, router, requiredRole]);
 
   return { role, isAuthenticated, loading };
 }

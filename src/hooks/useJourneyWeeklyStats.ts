@@ -21,7 +21,7 @@ export function useJourneyWeeklyStats(journeyId?: string | number) {
   const [retryCount, setRetryCount] = useState(0);
 
   // 데이터 가져오기 함수
-  const fetcher = useCallback(async (key: string) => {
+  const fetcher = useCallback(async () => {
     if (!journeyId) {
       return [];
     }
@@ -53,7 +53,7 @@ export function useJourneyWeeklyStats(journeyId?: string | number) {
           const errorData = JSON.parse(responseText);
           throw new Error(`API 에러 (${response.status}): ${errorData.error || '알 수 없는 오류'}`);
         } catch (parseError) {
-          // JSON 파싱 실패 시 원본 텍스트 사용
+          console.error("JSON 파싱 오류:", parseError);
           throw new Error(`API 에러 (${response.status}): ${responseText || '알 수 없는 오류'}`);
         }
       }

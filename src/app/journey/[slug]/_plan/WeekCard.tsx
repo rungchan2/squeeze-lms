@@ -1,4 +1,4 @@
-import { JourneyWeek, UpdateJourneyWeek } from "@/types";
+import { JourneyWeek } from "@/types";
 import Text from "@/components/Text/Text";
 import styled from "@emotion/styled";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6";
@@ -34,7 +34,6 @@ export default function WeekCard({
   const {
     missionInstances,
     isLoading: isLoadingInstances,
-    mutate,
   } = useJourneyMissionInstances(journeyUuid, week.id);
   const { updateWeek } = useWeeks(journeyId);
   // 미션 인스턴스가 로드되면 카운트 업데이트
