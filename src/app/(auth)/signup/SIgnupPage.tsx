@@ -7,7 +7,13 @@ import { Input } from "@chakra-ui/react";
 import Button from "@/components/common/Button";
 import Text from "@/components/Text/Text";
 import Checkbox from "@/components/common/Checkbox";
-import { Separator, Stack, Spinner } from "@chakra-ui/react";
+import {
+  Separator,
+  Stack,
+  Spinner,
+  RadioGroup,
+  HStack,
+} from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,13 +26,23 @@ import constants from "@/utils/constants";
 import { user } from "@/utils/data/user";
 import { signupPageSchema, type SignupPage } from "@/types";
 import { auth } from "@/utils/data/auth";
+import { Modal } from "@/components/modal/Modal";
+import { Role } from "@/types";
+import { confirmRoleAccessCode } from "../actions";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
 
 export default function SignupPage() {
   const router = useRouter();
   const [isChecked, setIsChecked] = useState<Agreement[]>([]);
-
+  const [roleAccessCode, setRoleAccessCode] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [roleAccessType, setRoleAccessType] = useState<string>("teacher");
+  const [confirmedRoleType, setConfirmedRoleType] = useState<Role | null>(null);
+  const roleAccessTypeOptions = [
+    { label: "관리자", value: "admin" },
+    { label: "교사", value: "teacher" },
+  ];
   const {
     data: { useOrganizationList },
   } = useOrganization();
@@ -55,7 +71,6 @@ export default function SignupPage() {
       uid: "",
     },
   });
-  console.log("errors", errors);
 
   // 필수 필드 감시
   const email = watch("email");
@@ -107,10 +122,11 @@ export default function SignupPage() {
   const onSubmit = async (data: SignupPage) => {
     try {
       // 1. 인증 계정 생성
-      const { userData, error } = await auth.signUpWithEmail(data.email, data.password);
-      
-      console.log("회원가입 응답:", userData, error);
-      
+      const { userData, error } = await auth.signUpWithEmail(
+        data.email,
+        data.password
+      );
+
       if (error) {
         console.error("회원가입 오류:", error);
         toaster.create({
@@ -119,23 +135,22 @@ export default function SignupPage() {
         });
         return;
       }
-      
+
       // 2. 프로필 생성
       if (userData.user) {
         // 사용자 ID 가져오기
         const uid = userData.user.id;
-        console.log("생성된 사용자 ID:", uid);
-        
+
         // 프로필 데이터에 uid 추가
         const profileData: SignupPage = {
           ...data,
           uid: uid,
-          profile_image: ""
+          profile_image: "",
         };
-                
+
         // 프로필 생성
         const { error: profileError } = await user.createProfile(profileData);
-        
+
         if (profileError) {
           console.error("프로필 생성 오류:", profileError);
           toaster.create({
@@ -144,15 +159,13 @@ export default function SignupPage() {
           });
           return;
         }
-        
-        console.log("회원가입 프로세스 완료!");
+
         toaster.create({
           title: "회원가입이 완료되었습니다.",
           type: "success",
         });
-        
-        router.push("/login");
 
+        router.push("/login");
       } else {
         console.error("사용자 정보 없음");
         toaster.create({
@@ -327,17 +340,90 @@ export default function SignupPage() {
         >
           {isSubmitting ? (
             <>
-              <Spinner /> 회원가입 중
+              <Spinner /> 회원가입 중...
             </>
+          ) : confirmedRoleType === "admin" ? (
+            "관리자 회원가입"
+          ) : confirmedRoleType === "teacher" ? (
+            "교사 회원가입"
           ) : (
             "회원가입"
           )}
         </Button>
-
+        <Text
+          variant="caption"
+          weight="medium"
+          onClick={() => setIsModalOpen(true)}
+          color="var(--grey-500)"
+          style={{
+            cursor: "pointer",
+            textDecoration: "underline",
+            marginTop: "10px",
+          }}
+        >
+          다른 권한으로 회원가입하기
+        </Text>
         {process.env.NODE_ENV === "development" && (
           <DevTool control={control} />
         )}
       </FormContainer>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ModalContainer>
+          <Heading level={4}>다른 권한으로 회원가입하기</Heading>
+          <InputAndTitle title="권한 종류">
+            <RadioGroup.Root
+              value={roleAccessType}
+              onValueChange={(e) => setRoleAccessType(e.value)}
+            >
+              <HStack gap="6">
+                {roleAccessTypeOptions.map((item) => (
+                  <RadioGroup.Item key={item.value} value={item.value}>
+                    <RadioGroup.ItemHiddenInput />
+                    <RadioGroup.ItemIndicator />
+                    <RadioGroup.ItemText>{item.label}</RadioGroup.ItemText>
+                  </RadioGroup.Item>
+                ))}
+              </HStack>
+            </RadioGroup.Root>
+          </InputAndTitle>
+          <InputAndTitle title="권한 코드">
+            <Input
+              type="text"
+              placeholder="권한 코드"
+              value={roleAccessCode}
+              onChange={(e) => setRoleAccessCode(e.target.value)}
+            />
+          </InputAndTitle>
+          <Button
+            style={{ marginTop: "16px" }}
+            variant="flat"
+            disabled={!roleAccessCode}
+            onClick={async () => {
+              const { data, error } = await confirmRoleAccessCode(
+                roleAccessCode,
+                roleAccessType as Role
+              );
+              if (error || !data) {
+                toaster.create({
+                  title: "권한 인증 실패",
+                  type: "error",
+                });
+              } else if (data) {
+                setConfirmedRoleType(data.role as Role);
+                setValue("role", data.role as Role);
+                toaster.create({
+                  title: "권한 인증 성공",
+                  type: "success",
+                });
+                setIsModalOpen(false);
+                setRoleAccessCode("");
+              }
+            }}
+          >
+            인증
+          </Button>
+        </ModalContainer>
+      </Modal>
     </Container>
   );
 }
@@ -347,7 +433,8 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-bottom: 100px;
+  padding-bottom: 80px;
+  height: calc(100vh - 90px);
 `;
 
 const FormContainer = styled.form`
@@ -358,7 +445,7 @@ const FormContainer = styled.form`
   gap: 16px;
   width: 100%;
   max-width: 500px;
-  padding: 32px 12px;
+  padding: 12px;
   background-color: var(--white);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -411,4 +498,11 @@ const HorizontalContainer = styled.div`
   gap: 12px;
   flex-direction: row;
   align-items: flex-start;
+`;
+const ModalContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 `;

@@ -28,6 +28,12 @@ import constants from "@/utils/constants";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
 
+export const formatedKrRole = (role: Role) => {
+  if (role === "admin") return "관리자";
+  if (role === "teacher") return "교사";
+  if (role === "user") return "학생";
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const [isChecked, setIsChecked] = useState<Agreement[]>([]);
@@ -179,11 +185,7 @@ export default function LoginPage() {
       value: organization.id,
     })) || [];
 
-  const formatedKrRole = (role: Role) => {
-    if (role === "admin") return "관리자";
-    if (role === "teacher") return "교사";
-    if (role === "user") return "학생";
-  };
+  
 
   const onSubmit = async (data: CreateUser) => {
     try {

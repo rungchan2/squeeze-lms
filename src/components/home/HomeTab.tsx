@@ -20,13 +20,24 @@ import { useAuth } from "../AuthProvider";
 import { Error } from "../common/Error";
 import { Loading } from "../common/Loading";
 import Footer from "../common/Footer";
+import { toaster } from "../ui/toaster";
 
 export default function HomeTab() {
   const { clearCurrentJourneyId } = useJourneyStore();
-  const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
+  const { isAuthenticated, loading } = useAuth();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get('tab');
+
+  useEffect(() => {
+    if (!isAuthenticated && !loading) {
+      toaster.create({
+        title: "로그인 후 이용해주세요.",
+        type: "warning",
+      });
+      router.push("/login");
+    }
+  }, [isAuthenticated, loading, router]);
 
   // 홈탭으로 돌아올 때만 상태 초기화
   useEffect(() => {
@@ -39,7 +50,7 @@ export default function HomeTab() {
     if (loading) {
       return <Loading />;
     }
-    return <Error message="로그인 후 이용해주세요." />;
+    return null;
   }
 
   return (

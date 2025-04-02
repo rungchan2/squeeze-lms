@@ -52,7 +52,7 @@ export default function LoginPage() {
         <GoogleLoginButton onClick={handleGoogleLogin}>
           <Image src="/google.svg" alt="Google" width={27} height={27} priority />
           <Text weight="bold" color="var(--background)">
-            Google로 로그인
+            Google로 시작하기
           </Text>
         </GoogleLoginButton>
         {error && (
@@ -127,7 +127,7 @@ const LoginContainer = styled.div`
 const GoogleLoginButton = styled.button`
   margin: 10px 0;
   width: 100%;
-  padding: 5px 15px;
+  padding: 7px 15px;
   background: var(--black);
   color: var(--white);
   border: none;
