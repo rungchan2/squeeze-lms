@@ -1,6 +1,6 @@
 "use client";
 
-import { Text } from "@chakra-ui/react";
+import { Text, Textarea } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Heading from "@/components/Text/Heading";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -102,7 +102,7 @@ export default function BugReport() {
         </div>
         <div className="input-container">
           <InputAndTitle
-            title="페이지"
+            title="페이지/제목"
             errorMessage={errors.title?.message as string}
           >
             <Input {...register("title")} />
@@ -111,7 +111,7 @@ export default function BugReport() {
             title="설명"
             errorMessage={errors.description?.message as string}
           >
-            <Input {...register("description")} />
+            <Textarea minHeight={120} {...register("description")} placeholder="해당 버그의 재현 방법, 현재 기기/브라우저, 버그로 인한 영향을 작성해주세요." />
           </InputAndTitle>
           <InputAndTitle
             title="심각성"
