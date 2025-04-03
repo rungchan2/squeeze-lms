@@ -34,6 +34,7 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
   
   const {
     register,
+    setValue,
     handleSubmit,
     formState: { errors },
   } = useForm<CreateMission>({
@@ -154,6 +155,7 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
           onChange={(value) => {
             setContent(value);
             setDescriptionError(null);
+            setValue("description", value);
           }}
         />
         </InputAndTitle>
