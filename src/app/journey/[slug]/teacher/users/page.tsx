@@ -234,7 +234,7 @@ export default function UsersPage() {
           `${journey.name}에 초대되었습니다.`,
           `<div style="font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; border: 1px solid #f0f0f0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
             <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
-              <img src="${window.location.origin}/logo.png" alt="스퀴즈 로고" style="height: 40px; margin-bottom: 10px;" />
+              <img src="${window.location.origin}/logo.svg" alt="스퀴즈 로고" style="height: 40px; margin-bottom: 10px;" />
               <h1 style="color: #333; font-size: 24px; margin: 0;">클라스 초대</h1>
             </div>
             

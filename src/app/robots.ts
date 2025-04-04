@@ -6,15 +6,13 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: '/',
+      allow: ['/', '/signup', '/login'],
       // 관리자 페이지나 민감한 페이지는 크롤링 제외
       disallow: [
         '/admin',
         '/private',
         '/api/*',
         '/*.json',
-        '/login',
-        '/signup',
         '/forgot-password',
       ],
     },
