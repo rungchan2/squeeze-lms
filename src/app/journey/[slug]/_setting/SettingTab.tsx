@@ -26,11 +26,46 @@ import { IoIosBookmarks } from "react-icons/io";
 import { MdOutlinePrivacyTip, MdPolicy, MdUpdate } from "react-icons/md";
 import Footer from "@/components/common/Footer";
 
+type Option = {
+  label: string;
+  href: string;
+  icon: React.ReactNode;
+};
+
 export default function SettingTab({ slug }: { slug: string }) {
   const { accessCodes } = useAccessCode();
   const filterAccessCodes = accessCodes?.filter(
     (code) => code.role === "teacher"
   );
+
+
+  const options: Option[] = [
+    {
+      label: "서비스 사용방법",
+      href: constants.GUIDE_URL ?? "",
+      icon: <IoIosBookmarks />,
+    },
+    {
+      label: "서비스 이용약관",
+      href: constants.TERMS_OF_SERVICE_URL ?? "",
+      icon: <MdOutlinePrivacyTip />,
+    },
+    {
+      label: "개인정보 처리방침",
+      href: constants.PRIVACY_POLICY_URL ?? "",
+      icon: <MdPolicy />,
+    },
+    {
+      label: "서비스 업데이트 내역",
+      href: constants.SERVICE_UPDATE_URL ?? "",
+      icon: <MdUpdate />,
+    },
+    // {
+    //   label: "팀 만들기",
+    //   href: "/team",
+    //   icon: <FaUserGroup />,
+    // },
+  ];
   return (
     <SettingTabContainer>
       <div>
@@ -56,7 +91,7 @@ export default function SettingTab({ slug }: { slug: string }) {
                     color="var(--grey-700)"
                     fontWeight="medium"
                   >
-                    권한 설정
+                    어드민 설정
                   </Text>
                 </MenuItem>
               </div>
@@ -190,80 +225,9 @@ export default function SettingTab({ slug }: { slug: string }) {
               <Heading level={4}>공통설정</Heading>
             </div>
             <div className="menu-items">
-              {/* <MenuItem href={`/journey/${slug}/info`}>
-                <FaUserGroup />
-                <Text
-                  variant="body"
-                  color="var(--grey-700)"
-                  fontWeight="medium"
-                >
-                  클라스 정보
-                </Text>
-              </MenuItem>
-              <MenuItem href={`/journey/${slug}/invite`}>
-                <BsEnvelopeArrowUpFill />
-                <Text
-                  variant="body"
-                  color="var(--grey-700)"
-                  fontWeight="medium"
-                >
-                  다른 친구 초대
-                </Text>
-              </MenuItem> */}
-              <MenuItemDiv
-                onClick={() => window.open(constants.GUIDE_URL, "_blank")}
-              >
-                <IoIosBookmarks />
-                <Text
-                  variant="body"
-                  color="var(--grey-700)"
-                  fontWeight="medium"
-                >
-                  스퀴즈 사용방법
-                </Text>
-              </MenuItemDiv>
-              <MenuItemDiv
-                onClick={() =>
-                  window.open(constants.TERMS_OF_SERVICE_URL, "_blank")
-                }
-              >
-                <MdOutlinePrivacyTip />
-                <Text
-                  variant="body"
-                  color="var(--grey-700)"
-                  fontWeight="medium"
-                >
-                  서비스 이용약관
-                </Text>
-              </MenuItemDiv>
-              <MenuItemDiv
-                onClick={() =>
-                  window.open(constants.PRIVACY_POLICY_URL, "_blank")
-                }
-              >
-                <MdPolicy />
-                <Text
-                  variant="body"
-                  color="var(--grey-700)"
-                  fontWeight="medium"
-                >
-                  개인정보 처리방침
-                </Text>
-              </MenuItemDiv>
-              <MenuItemDiv
-                onClick={() =>
-                  window.open(constants.SERVICE_UPDATE_URL, "_blank")
-                }
-              >
-                <MdUpdate />
-                <Text
-                  variant="body"
-                  color="var(--grey-700)"
-                  fontWeight="medium"
-                >
-                  서비스 업데이트 내역
-                </Text>
-              </MenuItemDiv>
+              {options.map((option) => (
+                <MenuItemList key={option.label} option={option} />
+              ))}
             </div>
           </div>
         </div>
@@ -272,6 +236,17 @@ export default function SettingTab({ slug }: { slug: string }) {
     </SettingTabContainer>
   );
 }
+function MenuItemList({ option }: { option: Option }) {
+  return (
+    <MenuItemDiv onClick={() => window.open(option.href, "_blank")}>
+      {option.icon}
+      <Text variant="body" color="var(--grey-700)" fontWeight="medium">
+        {option.label}
+      </Text>
+    </MenuItemDiv>
+  );
+}
+
 const CopyInput = ({ value }: { value: string }) => {
   return (
     <Clipboard.Root maxW="100%" value={value}>

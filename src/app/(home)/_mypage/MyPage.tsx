@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/store/auth";
 import styled from "@emotion/styled";
 import Heading from "@/components/Text/Heading";
-import { ProfileImage } from "../../navigation/ProfileImage";
+import { ProfileImage } from "@/components/navigation/ProfileImage";
 import Text from "@/components/Text/Text";
 import { FiEdit } from "react-icons/fi";
 import { IoSettingsOutline } from "react-icons/io5";

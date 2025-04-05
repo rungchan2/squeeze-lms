@@ -23,9 +23,9 @@ export default function AdminPage() {
 
   return (
     <AdminPageContainer>
-      <Tabs.Root defaultValue="members" variant="plain">
-      <Tabs.List bg="bg.muted" rounded="l3" p="1">
-        <Tabs.Trigger value="members">
+      <Tabs.Root key="line" defaultValue="organization" variant="line" fitted>
+      <Tabs.List>
+        <Tabs.Trigger value="organization">
           <LuUser />
           소속
         </Tabs.Trigger>
@@ -33,17 +33,17 @@ export default function AdminPage() {
           <LuFolder />
           회원
         </Tabs.Trigger>
-        <Tabs.Trigger value="tasks">
+        <Tabs.Trigger value="posts">
           <LuSquareCheck />
           게시글
         </Tabs.Trigger>
         <Tabs.Indicator rounded="l2" />
       </Tabs.List>
-      <Tabs.Content value="members">
+      <Tabs.Content value="organization">
         <OrganizationManagement />
       </Tabs.Content>
       <Tabs.Content value="projects">기능 구현중입니다.</Tabs.Content>
-      <Tabs.Content value="tasks">기능 구현중입니다.</Tabs.Content>
+      <Tabs.Content value="posts">기능 구현중입니다.</Tabs.Content>
     </Tabs.Root>
     </AdminPageContainer>
   );

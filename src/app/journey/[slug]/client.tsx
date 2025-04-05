@@ -42,7 +42,7 @@ export default function JourneyClient({ slug }: { slug: string }) {
   
   return (
     <div>
-      <Tabs usePath={true} flexDirection="column">
+      <Tabs usePath={true} flexDirection="column" preserveContent>
         <Tab title="일정" icon={<FaSchool />} path="plan" key="plan-tab">
           <Suspense fallback={<Spinner />}>
             <PlanTab slug={slug} key={`plan-${slug}`}/>

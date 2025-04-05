@@ -1,7 +1,7 @@
 "use client";
 
 import Text from "@/components/Text/Text";
-import Heading from "../../Text/Heading";
+import Heading from "@/components/Text/Heading";
 import styled from "@emotion/styled";
 import { FaRegComment, FaShare, FaHeart } from "react-icons/fa";
 import { MdAutoGraph } from "react-icons/md";

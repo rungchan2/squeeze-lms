@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import PostCard from "@/components/home/mypage/PostCard";
+import PostCard from "@/app/(home)/_mypage/PostCard";
 import CommentSection from "./CommentSection";
 import { useParams } from "next/navigation";
 import Spinner from "@/components/common/Spinner";

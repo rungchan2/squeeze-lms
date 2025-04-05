@@ -10,6 +10,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import createEmotionServer from '@emotion/server/create-instance'
 import { AuthProvider } from '@/components/AuthProvider'
 import { usePathname } from 'next/navigation';
+import useSWR, { SWRConfig } from 'swr'
+
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -44,11 +46,21 @@ export function Providers({ children}: ProvidersProps) {
 
   return (
     <CacheProvider value={emotionCache}>
-      <QueryClientProvider client={queryClient}>
-        <ChakraProvider value={defaultSystem}>
-          <AuthProvider>{children}</AuthProvider>
-        </ChakraProvider>
-      </QueryClientProvider>
+      <SWRConfig 
+        value={{
+          fetcher: (url: string) => fetch(url).then((res) => res.json()),
+          revalidateOnFocus: true,
+          revalidateOnReconnect: true,
+          revalidateOnMount: true,
+          revalidateIfStale: true,
+        }}
+      >
+        <QueryClientProvider client={queryClient}>
+          <ChakraProvider value={defaultSystem}>
+            <AuthProvider>{children}</AuthProvider>
+          </ChakraProvider>
+        </QueryClientProvider>
+      </SWRConfig>
     </CacheProvider>
   )
 } 

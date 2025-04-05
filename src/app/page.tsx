@@ -1,6 +1,4 @@
-"use client";
-
-import HomeTab from "@/components/home/HomeTab";
+import HomeTab from "./(home)/HomeTab";
 
 export default function Home() {
   

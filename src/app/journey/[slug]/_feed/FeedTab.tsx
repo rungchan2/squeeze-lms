@@ -2,7 +2,7 @@
 
 import styled from "@emotion/styled";
 import { usePosts, useCompletedMissions } from "@/hooks/usePosts";
-import PostCard from "@/components/home/mypage/PostCard";
+import PostCard from "@/app/(home)/_mypage/PostCard";
 import { useAuth } from "@/components/AuthProvider";
 import Spinner from "@/components/common/Spinner";
 import Text from "@/components/Text/Text";

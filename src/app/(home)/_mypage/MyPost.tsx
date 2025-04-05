@@ -1,4 +1,4 @@
-import PostCard from "@/components/home/mypage/PostCard";
+import PostCard from "@/app/(home)/_mypage/PostCard";
 import styles from "./Mypage.module.css";
 import { useMyPosts } from "@/hooks/usePosts";
 import Spinner from "@/components/common/Spinner";

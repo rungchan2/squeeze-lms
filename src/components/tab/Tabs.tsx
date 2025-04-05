@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import React from "react";
 import styles from "./Tabs.module.css";
 import Text from "@/components/Text/Text";
@@ -20,15 +20,18 @@ interface TabsProps {
   defaultIndex?: number;
   flexDirection?: "row" | "column";
   variant?: "plain" | "underline";
+  preserveContent?: boolean;
 }
 
-function Tab({ children }: TabProps) {
+const Tab = memo(({ children }: TabProps) => {
   return (
     <div className={styles.tab}>
       {children}
     </div>
   );
-}
+});
+
+Tab.displayName = 'Tab';
 
 function Tabs({ 
   children, 
@@ -36,6 +39,7 @@ function Tabs({
   hoverActiveColor = "transparent",
   defaultIndex = 0,
   flexDirection = "row",
+  preserveContent = false,
 }: TabsProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -45,12 +49,12 @@ function Tabs({
     usePath ? currentTab : String(defaultIndex)
   );
   
-  const tabs = React.Children.toArray(
-    children
-  ) as React.ReactElement<TabProps>[];
+  const tabs = useMemo(() => {
+    return React.Children.toArray(children) as React.ReactElement<TabProps>[];
+  }, [children]);
 
   useEffect(() => {
-    if (usePath) {
+    if (usePath && currentTab) {
       setActiveIndex(currentTab);
     }
   }, [currentTab, usePath]);
@@ -60,21 +64,21 @@ function Tabs({
       const defaultPath = tabs[0].props.path;
       setActiveIndex(defaultPath);
       
-      try {
-        const newParams = new URLSearchParams(searchParams.toString());
-        newParams.set('tab', defaultPath);
-        const newUrl = `?${newParams.toString()}`;
-        
-        if (window.location.search !== newUrl) {
-          router.push(newUrl, { scroll: false });
+      if (window.location.search !== `?tab=${defaultPath}`) {
+        try {
+          const newParams = new URLSearchParams(searchParams.toString());
+          newParams.set('tab', defaultPath);
+          const newUrl = `?${newParams.toString()}`;
+          
+          router.replace(newUrl, { scroll: false });
+        } catch (error) {
+          console.error("탭 라우팅 오류:", error);
         }
-      } catch (error) {
-        console.error("탭 라우팅 오류:", error);
       }
     }
   }, [activeIndex, tabs, router, searchParams, usePath]);
 
-  const handleTabClick = (path: string | undefined, index: number) => {
+  const handleTabClick = useCallback((path: string | undefined, index: number) => {
     if (usePath && path) {
       if (activeIndex === path) return;
       
@@ -83,21 +87,25 @@ function Tabs({
       try {
         const newParams = new URLSearchParams(searchParams.toString());
         newParams.set('tab', path);
-        router.push(`?${newParams.toString()}`, { scroll: false });
+        const newUrl = `?${newParams.toString()}`;
+        
+        router.replace(newUrl, { scroll: false });
       } catch (error) {
         console.error("탭 클릭 라우팅 오류:", error);
       }
     } else {
       setActiveIndex(String(index));
     }
-  };
+  }, [activeIndex, router, searchParams, usePath]);
 
-  const activeTabContent = usePath 
-    ? tabs.find(tab => tab.props.path === activeIndex)
-    : tabs[Number(activeIndex) || 0];
+  const activeTabIndex = usePath 
+    ? tabs.findIndex(tab => tab.props.path === activeIndex)
+    : Number(activeIndex) || 0;
+  
+  const activeTabContent = activeTabIndex >= 0 ? tabs[activeTabIndex] : tabs[0];
 
   return (
-    <div className={styles.container} >
+    <div className={styles.container}>
       <div className={styles.tabButton}>
         {tabs.map((tab, index) => {
           const isActive = usePath 
@@ -110,7 +118,8 @@ function Tabs({
               onClick={() => handleTabClick(tab.props.path, index)}
               className={isActive ? styles.active : ""}
               style={{
-                backgroundColor: isActive ? hoverActiveColor : undefined, cursor: 'pointer',
+                backgroundColor: isActive ? hoverActiveColor : undefined, 
+                cursor: 'pointer',
                 flexDirection: flexDirection,
                 color: isActive ? "var(--grey-700)" : "var(--grey-500)"
               }}
@@ -125,7 +134,20 @@ function Tabs({
       </div>
 
       <div className={styles.tabContent}>
-        {activeTabContent || tabs[0]}
+        {preserveContent ? (
+          tabs.map((tab, index) => (
+            <div 
+              key={index}
+              style={{ 
+                display: index === activeTabIndex ? 'block' : 'none' 
+              }}
+            >
+              {tab}
+            </div>
+          ))
+        ) : (
+          activeTabContent
+        )}
       </div>
     </div>
   );
