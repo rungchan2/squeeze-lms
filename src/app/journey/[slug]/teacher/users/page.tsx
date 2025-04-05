@@ -231,7 +231,7 @@ export default function UsersPage() {
 
         const { error } = await sendEmail(
           email ?? "",
-          `${journey.name}에 초대되었습니다.`,
+          `[스퀴즈!]${journey.name}에 초대되었습니다.`,
           `<div style="font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; border: 1px solid #f0f0f0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
             <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
               <img src="${window.location.origin}/logo.svg" alt="스퀴즈 로고" style="height: 40px; margin-bottom: 10px;" />
@@ -442,16 +442,16 @@ export default function UsersPage() {
               <Table.Root size="sm" interactive showColumnBorder>
                 <Table.Header>
                   <Table.Row>
-                    <Table.ColumnHeader textAlign="center">
+                    <Table.ColumnHeader>
                       프로필
                     </Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="center">
+                    <Table.ColumnHeader>
                       이름
                     </Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="center">
+                    <Table.ColumnHeader>
                       역할
                     </Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="center">
+                    <Table.ColumnHeader>
                       초대
                     </Table.ColumnHeader>
                   </Table.Row>

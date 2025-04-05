@@ -1,7 +1,6 @@
 import { useAuthStore } from "@/store/auth";
 import styled from "@emotion/styled";
 import Heading from "@/components/Text/Heading";
-import { Tabs, Tab } from "@/components/tab/Tabs";
 import { ProfileImage } from "../../navigation/ProfileImage";
 import Text from "@/components/Text/Text";
 import { FiEdit } from "react-icons/fi";
@@ -26,6 +25,7 @@ import { Error } from "@/components/common/Error";
 import constants from "@/utils/constants";
 import { AdminOnly } from "@/components/auth/AdminOnly";
 import { MdAdminPanelSettings } from "react-icons/md";
+import { Tabs } from "@chakra-ui/react";
 
 export default function MyPage() {
   const [orgData, setOrgData] = useState<any>(null);
@@ -147,11 +147,21 @@ export default function MyPage() {
             </Text>
           </div>
         </div>
-        <Tabs usePath={false} defaultIndex={0}>
-          <Tab title="내 게시글" icon={<BsFillAirplaneFill />}>
+        <Tabs.Root key="line" defaultValue="myPosts" variant="line" fitted>
+          <Tabs.List>
+            <Tabs.Trigger value="myPosts">
+              <BsFillAirplaneFill />
+              내 게시글
+            </Tabs.Trigger>
+            <Tabs.Trigger value="likedPosts">
+              <FaRegHeart />
+              좋아요 게시글
+            </Tabs.Trigger>
+          </Tabs.List>
+          <Tabs.Content value="myPosts">
             <MyPost />
-          </Tab>
-          <Tab title="좋아요 게시글" icon={<FaRegHeart />}>
+          </Tabs.Content>
+          <Tabs.Content value="likedPosts">
             {myLikedPosts?.length === 0 ? (
               <Error message="좋아요 게시글이 없습니다." />
             ) : (
@@ -161,8 +171,8 @@ export default function MyPage() {
                 ))}
               </div>
             )}
-          </Tab>
-        </Tabs>
+          </Tabs.Content>
+        </Tabs.Root>
       </div>
     </PostContainer>
   );

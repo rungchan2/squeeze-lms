@@ -41,7 +41,7 @@ export default function MissionCard({
   const searchParams = useSearchParams();
   const isTabMission = searchParams.get("tab") === "missions";
 
-  if (!missionInstance || !mission) {
+  if (!mission) {
     return (
       <StyledMissionCard
         isModal={isModal}

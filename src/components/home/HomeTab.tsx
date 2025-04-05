@@ -1,4 +1,3 @@
-import { Tabs, Tab } from "@/components/tab/Tabs";
 import { MdSpaceDashboard } from "react-icons/md";
 import { FaBell, FaPlus } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
@@ -20,13 +19,14 @@ import { useAuth } from "../AuthProvider";
 import { Loading } from "../common/Loading";
 import Footer from "../common/Footer";
 import { toaster } from "../ui/toaster";
+import { Tabs } from "@chakra-ui/react";
 
 export default function HomeTab() {
   const { clearCurrentJourneyId } = useJourneyStore();
   const router = useRouter();
   const { isAuthenticated, loading } = useAuth();
   const searchParams = useSearchParams();
-  const currentTab = searchParams.get('tab');
+  const currentTab = searchParams.get("tab");
 
   useEffect(() => {
     if (!isAuthenticated && !loading) {
@@ -40,7 +40,7 @@ export default function HomeTab() {
 
   // 홈탭으로 돌아올 때만 상태 초기화
   useEffect(() => {
-    if (currentTab === 'home') {
+    if (currentTab === "home") {
       clearCurrentJourneyId();
     }
   }, [currentTab, clearCurrentJourneyId]);
@@ -53,17 +53,31 @@ export default function HomeTab() {
   }
 
   return (
-    <Tabs usePath={true}>
-      <Tab title="클라스" icon={<MdSpaceDashboard />} path="home">
+    <Tabs.Root key="line" defaultValue="classes" variant="line" fitted>
+      <Tabs.List>
+        <Tabs.Trigger value="classes">
+          <MdSpaceDashboard />
+          클라스
+        </Tabs.Trigger>
+        <Tabs.Trigger value="notifications">
+          <FaBell />
+          알림
+        </Tabs.Trigger>
+        <Tabs.Trigger value="profile">
+          <FaUser />
+          프로필
+        </Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="classes">
         <JourneyTab />
-      </Tab>
-      <Tab title="알림" icon={<FaBell />} path="notifications">
+      </Tabs.Content>
+      <Tabs.Content value="notifications">
         <NotificationTab />
-      </Tab>
-      <Tab title="프로필" icon={<FaUser />} path="profile">
+      </Tabs.Content>
+      <Tabs.Content value="profile">
         <ProfileTab />
-      </Tab>
-    </Tabs>
+      </Tabs.Content>
+    </Tabs.Root>
   );
 }
 
