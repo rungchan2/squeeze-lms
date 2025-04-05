@@ -174,7 +174,7 @@ export default function MissionTab({ slug }: { slug: string }) {
       <TeacherOnly>
         <FloatingButton
           onClick={() =>
-            router.push(`/journey/${getSlugFromPathname()}/teacher/new-mission`)
+            router.push(`/mission/create`)
           }
         >
           <FaWandMagicSparkles />

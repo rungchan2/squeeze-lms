@@ -2,10 +2,11 @@
 import { useOrganization } from "@/hooks/useOrganization";
 import { useAuth } from "@/components/AuthProvider";
 import { Error } from "@/components/common/Error";
-import { Tabs } from "@chakra-ui/react"
+import { Tabs } from "@chakra-ui/react";
 import OrganizationManagement from "./OrganizationManagement";
 import { LuUser, LuFolder, LuSquareCheck } from "react-icons/lu";
 import styled from "@emotion/styled";
+import MissionManagement from "./MissionManagement";
 export default function AdminPage() {
   const { isAuthenticated, role } = useAuth();
 
@@ -24,27 +25,29 @@ export default function AdminPage() {
   return (
     <AdminPageContainer>
       <Tabs.Root key="line" defaultValue="organization" variant="line" fitted>
-      <Tabs.List>
-        <Tabs.Trigger value="organization">
-          <LuUser />
-          소속
-        </Tabs.Trigger>
-        <Tabs.Trigger value="projects">
-          <LuFolder />
-          회원
-        </Tabs.Trigger>
-        <Tabs.Trigger value="posts">
-          <LuSquareCheck />
-          게시글
-        </Tabs.Trigger>
-        <Tabs.Indicator rounded="l2" />
-      </Tabs.List>
-      <Tabs.Content value="organization">
-        <OrganizationManagement />
-      </Tabs.Content>
-      <Tabs.Content value="projects">기능 구현중입니다.</Tabs.Content>
-      <Tabs.Content value="posts">기능 구현중입니다.</Tabs.Content>
-    </Tabs.Root>
+        <Tabs.List>
+          <Tabs.Trigger value="organization">
+            <LuUser />
+            소속
+          </Tabs.Trigger>
+          <Tabs.Trigger value="projects">
+            <LuFolder />
+            미션 관리
+          </Tabs.Trigger>
+          <Tabs.Trigger value="posts">
+            <LuSquareCheck />
+            회원 관리
+          </Tabs.Trigger>
+          <Tabs.Indicator rounded="l2" />
+        </Tabs.List>
+        <Tabs.Content value="organization">
+          <OrganizationManagement />
+        </Tabs.Content>
+        <Tabs.Content value="projects">
+          <MissionManagement />
+        </Tabs.Content>
+        <Tabs.Content value="posts">기능 추가 중</Tabs.Content>
+      </Tabs.Root>
     </AdminPageContainer>
   );
 }

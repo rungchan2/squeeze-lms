@@ -1,4 +1,4 @@
-import NewMissionPage from "../../new-mission/page";
+import NewMissionPage from "../../create/client";
 import { getMission } from "@/app/journey/actions";
 
 export default async function EditMissionPage({ params }: { params: Promise<{ id: number }> }) {

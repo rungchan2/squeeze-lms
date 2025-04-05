@@ -81,7 +81,7 @@ export default function MissionCard({
       : "날짜없음";
 
   const goToEditMission = (missionId: number) => {
-    router.push(`/journey/${slug}/teacher/edit-mission/${missionId}`);
+    router.push(`/mission/edit/${missionId}`);
   };
 
   const RemoveHtmlTags = (text: string) => {
