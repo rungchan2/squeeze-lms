@@ -1,8 +1,9 @@
 import useSWR from "swr";
+import useSWRInfinite from "swr/infinite";
 import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
-import { useInfiniteQuery } from '@tanstack/react-query';
 import { PostWithRelations } from "@/types";
+import { useState, useCallback, useEffect } from "react";
 
 // 페이지네이션 타입 정의
 type FetchPostsParams = {
@@ -20,10 +21,10 @@ interface PostsPage {
 }
 
 // 게시물을 페이지네이션으로 가져오는 함수
-async function getPosts({ pageParam = 0, pageSize = 10, journeySlug, showHidden = false }: FetchPostsParams): Promise<PostsPage> {
+async function getPosts(key: string, pageIndex: number, pageSize: number, journeySlug?: string, showHidden = false): Promise<PostsPage> {
   const supabase = createClient();
   
-  const from = pageParam * pageSize;
+  const from = pageIndex * pageSize;
   const to = from + pageSize - 1;
   
   let query = supabase
@@ -69,7 +70,7 @@ async function getPosts({ pageParam = 0, pageSize = 10, journeySlug, showHidden 
   if (error) throw error;
   
   const hasNextPage = count ? from + pageSize < count : false;
-  const nextPage = hasNextPage ? pageParam + 1 : null;
+  const nextPage = hasNextPage ? pageIndex + 1 : null;
   
   return {
     data: data as unknown as PostWithRelations[],
@@ -79,7 +80,7 @@ async function getPosts({ pageParam = 0, pageSize = 10, journeySlug, showHidden 
 }
 
 // 내 게시물만 가져오는 함수
-async function getMyPosts(userId: number, journeySlug?: string) {
+async function getMyPosts(key: string, userId: number, journeySlug?: string) {
   if (!userId) return [];
   
   const supabase = createClient();
@@ -126,7 +127,7 @@ async function getMyPosts(userId: number, journeySlug?: string) {
 }
 
 // 내가 좋아요한 게시물만 가져오는 함수
-async function getMyLikedPosts(userId: number, journeySlug?: string) {
+async function getMyLikedPosts(key: string, userId: number, journeySlug?: string) {
   if (!userId) return [];
   
   const supabase = createClient();
@@ -184,7 +185,7 @@ async function getMyLikedPosts(userId: number, journeySlug?: string) {
     .map(item => item.posts) ?? [];
 }
 
-async function getCompletedMissionIds(userId: number, journeySlug?: string) {
+async function getCompletedMissionIds(key: string, userId: number, journeySlug?: string) {
   if (!userId) return [];
     
   const supabase = createClient();
@@ -282,38 +283,65 @@ async function togglePostHidden(postId: number, isHidden: boolean) {
 // TODO: 2. ✅ 클라스 별로 게시물 볼 수 있게 쿼리 수정
 // ✅ SWR을 사용한 usePosts 훅
 export function usePosts(pageSize = 10, journeySlug?: string, showHidden = false) {
+  const [posts, setPosts] = useState<PostWithRelations[]>([]);
+  const [total, setTotal] = useState(0);
+  
+  // SWR Infinite로 무한 스크롤 구현
+  const getKey = (pageIndex: number, previousPageData: PostsPage | null) => {
+    // 이전 페이지 데이터가 없거나 더 불러올 페이지가 있는 경우
+    if (previousPageData === null || previousPageData.nextPage !== null) {
+      return [`posts-${journeySlug || 'all'}-${showHidden ? 'hidden' : 'visible'}`, pageIndex, pageSize, journeySlug, showHidden];
+    }
+    return null; // 더 이상 데이터가 없으면 null 반환
+  };
+  
   const {
     data,
     error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    status,
-    refetch
-  } = useInfiniteQuery({
-    queryKey: ['posts', journeySlug],
-    queryFn: ({ pageParam }) => getPosts({ 
-      pageParam: pageParam as number, 
-      pageSize,
-      journeySlug,
-      showHidden
-    }),
-    getNextPageParam: (lastPage: PostsPage) => lastPage.nextPage,
-    initialPageParam: 0
-  });
+    size,
+    setSize,
+    isLoading,
+    isValidating,
+    mutate
+  } = useSWRInfinite<PostsPage>(
+    getKey,
+    ([key, pageIndex, pageSize, journeyParam, showHiddenParam]) => 
+      getPosts(key, pageIndex, pageSize, journeyParam, showHiddenParam),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 30000, // 30초 동안 중복 요청 방지
+    }
+  );
   
-  // 모든 페이지의 데이터를 하나의 배열로 합치기
-  const posts = data?.pages.flatMap(page => page.data) || [];
+  // 데이터가 로드되면 상태 업데이트
+  useEffect(() => {
+    if (data) {
+      const allPosts = data.flatMap(page => page.data);
+      setPosts(allPosts);
+      
+      if (data.length > 0 && data[0].total !== undefined) {
+        setTotal(data[0].total);
+      }
+    }
+  }, [data]);
+  
+  // 다음 페이지 불러오기 함수
+  const fetchNextPage = useCallback(() => {
+    setSize(size + 1);
+  }, [size, setSize]);
+  
+  // 다음 페이지가 있는지 확인
+  const hasNextPage = data ? data[data.length - 1]?.nextPage !== null : false;
   
   return {
     data: posts,
     error,
-    isLoading: status === 'pending',
-    isFetchingNextPage,
+    isLoading,
+    isFetchingNextPage: isValidating && !isLoading,
     fetchNextPage,
     hasNextPage,
-    refetch,
-    total: data?.pages[0]?.total ?? 0
+    refetch: mutate,
+    total
   };
 }
 
@@ -322,8 +350,8 @@ export function useMyPosts(journeySlug?: string) {
   const { id: userId } = useAuth();
   
   const { data, error, isLoading, mutate } = useSWR(
-    userId ? `my-posts-${userId}-${journeySlug || ''}` : null,
-    () => getMyPosts(userId as number, journeySlug),
+    userId ? [`my-posts-${userId}`, userId, journeySlug] : null,
+    ([key, id, slug]) => getMyPosts(key, id, slug),
     {
       revalidateOnFocus: false,
       dedupingInterval: 60000, // 1분 동안 중복 요청 방지
@@ -344,8 +372,8 @@ export function useMyLikedPosts(journeySlug?: string) {
   const { id: userId } = useAuth();
   
   const { data, error, isLoading, mutate } = useSWR(
-    userId ? `my-liked-posts-${userId}-${journeySlug || ''}` : null,
-    () => getMyLikedPosts(userId as number, journeySlug),
+    userId ? [`my-liked-posts-${userId}`, userId, journeySlug] : null,
+    ([key, id, slug]) => getMyLikedPosts(key, id, slug),
     {
       revalidateOnFocus: false,
       dedupingInterval: 60000, // 1분 동안 중복 요청 방지
@@ -363,26 +391,20 @@ export function useMyLikedPosts(journeySlug?: string) {
 
 // ✅ SWR을 사용한 useCompletedMissions 훅
 export function useCompletedMissions(userId: number, journeySlug?: string) {
-  const { data, error, isLoading, refetch } = useInfiniteQuery({
-    queryKey: ['completed-missions', userId, journeySlug],
-    queryFn: () => getCompletedMissionIds(userId, journeySlug),
-    initialPageParam: 0,
-    getNextPageParam: () => null, // 페이지네이션이 필요 없으므로 null 반환
-    enabled: !!userId,
-    // 캐싱 시간 줄이기
-    staleTime: 5 * 60 * 1000, // 5분동안 캐시 유지
-    refetchOnMount: false,    // 컴포넌트 마운트 시 자동 리페치 비활성화
-    refetchOnWindowFocus: false,  // 창 포커스 시 자동 리페치 비활성화
-    // refetchInterval 제거 - 주기적 자동 갱신 제거
-  });
-  
-  const completedMissionIds = data?.pages[0] || [];
+  const { data, error, isLoading, mutate } = useSWR(
+    userId ? [`completed-missions-${userId}`, userId, journeySlug] : null,
+    ([key, id, slug]) => getCompletedMissionIds(key, id, slug),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 5 * 60 * 1000, // 5분 동안 중복 요청 방지
+    }
+  );
   
   return {
-    completedMissionIds,
+    completedMissionIds: data || [],
     error,
     isLoading,
-    refetch
+    refetch: mutate
   };
 }
 

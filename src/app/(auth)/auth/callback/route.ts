@@ -20,14 +20,6 @@ export async function GET(request: Request) {
   // if "next" is in param, use it as the redirect URL
   const next = searchParams.get("next") ?? "/";
 
-  // 디버깅을 위한 상세 로깅
-  console.log("Callback Route 실행됨:", {
-    code,
-    next,
-    origin,
-    // headers: Object.fromEntries(request.headers),
-  });
-
   if (error && error_description) {
     console.error("Auth error:", error, error_description);
     return NextResponse.redirect(
@@ -39,17 +31,12 @@ export async function GET(request: Request) {
     try {
       const { data, error } = await supabase_server.auth.exchangeCodeForSession(code);
 
-      console.log("Exchange 결과:", { data: data.user, error });
-
       if (!error) {
         const userData = await supabase_server
           .from("profiles")
           .select("*")
           .eq("email", data.user.email || "")
           .single();
-
-        // 디버깅을 위한 로그 추가
-        console.log("userData 결과:", userData.data);
 
         const neededuserData: NeededUserMetadata = {
           uid: data.user.id,
@@ -58,7 +45,8 @@ export async function GET(request: Request) {
           last_name: data.user.user_metadata.full_name.split(" ")[1] || "",
           profile_image: data.user.user_metadata.picture || "",
         };
-        console.log("neededuserData:", neededuserData);
+
+        console.log("userData:", userData.data);
         if (userData.data === null) {
           const response = NextResponse.redirect(`${origin}/login/info`);
           const encryptedData = encrypt(JSON.stringify(neededuserData));

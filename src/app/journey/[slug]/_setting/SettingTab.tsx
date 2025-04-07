@@ -25,11 +25,12 @@ import constants from "@/utils/constants";
 import { IoIosBookmarks } from "react-icons/io";
 import { MdOutlinePrivacyTip, MdPolicy, MdUpdate } from "react-icons/md";
 import Footer from "@/components/common/Footer";
-
+import { useRouter } from "next/navigation";
 type Option = {
   label: string;
   href: string;
   icon: React.ReactNode;
+  isUseRouter?: boolean;
 };
 
 export default function SettingTab({ slug }: { slug: string }) {
@@ -37,9 +38,13 @@ export default function SettingTab({ slug }: { slug: string }) {
   const filterAccessCodes = accessCodes?.filter(
     (code) => code.role === "teacher"
   );
-
-
   const options: Option[] = [
+    {
+      label: "팀 관리",
+      href: `/journey/${slug}/teams`,
+      icon: <FaUserGroup />,
+      isUseRouter: true,
+    },
     {
       label: "서비스 사용방법",
       href: constants.GUIDE_URL ?? "",
@@ -60,11 +65,6 @@ export default function SettingTab({ slug }: { slug: string }) {
       href: constants.SERVICE_UPDATE_URL ?? "",
       icon: <MdUpdate />,
     },
-    // {
-    //   label: "팀 만들기",
-    //   href: "/team",
-    //   icon: <FaUserGroup />,
-    // },
   ];
   return (
     <SettingTabContainer>
@@ -237,8 +237,17 @@ export default function SettingTab({ slug }: { slug: string }) {
   );
 }
 function MenuItemList({ option }: { option: Option }) {
+  const router = useRouter();
   return (
-    <MenuItemDiv onClick={() => window.open(option.href, "_blank")}>
+    <MenuItemDiv
+      onClick={() => {
+        if (option.isUseRouter) {
+          router.push(option.href);
+        } else {
+          window.open(option.href, "_blank");
+        }
+      }}
+    >
       {option.icon}
       <Text variant="body" color="var(--grey-700)" fontWeight="medium">
         {option.label}

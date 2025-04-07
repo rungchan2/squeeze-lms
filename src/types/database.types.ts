@@ -417,39 +417,51 @@ export type Database = {
       }
       posts: {
         Row: {
+          achievement_status: string | null
           content: string | null
           created_at: string | null
           file_url: string | null
           id: number
           is_hidden: boolean
+          is_team_submission: boolean | null
           mission_instance_id: number | null
           score: number | null
+          team_id: number | null
+          team_points: number | null
           title: string
           updated_at: string | null
           user_id: number
           view_count: number
         }
         Insert: {
+          achievement_status?: string | null
           content?: string | null
           created_at?: string | null
           file_url?: string | null
           id?: number
           is_hidden?: boolean
+          is_team_submission?: boolean | null
           mission_instance_id?: number | null
           score?: number | null
+          team_id?: number | null
+          team_points?: number | null
           title: string
           updated_at?: string | null
           user_id: number
           view_count?: number
         }
         Update: {
+          achievement_status?: string | null
           content?: string | null
           created_at?: string | null
           file_url?: string | null
           id?: number
           is_hidden?: boolean
+          is_team_submission?: boolean | null
           mission_instance_id?: number | null
           score?: number | null
+          team_id?: number | null
+          team_points?: number | null
           title?: string
           updated_at?: string | null
           user_id?: number
@@ -461,6 +473,20 @@ export type Database = {
             columns: ["mission_instance_id"]
             isOneToOne: false
             referencedRelation: "journey_mission_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_points_summary"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "posts_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
           {
@@ -551,6 +577,170 @@ export type Database = {
           role?: Database["public"]["Enums"]["role"] | null
         }
         Relationships: []
+      }
+      sitemap_status: {
+        Row: {
+          id: number
+          last_updated: string | null
+          needs_update: boolean | null
+        }
+        Insert: {
+          id?: number
+          last_updated?: string | null
+          needs_update?: boolean | null
+        }
+        Update: {
+          id?: number
+          last_updated?: string | null
+          needs_update?: boolean | null
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          created_at: string | null
+          id: number
+          is_leader: boolean | null
+          joined_at: string | null
+          team_id: number
+          updated_at: string | null
+          user_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          is_leader?: boolean | null
+          joined_at?: string | null
+          team_id: number
+          updated_at?: string | null
+          user_id: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          is_leader?: boolean | null
+          joined_at?: string | null
+          team_id?: number
+          updated_at?: string | null
+          user_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_points_summary"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_points: {
+        Row: {
+          created_at: string | null
+          id: number
+          mission_instance_id: number
+          post_id: number | null
+          team_id: number
+          total_points: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          mission_instance_id: number
+          post_id?: number | null
+          team_id: number
+          total_points?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          mission_instance_id?: number
+          post_id?: number | null
+          team_id?: number
+          total_points?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_points_mission_instance_id_fkey"
+            columns: ["mission_instance_id"]
+            isOneToOne: false
+            referencedRelation: "journey_mission_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_points_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_points_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_points_summary"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "team_points_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: number
+          journey_id: number
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          journey_id: number
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          journey_id?: number
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_journeys: {
         Row: {
@@ -669,6 +859,25 @@ export type Database = {
           },
         ]
       }
+      team_points_summary: {
+        Row: {
+          journey_id: number | null
+          journey_name: string | null
+          member_count: number | null
+          team_id: number | null
+          team_name: string | null
+          total_points: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       bytea_to_text: {
@@ -780,6 +989,10 @@ export type Database = {
           value: string
         }
         Returns: boolean
+      }
+      migrate_existing_team_posts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       migrate_missions_to_instances: {
         Args: Record<PropertyKey, never>

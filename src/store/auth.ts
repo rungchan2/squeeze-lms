@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { getUser, getUserProfile, logout } from "@/app/(auth)/actions";
+import { getUser, logout } from "@/app/(auth)/actions";
 import { encrypt, decrypt } from "@/utils/encryption";
 import { redirect } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
+import { user as userUtil } from "@/utils/data/user";
 
 // 역할 타입 정의
 export type Role = "user" | "teacher" | "admin";
@@ -99,9 +100,10 @@ export const useAuthStore = create<UserState>()(
           }
 
           // 로그인 관련 경로인지 확인
-          const isLoginPath = currentPath.includes("/login") || 
-                            currentPath.includes("/signup") || 
-                            currentPath.includes("/forgot-password");
+          const isLoginPath =
+            currentPath.includes("/login") ||
+            currentPath.includes("/signup") ||
+            currentPath.includes("/forgot-password");
 
           if (!user) {
             set({
@@ -120,9 +122,7 @@ export const useAuthStore = create<UserState>()(
             return;
           }
 
-          const { profile, error } = await getUserProfile();
-          console.log("profile", profile);
-          console.log("error", error);
+          const { profile, error } = await userUtil.getUserProfile();
 
           // 로그인 관련 경로에서는 프로필 검증 및 리다이렉트 건너뛰기
           if (isLoginPath) {
@@ -145,13 +145,7 @@ export const useAuthStore = create<UserState>()(
               type: "error",
             });
 
-            // 클라이언트 사이드인 경우 window.location 사용, 서버 사이드인 경우 redirect 사용
-            if (typeof window !== "undefined") {
-              window.location.href =
-                "/error?message=로그인 정보가 없거나 유효하지 않습니다";
-            } else {
-              redirect("/error?message=로그인 정보가 없거나 유효하지 않습니다");
-            }
+            redirect("/login");
           } else if (profile) {
             set({
               id: profile.id,

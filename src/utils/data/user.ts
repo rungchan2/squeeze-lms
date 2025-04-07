@@ -10,6 +10,22 @@ export const user = {
     } = await supabase.auth.getUser();
     return { user, error };
   },
+  async getUserProfile() {
+    const supabase = createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+    if (!user || error) {
+      throw new Error("사용자 정보를 찾을 수 없습니다.");
+    }
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("uid", user?.id || "")
+      .single();
+    return { profile, error: profileError };
+  },
   async deleteProfile(uid: string) {
     const supabase = createClient();
     const { error } = await supabase.from("profiles").delete().eq("uid", uid);

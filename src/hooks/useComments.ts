@@ -3,18 +3,11 @@ import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { Comment, CreateComment } from "@/types/comments";
 import { RealtimeChannel } from "@supabase/supabase-js";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import useSWR from "swr";
 
 interface UseCommentsProps {
   postId: number;
   pageSize?: number;
-}
-
-// 댓글 페이지 결과 타입
-interface CommentsPage {
-  data: Comment[];
-  nextPage: number | null;
-  total: number;
 }
 
 // 전역 상태로 댓글 캐시 관리
@@ -22,21 +15,14 @@ const commentsCache: Record<string, Comment[]> = {};
 // 최근 생성/삭제된 댓글 ID를 추적 (중복 처리 방지)
 const recentlyProcessedIds = new Set<number>();
 
-// 댓글을 페이지네이션으로 가져오는 함수
-async function fetchCommentsPage({
-  postId,
-  pageParam = 0,
-  pageSize = 10,
-}: {
-  postId: number;
-  pageParam: number;
-  pageSize: number;
-}): Promise<CommentsPage> {
-  if (!postId) return { data: [], nextPage: null, total: 0 };
+// 댓글을 가져오는 함수
+async function fetchComments(postId: number, pageSize: number = 10): Promise<{
+  comments: Comment[];
+  count: number;
+}> {
+  if (!postId) return { comments: [], count: 0 };
 
   const supabase = createClient();
-  const from = pageParam * pageSize;
-  const to = from + pageSize - 1;
 
   const { data, error, count } = await supabase
     .from("comments")
@@ -54,17 +40,13 @@ async function fetchCommentsPage({
     )
     .eq("post_id", postId)
     .order("created_at", { ascending: false })
-    .range(from, to);
+    .limit(pageSize);
 
   if (error) throw error;
 
-  const hasNextPage = count ? from + pageSize < count : false;
-  const nextPage = hasNextPage ? pageParam + 1 : null;
-
   return {
-    data: data || [],
-    nextPage,
-    total: count || 0,
+    comments: data || [],
+    count: count || 0,
   };
 }
 
@@ -73,33 +55,32 @@ export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
   const supabase = createClient();
   const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
   const mountedRef = useRef(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [loadedComments, setLoadedComments] = useState<Comment[]>([]);
 
-  // React Query로 무한 스크롤 구현
+  // SWR로 댓글 데이터 가져오기
   const {
     data,
-    error: queryError,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    status,
-    refetch,
-  } = useInfiniteQuery({
-    queryKey: ["comments", postId],
-    queryFn: ({ pageParam }) =>
-      fetchCommentsPage({
-        postId,
-        pageParam: pageParam as number,
-        pageSize,
-      }),
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-    initialPageParam: 0,
-    enabled: !!postId,
-  });
+    error: swrError,
+    isLoading,
+    isValidating,
+    mutate,
+  } = useSWR(
+    postId ? [`comments-${postId}`, pageSize] : null,
+    ([_, size]) => fetchComments(postId, size * page),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000, // 1분 동안 중복 요청 방지
+    }
+  );
 
-  // 모든 페이지의 댓글을 하나의 배열로 합치기
-  const comments = data?.pages.flatMap((page) => page.data) || [];
-  const count = data?.pages[0]?.total || 0;
-  const [error, setError] = useState<string | null>(null);
+  // 데이터가 로드되면 상태 업데이트
+  useEffect(() => {
+    if (data?.comments) {
+      setLoadedComments(data.comments);
+    }
+  }, [data]);
 
   // 댓글 생성 함수
   const createComment = useCallback(
@@ -127,13 +108,8 @@ export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
         },
       };
 
-      // 캐시 키
-      const cacheKey = `comments-${postId}`;
-
-      // 낙관적 업데이트 적용 (첫 페이지에만)
-      const firstPageComments = data?.pages[0]?.data || [];
-      const updatedFirstPage = [optimisticComment, ...firstPageComments];
-      commentsCache[cacheKey] = updatedFirstPage;
+      // 낙관적 업데이트 적용
+      setLoadedComments(prev => [optimisticComment, ...prev]);
 
       try {
         const newComment: CreateComment = {
@@ -170,7 +146,7 @@ export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
         }
 
         // 데이터 다시 불러오기
-        refetch();
+        mutate();
 
         return createdComment;
       } catch (err: any) {
@@ -179,12 +155,12 @@ export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
         if (mountedRef.current) {
           setError(err.message);
           // 데이터 다시 불러오기
-          refetch();
+          mutate();
         }
         return null;
       }
     },
-    [userId, postId, fullName, profileImage, supabase, data, refetch]
+    [userId, postId, fullName, profileImage, supabase, mutate]
   );
 
   // 댓글 삭제 함수
@@ -196,10 +172,13 @@ export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
       }
 
       // 삭제할 댓글 찾기
-      const commentToDelete = comments.find(
+      const commentToDelete = loadedComments.find(
         (comment) => comment.id === commentId
       );
       if (!commentToDelete) return false;
+
+      // 낙관적 업데이트
+      setLoadedComments(prev => prev.filter(comment => comment.id !== commentId));
 
       // 중복 처리 방지를 위해 ID 추가
       recentlyProcessedIds.add(commentId);
@@ -217,7 +196,7 @@ export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
         if (error) throw error;
 
         // 데이터 다시 불러오기
-        refetch();
+        mutate();
         return true;
       } catch (err: any) {
         console.error("댓글 삭제 오류:", err.message);
@@ -225,13 +204,18 @@ export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
         if (mountedRef.current) {
           setError(err.message);
           // 데이터 다시 불러오기
-          refetch();
+          mutate();
         }
         return false;
       }
     },
-    [userId, supabase, comments, refetch]
+    [userId, supabase, loadedComments, mutate]
   );
+
+  // 더 많은 댓글 불러오기
+  const fetchNextPage = useCallback(() => {
+    setPage(prev => prev + 1);
+  }, []);
 
   // 실시간 구독 설정
   useEffect(() => {
@@ -264,7 +248,7 @@ export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
             if (recentlyProcessedIds.has(commentId)) return;
 
             // 새 댓글이 추가되면 데이터 다시 불러오기
-            refetch();
+            mutate();
           }
         )
         .on(
@@ -284,7 +268,7 @@ export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
             if (recentlyProcessedIds.has(deletedId)) return;
 
             // 댓글이 삭제되면 데이터 다시 불러오기
-            refetch();
+            mutate();
           }
         )
         .subscribe();
@@ -301,18 +285,23 @@ export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
         supabase.removeChannel(realtimeChannelRef.current);
       }
     };
-  }, [postId, supabase, refetch]);
+  }, [postId, supabase, mutate]);
+
+  // 다음 페이지가 있는지 여부 확인
+  const hasNextPage = data?.count 
+    ? data.count > loadedComments.length 
+    : false;
 
   return {
-    comments,
-    count,
-    loading: status === "pending",
-    error: error || (queryError ? String(queryError) : null),
+    comments: loadedComments,
+    count: data?.count || 0,
+    loading: isLoading,
+    error: error || (swrError ? String(swrError) : null),
     createComment,
     deleteComment,
-    refreshComments: refetch,
+    refreshComments: () => mutate(),
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
+    isFetchingNextPage: isValidating && !isLoading,
   };
 }

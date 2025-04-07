@@ -1,32 +1,17 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import useSWR from 'swr';
 import { createClient } from "@/utils/supabase/client";
 import { Notification, NotificationInsert } from "@/types";
 import { useAuth } from "@/components/AuthProvider";
-
-// 페이지네이션 타입 정의
-type FetchNotificationsParams = {
-  pageParam: number;
-  pageSize: number;
-  userId: number;
-};
-
-// 알림 페이지 결과 타입
-interface NotificationPage {
-  data: Notification[];
-  nextPage: number | null;
-}
+import { useState, useCallback, useEffect } from 'react';
 
 // 알림을 가져오는 fetcher 함수
-const fetchNotificationsPage = async ({
-  pageParam = 0,
-  pageSize = 10,
-  userId
-}: FetchNotificationsParams): Promise<NotificationPage> => {
-  const supabase = createClient();
+const fetchNotifications = async (
+  userId: number,
+  pageSize: number
+): Promise<{ notifications: Notification[]; count: number }> => {
+  if (!userId) return { notifications: [], count: 0 };
   
-  // 페이지네이션 계산 (from-to 범위)
-  const from = pageParam * pageSize;
-  const to = from + pageSize - 1;
+  const supabase = createClient();
   
   const { data, error, count } = await supabase
     .from("notifications")
@@ -34,17 +19,13 @@ const fetchNotificationsPage = async ({
     .eq("receiver_id", userId)
     .order("read_at", { ascending: true, nullsFirst: true })
     .order("created_at", { ascending: false })
-    .range(from, to);
+    .limit(pageSize);
     
   if (error) throw error;
   
-  // 다음 페이지 계산
-  const hasNextPage = count ? from + pageSize < count : false;
-  const nextPage = hasNextPage ? pageParam + 1 : null;
-  
   return {
-    data: (data ?? []) as Notification[],
-    nextPage
+    notifications: (data ?? []) as Notification[],
+    count: count || 0
   };
 };
 
@@ -92,45 +73,55 @@ export const markAllAsRead = async (userId: number) => {
 // 무한 스크롤을 위한 알림 훅
 export const useNotifications = (pageSize = 10) => {
   const { id: userId } = useAuth();
+  const [page, setPage] = useState(1);
+  const [loadedNotifications, setLoadedNotifications] = useState<Notification[]>([]);
   
   // userId가 숫자가 아니면 기본값 사용
   const numericUserId = typeof userId === 'number' ? userId : 0;
   
+  // SWR로 데이터 가져오기
   const {
     data,
     error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    status,
-    refetch
-  } = useInfiniteQuery({
-    queryKey: ['notifications', numericUserId],
-    queryFn: ({ pageParam }) => fetchNotificationsPage({ 
-      pageParam: pageParam as number, 
-      pageSize, 
-      userId: numericUserId 
-    }),
-    getNextPageParam: (lastPage: NotificationPage) => lastPage.nextPage,
-    enabled: !!userId,
-    initialPageParam: 0
-  });
+    isLoading,
+    isValidating,
+    mutate
+  } = useSWR(
+    numericUserId ? [`notifications-${numericUserId}`, pageSize * page] : null,
+    ([_, size]) => fetchNotifications(numericUserId, size),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000, // 1분
+    }
+  );
   
-  // 모든 페이지의 데이터를 하나의 배열로 합치기
-  const notifications = data?.pages.flatMap(page => (page as NotificationPage).data) || [];
+  // 데이터가 로드되면 상태 업데이트
+  useEffect(() => {
+    if (data?.notifications) {
+      setLoadedNotifications(data.notifications);
+    }
+  }, [data]);
   
   // 읽지 않은 알림 갯수 계산
-  const unreadCount = notifications.filter(item => !item.read_at).length;
+  const unreadCount = loadedNotifications.filter(item => !item.read_at).length;
+  
+  // 다음 페이지 불러오기 함수
+  const fetchNextPage = useCallback(() => {
+    setPage(prev => prev + 1);
+  }, []);
+  
+  // 다음 페이지가 있는지 확인
+  const hasNextPage = data ? loadedNotifications.length < data.count : false;
   
   return {
-    notifications,
+    notifications: loadedNotifications,
     unreadCount,
     error,
-    isLoading: status === 'pending',
+    isLoading,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
-    refetch
+    isFetchingNextPage: isValidating && !isLoading,
+    refetch: mutate
   };
 };
 
@@ -138,31 +129,34 @@ export const useNotifications = (pageSize = 10) => {
 export const useNotification = (notificationId: number) => {
   const { id: userId } = useAuth();
   
-  const fetchNotification = async (): Promise<Notification | null> => {
-    if (!userId) return null;
+  const fetchNotification = async ([key, nId, uId]: [string, number, number]): Promise<Notification | null> => {
+    if (!uId) return null;
     
     const supabase = createClient();
     const { data, error } = await supabase
       .from("notifications")
       .select("*")
-      .eq("id", notificationId)
-      .eq("receiver_id", userId)
+      .eq("id", nId)
+      .eq("receiver_id", uId)
       .single();
       
     if (error) return null;
     return data as Notification;
   };
   
-  // 일반 쿼리 사용 (단일 알림 조회는 무한 스크롤이 필요 없음)
-  const { data, error, refetch } = useQuery({
-    queryKey: ['notification', notificationId, userId],
-    queryFn: fetchNotification,
-    enabled: !!notificationId && !!userId,
-  });
+  // SWR 사용
+  const { data, error, mutate } = useSWR(
+    notificationId && userId ? ['notification', notificationId, userId] : null,
+    fetchNotification,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000, // 1분
+    }
+  );
   
   return {
     notification: data,
     error,
-    refetch
+    refetch: mutate
   };
 };

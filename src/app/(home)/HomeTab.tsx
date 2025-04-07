@@ -143,9 +143,6 @@ function JourneyTab() {
   // 로딩 중 표시
   const isPageLoading = isLoading || (!isAdmin && userJourneysLoading);
   
-  console.log("User Journey IDs:", userJourneyIds);
-  console.log("Filtered Journeys:", filteredJourneys);
-  
   return (
     <JourneysContainer>
       {isPageLoading ? (

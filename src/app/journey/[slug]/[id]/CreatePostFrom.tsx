@@ -20,6 +20,18 @@ import { UpdatePost } from "@/types";
 import { useCompletedMissions } from "@/hooks/usePosts";
 import { Error } from "@/components/common/Error";
 import { JourneyMissionInstanceWithMission } from "@/types";
+import { StlyedSelect } from "@/components/select/Select";
+import { useJourneyUser } from "@/hooks/useJourneyUser";
+import { useJourneyStore } from "@/store/journey";
+import { createClient } from "@/utils/supabase/client";
+import { useTeams } from "@/hooks/useTeams";
+
+type TeamMember = {
+  label: string;
+  value: number;
+  isFixed: boolean;
+};
+
 export default function DoMissionPage({
   updateData,
   updateDataId,
@@ -40,6 +52,22 @@ export default function DoMissionPage({
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const initialTeamMembers : TeamMember[] = []
+
+  // 팀 관련 상태
+  const { currentJourneyId } = useJourneyStore();
+  const { data: journeyUsers } = useJourneyUser(currentJourneyId ?? 0);
+  const [isTeamMission, setIsTeamMission] = useState(false);
+  const [selectedTeamMembers, setSelectedTeamMembers] = useState<TeamMember[]>(initialTeamMembers);
+  
+  // useTeams 훅 사용
+  const { 
+    teamData, 
+    markPostAsTeamSubmission 
+  } = useTeams(currentJourneyId ?? 0);
+  
+  const supabase = createClient();
+
   // 완료된 미션 목록 관리를 위한 훅 추가
   const { refetch: refetchCompletedMissions } = useCompletedMissions(
     userId || 0
@@ -51,6 +79,46 @@ export default function DoMissionPage({
       setTitle(updateData.title || "");
     }
   }, [updateData]);
+
+  // 팀 데이터 로딩 시 팀원 목록 초기화
+  useEffect(() => {
+    // 팀이 있는 경우 팀원 정보 가져오기
+    if (teamData && teamData.members && teamData.members.length > 0) {
+      const teamMembers = teamData.members.map((member) => ({
+        label: `${member.profiles?.first_name || ''} ${member.profiles?.last_name || ''}`,
+        value: member.user_id,
+        isFixed: member.user_id === userId || member.is_leader === true
+      }));
+      
+      setSelectedTeamMembers(teamMembers);
+    }
+  }, [teamData, userId]);
+
+  // 팀 미션 여부 확인 및 팀 멤버 가져오기
+  useEffect(() => {
+    if (missionInstance && missionInstance.mission) {
+      // mission_type이 'team'인 경우 팀 미션으로 설정
+      setIsTeamMission(missionInstance.mission.mission_type === "team");
+      
+      // 팀원 정보 초기화 (현재 사용자가 팀에 속하지 않은 경우)
+      if (isTeamMission && userId && journeyUsers && (!teamData.members || teamData.members.length === 0)) {
+        // 현재 사용자를 팀원으로 추가
+        const currentUser = journeyUsers.find((user) => user.id === userId);
+        if (currentUser) {
+          setSelectedTeamMembers([
+            {
+              label:
+                currentUser.profiles?.first_name +
+                " " +
+                currentUser.profiles?.last_name,
+              value: userId,
+              isFixed: true,
+            },
+          ]);
+        }
+      }
+    }
+  }, [missionInstance, userId, isTeamMission, journeyUsers, teamData.members]);
 
   // 권한 없을 때 뒤로 가거나 여정 페이지로 가는 함수
   const goBackOrJourney = useCallback(() => {
@@ -89,6 +157,29 @@ export default function DoMissionPage({
   if (error) return <Error message={`오류가 발생했습니다: ${error.message}`} />;
   // if (!missionInstance) return <Error message="미션을 찾을 수 없습니다." />;
 
+  // 팀 생성 또는 업데이트 처리
+  const handleTeamSubmission = async (postId: number) => {
+    try {
+      if (!missionInstance) return false;
+      
+      // useTeams 훅의 markPostAsTeamSubmission 함수 사용
+      const success = await markPostAsTeamSubmission(
+        postId,
+        missionInstance.mission.points || 0
+      );
+      
+      if (!success) {
+        console.error("팀 제출 처리 중 오류 발생");
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("팀 제출 처리 중 오류:", error);
+      return false;
+    }
+  };
+
   const handleSubmit = async (
     missionInstance: JourneyMissionInstanceWithMission
   ) => {
@@ -119,25 +210,37 @@ export default function DoMissionPage({
         });
         return;
       }
-      // 유저 포인트 생성
-      const { error: userPointError } = await userPoint.createUserPoint({
-        profile_id: userId,
-        mission_instance_id: missionInstance.id,
-        post_id: data?.id || 0,
-        total_points: missionInstance.mission.points || 0,
-      });
 
-      if (userPointError) {
-        console.error("유저 포인트 생성 오류:", userPointError);
-        toaster.create({
-          title: "유저 포인트 생성 중 오류가 발생했습니다.",
-          description:
-            typeof userPointError === "object"
-              ? (userPointError as any)?.message ||
-                JSON.stringify(userPointError).substring(0, 50) + "..."
-              : String(userPointError),
-          type: "error",
+      // 팀 미션인 경우 팀 처리
+      if (isTeamMission && data?.id) {
+        const success = await handleTeamSubmission(data.id);
+        if (!success) {
+          toaster.create({
+            title: "팀 처리 중 오류가 발생했습니다.",
+            type: "error",
+          });
+        }
+      } else {
+        // 팀 미션이 아닌 경우 일반 유저 포인트 생성
+        const { error: userPointError } = await userPoint.createUserPoint({
+          profile_id: userId,
+          mission_instance_id: missionInstance.id,
+          post_id: data?.id || 0,
+          total_points: missionInstance.mission.points || 0,
         });
+
+        if (userPointError) {
+          console.error("유저 포인트 생성 오류:", userPointError);
+          toaster.create({
+            title: "유저 포인트 생성 중 오류가 발생했습니다.",
+            description:
+              typeof userPointError === "object"
+                ? (userPointError as any)?.message ||
+                  JSON.stringify(userPointError).substring(0, 50) + "..."
+                : String(userPointError),
+            type: "error",
+          });
+        }
       }
 
       // 완료된 미션 목록 갱신
@@ -197,6 +300,17 @@ export default function DoMissionPage({
         return;
       }
 
+      // 팀 미션인 경우 팀 처리 업데이트
+      if (isTeamMission && updateDataId) {
+        const success = await handleTeamSubmission(updateDataId);
+        if (!success) {
+          toaster.create({
+            title: "팀 처리 중 오류가 발생했습니다.",
+            type: "error",
+          });
+        }
+      }
+
       toaster.create({
         title: "미션이 성공적으로 수정되었습니다!",
         type: "success",
@@ -218,6 +332,13 @@ export default function DoMissionPage({
       setIsSubmitting(false);
     }
   };
+
+  // 팀원 옵션 생성
+  const teamOptions =
+    journeyUsers?.map((user) => ({
+      label: user.profiles?.first_name + " " + user.profiles?.last_name,
+      value: user.id,
+    })) || [];
 
   return (
     <MissionContainer>
@@ -249,7 +370,9 @@ export default function DoMissionPage({
           onChange={(value) => {
             setContent(value);
           }}
+          inputHeight="250px"
         />
+
         <Text variant="body" color="grey-700" fontWeight="bold">
           미션 상세 설명
         </Text>
@@ -260,6 +383,33 @@ export default function DoMissionPage({
           missionInstance={missionInstance as any}
         />
       </div>
+      {/* 팀 미션인 경우 팀원 선택 컴포넌트 추가 */}
+      {isTeamMission && (
+        <TeamSelectSection>
+          <Text variant="body" color="grey-700" fontWeight="bold">
+            팀원 선택
+          </Text>
+          <Text variant="small" className="help-text">
+            함께 미션을 수행할 팀원을 선택하세요. 선택한 팀원들과 함께 점수를
+            받게 됩니다.
+          </Text>
+          {(!journeyUsers || journeyUsers.length <= 1) ? (
+            <EmptyTeamMessage>
+              <Text variant="body" color="grey-500">
+                팀원이 없습니다. 팀원을 초대해주세요.
+              </Text>
+            </EmptyTeamMessage>
+          ) : (
+            <StlyedSelect
+              options={teamOptions}
+              defaultValues={selectedTeamMembers}
+              onChange={setSelectedTeamMembers}
+              onBlur={() => {}}
+              isDisabled={!journeyUsers || journeyUsers.length <= 1}
+            />
+          )}
+        </TeamSelectSection>
+      )}
       <div className="button-container">
         <Button
           variant="flat"
@@ -295,4 +445,26 @@ const MissionContainer = styled.div`
   .button-container {
     margin-top: 16px;
   }
+`;
+
+const TeamSelectSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: var(--grey-100);
+  border-radius: 8px;
+
+  .help-text {
+    color: var(--grey-500);
+    margin-bottom: 8px;
+  }
+`;
+
+const EmptyTeamMessage = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  background-color: var(--grey-100);
+  border-radius: 8px;
 `;

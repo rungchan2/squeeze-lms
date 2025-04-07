@@ -2,13 +2,16 @@ import styled from "@emotion/styled";
 import { FaTimes } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import Heading from "@/components/Text/Heading";
+
 interface ModalProps {
   children: React.ReactNode;
   isOpen: boolean;
   onClose: () => void;
+  title?: string;
 }
 
-export function Modal({ children, isOpen, onClose }: ModalProps) {
+export function Modal({ children, isOpen, onClose, title }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [isFadeOut, setIsFadeOut] = useState(false);
   const handleOnClose = () => {
@@ -64,6 +67,11 @@ export function Modal({ children, isOpen, onClose }: ModalProps) {
     >
       <div className="modal-body" ref={modalRef}>
         <div className="modal-content">
+          {title && (
+            <div className="modal-header">
+              <Heading level={4}>{title}</Heading>
+            </div>
+          )}
           <div className="modal-scroll-container">
             {children}
           </div>
@@ -131,6 +139,10 @@ const StyledModal = styled.div`
       display: flex;
       flex-direction: column;
       max-height: 90vh;
+      
+      .modal-header {
+        margin-bottom: 16px;
+      }
       
       .modal-scroll-container {
         overflow-y: auto;
