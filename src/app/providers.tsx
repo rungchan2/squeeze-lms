@@ -6,7 +6,6 @@ import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useServerInsertedHTML } from "next/navigation";
 // import { ThemeProvider } from "next-themes"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import createEmotionServer from "@emotion/server/create-instance";
 import { AuthProvider } from "@/components/AuthProvider";
 import { usePathname } from "next/navigation";
@@ -19,7 +18,6 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   const [emotionCache] = useState(() => createCache({ key: "css" }));
-  const [queryClient] = useState(() => new QueryClient());
   const [mounted, setMounted] = useState(false);
   const { extractCritical } = createEmotionServer(emotionCache);
   const pathname = usePathname();

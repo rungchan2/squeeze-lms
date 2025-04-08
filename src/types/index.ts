@@ -12,3 +12,4 @@ export * from './userJourneys';
 export * from './journeyMissionInstances';
 export * from './userPoints';
 export * from './leaderboard';
+export * from './teams';

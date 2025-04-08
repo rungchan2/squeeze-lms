@@ -68,6 +68,22 @@ export const posts = {
       .eq("id", postId);
     return { data, error };
   },
+  updateTeamPost: async (postId: number, post: {
+    team_id: number;
+    is_team_submission: boolean;
+    team_points: number;
+  }) => {
+    const { data, error } = await supabase
+      .from("posts")
+      .update(post)
+      .eq("id", postId);
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  },
   addViewCount: async (postId: number, prevViewCount: number) => {
     const { data, error } = await supabase
       .from("posts")

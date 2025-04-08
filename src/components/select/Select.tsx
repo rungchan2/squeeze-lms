@@ -11,7 +11,7 @@ interface SelectProps {
   options: SelectOption[];
   defaultValues: SelectOption[];
   onChange: (value: any) => void;
-  onBlur: () => void;
+  onBlur: (value: any) => void;
   isDisabled?: boolean;
 }
 

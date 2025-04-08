@@ -16,8 +16,9 @@ import { Modal } from "@/components/modal/Modal";
 import InputAndTitle from "@/components/InputAndTitle";
 import { Input } from "@chakra-ui/react";
 import dayjs from "@/utils/dayjs/dayjs";
-import { createClient } from "@supabase/supabase-js";
-import { FaTrash } from "react-icons/fa";
+import { FaRegTrashAlt, FaTrash } from "react-icons/fa";
+import { team } from "@/utils/data/team";
+import { IoRefreshSharp } from "react-icons/io5";
 
 export default function TeamsPage() {
   const { currentJourneyId } = useJourneyStore();
@@ -190,12 +191,6 @@ export default function TeamsPage() {
     // 변경사항 적용
     let success = true;
 
-    // Supabase 클라이언트 생성
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
-    );
-
     // 멤버 추가
     for (const userId of addedMemberIds) {
       const isCurrentUser = userId === currentUserId;
@@ -206,14 +201,17 @@ export default function TeamsPage() {
         if (!joinSuccess) success = false;
       } else {
         // 다른 사용자를 추가하는 경우
-        const { error } = await supabase.from("team_members").insert({
-          team_id: teamId,
-          user_id: userId,
-          is_leader: false,
-        });
-
-        if (error) {
-          console.error("팀원 추가 중 오류:", error);
+        try {
+          const addMemberError = await team.addTeamMember(teamId, userId);
+          if (addMemberError) {
+            console.error("팀원 추가 중 오류:", addMemberError);
+            success = false;
+          }
+        } catch (error) {
+          console.error(
+            `사용자(${userId})를 팀(${teamId})에 추가하는 중 예외 발생:`,
+            error
+          );
           success = false;
         }
       }
@@ -223,14 +221,17 @@ export default function TeamsPage() {
     for (const userId of removedMemberIds) {
       if (userId === currentUserId && teamId === currentUserTeamId) continue;
 
-      const { error } = await supabase
-        .from("team_members")
-        .delete()
-        .eq("team_id", teamId)
-        .eq("user_id", userId);
-
-      if (error) {
-        console.error("팀원 제거 중 오류:", error);
+      try {
+        const removeMemberError = await team.removeTeamMember(teamId, userId);
+        if (removeMemberError) {
+          console.error("팀원 제거 중 오류:", removeMemberError);
+          success = false;
+        }
+      } catch (error) {
+        console.error(
+          `사용자(${userId})를 팀(${teamId})에서 제거하는 중 예외 발생:`,
+          error
+        );
         success = false;
       }
     }
@@ -240,7 +241,6 @@ export default function TeamsPage() {
         title: "팀원이 업데이트되었습니다",
         type: "success",
       });
-
 
       // 선택 상태 업데이트
       setTeamSelections((prev) => ({
@@ -253,6 +253,14 @@ export default function TeamsPage() {
         type: "warning",
       });
     }
+  };
+
+  const handleRefreshTeam = async (teamId: number) => {
+    const result = await team.getTeamMembers([teamId]);
+    toaster.create({
+      title: "팀원 목록이 새로고침되었습니다",
+      type: "success",
+    });
   };
 
   // 날짜 포맷팅 함수
@@ -307,7 +315,20 @@ export default function TeamsPage() {
                       <Text variant="small" className="team-date">
                         {formatDate(team.created_at)}
                       </Text>
-                      <FaTrash onClick={() => deleteTeam(team.id)} />
+                      <IoRefreshSharp
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                          handleRefreshTeam(team.id);
+                        }}
+                      />
+                      <FaRegTrashAlt
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                          if (confirm("팀을 삭제하시겠습니까?")) {
+                            deleteTeam(team.id);
+                          }
+                        }}
+                      />
                     </div>
                   </div>
 
