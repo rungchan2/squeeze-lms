@@ -17,33 +17,24 @@ export function useTeams(journeyId?: number) {
   // 캐시 키 생성 - 현재 사용자 ID가 없으면 null을 반환하여 요청을 방지
   const cacheKey = useMemo(() => {
     if (!currentUserId || !journeyId) {
-      console.log(
-        "[useTeams] 캐시 키 생성 취소: currentUserId 또는 journeyId 없음",
-        { currentUserId, journeyId }
-      );
+
       return null;
     }
     const key = `teams-${currentUserId}-${journeyId}`;
-    console.log("[useTeams] 캐시 키 생성:", key);
     return key;
   }, [currentUserId, journeyId]);
 
   // 모든 팀 조회용 캐시 키
   const allTeamsCacheKey = useMemo(() => {
     if (!journeyId) {
-      console.log("[useTeams] 모든 팀 캐시 키 생성 취소: journeyId 없음", {
-        journeyId,
-      });
       return null;
     }
     const key = `all-teams-${journeyId}`;
-    console.log("[useTeams] 모든 팀 캐시 키 생성:", key);
     return key;
   }, [journeyId]);
 
   // 팀 데이터 fetcher 함수
   const fetchTeamData = async (): Promise<TeamData> => {
-    console.log("[useTeams] fetchTeamData 실행: journeyId =", journeyId);
     if (!currentUserId || !journeyId) return { team: null, members: [] };
 
     try {
@@ -83,16 +74,8 @@ export function useTeams(journeyId?: number) {
     isValidating,
   } = useSWR<TeamData>(cacheKey, fetchTeamData, {
     revalidateOnMount: true,
-    onSuccess: (data) => {
-      console.log("[useTeams] 데이터 로드 성공:", {
-        key: cacheKey,
-        hasTeam: !!data.team,
-        membersCount: data.members.length,
-        timestamp: new Date().toISOString(),
-      });
-    },
     onError: (err) => {
-      console.error("[useTeams] 데이터 로드 중 오류:", err);
+      console.error("[useTeams] 팀 데이터 로드 중 오류:", err);
     },
   });
 
@@ -412,16 +395,12 @@ export function useTeams(journeyId?: number) {
       teamsResponse = await team.getAllTeams(journeyId);
 
       if (!teamsResponse || teamsResponse.length === 0) {
-        console.log("[getAllTeams] 팀이 없거나 빈 배열");
         return { teams: [], teamMembers: {} };
       }
 
       const teamIds = teamsResponse.map((team) => team.id);
       const allMembers = await team.getTeamMembers(teamIds);
 
-      console.log("[getAllTeams] 모든 팀의 멤버 조회 완료", {
-        allMembersCount: allMembers?.length,
-      });
 
       // 팀별로 멤버 분류
       const teamMembers: Record<number, TeamMember[]> = {};
@@ -444,11 +423,6 @@ export function useTeams(journeyId?: number) {
         teams: teamsResponse,
         teamMembers,
       };
-
-      console.log("[getAllTeams] 성공적으로 완료", {
-        teamsCount: result.teams.length,
-        teamMembersKeys: Object.keys(result.teamMembers).length,
-      });
 
       return result;
     } catch (error) {
@@ -479,25 +453,8 @@ export function useTeams(journeyId?: number) {
         "[useTeams/allTeams] 로딩이 느려지고 있습니다 - 네트워크 상태를 확인하세요"
       );
     },
-    onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
-      console.log(
-        `[useTeams/allTeams] 오류 발생 후 재시도 (${retryCount}/2): 키=${key}`,
-        error
-      );
-    },
-    onSuccess: (data) => {
-      console.log("[useTeams/allTeams] 데이터 로드 성공:", {
-        key: allTeamsCacheKey,
-        teamsCount: data.teams.length,
-        teamMembersKeys: Object.keys(data.teamMembers).length,
-        timestamp: new Date().toISOString(),
-      });
-    },
     onError: (err) => {
       console.error("[useTeams/allTeams] 데이터 로드 중 오류:", err);
-    },
-    onDiscarded: () => {
-      console.log("[useTeams/allTeams] 요청이 중복으로 취소됨");
     },
   });
 

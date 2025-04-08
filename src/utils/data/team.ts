@@ -42,21 +42,15 @@ export const team = {
         .eq("user_id", currentUserId)
         .eq("teams.journey_id", journeyId);
       
-      // 결과 확인 로그
-      console.log("getCurrentUserTeam 조회 결과:", { 
-        hasResults: !!initialData && initialData.length > 0,
-        resultCount: initialData?.length || 0,
-      });
+
       
       // 결과가 없는 경우
       if (initialError || !initialData || initialData.length === 0) {
-        console.log("getCurrentUserTeam: 팀이 없습니다.", initialError);
         return null;
       }
       
       // 여러 결과가 있는 경우 첫 번째 결과 반환
       if (initialData.length > 1) {
-        console.log("getCurrentUserTeam: 여러 팀이 존재합니다. 첫 번째 팀을 반환합니다.");
         return { team_id: initialData[0].team_id };
       }
       

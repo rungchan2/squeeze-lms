@@ -51,20 +51,16 @@ export default function TeamsPage() {
 
   // 팀원 옵션 생성 및 이미 팀에 속한 사용자 표시
   const [usersWithTeam, setUsersWithTeam] = useState<number[]>([]);
-  const [isLoadingUserTeams, setIsLoadingUserTeams] = useState(false);
 
   // 이미 팀에 속한 사용자 정보 로드
   useEffect(() => {
     const loadUsersWithTeam = async () => {
       if (!currentJourneyId) return;
-      setIsLoadingUserTeams(true);
       try {
         const userIds = await getUsersWithTeam();
         setUsersWithTeam(userIds);
       } catch (error) {
         console.error("팀 소속 사용자 목록 로드 중 오류:", error);
-      } finally {
-        setIsLoadingUserTeams(false);
       }
     };
     
@@ -77,7 +73,7 @@ export default function TeamsPage() {
       const userId = user.user_id;
       const isCurrentUser = userId === currentUserId;
       // 이미 팀에 속한 사용자인지 확인 (현재 사용자 제외)
-      const isInOtherTeam = !isCurrentUser && usersWithTeam.includes(userId);
+      const isInOtherTeam = !isCurrentUser && usersWithTeam.includes(userId || 0);
       
       // 사용자가 현재 속한 팀 ID
       let userTeamIdText = '';
@@ -327,6 +323,17 @@ export default function TeamsPage() {
     }
 
     if (success) {
+      // 팀원이 업데이트되면 즉시 팀 소속 사용자 목록 업데이트
+      try {
+        const updatedUsersWithTeam = await getUsersWithTeam();
+        setUsersWithTeam(updatedUsersWithTeam);
+        
+        // 모든 팀 데이터 새로고침
+        await mutateAllTeams();
+      } catch (error) {
+        console.error("팀원 업데이트 후 팀 소속 사용자 목록 갱신 중 오류:", error);
+      }
+      
       toaster.create({
         title: "팀원이 업데이트되었습니다",
         type: "success",
@@ -337,6 +344,31 @@ export default function TeamsPage() {
         ...prev,
         [teamId]: newMembers,
       }));
+      
+      // teamOptions도 업데이트하기 위해 전체 UI 리프레시
+      // 이를 통해 이미 팀에 속한 사용자가 즉시 반영됨
+      setTeamSelections(prev => {
+        // 모든 팀의 현재 상태를 유지하면서 팀별 멤버 옵션 새로고침
+        const updated = { ...prev };
+        
+        // 각 팀에 대해 멤버 목록에 현재 사용자 상태 표시 업데이트
+        Object.keys(updated).forEach(tid => {
+          const teamId = Number(tid);
+          const members = updated[teamId];
+          
+          if (members) {
+            updated[teamId] = members.map(member => {
+              const isCurrentUser = member.value === currentUserId;
+              return {
+                ...member,
+                color: isCurrentUser ? 'var(--primary-900)' : undefined
+              };
+            });
+          }
+        });
+        
+        return updated;
+      });
     } else {
       toaster.create({
         title: "팀원 업데이트 중 일부 오류가 발생했습니다",
