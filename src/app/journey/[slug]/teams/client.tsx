@@ -15,7 +15,7 @@ import Button from "@/components/common/Button";
 import { Modal } from "@/components/modal/Modal";
 import InputAndTitle from "@/components/InputAndTitle";
 import { Input } from "@chakra-ui/react";
-import dayjs from "@/utils/dayjs/dayjs";
+import { formatDifference } from "@/utils/dayjs/calcDifference";
 import { FaRegTrashAlt, FaTrash } from "react-icons/fa";
 import { team } from "@/utils/data/team";
 import { IoRefreshSharp } from "react-icons/io5";
@@ -44,14 +44,64 @@ export default function TeamsPage() {
     joinTeam,
     leaveTeam,
     deleteTeam,
+    checkUserTeam,
+    getUsersWithTeam,
+    mutateAllTeams
   } = useTeams(currentJourneyId ?? 0);
 
-  // 팀원 옵션 생성
+  // 팀원 옵션 생성 및 이미 팀에 속한 사용자 표시
+  const [usersWithTeam, setUsersWithTeam] = useState<number[]>([]);
+  const [isLoadingUserTeams, setIsLoadingUserTeams] = useState(false);
+
+  // 이미 팀에 속한 사용자 정보 로드
+  useEffect(() => {
+    const loadUsersWithTeam = async () => {
+      if (!currentJourneyId) return;
+      setIsLoadingUserTeams(true);
+      try {
+        const userIds = await getUsersWithTeam();
+        setUsersWithTeam(userIds);
+      } catch (error) {
+        console.error("팀 소속 사용자 목록 로드 중 오류:", error);
+      } finally {
+        setIsLoadingUserTeams(false);
+      }
+    };
+    
+    loadUsersWithTeam();
+  }, [currentJourneyId, getUsersWithTeam]);
+
+  // 팀원 옵션 생성 (내 이름 옆에 (나) 표시 및 이미 팀에 속한 사용자 표시)
   const teamOptions =
-    journeyUsers?.map((user) => ({
-      label: user.profiles?.first_name + " " + user.profiles?.last_name,
-      value: user.user_id,
-    })) || [];
+    journeyUsers?.map((user) => {
+      const userId = user.user_id;
+      const isCurrentUser = userId === currentUserId;
+      // 이미 팀에 속한 사용자인지 확인 (현재 사용자 제외)
+      const isInOtherTeam = !isCurrentUser && usersWithTeam.includes(userId);
+      
+      // 사용자가 현재 속한 팀 ID
+      let userTeamIdText = '';
+      if (isInOtherTeam && allTeamsData?.teams) {
+        // allTeamsData.teamMembers에서 해당 사용자가 속한 팀 찾기
+        for (const teamId in allTeamsData.teamMembers) {
+          const teamMembers = allTeamsData.teamMembers[teamId] || [];
+          if (teamMembers.some(member => member.user_id === userId)) {
+            const teamInfo = allTeamsData.teams.find(t => t.id === Number(teamId));
+            if (teamInfo) {
+              userTeamIdText = ` (${teamInfo.name})`;
+              break;
+            }
+          }
+        }
+      }
+      
+      return {
+        label: `${user.profiles?.first_name} ${user.profiles?.last_name}${isCurrentUser ? ' (나)' : ''}${isInOtherTeam ? userTeamIdText : ''}`,
+        value: userId,
+        isDisabled: isInOtherTeam, // 다른 팀에 속한 경우 선택 불가
+        color: isCurrentUser ? 'var(--primary-900)' : undefined
+      };
+    }) || [];
 
   useEffect(() => {
     if (allTeamsData?.teams) {
@@ -61,13 +111,17 @@ export default function TeamsPage() {
         const teamId = team.id;
         const members = allTeamsData.teamMembers[teamId] || [];
 
-        selections[teamId] = members.map((member) => ({
-          label: `${member.profiles?.first_name || ""} ${
-            member.profiles?.last_name || ""
-          }`,
-          value: member.user_id,
-          isFixed: member.is_leader, // 리더는 고정(제거할 수 없음)
-        }));
+        selections[teamId] = members.map((member) => {
+          const isCurrentUser = member.user_id === currentUserId;
+          return {
+            label: `${member.profiles?.first_name || ""} ${
+              member.profiles?.last_name || ""
+            }${isCurrentUser ? ' (나)' : ''}`,
+            value: member.user_id,
+            isFixed: member.is_leader, // 리더는 고정(제거할 수 없음)
+            color: isCurrentUser ? 'var(--primary-900)' : undefined
+          };
+        });
       });
 
       // 이전 상태와 비교 후 변경된 경우에만 업데이트
@@ -99,7 +153,7 @@ export default function TeamsPage() {
         return hasChanges ? selections : prev;
       });
     }
-  }, [allTeamsData?.teams, allTeamsData?.teamMembers]);
+  }, [allTeamsData?.teams, allTeamsData?.teamMembers, currentUserId]);
 
   // 모달에서 팀 생성 준비
   const handleOpenCreateTeamModal = () => {
@@ -167,6 +221,42 @@ export default function TeamsPage() {
         type: "warning",
       });
       return;
+    }
+
+    // 추가하려는 사용자 중 이미 다른 팀에 속한 사용자가 있는지 확인
+    for (const userId of addedMemberIds) {
+      // 현재 사용자는 팀 변경이 가능하므로 제외
+      if (userId === currentUserId) continue;
+      
+      // 사용자가 이미 다른 팀에 속해 있는지 확인
+      const userInTeam = usersWithTeam.includes(userId);
+      if (userInTeam) {
+        let userTeamId: number | null = null;
+        
+        // allTeamsData에서 사용자가 속한 팀 찾기
+        for (const tId in allTeamsData.teamMembers) {
+          const memberList = allTeamsData.teamMembers[tId] || [];
+          if (memberList.some(m => m.user_id === userId)) {
+            userTeamId = Number(tId);
+            break;
+          }
+        }
+        
+        // 다른 팀에 속한 경우
+        if (userTeamId !== null && userTeamId !== teamId) {
+          const userInfo = journeyUsers?.find(u => u.user_id === userId);
+          const userName = userInfo ? 
+            `${userInfo.profiles?.first_name || ""} ${userInfo.profiles?.last_name || ""}` : 
+            "선택한 사용자";
+            
+          toaster.create({
+            title: "팀 추가 불가",
+            description: `${userName}님은 이미 다른 팀에 속해 있습니다.`,
+            type: "warning",
+          });
+          return;
+        }
+      }
     }
 
     // 현재 사용자가 속한 다른 팀 ID 찾기
@@ -256,20 +346,47 @@ export default function TeamsPage() {
   };
 
   const handleRefreshTeam = async (teamId: number) => {
-    const result = await team.getTeamMembers([teamId]);
-    toaster.create({
-      title: "팀원 목록이 새로고침되었습니다",
-      type: "success",
-    });
-  };
-
-  // 날짜 포맷팅 함수
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) return "날짜 정보 없음";
     try {
-      return dayjs(dateString).fromNow();
-    } catch (e) {
-      return "날짜 형식 오류";
+      // 모든 팀 데이터 새로고침
+      await mutateAllTeams();
+      
+      // 특정 팀에 대한 멤버 조회
+      const teamMembers = await team.getTeamMembers([teamId]);
+      
+      // 팀 소속 사용자 목록 업데이트
+      const updatedUsersWithTeam = await getUsersWithTeam();
+      setUsersWithTeam(updatedUsersWithTeam);
+      
+      // 팀원 목록이 업데이트된 후 UI 업데이트
+      const members = teamMembers.filter(member => member.team_id === teamId);
+      
+      // 해당 팀에 대한 선택 상태 업데이트
+      const updatedMembers = members.map(member => {
+        const isCurrentUser = member.user_id === currentUserId;
+        return {
+          label: `${member.profiles?.first_name || ""} ${member.profiles?.last_name || ""}${isCurrentUser ? ' (나)' : ''}`,
+          value: member.user_id,
+          isFixed: member.is_leader, // 리더는 고정
+          color: isCurrentUser ? 'var(--primary-900)' : undefined
+        };
+      });
+      
+      // 특정 팀의 선택 상태만 업데이트
+      setTeamSelections(prev => ({
+        ...prev,
+        [teamId]: updatedMembers
+      }));
+      
+      toaster.create({
+        title: "팀원 목록이 새로고침되었습니다",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("팀원 목록 새로고침 중 오류:", error);
+      toaster.create({
+        title: "팀원 목록 새로고침 중 오류가 발생했습니다",
+        type: "error",
+      });
     }
   };
 
@@ -313,7 +430,7 @@ export default function TeamsPage() {
                     <Heading level={5}>{team.name}</Heading>
                     <div className="team-card-header-right">
                       <Text variant="small" className="team-date">
-                        {formatDate(team.created_at)}
+                        {formatDifference(team.created_at ?? "")}
                       </Text>
                       <IoRefreshSharp
                         style={{ cursor: "pointer" }}

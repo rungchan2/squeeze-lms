@@ -597,6 +597,80 @@ export function useTeams(journeyId?: number) {
     }
   }, [data, currentUserId, mutate, mutateAllTeams]);
 
+  /**
+   * 사용자가 이미 팀에 속해 있는지 확인하는 함수
+   * @param userId 확인할 사용자 ID
+   * @returns {Promise<number | null>} 사용자가 속한 팀 ID 또는 null
+   */
+  const checkUserTeam = useCallback(
+    async (userId: number): Promise<number | null> => {
+      if (!journeyId) return null;
+      
+      try {
+        // 사용자의 팀 조회
+        const userTeam = await team.getCurrentUserTeam(userId, journeyId);
+        return userTeam ? userTeam.team_id : null;
+      } catch (error) {
+        console.error("사용자의 팀 확인 중 오류:", error);
+        return null;
+      }
+    }, 
+    [journeyId]
+  );
+  
+  /**
+   * 팀에 속한 모든 사용자 ID 목록 조회
+   * @returns {Promise<Record<number, number[]>>} 각 팀 ID를 키로 하는 사용자 ID 배열
+   */
+  const getAllTeamUserIds = useCallback(
+    async (): Promise<Record<number, number[]>> => {
+      if (!journeyId) return {};
+      
+      try {
+        const teamsData = await getAllTeams();
+        const result: Record<number, number[]> = {};
+        
+        Object.entries(teamsData.teamMembers).forEach(([teamId, members]) => {
+          result[Number(teamId)] = members.map(member => member.user_id);
+        });
+        
+        return result;
+      } catch (error) {
+        console.error("모든 팀 사용자 ID 조회 중 오류:", error);
+        return {};
+      }
+    },
+    [journeyId, getAllTeams]
+  );
+  
+  /**
+   * 특정 여정 내에서 이미 팀에 속한 사용자 ID 목록 조회
+   * @returns {Promise<number[]>} 이미 팀에 속한 사용자 ID 배열
+   */
+  const getUsersWithTeam = useCallback(
+    async (): Promise<number[]> => {
+      if (!journeyId) return [];
+      
+      try {
+        const teamsData = await getAllTeams();
+        const usersWithTeam = new Set<number>();
+        
+        // 모든 팀 멤버를 순회하며 사용자 ID 수집
+        Object.values(teamsData.teamMembers).forEach(members => {
+          members.forEach(member => {
+            usersWithTeam.add(member.user_id);
+          });
+        });
+        
+        return Array.from(usersWithTeam);
+      } catch (error) {
+        console.error("팀에 속한 사용자 ID 조회 중 오류:", error);
+        return [];
+      }
+    },
+    [journeyId, getAllTeams]
+  );
+
   return {
     teamData: data || { team: null, members: [] },
     allTeamsData: allTeams || { teams: [], teamMembers: {} },
@@ -614,5 +688,8 @@ export function useTeams(journeyId?: number) {
     leaveTeam,
     mutate,
     mutateAllTeams,
+    checkUserTeam,
+    getAllTeamUserIds,
+    getUsersWithTeam
   };
 }

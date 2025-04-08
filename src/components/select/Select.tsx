@@ -5,6 +5,8 @@ interface SelectOption {
   label: string;
   value: any;
   isFixed?: boolean;
+  isDisabled?: boolean;
+  color?: string;
 }
 
 interface SelectProps {
@@ -120,14 +122,20 @@ export const StlyedSelect = ({
             : isFocused
             ? "var(--primary-100)"
             : "white",
-          color: isSelected ? "white" : "var(--grey-700)",
-          fontWeight: data.isFixed ? 700 : 400,
+          color: isSelected 
+            ? "white" 
+            : data.color 
+              ? data.color
+              : "var(--grey-700)",
+          fontWeight: data.isFixed || data.color ? 700 : 400,
           "&:hover": {
             backgroundColor: isSelected
               ? "var(--primary-600)"
               : "var(--primary-100)",
           },
           padding: "10px 12px",
+          opacity: data.isDisabled ? 0.5 : 1,
+          cursor: data.isDisabled ? "not-allowed" : "default",
         }),
         dropdownIndicator: (baseStyles) => ({
           ...baseStyles,
