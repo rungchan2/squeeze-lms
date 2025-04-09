@@ -57,7 +57,9 @@ export default function PostPage() {
   return (
     <PostPageContainer>
       <PostCard post={post} showDetails={true} />
-      <CommentSection />
+      <CommentContainer>
+        <CommentSection />
+      </CommentContainer>
     </PostPageContainer>
   );
 }
@@ -67,4 +69,10 @@ const PostPageContainer = styled.div`
   flex-direction: column;
   max-width: var(--breakpoint-tablet);
   margin: 0 auto;
+  position: relative;
+  padding-bottom: 120px; /* 댓글 입력 영역의 높이만큼 여백 */
+`;
+
+const CommentContainer = styled.div`
+  margin-top: 1rem;
 `;

@@ -97,7 +97,7 @@ export function useJourneyMissionInstances(
     swrKey,
     fetcher,
     {
-      revalidateOnFocus: false,
+      revalidateOnFocus: true,
       dedupingInterval: 60000, // 1분 동안 중복 요청 방지
       fallbackData: [], // 기본값 제공하여 에러 방지
       suspense: false, // suspense 모드 비활성화로 에러 방지
