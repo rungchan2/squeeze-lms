@@ -15,7 +15,13 @@ import { useJourneyStore } from "@/store/journey";
 import { Suspense } from "react";
 import Spinner from "@/components/common/Spinner";
 import { journey } from "@/utils/data/journey";
-export default function JourneyClient({ slug }: { slug: string }) {
+
+interface JourneyClientProps {
+  slug: string;
+  initialData?: any; // 서버에서 받은 여정 데이터
+}
+
+export default function JourneyClient({ slug, initialData }: JourneyClientProps) {
   const [isInitialized, setIsInitialized] = useState(false);
   const { setCurrentJourneyId } = useJourneyStore();
   
@@ -27,9 +33,21 @@ export default function JourneyClient({ slug }: { slug: string }) {
     
     const initJourney = async () => {
       try {
+        // 서버에서 받은 초기 데이터가 있으면 사용
+        if (initialData && initialData.id) {
+          setCurrentJourneyId(initialData.id);
+          setIsInitialized(true);
+          return;
+        }
+        
+        // 초기 데이터가 없으면 클라이언트에서 조회
         const journeyData = await journey.getJourneyByUuidRetrieveId(slug);
-        setCurrentJourneyId(journeyData[0].id);
-        setIsInitialized(true);
+        if (journeyData && journeyData.length > 0) {
+          setCurrentJourneyId(journeyData[0].id);
+          setIsInitialized(true);
+        } else {
+          console.error("[JourneyClient] 여정 데이터 없음");
+        }
       } catch (err) {
         console.error("[JourneyClient] 초기화 오류:", err);
       }
@@ -38,7 +56,7 @@ export default function JourneyClient({ slug }: { slug: string }) {
     // 실행 지연을 통해 상태 초기화 경쟁 조건 방지
     const timer = setTimeout(initJourney, 10);
     return () => clearTimeout(timer);
-  }, [slug, setCurrentJourneyId, isInitialized]);
+  }, [slug, setCurrentJourneyId, isInitialized, initialData]);
   
   return (
     <div>

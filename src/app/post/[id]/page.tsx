@@ -58,7 +58,10 @@ export default function PostPage() {
     <PostPageContainer>
       <PostCard post={post} showDetails={true} />
       <CommentContainer>
-        <CommentSection />
+        <CommentSection 
+          postId={Number(params.id)}
+          enableRealtime={true}
+        />
       </CommentContainer>
     </PostPageContainer>
   );

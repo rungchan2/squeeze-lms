@@ -1,4 +1,3 @@
-import styles from "../Home.module.css";
 import { FaBell } from "react-icons/fa";
 import { HiDotsHorizontal } from "react-icons/hi";
 import Text from "@/components/Text/Text";
@@ -27,17 +26,17 @@ export default function NotificationCard({
   const router = useRouter();
   return (
     <Container>
-      <div className={styles.notificationCard} onClick={() => {
+      <div className="notificationCard" onClick={() => {
         setIsOpen(true)
         readNotification(notification.id)
       }}>
-        <div className={styles.contentContainer}>
+        <div className="contentContainer">
           <FaBell
             color={
               isNotificationRead ? "var(--grey-500)" : "var(--primary-400)"
             }
           />
-          <div className={styles.textContainer}>
+          <div className="textContainer">
             <Text
               variant="body"
               fontWeight="bold"
@@ -49,7 +48,7 @@ export default function NotificationCard({
             >
               {notification.message}
             </Text>
-            <div className={styles.dateContainer}>
+            <div className="dateContainer">
               <Text variant="small" color="var(--grey-400)">
                 {duration} {isNotificationRead ? "(읽음)" : ""}
               </Text>
@@ -58,13 +57,13 @@ export default function NotificationCard({
           <Menu.Root>
             <Menu.Trigger asChild>
               <div
-                className={styles.dotsContainer}
+                className="dotsContainer"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
               >
                 <HiDotsHorizontal
-                  className={styles.dots}
+                  className="dots"
                   color="var(--grey-500)"
                 />
               </div>
@@ -88,7 +87,7 @@ export default function NotificationCard({
           </Menu.Root>
         </div>
         {notification.type === "request" && (
-          <div className={styles.buttonContainer}>
+          <div className="buttonContainer">
             <Button
               variant="flat"
               maxWidth={100}
@@ -103,7 +102,7 @@ export default function NotificationCard({
           </div>
         )}
         <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-          <div className={styles.modalContent}>
+          <div className="modalContent">
             <Text variant="body" fontWeight="bold">
               알림 상세
             </Text>
@@ -113,7 +112,7 @@ export default function NotificationCard({
                 variant="small"
                 color="var(--primary-400)"
                 fontWeight="bold"
-                className={styles.link}
+                className="link"
                 onClick={() =>
                   router.push(notification.link || "")
                 }
@@ -122,7 +121,7 @@ export default function NotificationCard({
                 {notification.link}
               </Text>
             )}
-            <div className={styles.typeContainer}>
+            <div className="typeContainer">
               <Text variant="small">{notification.type}</Text>
             </div>
             <Text color="var(--grey-400)" variant="caption">

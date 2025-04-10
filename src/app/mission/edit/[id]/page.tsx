@@ -1,5 +1,5 @@
 import NewMissionPage from "../../create/client";
-import { getMission } from "@/app/journey/actions";
+import { getMission } from "@/app/journey/[slug]/clientActions";
 
 export default async function EditMissionPage({ params }: { params: Promise<{ id: number }> }) {
   const { id } = await params;

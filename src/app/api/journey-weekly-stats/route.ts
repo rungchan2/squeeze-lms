@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getJourneyWeeklyStats } from '@/app/journey/actions';
+import { getJourneyWeeklyStats } from '@/app/journey/[slug]/clientActions';
 
 export async function POST(req: NextRequest) {
   try {

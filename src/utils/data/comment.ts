@@ -3,21 +3,40 @@ import { CreateComment, UpdateComment, Comment } from "@/types";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { RefObject } from "react";
 
+// 개발 환경에서만 로그 출력 (환경 변수 사용)
+const DEBUG = process.env.DEBUG_LOGS === 'true';
+
+// 안전한 로그 출력 함수
+function safeLog(message: string, ...args: any[]) {
+  if (DEBUG) {
+    console.log(message, ...args);
+  }
+}
+
+// 전역으로 활성화된 채널을 추적하기 위한 Map
+const activeChannels = new Map<string, RealtimeChannel>();
+
 // 실시간 연결 설정을 위한 옵션
 const REALTIME_CONFIG = {
   retryInterval: 1000,
   maxRetries: 5,
 };
 
-export async function getCommentsNumber(postId: number) : Promise<number> {
+// 최대 활성 채널 수 제한
+const MAX_ACTIVE_CHANNELS = 10;
+
+export async function getCommentsNumber(postId: number): Promise<number> {
   const supabase = createClient();
-  const { data, error } = await supabase
+  const { count, error } = await supabase
     .from("comments")
-    .select("id", { count: "exact" })
+    .select("*", { count: "exact", head: true })
     .eq("post_id", postId);
 
-  if (error) throw error;
-  return data.length;
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return count || 0;
 } 
 
 export async function createComment(newComment: CreateComment) {
@@ -109,47 +128,68 @@ export async function addChannel(
   postId: number,
   mountedRef: RefObject<boolean>,
   recentlyProcessedIds: Set<number>,
-  mutate: () => void
+  onUpdate: () => void
 ): Promise<RealtimeChannel> {
   const supabase = createClient();
+  const channelName = `comments-${postId}`;
+  const fullChannelName = `realtime:${channelName}`;
+  
   try {
-    // 고정된 채널 이름 사용 (타임스탬프 제거)
-    const channelName = `comments-${postId}`;
-    console.log(`실시간 채널 설정: ${channelName}`);
+    // 1. 먼저 전역 캐시에서 채널 확인
+    if (activeChannels.has(fullChannelName)) {
+      const cachedChannel = activeChannels.get(fullChannelName);
+      if (cachedChannel) {
+        safeLog(`전역 캐시에서 채널 재사용: ${fullChannelName}`);
+        return cachedChannel;
+      }
+    }
+    
+    // 2. 활성 채널 수 확인 및 정리 (제한 초과 시)
+    if (activeChannels.size >= MAX_ACTIVE_CHANNELS) {
+      safeLog(`최대 채널 수 초과(${activeChannels.size}/${MAX_ACTIVE_CHANNELS}), 오래된 채널 정리`);
+      
+      // 가장 오래된 채널 제거 (FIFO)
+      const oldestChannel = activeChannels.values().next().value;
+      if (oldestChannel) {
+        await removeChannel(oldestChannel);
+      }
+    }
+    
+    safeLog(`실시간 채널 설정: ${channelName}`);
 
-    // 기존 채널 확인 및 정리
+    // 3. 기존 supabase 채널 확인 및 정리
     const existingChannels = supabase.getChannels();
     let existingChannel: RealtimeChannel | null = null;
     
-    // 이미 동일한 이름의 채널이 있는지 확인
     for (const ch of existingChannels) {
-      if (ch.topic.includes(`realtime:${channelName}`)) {
-        console.log(`기존 채널 발견: ${ch.topic}`);
+      if (ch.topic === fullChannelName) {
+        safeLog(`기존 채널 발견: ${ch.topic}`);
         existingChannel = ch;
         break;
       }
     }
 
-    // 이미 있는 채널은 재사용
+    // 기존 채널 처리
     if (existingChannel) {
-      console.log(`기존 채널 재사용: ${existingChannel.topic}`);
+      safeLog(`기존 채널 재사용: ${existingChannel.topic}`);
       
-      // 이미 SUBSCRIBED 상태인 경우 재사용
+      // SUBSCRIBED 상태인 경우 재사용 및 전역 캐시에 추가
       if ((existingChannel as any).state === "SUBSCRIBED") {
-        console.log(`채널이 이미 구독 중입니다: ${existingChannel.topic}`);
+        safeLog(`채널이 이미 구독 중입니다: ${existingChannel.topic}`);
+        activeChannels.set(existingChannel.topic, existingChannel);
         return existingChannel;
       }
       
-      // CLOSED 상태이거나 다른 상태일 경우 안전하게 제거 후 새로 생성
+      // 다른 상태인 경우 제거
       try {
-        console.log(`기존 채널 제거: ${existingChannel.topic}`);
+        safeLog(`비활성 채널 제거: ${existingChannel.topic}`);
         await supabase.removeChannel(existingChannel);
       } catch (err) {
         console.error("기존 채널 제거 오류:", err);
       }
     }
 
-    // 새 채널 생성
+    // 4. 새 채널 생성
     const channel = supabase
       .channel(channelName, {
         config: {
@@ -166,20 +206,18 @@ export async function addChannel(
           filter: `post_id=eq.${postId}`,
         },
         (payload) => {
-          console.log("실시간 INSERT 이벤트 수신:", payload);
+          safeLog("실시간 INSERT 이벤트 수신:", payload);
           if (!mountedRef.current || !payload.new) return;
 
           const commentId = payload.new.id;
 
-          // 이미 처리한 댓글인지 확인
           if (recentlyProcessedIds.has(commentId)) {
-            console.log(`이미 처리된 댓글 무시: ${commentId}`);
+            safeLog(`이미 처리된 댓글 무시: ${commentId}`);
             return;
           }
 
-          console.log(`새 댓글 추가됨: ${commentId}, mutate 호출`);
-          // 새 댓글이 추가되면 데이터 다시 불러오기
-          mutate();
+          safeLog(`새 댓글 추가됨: ${commentId}`);
+          onUpdate();
         }
       )
       .on(
@@ -191,20 +229,18 @@ export async function addChannel(
           filter: `post_id=eq.${postId}`,
         },
         (payload) => {
-          console.log("실시간 DELETE 이벤트 수신:", payload);
+          safeLog("실시간 DELETE 이벤트 수신:", payload);
           if (!mountedRef.current || !payload.old) return;
 
           const deletedId = (payload.old as Comment).id;
 
-          // 이미 처리한 댓글인지 확인
           if (recentlyProcessedIds.has(deletedId)) {
-            console.log(`이미 처리된 댓글 삭제 무시: ${deletedId}`);
+            safeLog(`이미 처리된 댓글 삭제 무시: ${deletedId}`);
             return;
           }
 
-          console.log(`댓글 삭제됨: ${deletedId}, mutate 호출`);
-          // 댓글이 삭제되면 데이터 다시 불러오기
-          mutate();
+          safeLog(`댓글 삭제됨: ${deletedId}`);
+          onUpdate();
         }
       )
       .on(
@@ -216,39 +252,43 @@ export async function addChannel(
           filter: `post_id=eq.${postId}`,
         },
         (payload) => {
-          console.log("실시간 UPDATE 이벤트 수신:", payload);
+          safeLog("실시간 UPDATE 이벤트 수신:", payload);
           if (!mountedRef.current || !payload.new) return;
 
           const commentId = payload.new.id;
 
-          // 이미 처리한 댓글인지 확인
           if (recentlyProcessedIds.has(commentId)) {
-            console.log(`이미 처리된 댓글 업데이트 무시: ${commentId}`);
+            safeLog(`이미 처리된 댓글 업데이트 무시: ${commentId}`);
             return;
           }
 
-          console.log(`댓글 업데이트됨: ${commentId}, mutate 호출`);
-          // 댓글이 업데이트되면 데이터 다시 불러오기
-          mutate();
+          safeLog(`댓글 업데이트됨: ${commentId}`);
+          onUpdate();
         }
       );
 
-    // 구독 시도 (한 번만 실행됨)
+    // 5. 구독 시도
     try {
       await channel.subscribe((status, err) => {
-        console.log(
+        safeLog(
           `실시간 채널 상태: ${status}${
             err ? `, 오류: ${err.message}` : ""
           }, 채널: ${channelName}`
         );
 
-        // 연결이 끊어진 경우 
         if (status === "CLOSED" && mountedRef.current) {
-          console.log(`채널이 닫혔습니다. 설정 함수가 다시 호출될 때 재연결됩니다.`);
-          // 여기서 재구독 시도하지 않음 - 컴포넌트가 remount될 때 새 채널 생성
+          safeLog(`채널이 닫혔습니다. 재구독 시도하지 않음`);
+          // 전역 캐시에서도 제거
+          if (activeChannels.has(channel.topic)) {
+            activeChannels.delete(channel.topic);
+            safeLog(`닫힌 채널을 전역 캐시에서 제거: ${channel.topic}`);
+          }
         }
       });
-      console.log(`채널 구독 성공: ${channelName}`);
+      
+      // 6. 전역 Map에 추가
+      activeChannels.set(channel.topic, channel);
+      safeLog(`채널 구독 성공 및 전역 캐시에 추가: ${channelName}, 현재 활성 채널 수: ${activeChannels.size}`);
       return channel;
     } catch (subscribeError) {
       console.error("실시간 구독 오류:", subscribeError);
@@ -262,11 +302,24 @@ export async function addChannel(
 
 export async function removeChannel(channel: RealtimeChannel) {
   try {
+    const channelName = channel.topic;
+    
+    safeLog(`실시간 채널 상태: ${channel.state}, 채널: ${channelName}`);
     if (!channel) return;
-    console.log(`채널 제거: ${channel.topic}`);
-    const supabase = createClient();
-    await supabase.removeChannel(channel);
+    safeLog(`채널 제거: ${channel.topic}`);
+
+    // 특별 케이스 처리: 진행 중인 채널
+    if (channel.state !== "closed") {
+      // 구독 취소 및 연결 해제
+      await channel.unsubscribe();
+    }
+
+    // 전역 캐시에서 제거
+    if (activeChannels.has(channel.topic)) {
+      activeChannels.delete(channel.topic);
+      safeLog(`채널 닫힘: ${channel.topic}, 전역 캐시에서 제거`);
+    }
   } catch (error) {
-    console.error("채널 제거 중 오류:", error);
+    console.error("Error removing channel:", error);
   }
 }

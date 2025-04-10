@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUserPointsByJourneyId } from "@/app/journey/actions";
+import { getUserPointsByJourneyId } from "@/app/journey/[slug]/clientActions";
 
 export async function GET(request: Request) {
   try {

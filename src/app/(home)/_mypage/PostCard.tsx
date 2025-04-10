@@ -15,12 +15,14 @@ import { PostWithRelations } from "@/types";
 import { useLikes } from "@/hooks/useLikes";
 import RichTextViewer from "@/components/richTextInput/RichTextViewer";
 import { useAuth } from "@/components/AuthProvider";
-import { useComments } from "@/hooks/useComments";
 import { useEffect, useCallback, useMemo, memo } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { Menu, Portal } from "@chakra-ui/react";
 import { FaEllipsis } from "react-icons/fa6";
 import { posts } from "@/utils/data/posts";
+import useSWR from "swr";
+import { getCommentsNumber } from "@/utils/data/comment";
+
 interface PostCardProps {
   post: PostWithRelations;
   showDetails?: boolean;
@@ -32,6 +34,25 @@ declare global {
   }
 }
 
+// 경량화된 댓글 수만 가져오는 훅
+function useCommentsCount(postId: number) {
+  const { data, error, isLoading } = useSWR(
+    postId ? [`commentsCount-${postId}`] : null,
+    () => getCommentsNumber(postId),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 30000, // 30초 동안 캐시 유지
+    }
+  );
+
+  return {
+    count: data || 0,
+    error,
+    isLoading,
+  };
+}
+
 // memo로 컴포넌트 최적화
 export default memo(function PostCard({
   post,
@@ -40,7 +61,7 @@ export default memo(function PostCard({
   const router = useRouter();
   const { id } = useAuth();
   const { onLike, onUnlike, likesCount, useUserLike } = useLikes(post.id);
-  const { count } = useComments({ postId: post.id });
+  const { count } = useCommentsCount(post.id);
 
   const { data: userLike } = useUserLike(id);
   const isUserLike = Boolean(userLike);

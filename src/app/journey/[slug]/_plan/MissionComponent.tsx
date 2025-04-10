@@ -17,7 +17,7 @@ import { IoSearch } from "react-icons/io5";
 import ChipGroup from "@/components/common/ChipGroup";
 import { useWeeks } from "@/hooks/useWeeks";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
-import { getMissionTypes } from "@/app/journey/clientActions";
+import { getMissionTypes } from "@/app/journey/[slug]/clientActions";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
 import { JourneyMissionInstanceWithMission } from "@/types";

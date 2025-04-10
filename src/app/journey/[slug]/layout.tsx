@@ -1,5 +1,5 @@
-import { createClient } from "@/utils/supabase/server";
 import type { Metadata, ResolvingMetadata } from "next";
+import { getJourneyByUuid } from "./actions";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -24,14 +24,8 @@ export async function generateMetadata(
         },
       };
     }
-    
-    const supabase = await createClient();
-    
-    const { data: journeyData, error } = await supabase
-      .from("journeys")
-      .select("name, image_url")
-      .eq("uuid", slug)
-      .single();
+        
+    const { data: journeyData, error } = await getJourneyByUuid(slug);
 
     if (error || !journeyData) {
       console.error("Journey metadata fetch error:", error);

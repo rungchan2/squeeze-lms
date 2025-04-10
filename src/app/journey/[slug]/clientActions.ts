@@ -1,57 +1,9 @@
-import { CreatePost, CreateJourney, UpdatePost, CreateMission } from "@/types";
+import { CreatePost, CreateJourney, UpdatePost } from "@/types";
 import { createClient } from "@/utils/supabase/client";
 
-export async function getJourney(uuid: string) {
-  
-  if (!uuid) {
-    console.error("[SERVER] getJourney: uuid가 제공되지 않았습니다");
-    return { data: null, error: new Error("UUID가 제공되지 않았습니다") };
-  }
-  
-  try {
-    const supabase = createClient();
-    
-    const response = await supabase
-      .from("journeys")
-      .select("*")
-      .eq("uuid", uuid)
-      .single();
-    
-    return response;
-  } catch (error) {
-    return { data: null, error };
-  }
-}
-
-export async function getJourneyWeeks(journeyId: number) {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("journey_weeks")
-    .select("*")
-    .eq("journey_id", journeyId);
-  return { data, error };
-}
-
-export async function getMissionInstanceById(id: number) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("journey_mission_instances")
-    .select("*")
-    .eq("id", id);
-  return { data, error };
-}
-
-export async function getMissionInstanceByWeekId(weekId: number) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("journey_mission_instances")
-    .select("*")
-    .eq("journey_week_id", weekId);
-  return { data, error };
-}
 
 export async function createPost(post: CreatePost) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const insertData: CreatePost = {
     content: post.content,
     user_id: post.user_id,
@@ -165,14 +117,6 @@ export async function getUserPointsByJourneyId(journeyId: number | null) {
   }
 }
 
-export async function getJourneyUserbyJourneyId(journeyId: number) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("user_journeys")
-    .select("*")
-    .eq("journey_id", journeyId);
-  return { data, error };
-}
 
 export async function deleteUserFromJourney(journeyId: number, userId: number) {
   const supabase = await createClient();
@@ -184,36 +128,16 @@ export async function deleteUserFromJourney(journeyId: number, userId: number) {
   return { data, error };
 }
 
-export async function deletePost(postId: number) {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("posts").delete().eq("id", postId);
-  return { data, error };
-} 
-
-export async function createMission(mission: CreateMission) {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("missions").insert(mission);
-  return { data, error };
-}
 
 export async function getMission(id: number) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data, error } = await supabase.from("missions").select("*").eq("id", id).single();
-  return { data, error };
-}
-
-export async function getJourneyParticipants(journeyId: number | string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("user_journeys")
-    .select("user_id")
-    .eq("journey_id", typeof journeyId === 'string' ? parseInt(journeyId, 10) : journeyId);
   return { data, error };
 }
 
 export async function getJourneyWeeklyStats(journeyId: number | string) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     
     const journeyIdNumber = typeof journeyId === 'string' ? parseInt(journeyId, 10) : journeyId;
     
@@ -345,6 +269,14 @@ export async function getJourneyWeeklyStats(journeyId: number | string) {
     console.error("주차별 통계 가져오기 오류:", error);
     return { data: null, error };
   }
+}
+
+export async function getMissionTypes() {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc(
+    "get_distinct_mission_types" as any
+  );
+  return { data, error };
 }
 
 

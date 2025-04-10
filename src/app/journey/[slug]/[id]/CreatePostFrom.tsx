@@ -11,7 +11,7 @@ import styled from "@emotion/styled";
 import Button from "@/components/common/Button";
 import { useEffect, useState, useCallback } from "react";
 import { toaster } from "@/components/ui/toaster";
-import { createPost, updatePost } from "@/app/journey/actions";
+import { createPost, updatePost } from "@/app/journey/[slug]/clientActions";
 import { useAuth } from "@/components/AuthProvider";
 import { Input } from "@chakra-ui/react";
 import InputAndTitle from "@/components/InputAndTitle";

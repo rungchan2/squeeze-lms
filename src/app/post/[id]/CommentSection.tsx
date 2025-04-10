@@ -12,9 +12,17 @@ import { FiTrash2 } from "react-icons/fi";
 import CommentInputSection from "./CommentInputSection";
 import Heading from "@/components/Text/Heading";
 
-export default function CommentSection() {
+interface CommentSectionProps {
+  postId?: number;
+  enableRealtime?: boolean;
+}
+
+export default function CommentSection({ 
+  postId: propPostId, 
+  enableRealtime = true 
+}: CommentSectionProps = {}) {
   const params = useParams();
-  const postId = Number(params.id);
+  const postId = propPostId || Number(params.id);
   const {
     comments,
     count,
@@ -25,7 +33,10 @@ export default function CommentSection() {
     fetchNextPage,
     hasMore,
     isFetchingNextPage,
-  } = useComments({ postId });
+  } = useComments({ 
+    postId, 
+    enableRealtime, // 실시간 업데이트 옵션 전달
+  });
   const { id: userId } = useAuth();
 
   const lastCommentRef = useRef<HTMLDivElement | null>(null);

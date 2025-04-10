@@ -2,7 +2,7 @@
 
 // TODO: 1. 제출된 과제 통계 확인할 수 있게 하기
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { usePosts } from "@/hooks/usePosts";
 import { Table } from "@chakra-ui/react";
 import { Tabs } from "@chakra-ui/react";
@@ -21,7 +21,7 @@ import { MdOutlineCalendarViewWeek } from "react-icons/md";
 import Heading from "@/components/Text/Heading";
 import WeeklySubmissionChart from "./WeeklySubmissionChart";
 import Text from "@/components/Text/Text";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import useSWRInfinite from "swr/infinite";
 import { createClient } from "@/utils/supabase/client";
 
 interface Post {
@@ -115,28 +115,50 @@ export default function TeacherPostsPage() {
   const router = useRouter();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  // SWR 키 생성 함수 정의
+  const getKey = (pageIndex: number, previousPageData: PostsResponse | null) => {
+    // 이전 페이지 데이터가 없거나 nextPage가 null이 아닌 경우 계속 로드
+    if (previousPageData === null || previousPageData.nextPage !== null) {
+      return [`posts-${slug}-teacher`, pageIndex];
+    }
+    return null; // 더 이상 데이터가 없으면 null 반환
+  };
   
+  // useSWRInfinite 훅 사용
   const {
     data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
     error,
-  } = useInfiniteQuery({
-    queryKey: ['posts', slug, true],
-    queryFn: ({ pageParam }) => fetchPosts({ 
-      pageParam: pageParam as number, 
+    size,
+    setSize,
+    isLoading,
+    isValidating,
+  } = useSWRInfinite<PostsResponse>(
+    getKey,
+    async (key, pageIndex) => fetchPosts({ 
+      pageParam: pageIndex, 
       journeySlug: slug as string, 
       showHidden: true 
     }),
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-    initialPageParam: 0,
-  });
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000, // 1분 동안 중복 요청 방지
+    }
+  );
   
-  const allPosts = data?.pages.flatMap(page => page.data) || [];
-  const totalPosts = data?.pages[0]?.total || 0;
-
+  // 데이터 가공
+  const allPosts = data ? data.flatMap(page => page.data) : [];
+  const totalPosts = data && data[0] ? data[0].total : 0;
+  const hasNextPage = data ? data[data.length - 1]?.nextPage !== null : false;
+  const isFetchingNextPage = isValidating && size > 0 && !isLoading;
+  
+  // 다음 페이지 불러오기 함수
+  const fetchNextPage = useCallback(() => {
+    if (hasNextPage) {
+      setSize(size + 1);
+    }
+  }, [setSize, size, hasNextPage]);
+  
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;

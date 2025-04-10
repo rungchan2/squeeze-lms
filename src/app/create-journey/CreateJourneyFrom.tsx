@@ -7,7 +7,7 @@ import {
   createJourney,
   updateJourney,
   deleteJourney,
-} from "../journey/actions";
+} from "../journey/[slug]/clientActions";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@chakra-ui/react";

@@ -20,8 +20,6 @@ export function Providers({ children }: ProvidersProps) {
   const [emotionCache] = useState(() => createCache({ key: "css" }));
   const [mounted, setMounted] = useState(false);
   const { extractCritical } = createEmotionServer(emotionCache);
-  const pathname = usePathname();
-  const isLoginPage = pathname?.includes("/login");
 
   useEffect(() => {
     setMounted(true);
@@ -45,23 +43,9 @@ export function Providers({ children }: ProvidersProps) {
         value={{
           fetcher: (url: string) => fetch(url).then((res) => res.json()),
           revalidateOnFocus: true,
-          revalidateOnReconnect: false,
+          revalidateOnReconnect: true,
           revalidateOnMount: true,
-          revalidateIfStale: false,
-          dedupingInterval: 5000,
-          errorRetryCount: 3,
-          onError: (error, key) => {
-            if (error && error.message) {
-              if (error.message.includes("Cannot destructure property")) {
-                console.warn(`[SWR 에러 - 파라미터 누락] 키: ${key}, 메시지: ${error.message}`);
-                return;
-              }
-              
-              console.error(`[SWR 글로벌 에러] 키: ${key}, 메시지: ${error.message}`);
-            } else {
-              console.error('[SWR 글로벌 에러] 미확인 오류 타입:', error);
-            }
-          }
+          revalidateIfStale: true,
         }}
       >
         <ChakraProvider value={defaultSystem}>

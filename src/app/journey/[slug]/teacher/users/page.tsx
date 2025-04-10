@@ -20,7 +20,7 @@ import { useJourneyUser } from "@/hooks/useJourneyUser";
 import { Tabs } from "@chakra-ui/react";
 import { LuFolder, LuUser } from "react-icons/lu";
 import Heading from "@/components/Text/Heading";
-import { deleteUserFromJourney } from "@/app/journey/actions";
+import { deleteUserFromJourney } from "@/app/journey/[slug]/clientActions";
 import Footer from "@/components/common/Footer";
 import { createClient } from "@/utils/supabase/client";
 import { sendEmail } from "@/utils/edge-functions/email";

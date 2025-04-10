@@ -1,6 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
 import useSWRInfinite from "swr/infinite";
-import { createClient } from "@/utils/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { Comment, CreateComment } from "@/types/comments";
 import { RealtimeChannel } from "@supabase/supabase-js";
@@ -16,6 +15,7 @@ import {
 interface UseCommentsProps {
   postId: number;
   pageSize?: number;
+  enableRealtime?: boolean; // 실시간 업데이트 활성화 여부
 }
 
 // 페이지 데이터 타입 정의
@@ -24,7 +24,11 @@ interface PageData {
   count: number | null;
 }
 
-export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
+export function useComments({ 
+  postId, 
+  pageSize = 10, 
+  enableRealtime = false // 기본값은 false로 설정 
+}: UseCommentsProps) {
   const { id: userId } = useAuth();
   
   const recentlyProcessedIds = useRef<Set<number>>(new Set());
@@ -264,9 +268,9 @@ export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
     }
   }, [userId, mutate]);
 
-  // 실시간 구독 설정
+  // 실시간 구독 설정 - enableRealtime 옵션에 따라 활성화
   useEffect(() => {
-    if (!postId) return;
+    if (!postId || !enableRealtime) return; // enableRealtime이 false면 실시간 구독하지 않음
 
     mountedRef.current = true;
 
@@ -316,7 +320,7 @@ export function useComments({ postId, pageSize = 10 }: UseCommentsProps) {
         channelRef.current = null;
       }
     };
-  }, [postId]); // mutate 의존성 제거 - 채널에서 mutate 함수 호출 시 클로저 활용
+  }, [postId, enableRealtime]); // enableRealtime 의존성 추가
 
   return {
     comments,

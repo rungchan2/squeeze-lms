@@ -1,5 +1,4 @@
 import PostCard from "@/app/(home)/_mypage/PostCard";
-import styles from "./Mypage.module.css";
 import { useMyPosts } from "@/hooks/usePosts";
 import Spinner from "@/components/common/Spinner";
 import { Error } from "@/components/common/Error";
@@ -20,7 +19,7 @@ export default function MyPost() {
   }
 
   return (
-    <div className={styles.postContainer}>
+    <div className="postContainer">
       {data?.map((post: any) => <PostCard key={post.id} post={post} />)}
     </div>
   );
