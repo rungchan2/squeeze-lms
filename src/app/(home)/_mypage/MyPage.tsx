@@ -19,7 +19,6 @@ import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useMyLikedPosts } from "@/hooks/usePosts";
 import PostCard from "./PostCard";
-import styles from "./Mypage.module.css";
 import { organization } from "@/utils/data/organization";
 import { Error } from "@/components/common/Error";
 import constants from "@/utils/constants";
@@ -150,8 +149,7 @@ export default function MyPage() {
         <Tabs.Root key="line" defaultValue="myPosts" variant="line" fitted>
           <Tabs.List>
             <Tabs.Trigger value="myPosts">
-              <BsFillAirplaneFill />
-              내 게시글
+              <BsFillAirplaneFill />내 게시글
             </Tabs.Trigger>
             <Tabs.Trigger value="likedPosts">
               <FaRegHeart />
@@ -165,7 +163,7 @@ export default function MyPage() {
             {myLikedPosts?.length === 0 ? (
               <Error message="좋아요 게시글이 없습니다." />
             ) : (
-              <div className={styles.postContainer}>
+              <div className="postContainer">
                 {myLikedPosts?.map((post: any) => (
                   <PostCard key={post.id} post={post} />
                 ))}
@@ -182,6 +180,12 @@ const PostContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  .postContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
   .header {
     display: flex;
