@@ -39,31 +39,31 @@ export type Database = {
           created_at: string | null
           description: string | null
           file_url: string | null
-          id: number
+          id: string
           status: string | null
           title: string
           updated_at: string | null
-          user_id: number
+          user_id: string
         }
         Insert: {
           created_at?: string | null
           description?: string | null
           file_url?: string | null
-          id?: number
+          id?: string
           status?: string | null
           title: string
           updated_at?: string | null
-          user_id: number
+          user_id?: string
         }
         Update: {
           created_at?: string | null
           description?: string | null
           file_url?: string | null
-          id?: number
+          id?: string
           status?: string | null
           title?: string
           updated_at?: string | null
-          user_id?: number
+          user_id?: string
         }
         Relationships: [
           {
@@ -77,28 +77,28 @@ export type Database = {
       }
       comments: {
         Row: {
-          content: string | null
+          content: string
           created_at: string | null
-          id: number
-          post_id: number | null
+          id: string
+          post_id: string
           updated_at: string | null
-          user_id: number
+          user_id: string
         }
         Insert: {
-          content?: string | null
+          content: string
           created_at?: string | null
-          id?: number
-          post_id?: number | null
+          id?: string
+          post_id: string
           updated_at?: string | null
-          user_id: number
+          user_id?: string
         }
         Update: {
-          content?: string | null
+          content?: string
           created_at?: string | null
-          id?: number
-          post_id?: number | null
+          id?: string
+          post_id?: string
           updated_at?: string | null
-          user_id?: number
+          user_id?: string
         }
         Relationships: [
           {
@@ -117,62 +117,14 @@ export type Database = {
           },
         ]
       }
-      email_queue: {
-        Row: {
-          content: string
-          content_ref_id: number | null
-          created_at: string | null
-          error_message: string | null
-          id: number
-          processed: boolean | null
-          processed_at: string | null
-          recipient_email: string
-          recipient_name: string | null
-          response: string | null
-          retry_count: number | null
-          status_code: number | null
-          subject: string
-        }
-        Insert: {
-          content: string
-          content_ref_id?: number | null
-          created_at?: string | null
-          error_message?: string | null
-          id?: number
-          processed?: boolean | null
-          processed_at?: string | null
-          recipient_email: string
-          recipient_name?: string | null
-          response?: string | null
-          retry_count?: number | null
-          status_code?: number | null
-          subject: string
-        }
-        Update: {
-          content?: string
-          content_ref_id?: number | null
-          created_at?: string | null
-          error_message?: string | null
-          id?: number
-          processed?: boolean | null
-          processed_at?: string | null
-          recipient_email?: string
-          recipient_name?: string | null
-          response?: string | null
-          retry_count?: number | null
-          status_code?: number | null
-          subject?: string
-        }
-        Relationships: []
-      }
       journey_mission_instances: {
         Row: {
           created_at: string | null
           expiry_date: string | null
-          id: number
+          id: string
           journey_uuid: string | null
-          journey_week_id: number
-          mission_id: number
+          journey_week_id: string
+          mission_id: string
           release_date: string | null
           status: Database["public"]["Enums"]["mission_status"] | null
           updated_at: string | null
@@ -180,10 +132,10 @@ export type Database = {
         Insert: {
           created_at?: string | null
           expiry_date?: string | null
-          id?: number
+          id?: string
           journey_uuid?: string | null
-          journey_week_id: number
-          mission_id: number
+          journey_week_id: string
+          mission_id: string
           release_date?: string | null
           status?: Database["public"]["Enums"]["mission_status"] | null
           updated_at?: string | null
@@ -191,10 +143,10 @@ export type Database = {
         Update: {
           created_at?: string | null
           expiry_date?: string | null
-          id?: number
+          id?: string
           journey_uuid?: string | null
-          journey_week_id?: number
-          mission_id?: number
+          journey_week_id?: string
+          mission_id?: string
           release_date?: string | null
           status?: Database["public"]["Enums"]["mission_status"] | null
           updated_at?: string | null
@@ -219,27 +171,24 @@ export type Database = {
       journey_weeks: {
         Row: {
           created_at: string | null
-          id: number
-          journey_id: number | null
-          missions: number[] | null
+          id: string
+          journey_id: string
           name: string
           updated_at: string | null
           week_number: number | null
         }
         Insert: {
           created_at?: string | null
-          id?: number
-          journey_id?: number | null
-          missions?: number[] | null
+          id?: string
+          journey_id: string
           name: string
           updated_at?: string | null
           week_number?: number | null
         }
         Update: {
           created_at?: string | null
-          id?: number
-          journey_id?: number | null
-          missions?: number[] | null
+          id?: string
+          journey_id?: string
           name?: string
           updated_at?: string | null
           week_number?: number | null
@@ -259,52 +208,49 @@ export type Database = {
           created_at: string | null
           date_end: string | null
           date_start: string | null
-          id: number
+          id: string
           image_url: string | null
           name: string
           updated_at: string | null
-          uuid: string
         }
         Insert: {
           created_at?: string | null
           date_end?: string | null
           date_start?: string | null
-          id?: number
+          id?: string
           image_url?: string | null
           name: string
           updated_at?: string | null
-          uuid?: string
         }
         Update: {
           created_at?: string | null
           date_end?: string | null
           date_start?: string | null
-          id?: number
+          id?: string
           image_url?: string | null
           name?: string
           updated_at?: string | null
-          uuid?: string
         }
         Relationships: []
       }
       likes: {
         Row: {
           created_at: string | null
-          id: number
-          post_id: number | null
-          user_id: number
+          id: string
+          post_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string | null
-          id?: number
-          post_id?: number | null
-          user_id: number
+          id?: string
+          post_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string | null
-          id?: number
-          post_id?: number | null
-          user_id?: number
+          id?: string
+          post_id?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -328,7 +274,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           expiry_date: string | null
-          id: number
+          id: string
           mission_type: string | null
           name: string
           points: number | null
@@ -338,7 +284,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           expiry_date?: string | null
-          id?: number
+          id?: string
           mission_type?: string | null
           name: string
           points?: number | null
@@ -348,7 +294,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           expiry_date?: string | null
-          id?: number
+          id?: string
           mission_type?: string | null
           name?: string
           points?: number | null
@@ -359,34 +305,34 @@ export type Database = {
       notifications: {
         Row: {
           created_at: string | null
-          id: number
+          id: string
           link: string | null
           message: string
           read_at: string | null
-          receiver_id: number | null
+          receiver_id: string
           type: string
         }
         Insert: {
           created_at?: string | null
-          id?: number
+          id?: string
           link?: string | null
           message: string
           read_at?: string | null
-          receiver_id?: number | null
+          receiver_id: string
           type: string
         }
         Update: {
           created_at?: string | null
-          id?: number
+          id?: string
           link?: string | null
           message?: string
           read_at?: string | null
-          receiver_id?: number | null
+          receiver_id?: string
           type?: string
         }
         Relationships: [
           {
-            foreignKeyName: "fk_notifications_user"
+            foreignKeyName: "notifications_receiver_id_fkey"
             columns: ["receiver_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -397,19 +343,22 @@ export type Database = {
       organizations: {
         Row: {
           created_at: string | null
-          id: number
+          description: string | null
+          id: string
           name: string
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
-          id?: number
+          description?: string | null
+          id?: string
           name: string
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
-          id?: number
+          description?: string | null
+          id?: string
           name?: string
           updated_at?: string | null
         }
@@ -421,51 +370,51 @@ export type Database = {
           content: string | null
           created_at: string | null
           file_url: string | null
-          id: number
-          is_hidden: boolean
+          id: string
+          is_hidden: boolean | null
           is_team_submission: boolean | null
-          mission_instance_id: number | null
+          mission_instance_id: string | null
           score: number | null
-          team_id: number | null
+          team_id: string | null
           team_points: number | null
           title: string
           updated_at: string | null
-          user_id: number
-          view_count: number
+          user_id: string
+          view_count: number | null
         }
         Insert: {
           achievement_status?: string | null
           content?: string | null
           created_at?: string | null
           file_url?: string | null
-          id?: number
-          is_hidden?: boolean
+          id?: string
+          is_hidden?: boolean | null
           is_team_submission?: boolean | null
-          mission_instance_id?: number | null
+          mission_instance_id?: string | null
           score?: number | null
-          team_id?: number | null
+          team_id?: string | null
           team_points?: number | null
           title: string
           updated_at?: string | null
-          user_id: number
-          view_count?: number
+          user_id?: string
+          view_count?: number | null
         }
         Update: {
           achievement_status?: string | null
           content?: string | null
           created_at?: string | null
           file_url?: string | null
-          id?: number
-          is_hidden?: boolean
+          id?: string
+          is_hidden?: boolean | null
           is_team_submission?: boolean | null
-          mission_instance_id?: number | null
+          mission_instance_id?: string | null
           score?: number | null
-          team_id?: number | null
+          team_id?: string | null
           team_points?: number | null
           title?: string
           updated_at?: string | null
-          user_id?: number
-          view_count?: number
+          user_id?: string
+          view_count?: number | null
         }
         Relationships: [
           {
@@ -474,13 +423,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "journey_mission_instances"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "posts_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "team_points_summary"
-            referencedColumns: ["team_id"]
           },
           {
             foreignKeyName: "posts_team_id_fkey"
@@ -503,50 +445,47 @@ export type Database = {
           created_at: string | null
           email: string
           first_name: string | null
-          id: number
+          id: string
           last_name: string | null
           marketing_opt_in: boolean | null
-          organization_id: number | null
+          organization_id: string | null
           phone: string | null
           privacy_agreed: boolean | null
           profile_image: string | null
           role: string | null
-          uid: string
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           email: string
           first_name?: string | null
-          id?: number
+          id?: string
           last_name?: string | null
           marketing_opt_in?: boolean | null
-          organization_id?: number | null
+          organization_id?: string | null
           phone?: string | null
           privacy_agreed?: boolean | null
           profile_image?: string | null
           role?: string | null
-          uid: string
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           email?: string
           first_name?: string | null
-          id?: number
+          id?: string
           last_name?: string | null
           marketing_opt_in?: boolean | null
-          organization_id?: number | null
+          organization_id?: string | null
           phone?: string | null
           privacy_agreed?: boolean | null
           profile_image?: string | null
           role?: string | null
-          uid?: string
           updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "users_organization_id_fkey"
+            foreignKeyName: "profiles_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -556,82 +495,57 @@ export type Database = {
       }
       role_access_code: {
         Row: {
-          code: string
-          created_at: string
+          code: string | null
+          created_at: string | null
           expiry_date: string | null
-          id: number
-          role: Database["public"]["Enums"]["role"] | null
+          id: string
+          role: Database["public"]["Enums"]["role"]
         }
         Insert: {
-          code?: string
-          created_at?: string
+          code?: string | null
+          created_at?: string | null
           expiry_date?: string | null
-          id?: number
-          role?: Database["public"]["Enums"]["role"] | null
+          id?: string
+          role: Database["public"]["Enums"]["role"]
         }
         Update: {
-          code?: string
-          created_at?: string
+          code?: string | null
+          created_at?: string | null
           expiry_date?: string | null
-          id?: number
-          role?: Database["public"]["Enums"]["role"] | null
-        }
-        Relationships: []
-      }
-      sitemap_status: {
-        Row: {
-          id: number
-          last_updated: string | null
-          needs_update: boolean | null
-        }
-        Insert: {
-          id?: number
-          last_updated?: string | null
-          needs_update?: boolean | null
-        }
-        Update: {
-          id?: number
-          last_updated?: string | null
-          needs_update?: boolean | null
+          id?: string
+          role?: Database["public"]["Enums"]["role"]
         }
         Relationships: []
       }
       team_members: {
         Row: {
           created_at: string | null
-          id: number
+          id: string
           is_leader: boolean | null
           joined_at: string | null
-          team_id: number
+          team_id: string
           updated_at: string | null
-          user_id: number
+          user_id: string
         }
         Insert: {
           created_at?: string | null
-          id?: number
+          id?: string
           is_leader?: boolean | null
           joined_at?: string | null
-          team_id: number
+          team_id: string
           updated_at?: string | null
-          user_id: number
+          user_id: string
         }
         Update: {
           created_at?: string | null
-          id?: number
+          id?: string
           is_leader?: boolean | null
           joined_at?: string | null
-          team_id?: number
+          team_id?: string
           updated_at?: string | null
-          user_id?: number
+          user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "team_members_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "team_points_summary"
-            referencedColumns: ["team_id"]
-          },
           {
             foreignKeyName: "team_members_team_id_fkey"
             columns: ["team_id"]
@@ -651,28 +565,28 @@ export type Database = {
       team_points: {
         Row: {
           created_at: string | null
-          id: number
-          mission_instance_id: number
-          post_id: number | null
-          team_id: number
+          id: string
+          mission_instance_id: string
+          post_id: string | null
+          team_id: string
           total_points: number | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
-          id?: number
-          mission_instance_id: number
-          post_id?: number | null
-          team_id: number
+          id?: string
+          mission_instance_id: string
+          post_id?: string | null
+          team_id: string
           total_points?: number | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
-          id?: number
-          mission_instance_id?: number
-          post_id?: number | null
-          team_id?: number
+          id?: string
+          mission_instance_id?: string
+          post_id?: string | null
+          team_id?: string
           total_points?: number | null
           updated_at?: string | null
         }
@@ -695,13 +609,6 @@ export type Database = {
             foreignKeyName: "team_points_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
-            referencedRelation: "team_points_summary"
-            referencedColumns: ["team_id"]
-          },
-          {
-            foreignKeyName: "team_points_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -711,24 +618,24 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
-          id: number
-          journey_id: number
+          id: string
+          journey_id: string
           name: string
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           description?: string | null
-          id?: number
-          journey_id: number
+          id?: string
+          journey_id: string
           name: string
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           description?: string | null
-          id?: number
-          journey_id?: number
+          id?: string
+          journey_id?: string
           name?: string
           updated_at?: string | null
         }
@@ -745,30 +652,30 @@ export type Database = {
       user_journeys: {
         Row: {
           created_at: string | null
-          id: number
+          id: string
           joined_at: string | null
-          journey_id: number | null
+          journey_id: string
           role_in_journey: string | null
           updated_at: string | null
-          user_id: number | null
+          user_id: string
         }
         Insert: {
           created_at?: string | null
-          id?: number
+          id?: string
           joined_at?: string | null
-          journey_id?: number | null
+          journey_id: string
           role_in_journey?: string | null
           updated_at?: string | null
-          user_id?: number | null
+          user_id: string
         }
         Update: {
           created_at?: string | null
-          id?: number
+          id?: string
           joined_at?: string | null
-          journey_id?: number | null
+          journey_id?: string
           role_in_journey?: string | null
           updated_at?: string | null
-          user_id?: number | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -790,30 +697,30 @@ export type Database = {
       user_points: {
         Row: {
           created_at: string | null
-          id: number
-          mission_instance_id: number
-          post_id: number | null
-          profile_id: number
+          id: string
+          mission_instance_id: string
+          post_id: string | null
+          profile_id: string
           total_points: number | null
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
           created_at?: string | null
-          id?: number
-          mission_instance_id: number
-          post_id?: number | null
-          profile_id: number
+          id?: string
+          mission_instance_id: string
+          post_id?: string | null
+          profile_id: string
           total_points?: number | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string | null
-          id?: number
-          mission_instance_id?: number
-          post_id?: number | null
-          profile_id?: number
+          id?: string
+          mission_instance_id?: string
+          post_id?: string | null
+          profile_id?: string
           total_points?: number | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -841,200 +748,13 @@ export type Database = {
       }
     }
     Views: {
-      leaderboard: {
-        Row: {
-          completed_missions: number | null
-          first_name: string | null
-          last_name: string | null
-          total_points: number | null
-          user_id: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "posts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      team_points_summary: {
-        Row: {
-          journey_id: number | null
-          journey_name: string | null
-          member_count: number | null
-          team_id: number | null
-          team_name: string | null
-          total_points: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "teams_journey_id_fkey"
-            columns: ["journey_id"]
-            isOneToOne: false
-            referencedRelation: "journeys"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
-      bytea_to_text: {
-        Args: {
-          data: string
-        }
-        Returns: string
+      custom_access_token_hook: {
+        Args: { event: Json }
+        Returns: Json
       }
-      get_distinct_mission_types: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          mission_type: string
-        }[]
-      }
-      http: {
-        Args: {
-          request: Database["public"]["CompositeTypes"]["http_request"]
-        }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
-      }
-      http_delete:
-        | {
-            Args: {
-              uri: string
-            }
-            Returns: Database["public"]["CompositeTypes"]["http_response"]
-          }
-        | {
-            Args: {
-              uri: string
-              content: string
-              content_type: string
-            }
-            Returns: Database["public"]["CompositeTypes"]["http_response"]
-          }
-      http_get:
-        | {
-            Args: {
-              uri: string
-            }
-            Returns: Database["public"]["CompositeTypes"]["http_response"]
-          }
-        | {
-            Args: {
-              uri: string
-              data: Json
-            }
-            Returns: Database["public"]["CompositeTypes"]["http_response"]
-          }
-      http_head: {
-        Args: {
-          uri: string
-        }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
-      }
-      http_header: {
-        Args: {
-          field: string
-          value: string
-        }
-        Returns: Database["public"]["CompositeTypes"]["http_header"]
-      }
-      http_list_curlopt: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          curlopt: string
-          value: string
-        }[]
-      }
-      http_patch: {
-        Args: {
-          uri: string
-          content: string
-          content_type: string
-        }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
-      }
-      http_post:
-        | {
-            Args: {
-              uri: string
-              content: string
-              content_type: string
-            }
-            Returns: Database["public"]["CompositeTypes"]["http_response"]
-          }
-        | {
-            Args: {
-              uri: string
-              data: Json
-            }
-            Returns: Database["public"]["CompositeTypes"]["http_response"]
-          }
-      http_put: {
-        Args: {
-          uri: string
-          content: string
-          content_type: string
-        }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
-      }
-      http_reset_curlopt: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      http_set_curlopt: {
-        Args: {
-          curlopt: string
-          value: string
-        }
-        Returns: boolean
-      }
-      migrate_existing_team_posts: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      migrate_missions_to_instances: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      process_email_queue: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      test_send_email: {
-        Args: {
-          recipient_email: string
-          email_subject?: string
-          email_content?: string
-        }
-        Returns: string
-      }
-      text_to_bytea: {
-        Args: {
-          data: string
-        }
-        Returns: string
-      }
-      urlencode:
-        | {
-            Args: {
-              data: Json
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              string: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              string: string
-            }
-            Returns: string
-          }
     }
     Enums: {
       mission_status:
@@ -1046,48 +766,34 @@ export type Database = {
       role: "user" | "teacher" | "admin"
     }
     CompositeTypes: {
-      http_header: {
-        field: string | null
-        value: string | null
-      }
-      http_request: {
-        method: unknown | null
-        uri: string | null
-        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
-        content_type: string | null
-        content: string | null
-      }
-      http_response: {
-        status: number | null
-        content_type: string | null
-        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
-        content: string | null
-      }
+      [_ in never]: never
     }
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -1095,20 +801,22 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -1116,20 +824,22 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -1137,21 +847,23 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
@@ -1160,6 +872,24 @@ export type CompositeTypes<
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {
+      mission_status: [
+        "not_started",
+        "in_progress",
+        "submitted",
+        "completed",
+        "rejected",
+      ],
+      role: ["user", "teacher", "admin"],
+    },
+  },
+} as const

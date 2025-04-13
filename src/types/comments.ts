@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 export const commentSchema = z.object({
-  id: z.number(),
-  content: z.string().nullable(),
-  user_id: z.number(),
-  post_id: z.number().nullable(),
+  id: z.string().uuid(),
+  content: z.string(),
+  user_id: z.string().uuid(),
+  post_id: z.string().uuid(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
   profiles: z.object({
-    id: z.number(),
+    id: z.string().uuid(),
     first_name: z.string().nullable(),
     last_name: z.string().nullable(),
     profile_image: z.string().nullable()

@@ -4,7 +4,7 @@ import { CreateMission } from "@/types";
 const supabase = createClient();
 
 export const mission = {
-    getMission: async (id: number) => {
+    getMission: async (id: string) => {
         const { data, error } = await supabase.from("missions").select("*").eq("id", id).single();
         return { data, error };
     },
@@ -12,11 +12,11 @@ export const mission = {
         const { data, error } = await supabase.from("missions").insert(mission);
         return { data, error };
     },
-    updateMission: async (id: number, mission: CreateMission) => {
+    updateMission: async (id: string, mission: CreateMission) => {
         const { data, error } = await supabase.from("missions").update(mission).eq("id", id);
         return { data, error };
     },
-    deleteMission: async (id: number) => {
+    deleteMission: async (id: string) => {
         const { data, error } = await supabase.from("missions").delete().eq("id", id);
         return { data, error };
     },

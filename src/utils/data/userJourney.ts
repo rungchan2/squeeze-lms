@@ -3,8 +3,8 @@
 import { createClient } from "@/utils/supabase/server";
 import { UserJourneyWithJourney } from "@/types";
 
-export async function getJourney(userId: number) {
-  if (userId === 0) {
+export async function getJourney(userId: string) {
+  if (!userId) {
     return [];
   }
     const supabase = await createClient();
@@ -25,11 +25,11 @@ export async function getJourney(userId: number) {
 }
 
 
-export async function createJourney(userId: number, journey: UserJourneyWithJourney) {
+export async function createJourney(userId: string, journey: UserJourneyWithJourney) {
   const supabase = await createClient();
   const { data, error } = await supabase
       .from("user_journeys")
-      .insert({ user_id: userId, journey: journey });
+      .insert({ user_id: userId, journey_id: journey.journey_id });
 
     if (error) {
       throw new Error(error.message);

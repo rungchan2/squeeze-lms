@@ -2,7 +2,7 @@ import { createClient } from "@/utils/supabase/client";
 import { JourneyWeek } from "@/types";
 
 export const week = {
-  getWeek: async (journeyId: number) => {
+  getWeek: async (journeyId: string) => {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("journey_weeks")
@@ -15,7 +15,7 @@ export const week = {
 
     return data;
   },
-  updateWeek: async (weekId: number, data: Partial<JourneyWeek>) => {
+  updateWeek: async (weekId: string, data: Partial<JourneyWeek>) => {
     const supabase = createClient();
     const { data: updatedData, error } = await supabase
       .from("journey_weeks")
@@ -28,7 +28,7 @@ export const week = {
 
     return { data: updatedData, error };
   },
-  deleteWeek: async (weekId: number) => {
+  deleteWeek: async (weekId: string) => {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("journey_weeks")

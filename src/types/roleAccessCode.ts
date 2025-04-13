@@ -1,12 +1,16 @@
 import { z } from "zod";
+import { roleSchema } from "./users";
 
 export const roleAccessCodeSchema = z.object({
-  id: z.number(),
-  expiry_date: z.string(),
-  created_at: z.string(),
-  code: z.string(),
+  id: z.string().uuid(),
+  role: roleSchema,
+  expiry_date: z.string().nullable(),
+  created_at: z.string().nullable(),
+  code: z.string().uuid(),
 });
+
 export const createRoleAccessCodeSchema = roleAccessCodeSchema.pick({
+  role: true,
   expiry_date: true,
 });
 

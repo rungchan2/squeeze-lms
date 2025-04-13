@@ -57,14 +57,8 @@ export const user = {
   async createProfile(data: SignupPage) {
     const supabase = createClient();
     
-    // uid가 있는지 확인
-    if (!data.uid) {
-      return { error: new Error("사용자 ID가 필요합니다.") };
-    }
-    
     // 프로필 데이터 구성
     const profileData = {
-      uid: data.uid,
       email: data.email,
       first_name: data.first_name,
       last_name: data.last_name,

@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const likeSchema = z.object({
-  id: z.number(),
-  user_id: z.number(),
-  post_id: z.number().nullable(),
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  post_id: z.string().uuid(),
   created_at: z.string().nullable(),
 })
 

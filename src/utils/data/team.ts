@@ -4,7 +4,7 @@ import { createClient } from "@/utils/supabase/client";
 const supabase = createClient();
 
 export const team = {
-  getAllTeams: async (journeyId: number): Promise<Team[]> => {
+  getAllTeams: async (journeyId: string): Promise<Team[]> => {
     const { data, error } = await supabase
       .from("teams")
       .select("*")
@@ -16,7 +16,7 @@ export const team = {
 
     return data;
   },
-  getTeamData: async (journeyId: number): Promise<any> => {
+  getTeamData: async (journeyId: string): Promise<any> => {
     const { data, error } = await supabase
       .from("teams")
       .select("*")
@@ -29,10 +29,10 @@ export const team = {
     return data;
   },
   getCurrentUserTeam: async (
-    currentUserId: number,
-    journeyId: number
+    currentUserId: string,
+    journeyId: string
   ): Promise<{
-    team_id: number;
+    team_id: string;
   } | null> => {
     try {
       // 먼저 single() 없이 조회해서 여러 결과가 있는지 확인
@@ -62,7 +62,7 @@ export const team = {
       return null;
     }
   },
-  getTeam: async (teamId: number): Promise<Team | null> => {
+  getTeam: async (teamId: string): Promise<Team | null> => {
     const { data, error } = await supabase
       .from("teams")
       .select("*")
@@ -76,7 +76,7 @@ export const team = {
 
     return data;
   },
-  getTeamMembers: async (teamIds: number[]): Promise<TeamMember[]> => {
+  getTeamMembers: async (teamIds: string[]): Promise<TeamMember[]> => {
     const { data, error } = await supabase
       .from("team_members")
       .select("*, profiles:user_id(id, first_name, last_name)")
@@ -89,7 +89,7 @@ export const team = {
     return data;
   },
   getTeamByName: async (
-    journeyId: number,
+    journeyId: string,
     teamName: string
   ): Promise<Team | null> => {
     const { data, error } = await supabase
@@ -105,7 +105,7 @@ export const team = {
 
     return data;
   },
-  deleteTeam: async (teamId: number): Promise<void> => {
+  deleteTeam: async (teamId: string): Promise<void> => {
     const { error } = await supabase.from("teams").delete().eq("id", teamId);
 
     if (error) {
@@ -127,7 +127,7 @@ export const team = {
 
     return data;
   },
-  addTeamMember: async (teamId: number, userId: number): Promise<Error | null> => {
+  addTeamMember: async (teamId: string, userId: string): Promise<Error | null> => {
     try {
       // 먼저 이미 존재하는지 확인
       const { data: existingMember } = await supabase
@@ -163,7 +163,7 @@ export const team = {
       return error as Error;
     }
   },
-  removeTeamMember: async (teamId: number, userId: number): Promise<Error | null> => {
+  removeTeamMember: async (teamId: string, userId: string): Promise<Error | null> => {
     const { error } = await supabase
       .from("team_members")
       .delete()
@@ -176,8 +176,8 @@ export const team = {
 
     return error;
   },
-  updateTeam: async (teamId: number, teamData: Partial<Team>): Promise<Error | null> => {
-    const { error } = await supabase
+  updateTeam: async (teamId: string, teamData: Partial<Team>): Promise<Error | null> => {
+    const { error } = await supabase  
       .from("teams")
       .update(teamData)
       .eq("id", teamId);

@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const bugReportSchema = z.object({
-  id: z.number(),
+  id: z.string().uuid(),
   title: z.string().min(1, { message: "페이지는 필수 입력 사항입니다." }),
   description: z.string().min(1, { message: "설명은 필수 입력 사항입니다." }),
-  user_id: z.number(),
+  user_id: z.string().uuid(),
   status: z.string().min(1, { message: "심각성은 필수 입력 사항입니다." }),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),

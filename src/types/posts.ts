@@ -26,16 +26,21 @@ const pickedMissionSchema = missionSchema.pick({
 });
 
 export const postSchema = z.object({
-  id: z.number(),
+  id: z.string().uuid(),
   title: z.string(),
   content: z.string(),
-  user_id: z.number(),
-  mission_instance_id: z.number(),
+  user_id: z.string().uuid(),
+  mission_instance_id: z.string().uuid(),
   score: z.number(),
   created_at: z.string(),
   updated_at: z.string(),
   view_count: z.number(),
   is_hidden: z.boolean(),
+  team_id: z.string().uuid().nullable().optional(),
+  is_team_submission: z.boolean().nullable().optional(),
+  file_url: z.string().nullable().optional(),
+  achievement_status: z.string().nullable().optional(),
+  team_points: z.number().nullable().optional(),
 });
 
 

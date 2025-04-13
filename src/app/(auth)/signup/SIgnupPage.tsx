@@ -68,7 +68,6 @@ export default function SignupPage() {
       marketing_opt_in: false,
       privacy_agreed: false,
       profile_image: "",
-      uid: "",
     },
   });
 
@@ -144,7 +143,6 @@ export default function SignupPage() {
         // 프로필 데이터에 uid 추가
         const profileData: SignupPage = {
           ...data,
-          uid: uid,
           profile_image: "",
         };
 
@@ -279,7 +277,7 @@ export default function SignupPage() {
                 }),
               }}
               onChange={(e) => {
-                setValue("organization_id", e?.value || 0);
+                setValue("organization_id", e?.value || "");
               }}
             />
           </InputAndTitle>

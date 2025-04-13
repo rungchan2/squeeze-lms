@@ -1,8 +1,5 @@
 import {
   UpdatePost,
-  PostWithRelationsWithJourneyMissionInstance,
-  Post,
-  JourneyMissionInstance
 } from "@/types";
 import { createClient } from "@/utils/supabase/client";
 const supabase = createClient();
@@ -10,10 +7,10 @@ const supabase = createClient();
 // Supabase의 쿼리 결과와 일치하는 타입 정의
 type PostWithMissionInstanceResponse = {
   data: {
-    id: number;
+    id: string;
     title: string;
     content: string | null;
-    user_id: number;
+    user_id: string;
     created_at: string | null;
     updated_at: string | null;
     view_count: number;
@@ -25,7 +22,7 @@ type PostWithMissionInstanceResponse = {
 }
 
 export const posts = {
-  getPost: async (id: number): Promise<PostWithMissionInstanceResponse> => {
+  getPost: async (id: string): Promise<PostWithMissionInstanceResponse> => {
     const { data, error } = await supabase
       .from("posts")
       .select(`
@@ -37,7 +34,7 @@ export const posts = {
       .single();
     return { data, error };
   },
-  deletePost: async (postId: number) => {
+  deletePost: async (postId: string) => {
     const { data, error } = await supabase
       .from("posts")
       .delete()
@@ -45,7 +42,7 @@ export const posts = {
     return { data, error };
   },
 
-  hidePost: async (postId: number) => {
+  hidePost: async (postId: string) => {
     const { data, error } = await supabase
       .from("posts")
       .update({ is_hidden: true })
@@ -53,7 +50,7 @@ export const posts = {
     return { data, error };
   },
 
-  unhidePost: async (postId: number) => {
+  unhidePost: async (postId: string) => {
     const { data, error } = await supabase
       .from("posts")
       .update({ is_hidden: false })
@@ -61,15 +58,15 @@ export const posts = {
     return { data, error };
   },
 
-  updatePost: async (postId: number, post: UpdatePost) => {
+  updatePost: async (postId: string, post: UpdatePost) => {
     const { data, error } = await supabase
       .from("posts")
       .update(post)
       .eq("id", postId);
     return { data, error };
   },
-  updateTeamPost: async (postId: number, post: {
-    team_id: number;
+  updateTeamPost: async (postId: string, post: {
+    team_id: string;
     is_team_submission: boolean;
     team_points: number;
   }) => {
@@ -84,7 +81,7 @@ export const posts = {
 
     return data;
   },
-  addViewCount: async (postId: number, prevViewCount: number) => {
+  addViewCount: async (postId: string, prevViewCount: number) => {
     const { data, error } = await supabase
       .from("posts")
       .update({ view_count: prevViewCount + 1 })

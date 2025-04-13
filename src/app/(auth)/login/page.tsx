@@ -6,26 +6,16 @@ import Heading from "@/components/Text/Heading";
 import { HStack, Separator } from "@chakra-ui/react";
 import Image from "next/image";
 import { socialLogin } from "@/app/(auth)/clientActions";
-import { Modal } from "@/components/modal/Modal";
 import LoginSignup from "@/components/auth/LoginSignup";
 import Text from "@/components/Text/Text";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/components/AuthProvider";
 import { toaster } from "@/components/ui/toaster";
 
 export default function LoginPage() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [error, setError] = useState("");
   const isKakao = Boolean(navigator.userAgent.match("KAKAOTALK"));
 
-  // 인증 상태에 따른 리다이렉션 처리
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/");
-    }
-  }, [isAuthenticated, router]);
 
   const handleGoogleLogin = async () => {
     if (isKakao) {

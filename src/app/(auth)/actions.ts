@@ -63,6 +63,7 @@ export const signInWithEmail = async (email: string, password: string) => {
     email,
     password,
   });
+  console.log("signInWithEmail",data, error);
   return { userData: data, error };
 };
 

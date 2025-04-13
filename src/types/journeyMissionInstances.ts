@@ -10,15 +10,15 @@ export const missionStatusEnum = z.enum([
 ]);
 
 export const journeyMissionInstanceSchema = z.object({
-  id: z.number(),
-  journey_week_id: z.number(),
-  mission_id: z.number(),
-  status: z.any(),
-  release_date: z.string(),
-  expiry_date: z.string(),
-  created_at: z.string(),
-  updated_at: z.string(),
-  journey_uuid: z.string(),
+  id: z.string().uuid(),
+  journey_week_id: z.string().uuid(),
+  mission_id: z.string().uuid(),
+  status: missionStatusEnum.nullable(),
+  release_date: z.string().nullable(),
+  expiry_date: z.string().nullable(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+  journey_uuid: z.string().uuid().nullable(),
 });
 
 export const createJourneyMissionInstanceSchema = journeyMissionInstanceSchema.omit({

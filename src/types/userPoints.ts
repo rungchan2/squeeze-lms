@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const userPointsSchema = z.object({
-  id: z.number(),
-  profile_id: z.number(),
-  mission_instance_id: z.number().nullable(),
-  post_id: z.number().nullable(),
+  id: z.string().uuid(),
+  profile_id: z.string().uuid(),
+  mission_instance_id: z.string().uuid(),
+  post_id: z.string().uuid().nullable(),
   total_points: z.number(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),

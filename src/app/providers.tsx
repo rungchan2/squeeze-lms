@@ -7,8 +7,6 @@ import { useState, useEffect } from "react";
 import { useServerInsertedHTML } from "next/navigation";
 // import { ThemeProvider } from "next-themes"
 import createEmotionServer from "@emotion/server/create-instance";
-import { AuthProvider } from "@/components/AuthProvider";
-import { usePathname } from "next/navigation";
 import useSWR, { SWRConfig } from "swr";
 
 interface ProvidersProps {
@@ -49,7 +47,7 @@ export function Providers({ children }: ProvidersProps) {
         }}
       >
         <ChakraProvider value={defaultSystem}>
-          <AuthProvider>{children}</AuthProvider>
+          {children}
         </ChakraProvider>
       </SWRConfig>
     </CacheProvider>

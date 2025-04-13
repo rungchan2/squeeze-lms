@@ -1,4 +1,5 @@
 import { createClient } from "../supabase/client";
+import { Role } from "@/types";
 const supabase = createClient();
 
 export const accessCode = {
@@ -11,7 +12,7 @@ export const accessCode = {
   async createAccessCode(code: string, roleId: string) {
     const { data, error } = await supabase
       .from("role_access_code")
-      .insert([{ code, role_id: roleId }]);
+      .insert([{ code, role: roleId as Role }]);
 
     if (error) throw error;
     return data;
@@ -20,7 +21,7 @@ export const accessCode = {
     const { error } = await supabase
       .from("role_access_code")
       .delete()
-      .eq("id", parseInt(id));
+      .eq("id", id);
 
     if (error) throw error;
     return true;

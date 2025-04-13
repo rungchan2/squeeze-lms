@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 export const organizationSchema = z.object({
-  id: z.number(),
+  id: z.string().uuid(),
   name: z.string(),
+  description: z.string().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
 })

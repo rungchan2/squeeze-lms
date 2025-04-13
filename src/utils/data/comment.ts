@@ -16,16 +16,11 @@ function safeLog(message: string, ...args: any[]) {
 // 전역으로 활성화된 채널을 추적하기 위한 Map
 const activeChannels = new Map<string, RealtimeChannel>();
 
-// 실시간 연결 설정을 위한 옵션
-const REALTIME_CONFIG = {
-  retryInterval: 1000,
-  maxRetries: 5,
-};
 
 // 최대 활성 채널 수 제한
 const MAX_ACTIVE_CHANNELS = 10;
 
-export async function getCommentsNumber(postId: number): Promise<number> {
+export async function getCommentsNumber(postId: string): Promise<number> {
   const supabase = createClient();
   const { count, error } = await supabase
     .from("comments")
@@ -61,7 +56,7 @@ export async function createComment(newComment: CreateComment) {
   return data;
 }
 
-export async function getComments(postId: number, pageSize: number = 10, page: number = 1) {
+export async function getComments(postId: string, pageSize: number = 10, page: number = 1) {
   const supabase = createClient();
   const from = (page - 1) * pageSize;
   const to = page * pageSize - 1;
@@ -87,7 +82,7 @@ export async function getComments(postId: number, pageSize: number = 10, page: n
   return { data, count };
 }
 
-export async function deleteComment(commentId: number) {
+export async function deleteComment(commentId: string) {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("comments")
@@ -99,7 +94,7 @@ export async function deleteComment(commentId: number) {
 }
 
 export async function updateComment(
-  commentId: number,
+  commentId: string,
   updatedComment: UpdateComment
 ) {
   const supabase = createClient();
@@ -112,7 +107,7 @@ export async function updateComment(
   return data;
 }
 
-export async function getCommentById(commentId: number) {
+export async function getCommentById(commentId: string) {
   const supabase = createClient();
 
   const { data, error } = await supabase
@@ -125,9 +120,9 @@ export async function getCommentById(commentId: number) {
 }
 
 export async function addChannel(
-  postId: number,
+  postId: string,
   mountedRef: RefObject<boolean>,
-  recentlyProcessedIds: Set<number>,
+  recentlyProcessedIds: Set<string>,
   onUpdate: () => void
 ): Promise<RealtimeChannel> {
   const supabase = createClient();

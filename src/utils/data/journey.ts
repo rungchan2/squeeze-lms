@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/client";
 
 export const journey = {
-  getJourney: async (journeyId: number) => {
+  getJourney: async (journeyId: string) => {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("journeys")
@@ -21,7 +21,7 @@ export const journey = {
     if (error) {
       throw error;
     }
-    return data as { id: number }[];
+    return data as { id: string }[];
   },
   getJourneyBySlug: async (slug: string) => {
     const supabase = createClient();

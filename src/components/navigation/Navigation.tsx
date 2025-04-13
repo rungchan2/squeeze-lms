@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@/components/AuthProvider";
 import styled from "@emotion/styled";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { FaHome } from "react-icons/fa";
@@ -15,9 +14,10 @@ import { Separator } from "@chakra-ui/react";
 import { Menu, Portal } from "@chakra-ui/react";
 import { toaster } from "@/components/ui/toaster";
 import { auth } from "@/utils/data/auth";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
-  const { profileImage, id, logout, isAuthenticated } = useAuth();
+  const { profileImage, id, isAuthenticated } = useSupabaseAuth();
   const pathname = usePathname();
   const router = useRouter();
   const isException = exceptionPath.some((path) => pathname?.includes(path));
@@ -79,14 +79,13 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
   };
 
   const handleLogout = useCallback(async () => {
-    await logout();
     await auth.userLogout();
     toaster.create({
       title: "로그아웃 되었습니다.",
       type: "success",
     });
     router.replace("/login");
-  }, [logout, router]);
+  }, [router]);
 
   
   return (
@@ -102,12 +101,12 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
               <select className="dropdown" onChange={onDropDownChange}>
                 {journeyList && journeyList.length > 0 ? (
                   journeyList.map((journey) => (
-                    <option value={journey.journeys?.uuid} key={journey.id}>
+                    <option value={journey.journeys?.id} key={journey.id}>
                       {journey.journeys?.name}
                     </option>
                   ))
                 ) : (
-                  <option value={0} key={0}>
+                  <option value="" key="0">
                     여행 없음
                   </option>
                 )}

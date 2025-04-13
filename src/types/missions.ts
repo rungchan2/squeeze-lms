@@ -1,11 +1,12 @@
 import { z } from "zod";
 
 export const missionSchema = z.object({
-  id: z.number(),
+  id: z.string().uuid(),
   name: z.string(),
   description: z.string().nullable(),
   mission_type: z.string().nullable(),
   points: z.number().nullable(),
+  expiry_date: z.string().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
 })

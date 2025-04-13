@@ -23,7 +23,6 @@ import Select from "react-select";
 import { Modal } from "@/components/modal/Modal";
 import { confirmRoleAccessCode, getUser } from "../../actions";
 import { toaster } from "@/components/ui/toaster";
-import { useAuth } from "@/components/AuthProvider";
 import constants from "@/utils/constants";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
@@ -56,7 +55,6 @@ export default function LoginPage() {
   } = useOrganization();
   const { organizations, isLoading: isOrganizationLoading } =
     useOrganizationList();
-  const { refreshUser } = useAuth();
 
   const {
     register,
@@ -73,7 +71,6 @@ export default function LoginPage() {
       last_name: "",
       phone: "",
       role: "user",
-      uid: "",
       profile_image: "",
       marketing_opt_in: false,
       privacy_agreed: false,
@@ -122,7 +119,6 @@ export default function LoginPage() {
             setValue("email", decryptedAuthData.email || "");
             setValue("first_name", decryptedAuthData.first_name || "");
             setValue("last_name", decryptedAuthData.last_name || "");
-            setValue("uid", decryptedAuthData.uid || "");
             setValue("profile_image", decryptedAuthData.profile_image || "");
 
             if (decryptedAuthData.isEmailSignup) {
@@ -179,7 +175,7 @@ export default function LoginPage() {
     }
   };
 
-  const organizationOptions: { label: string; value: number }[] =
+  const organizationOptions: { label: string; value: string }[] =
     organizations?.map((organization) => ({
       label: organization.name,
       value: organization.id,
@@ -205,7 +201,6 @@ export default function LoginPage() {
       }
 
       try {
-        await refreshUser();
         // 프로필 생성 성공 후 홈페이지로 리다이렉트
         window.location.href = "/";
       } catch (refreshError) {
@@ -290,7 +285,7 @@ export default function LoginPage() {
                 }),
               }}
               onChange={(e) => {
-                setValue("organization_id", e?.value || 0);
+                setValue("organization_id", e?.value || "");
                 console.log(e?.value);
               }}
             />
