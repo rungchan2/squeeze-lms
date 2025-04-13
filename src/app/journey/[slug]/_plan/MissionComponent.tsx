@@ -23,11 +23,10 @@ import { IconContainer } from "@/components/common/IconContainer";
 import { JourneyMissionInstanceWithMission } from "@/types";
 import { toaster } from "@/components/ui/toaster";
 interface MissionComponentProps {
-  weekId: number;
+  weekId: string;
   weekName: string;
-  journeyId: number;
-  journeyUuid: string;
-  deleteWeek: (weekId: number) => void;
+  journeyId: string;
+  deleteWeek: (weekId: string) => void;
   onTotalMissionCountChange: (count: number) => void;
 }
 
@@ -47,7 +46,6 @@ export default function MissionComponent({
   weekId,
   weekName,
   journeyId,
-  journeyUuid,
   deleteWeek,
   onTotalMissionCountChange,
 }: MissionComponentProps) {
@@ -61,7 +59,7 @@ export default function MissionComponent({
 
   // 날짜 입력 모달 상태
   const [showDateModal, setShowDateModal] = useState(false);
-  const [selectedMissionId, setSelectedMissionId] = useState<number | null>(
+  const [selectedMissionId, setSelectedMissionId] = useState<string | null>(
     null
   );
   const [releaseDate, setReleaseDate] = useState<string>("");
@@ -81,7 +79,7 @@ export default function MissionComponent({
     createMissionInstance,
     deleteMissionInstance,
     mutate: mutateMissionInstances,
-  } = useJourneyMissionInstances(journeyUuid, weekId);
+  } = useJourneyMissionInstances(journeyId, weekId);
 
   // useMission 훅 사용 (전체 미션 목록 가져오기)
   const {
@@ -144,7 +142,7 @@ export default function MissionComponent({
   }, [missionInstances, isLoadingInstances, onTotalMissionCountChange]);
 
   //미션 추가 핸들러
-  const handleAddMission = async (missionId: number) => {
+  const handleAddMission = async (missionId: string) => {
     // 이미 추가된 미션인지 확인
     const isAlreadyAdded = missionInstances.some(
       (m) => m.mission_id === missionId
@@ -194,7 +192,7 @@ export default function MissionComponent({
         status: "not_started" as MissionStatus,
         release_date: releaseDate || null,
         expiry_date: expiryDate || null,
-        journey_uuid: journeyUuid || "",
+        journey_id: journeyId,
       };
 
       await createMissionInstance(newInstance as any);

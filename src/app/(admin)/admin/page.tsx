@@ -1,14 +1,15 @@
 "use client";
 import { useOrganization } from "@/hooks/useOrganization";
-import { useAuth } from "@/components/AuthProvider";
 import { Error } from "@/components/common/Error";
 import { Tabs } from "@chakra-ui/react";
 import OrganizationManagement from "./OrganizationManagement";
 import { LuUser, LuFolder, LuSquareCheck } from "react-icons/lu";
 import styled from "@emotion/styled";
 import MissionManagement from "./MissionManagement";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";  
+
 export default function AdminPage() {
-  const { isAuthenticated, role } = useAuth();
+  const { isAuthenticated, role } = useSupabaseAuth();
 
   const {
     data: { useOrganizationList },

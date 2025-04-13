@@ -94,14 +94,3 @@ export async function getTeacher() {
   return { data, error };
 }
 
-export async function confirmRoleAccessCode(code: string, requestedRole: Role) {
-  const supabase = await createClient();
-  const trimedCode = code.trim();
-  const { data, error } = await supabase
-    .from("role_access_code")
-    .select("*")
-    .eq("code", trimedCode)
-    .eq("role", requestedRole)
-    .single();
-  return { data, error };
-}

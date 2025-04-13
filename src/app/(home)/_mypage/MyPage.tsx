@@ -1,4 +1,3 @@
-import { useAuthStore } from "@/store/auth";
 import styled from "@emotion/styled";
 import Heading from "@/components/Text/Heading";
 import { ProfileImage } from "@/components/navigation/ProfileImage";
@@ -25,19 +24,20 @@ import constants from "@/utils/constants";
 import { AdminOnly } from "@/components/auth/AdminOnly";
 import { MdAdminPanelSettings } from "react-icons/md";
 import { Tabs } from "@chakra-ui/react";
-
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { auth } from "@/utils/data/auth";
 export default function MyPage() {
   const [orgData, setOrgData] = useState<any>(null);
   const { data: myLikedPosts } = useMyLikedPosts();
   const router = useRouter();
-  const { profileImage, email, fullName, logout, organizationId } =
-    useAuthStore();
+  const { profileImage, organizationId, user, lastName, firstName } =
+    useSupabaseAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchOrgData = async () => {
       const { data, error } = await organization.getOrganization(
-        organizationId || 0
+        organizationId || ""
       );
       if (error) {
         console.error("Error fetching organization data:", error);
@@ -49,9 +49,9 @@ export default function MyPage() {
   }, [organizationId]);
 
   const handleLogout = useCallback(() => {
-    logout();
+    auth.userLogout();
     router.push("/login");
-  }, [logout, router]);
+  }, [router]);
   return (
     <PostContainer>
       <div className="header">
@@ -118,7 +118,7 @@ export default function MyPage() {
 
           <div className="profileInfo">
             <Heading level={4}>
-              안녕하세요 <br /> {fullName}님!
+              안녕하세요 <br /> {firstName} {lastName}님!
             </Heading>
             <Text
               variant="body"
@@ -130,7 +130,7 @@ export default function MyPage() {
                 maxWidth: "100%",
               }}
             >
-              {email}
+              {user?.email}
             </Text>
             <Text
               variant="body"

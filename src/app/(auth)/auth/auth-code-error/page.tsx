@@ -3,7 +3,6 @@
 import { logout } from "@/app/(auth)/actions";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/components/AuthProvider";
 import Button from "@/components/common/Button";
 import styled from "@emotion/styled";
 import Text from "@/components/Text/Text";
@@ -13,12 +12,10 @@ export default function AuthCodeError() {
   const router = useRouter();
   const params = useSearchParams();
   const error = params.get('error');
-  const { logout: logoutAuth } = useAuth();
   const error_description = params.get('error_description');
 
   const handleLogout = async () => {
     await logout();
-    await logoutAuth();
     router.push("/login");
   };
   

@@ -28,8 +28,7 @@ import { signupPageSchema, type SignupPage } from "@/types";
 import { auth } from "@/utils/data/auth";
 import { Modal } from "@/components/modal/Modal";
 import { Role } from "@/types";
-import { confirmRoleAccessCode } from "../actions";
-
+import { accessCode } from "@/utils/data/accessCode";
 type Agreement = "mailAgreement" | "cookieAgreement";
 
 export default function SignupPage() {
@@ -397,7 +396,7 @@ export default function SignupPage() {
             variant="flat"
             disabled={!roleAccessCode}
             onClick={async () => {
-              const { data, error } = await confirmRoleAccessCode(
+              const { data, error } = await accessCode.confirmAccessCode(
                 roleAccessCode,
                 roleAccessType as Role
               );

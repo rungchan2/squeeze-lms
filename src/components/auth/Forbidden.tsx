@@ -1,16 +1,15 @@
 import { useRouter } from "next/navigation";
-import { useAuth } from "../AuthProvider";
 import { useEffect } from "react";
 import { toaster } from "../ui/toaster";
 import { Role } from "@/types";
-
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 interface ForbiddenProps {
   requiredRole: Role[];
 }
 
 export default function Forbidden({ requiredRole }: ForbiddenProps) {
   const router = useRouter();
-  const { role } = useAuth();
+  const { role } = useSupabaseAuth();
 
   useEffect(() => {
     if (!requiredRole.includes(role as Role)) {

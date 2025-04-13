@@ -4,7 +4,7 @@ import useSWRInfinite from "swr/infinite";
 import useSWR from "swr";
 
 // 단일 사용자 조회 함수
-async function fetchUser(userId: number) {
+async function fetchUser(userId: string) {
   if (!userId) return null;
   
   const supabase = createClient();
@@ -40,7 +40,7 @@ async function fetchUsers(pageIndex: number, pageSize: number) {
 }
 
 // 조직에 속한 사용자 페이지네이션으로 조회 함수
-async function fetchOrganizationUsers(organizationId: number, pageIndex: number, pageSize: number) {
+async function fetchOrganizationUsers(organizationId: string, pageIndex: number, pageSize: number) {
   if (!organizationId) return { data: [], count: 0 };
   
   const supabase = createClient();
@@ -77,7 +77,7 @@ async function createUser(userData: CreateUser) {
 }
 
 // 사용자 업데이트 함수
-async function updateUser(userId: number, userData: Partial<User>) {
+async function updateUser(userId: string, userData: Partial<User>) {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("profiles")
@@ -91,7 +91,7 @@ async function updateUser(userId: number, userData: Partial<User>) {
 }
 
 // 사용자 삭제 함수
-async function deleteUser(userId: number) {
+async function deleteUser(userId: string) {
   const supabase = createClient();
   const { error } = await supabase
     .from("profiles")
@@ -103,7 +103,7 @@ async function deleteUser(userId: number) {
 }
 
 // 단일 사용자 조회 훅
-export function useUser(userId: number) {
+export function useUser(userId: string) {
   const { data, error, isLoading, mutate } = useSWR(
     userId ? `user-${userId}` : null,
     () => fetchUser(userId),
@@ -174,7 +174,7 @@ export function useAllUsers(pageSize = 10) {
 }
 
 // 조직에 속한 사용자 무한 스크롤 훅
-export function useOrganizationUsers(organizationId: number, pageSize = 10) {
+export function useOrganizationUsers(organizationId: string, pageSize = 10) {
   const getKey = (pageIndex: number, previousPageData: any) => {
     // organizationId가 없거나 더 이상 불러올 데이터가 없으면 null 반환
     if (!organizationId) return null;
@@ -186,7 +186,7 @@ export function useOrganizationUsers(organizationId: number, pageSize = 10) {
     getKey,
     async (key) => {
       const parts = key.split('-');
-      const orgId = parseInt(parts[1]);
+      const orgId = parts[1];
       const pageIndex = parseInt(parts[4]);
       return fetchOrganizationUsers(orgId, pageIndex, pageSize);
     },

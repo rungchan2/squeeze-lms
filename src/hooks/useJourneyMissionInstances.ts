@@ -11,7 +11,7 @@ import { useCallback, useState, useEffect } from "react";
 
 export function useJourneyMissionInstances(
   specificJourneyUuid: string,
-  weekId?: number | null,
+  weekId?: string | null,
 ) {
   const [retryCount, setRetryCount] = useState(0);
   
@@ -151,7 +151,7 @@ export function useJourneyMissionInstances(
    * @returns 업데이트된 미션 인스턴스 데이터
    */
   const updateMissionInstance = useCallback(
-    async (id: number, instanceData: UpdateJourneyMissionInstance) => {
+    async (id: string, instanceData: UpdateJourneyMissionInstance) => {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("journey_mission_instances")
@@ -184,7 +184,7 @@ export function useJourneyMissionInstances(
    * @returns 업데이트된 미션 인스턴스 데이터
    */
   const updateMissionStatus = useCallback(
-    async (id: number, status: MissionStatus) => {
+    async (id: string, status: MissionStatus) => {
       return updateMissionInstance(id, { status });
     },
     [updateMissionInstance]
@@ -196,7 +196,7 @@ export function useJourneyMissionInstances(
    * @returns 삭제 성공 여부
    */
   const deleteMissionInstance = useCallback(
-    async (id: number) => {
+    async (id: string) => {
       const supabase = createClient();
 
       try {
@@ -239,7 +239,7 @@ export function useJourneyMissionInstances(
    * @returns 미션 인스턴스 데이터
    */
   const getMissionInstanceById = useCallback(
-    (id: number) => {
+    (id: string) => {
       return missionInstances?.find((instance) => instance.id === id);
     },
     [missionInstances]

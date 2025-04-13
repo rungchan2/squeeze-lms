@@ -15,14 +15,14 @@ import { toaster } from "@/components/ui/toaster";
 import Footer from "@/components/common/Footer";
 import Button from "@/components/common/Button";
 import { Modal } from "@/components/modal/Modal";
-import { useJourneyStore } from "@/store/journey";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 const MemoizedWeekCard = memo(WeekCard);
 
 export default function PlanTab({ slug }: { slug: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const status = searchParams.get("status");
-  const { currentJourneyId } = useJourneyStore();
+  const { id: currentJourneyId } = useSupabaseAuth();
 
   const [weekName, setWeekName] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,7 +44,7 @@ export default function PlanTab({ slug }: { slug: string }) {
     createWeek,
     updateWeek,
     deleteWeek,
-  } = useWeeks(currentJourneyId || 0) || {};
+  } = useWeeks(slug || "") || {};
 
   // 새 주차 추가 핸들러 예시
   const handleAddWeek = useCallback(async () => {
@@ -111,8 +111,7 @@ export default function PlanTab({ slug }: { slug: string }) {
                   week={week}
                   deleteWeek={deleteWeek}
                   index={index}
-                  journeyId={currentJourneyId || 0}
-                  journeyUuid={slug}
+                  journeyId={slug}
                 />
               ))}
           </div>

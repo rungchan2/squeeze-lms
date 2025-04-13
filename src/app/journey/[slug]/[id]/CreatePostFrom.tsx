@@ -12,7 +12,6 @@ import Button from "@/components/common/Button";
 import { useEffect, useState, useCallback } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { createPost, updatePost } from "@/app/journey/[slug]/clientActions";
-import { useAuth } from "@/components/AuthProvider";
 import { Input } from "@chakra-ui/react";
 import InputAndTitle from "@/components/InputAndTitle";
 import userPoint from "@/utils/data/userPoint";
@@ -22,13 +21,12 @@ import { Error } from "@/components/common/Error";
 import { JourneyMissionInstanceWithMission } from "@/types";
 import { StlyedSelect } from "@/components/select/Select";
 import { useJourneyUser } from "@/hooks/useJourneyUser";
-import { useJourneyStore } from "@/store/journey";
-import { createClient } from "@/utils/supabase/client";
 import { useTeams } from "@/hooks/useTeams";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 type TeamMember = {
   label: string;
-  value: number;
+  value: string;
   isFixed: boolean;
 };
 
@@ -39,14 +37,14 @@ export default function DoMissionPage({
   missionInstanceId,
 }: {
   updateData?: UpdatePost;
-  updateDataId?: number;
+  updateDataId?: string;
   slug?: string;
-  missionInstanceId?: number;
+  missionInstanceId?: string;
 }) {
-  const { id: userId } = useAuth();
+  const { id: userId } = useSupabaseAuth();
   const router = useRouter();
   const { missionInstance, isLoading, error } = useMissionInstance(
-    missionInstanceId || null
+    missionInstanceId || ""
   );
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
@@ -55,8 +53,7 @@ export default function DoMissionPage({
   const initialTeamMembers : TeamMember[] = []
 
   // 팀 관련 상태
-  const { currentJourneyId } = useJourneyStore();
-  const { data: journeyUsers } = useJourneyUser(currentJourneyId ?? 0);
+  const { data: journeyUsers } = useJourneyUser(slug ?? "");
   const [isTeamMission, setIsTeamMission] = useState(false);
   const [selectedTeamMembers, setSelectedTeamMembers] = useState<TeamMember[]>(initialTeamMembers);
   
@@ -64,13 +61,11 @@ export default function DoMissionPage({
   const { 
     teamData, 
     markPostAsTeamSubmission 
-  } = useTeams(currentJourneyId ?? 0);
+  } = useTeams(slug ?? "");
   
-  const supabase = createClient();
-
   // 완료된 미션 목록 관리를 위한 훅 추가
   const { refetch: refetchCompletedMissions } = useCompletedMissions(
-    userId || 0
+    userId || ""
   );
 
   useEffect(() => {
@@ -158,7 +153,7 @@ export default function DoMissionPage({
   // if (!missionInstance) return <Error message="미션을 찾을 수 없습니다." />;
 
   // 팀 생성 또는 업데이트 처리
-  const handleTeamSubmission = async (postId: number) => {
+  const handleTeamSubmission = async (postId: string) => {
     try {
       if (!missionInstance) return false;
       
@@ -225,7 +220,7 @@ export default function DoMissionPage({
         const { error: userPointError } = await userPoint.createUserPoint({
           profile_id: userId,
           mission_instance_id: missionInstance.id,
-          post_id: data?.id || 0,
+          post_id: data?.id || "",
           total_points: missionInstance.mission.points || 0,
         });
 
@@ -289,7 +284,7 @@ export default function DoMissionPage({
           title: title,
           user_id: userId,
         },
-        Number(updateDataId) || 0
+        updateDataId || ""
       );
       if (error) {
         console.error("미션 수정 오류:", error);

@@ -14,7 +14,6 @@ import dayjs from "@/utils/dayjs/dayjs";
 import { PostWithRelations } from "@/types";
 import { useLikes } from "@/hooks/useLikes";
 import RichTextViewer from "@/components/richTextInput/RichTextViewer";
-import { useAuth } from "@/components/AuthProvider";
 import { useEffect, useCallback, useMemo, memo } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { Menu, Portal } from "@chakra-ui/react";
@@ -22,6 +21,7 @@ import { FaEllipsis } from "react-icons/fa6";
 import { posts } from "@/utils/data/posts";
 import useSWR from "swr";
 import { getCommentsNumber } from "@/utils/data/comment";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 interface PostCardProps {
   post: PostWithRelations;
@@ -35,7 +35,7 @@ declare global {
 }
 
 // 경량화된 댓글 수만 가져오는 훅
-function useCommentsCount(postId: number) {
+function useCommentsCount(postId: string) {
   const { data, error, isLoading } = useSWR(
     postId ? [`commentsCount-${postId}`] : null,
     () => getCommentsNumber(postId),
@@ -59,7 +59,7 @@ export default memo(function PostCard({
   showDetails = false,
 }: PostCardProps) {
   const router = useRouter();
-  const { id } = useAuth();
+  const { id } = useSupabaseAuth();
   const { onLike, onUnlike, likesCount, useUserLike } = useLikes(post.id);
   const { count } = useCommentsCount(post.id);
 

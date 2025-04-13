@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useRef, useEffect, useCallback } from "react";
-import { useAuth } from "@/components/AuthProvider";
 import MentionInput, {
   MentionInputRef,
 } from "@/components/MentionInput/MentionInput";
@@ -11,6 +10,7 @@ import { RiSendPlaneFill } from "react-icons/ri";
 import { ProfileImage } from "@/components/navigation/ProfileImage";
 import { useState } from "react";
 import Spinner from "@/components/common/Spinner";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 interface CommentInputSectionProps {
   createComment: (content: string) => Promise<any>;
@@ -115,7 +115,7 @@ function useCommentInput(createComment: (content: string) => Promise<any>) {
 export default function CommentInputSection({
   createComment,
 }: CommentInputSectionProps) {
-  const { profileImage } = useAuth();
+  const { profileImage } = useSupabaseAuth();
   const {
     comment,
     isSubmitting,

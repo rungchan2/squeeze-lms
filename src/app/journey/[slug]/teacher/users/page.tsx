@@ -3,7 +3,6 @@
 import styled from "@emotion/styled";
 import { useOrganizationUsers } from "@/hooks/useUsers";
 import { Flex, Table } from "@chakra-ui/react";
-import { useAuth } from "@/components/AuthProvider";
 import Text from "@/components/Text/Text";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
@@ -15,7 +14,6 @@ import { toaster } from "@/components/ui/toaster";
 import { createNotification } from "@/hooks/useNotification";
 import { fetchJourneyDetail } from "@/hooks/useJourney";
 import { useParams } from "next/navigation";
-import { useJourneyStore } from "@/store/journey";
 import { useJourneyUser } from "@/hooks/useJourneyUser";
 import { Tabs } from "@chakra-ui/react";
 import { LuFolder, LuUser } from "react-icons/lu";
@@ -24,28 +22,28 @@ import { deleteUserFromJourney } from "@/app/journey/[slug]/clientActions";
 import Footer from "@/components/common/Footer";
 import { createClient } from "@/utils/supabase/client";
 import { sendEmail } from "@/utils/edge-functions/email";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 export default function UsersPage() {
-  const { currentJourneyId } = useJourneyStore();
   const router = useRouter();
-  const { organizationId, role } = useAuth();
+  const { organizationId, role } = useSupabaseAuth();
   const { slug } = useParams();
   const uuid = slug as string;
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedOrganizationId, setSelectedOrganizationId] = useState<number>(
-    organizationId ?? 0
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<string>(
+    organizationId ?? ""
   );
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
-  const [invitedUsers, setInvitedUsers] = useState<number[]>([]);
-  const [invitingUsers, setInvitingUsers] = useState<number[]>([]);
+  const [invitedUsers, setInvitedUsers] = useState<string[]>([]);
+  const [invitingUsers, setInvitingUsers] = useState<string[]>([]);
   const {
     users = [],
     loadMore,
     isLoadingMore = false,
     isReachingEnd = false,
     total = 0,
-  } = useOrganizationUsers(selectedOrganizationId ?? 0);
+  } = useOrganizationUsers(selectedOrganizationId ?? "");
 
   // 권한 없을 때 뒤로 가거나 홈으로 가는 함수
   const goBackOrHome = useCallback(() => {
@@ -68,12 +66,12 @@ export default function UsersPage() {
         // 여정 UUID 설정은 별도의 useEffect로 분리
 
         // 2. Journey ID 불러오기 - 이미 로드된 경우 다시 로드하지 않음
-        if (currentJourneyId) {
+        if (slug) {
           setIsLoading(false);
           return;
         }
 
-        if (!currentJourneyId) {
+        if (!slug) {
           setIsLoading(false);
           toaster.create({
             title: "여정 정보를 불러올 수 없습니다.",
@@ -107,10 +105,10 @@ export default function UsersPage() {
     };
 
     loadJourneyData();
-  }, [organizationId, role, router, currentJourneyId, goBackOrHome]);
+  }, [organizationId, role, router, slug, goBackOrHome]);
 
   // 현재 여정 ID가 설정된 후에만 여정 사용자 불러오기
-  const { currentJourneyUsers = [] } = useJourneyUser(currentJourneyId ?? 0);
+  const { currentJourneyUsers = [] } = useJourneyUser(uuid ?? "");
 
   // 현재 여정에 이미 참여 중인 사용자 ID 목록
   const currentMemberIds = useMemo(
@@ -148,7 +146,7 @@ export default function UsersPage() {
         // 초대된 사용자 ID 목록 추출 - null 값 필터링
         const invitedUserIds = data
           .map((item) => item.receiver_id)
-          .filter((id): id is number => id !== null);
+          .filter((id): id is string => id !== null);
         setInvitedUsers(invitedUserIds);
       } catch (error) {
         console.error("초대 목록 불러오기 실패:", error);
@@ -160,7 +158,7 @@ export default function UsersPage() {
 
   // 초대 상태 체크 함수
   const isUserInvited = useCallback(
-    (userId: number) => {
+    (userId: string) => {
       if (!userId) return false;
       // 이미 멤버인 경우
       if (currentMemberIds.includes(userId)) {
@@ -174,7 +172,7 @@ export default function UsersPage() {
 
   // 초대 버튼 텍스트 표시
   const getInviteButtonText = useCallback(
-    (userId: number) => {
+    (userId: string) => {
       if (!userId) return "초대";
       if (invitingUsers.includes(userId)) {
         return "로딩...";
@@ -190,7 +188,7 @@ export default function UsersPage() {
     [currentMemberIds, invitedUsers, invitingUsers]
   );
 
-  const handleInvite = async (userId: number, email: string) => {
+  const handleInvite = async (userId: string, email: string) => {
     if (!userId) return;
     // 이미 멤버이거나 처리 중인 사용자는 무시
     if (
@@ -278,11 +276,8 @@ export default function UsersPage() {
     }
   };
 
-  const handleKick = async (userId: number) => {
-    const { error } = await deleteUserFromJourney(
-      currentJourneyId ?? 0,
-      userId
-    );
+  const handleKick = async (userId: string) => {
+    const { error } = await deleteUserFromJourney(uuid ?? "", userId);
     if (error) {
       toaster.create({
         title: "강퇴 실패",
@@ -395,7 +390,7 @@ export default function UsersPage() {
                               if (
                                 confirm("정말로 이 유저를 강퇴하시겠습니까?")
                               ) {
-                                handleKick(user?.id ?? 0);
+                                handleKick(user?.id ?? "");
                               }
                             }}
                             disabled={!user?.id}
@@ -430,7 +425,7 @@ export default function UsersPage() {
                 )}
                 isDisabled={role === "teacher" || role === "user"}
                 onChange={(value) => {
-                  setSelectedOrganizationId(value?.value ?? 0);
+                  setSelectedOrganizationId(value?.value ? "" : "");
                 }}
               />
             ) : (

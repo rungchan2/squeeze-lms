@@ -43,7 +43,7 @@ export const useJourney = () => {
   };
 
   // 여정 삭제 함수
-  const removeJourney = async (journeyId: number) => {
+  const removeJourney = async (journeyId: string) => {
     const supabase = createClient();
     const { error } = await supabase
       .from("journeys")
@@ -58,7 +58,7 @@ export const useJourney = () => {
   };
 
   // 여정 수정 함수
-  const updateJourney = async (journeyId: number, updateData: Partial<CreateJourney>) => {
+  const updateJourney = async (journeyId: string, updateData: Partial<CreateJourney>) => {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("journeys")

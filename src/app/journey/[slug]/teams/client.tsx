@@ -1,12 +1,10 @@
 "use client";
 
-import { useJourneyStore } from "@/store/journey";
 import { useJourneyUser } from "@/hooks/useJourneyUser";
 import Heading from "@/components/Text/Heading";
 import styled from "@emotion/styled";
 import { StlyedSelect } from "@/components/select/Select";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/components/AuthProvider";
 import Text from "@/components/Text/Text";
 import { toaster } from "@/components/ui/toaster";
 import { useTeams } from "@/hooks/useTeams";
@@ -19,17 +17,20 @@ import { formatDifference } from "@/utils/dayjs/calcDifference";
 import { FaRegTrashAlt, FaTrash } from "react-icons/fa";
 import { team } from "@/utils/data/team";
 import { IoRefreshSharp } from "react-icons/io5";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { useParams } from "next/navigation";
 
 export default function TeamsPage() {
-  const { currentJourneyId } = useJourneyStore();
-  const { id: currentUserId } = useAuth();
-  const { data: journeyUsers } = useJourneyUser(currentJourneyId ?? 0);
+  const { slug } = useParams();
+  const { id: currentUserId } = useSupabaseAuth();
+  const slugString = slug as string;
+  const { data: journeyUsers } = useJourneyUser(slugString);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [teamDescription, setTeamDescription] =
     useState("미션을 함께 수행할 팀입니다.");
   const [isCreatingTeam, setIsCreatingTeam] = useState(false);
-  const [teamSelections, setTeamSelections] = useState<Record<number, any[]>>(
+  const [teamSelections, setTeamSelections] = useState<Record<string, any[]>>(
     {}
   );
 
@@ -47,15 +48,15 @@ export default function TeamsPage() {
     checkUserTeam,
     getUsersWithTeam,
     mutateAllTeams
-  } = useTeams(currentJourneyId ?? 0);
+  } = useTeams(slugString ?? 0);
 
   // 팀원 옵션 생성 및 이미 팀에 속한 사용자 표시
-  const [usersWithTeam, setUsersWithTeam] = useState<number[]>([]);
+  const [usersWithTeam, setUsersWithTeam] = useState<string[]>([]);
 
   // 이미 팀에 속한 사용자 정보 로드
   useEffect(() => {
     const loadUsersWithTeam = async () => {
-      if (!currentJourneyId) return;
+      if (!slugString) return;
       try {
         const userIds = await getUsersWithTeam();
         setUsersWithTeam(userIds);
@@ -65,7 +66,7 @@ export default function TeamsPage() {
     };
     
     loadUsersWithTeam();
-  }, [currentJourneyId, getUsersWithTeam]);
+  }, [slugString, getUsersWithTeam]);
 
   // 팀원 옵션 생성 (내 이름 옆에 (나) 표시 및 이미 팀에 속한 사용자 표시)
   const teamOptions =
@@ -73,7 +74,7 @@ export default function TeamsPage() {
       const userId = user.user_id;
       const isCurrentUser = userId === currentUserId;
       // 이미 팀에 속한 사용자인지 확인 (현재 사용자 제외)
-      const isInOtherTeam = !isCurrentUser && usersWithTeam.includes(userId || 0);
+      const isInOtherTeam = !isCurrentUser && usersWithTeam.includes(userId as string);
       
       // 사용자가 현재 속한 팀 ID
       let userTeamIdText = '';
@@ -82,7 +83,7 @@ export default function TeamsPage() {
         for (const teamId in allTeamsData.teamMembers) {
           const teamMembers = allTeamsData.teamMembers[teamId] || [];
           if (teamMembers.some(member => member.user_id === userId)) {
-            const teamInfo = allTeamsData.teams.find(t => t.id === Number(teamId));
+            const teamInfo = allTeamsData.teams.find(t => t.id === (teamId));
             if (teamInfo) {
               userTeamIdText = ` (${teamInfo.name})`;
               break;
@@ -101,7 +102,7 @@ export default function TeamsPage() {
 
   useEffect(() => {
     if (allTeamsData?.teams) {
-      const selections: Record<number, any[]> = {};
+      const selections: Record<string, any[]> = {};
 
       allTeamsData.teams.forEach((team) => {
         const teamId = team.id;
@@ -168,7 +169,7 @@ export default function TeamsPage() {
 
   // 팀 생성 핸들러
   const handleCreateTeam = async () => {
-    if (!currentUserId || !currentJourneyId) return;
+    if (!currentUserId || !slugString) return;
 
     if (!teamName.trim()) {
       toaster.create({
@@ -189,7 +190,7 @@ export default function TeamsPage() {
   };
 
   // 팀원 변경 핸들러
-  const handleTeamMembersChange = async (teamId: number, newMembers: any[]) => {
+  const handleTeamMembersChange = async (teamId: string, newMembers: any[]) => {
     if (!currentUserId) return;
 
     // 현재 팀원 목록
@@ -227,13 +228,13 @@ export default function TeamsPage() {
       // 사용자가 이미 다른 팀에 속해 있는지 확인
       const userInTeam = usersWithTeam.includes(userId);
       if (userInTeam) {
-        let userTeamId: number | null = null;
+        let userTeamId: string | null = null;
         
         // allTeamsData에서 사용자가 속한 팀 찾기
         for (const tId in allTeamsData.teamMembers) {
           const memberList = allTeamsData.teamMembers[tId] || [];
           if (memberList.some(m => m.user_id === userId)) {
-            userTeamId = Number(tId);
+            userTeamId = tId;
             break;
           }
         }
@@ -377,7 +378,7 @@ export default function TeamsPage() {
     }
   };
 
-  const handleRefreshTeam = async (teamId: number) => {
+  const handleRefreshTeam = async (teamId: string) => {
     try {
       // 모든 팀 데이터 새로고침
       await mutateAllTeams();

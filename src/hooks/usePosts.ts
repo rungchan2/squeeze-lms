@@ -1,8 +1,8 @@
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 import { createClient } from "@/utils/supabase/client";
-import { useAuth } from "@/components/AuthProvider";
 import { PostWithRelations } from "@/types";
+import { useSupabaseAuth } from "./useSupabaseAuth";
 import { useState, useCallback, useEffect } from "react";
 
 // 페이지네이션 타입 정의
@@ -80,7 +80,7 @@ async function getPosts(key: string, pageIndex: number, pageSize: number, journe
 }
 
 // 내 게시물만 가져오는 함수
-async function getMyPosts(key: string, userId: number, journeySlug?: string) {
+async function getMyPosts(key: string, userId: string, journeySlug?: string) {
   if (!userId) return [];
   
   const supabase = createClient();
@@ -127,13 +127,13 @@ async function getMyPosts(key: string, userId: number, journeySlug?: string) {
 }
 
 // 내가 좋아요한 게시물만 가져오는 함수
-async function getMyLikedPosts(key: string, userId: number, journeySlug?: string) {
+async function getMyLikedPosts(key: string, userId: string, journeySlug?: string) {
   if (!userId) return [];
   
   const supabase = createClient();
   
   // 먼저 journey_mission_instances에서 해당 journey의 mission_instance_id 목록 조회
-  const missionInstanceIds: number[] = [];
+  const missionInstanceIds: string[] = [];
   if (journeySlug) {
     const { data: missionInstances } = await supabase
       .from("journey_mission_instances")
@@ -185,7 +185,7 @@ async function getMyLikedPosts(key: string, userId: number, journeySlug?: string
     .map(item => item.posts) ?? [];
 }
 
-async function getCompletedMissionIds(key: string, userId: number, journeySlug?: string) {
+async function getCompletedMissionIds(key: string, userId: string, journeySlug?: string) {
   if (!userId) return [];
     
   const supabase = createClient();
@@ -240,12 +240,12 @@ async function getCompletedMissionIds(key: string, userId: number, journeySlug?:
     // 두 결과 병합
     const completedFromPosts = postsData
       .filter((post) => post.mission_instance_id !== null)
-      .map((post) => post.mission_instance_id as number);
+      .map((post) => post.mission_instance_id as string);
     
     const completedFromPoints = pointsData
       ? pointsData
           .filter((point) => point.mission_instance_id !== null)
-          .map((point) => point.mission_instance_id as number)
+          .map((point) => point.mission_instance_id as string)
       : [];
     
     // 중복 제거하여 병합
@@ -260,7 +260,7 @@ async function getCompletedMissionIds(key: string, userId: number, journeySlug?:
 }
 
 // 게시물 숨김 상태 변경 함수
-async function togglePostHidden(postId: number, isHidden: boolean) {
+async function togglePostHidden(postId: string, isHidden: boolean) {
   if (!postId) return null;
   
   const supabase = createClient();
@@ -347,7 +347,7 @@ export function usePosts(pageSize = 10, journeySlug?: string, showHidden = false
 
 // ✅ SWR을 사용한 useMyPosts 훅
 export function useMyPosts(journeySlug?: string) {
-  const { id: userId } = useAuth();
+  const { id: userId } = useSupabaseAuth();
   
   const { data, error, isLoading, mutate } = useSWR(
     userId ? [`my-posts-${userId}`, userId, journeySlug] : null,
@@ -369,7 +369,7 @@ export function useMyPosts(journeySlug?: string) {
 
 // ✅ SWR을 사용한 useMyLikedPosts 훅
 export function useMyLikedPosts(journeySlug?: string) {
-  const { id: userId } = useAuth();
+  const { id: userId } = useSupabaseAuth();
   
   const { data, error, isLoading, mutate } = useSWR(
     userId ? [`my-liked-posts-${userId}`, userId, journeySlug] : null,
@@ -390,7 +390,7 @@ export function useMyLikedPosts(journeySlug?: string) {
 }
 
 // ✅ SWR을 사용한 useCompletedMissions 훅
-export function useCompletedMissions(userId: number, journeySlug?: string) {
+export function useCompletedMissions(userId: string, journeySlug?: string) {
   const { data, error, isLoading, mutate } = useSWR(
     userId ? [`completed-missions-${userId}`, userId, journeySlug] : null,
     ([key, id, slug]) => getCompletedMissionIds(key, id, slug),
@@ -411,7 +411,7 @@ export function useCompletedMissions(userId: number, journeySlug?: string) {
 // 게시물 숨김 상태 변경 훅
 export function useTogglePostHidden() {
   return {
-    toggleHidden: async (postId: number, isHidden: boolean) => {
+    toggleHidden: async (postId: string, isHidden: boolean) => {
       return await togglePostHidden(postId, isHidden);
     }
   };

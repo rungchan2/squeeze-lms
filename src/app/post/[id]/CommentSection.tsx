@@ -7,13 +7,13 @@ import { useParams } from "next/navigation";
 import { ProfileImage } from "@/components/navigation/ProfileImage";
 import { formatDifference } from "@/utils/dayjs/calcDifference";
 import Spinner from "@/components/common/Spinner";
-import { useAuth } from "@/components/AuthProvider";
 import { FiTrash2 } from "react-icons/fi";
 import CommentInputSection from "./CommentInputSection";
 import Heading from "@/components/Text/Heading";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 interface CommentSectionProps {
-  postId?: number;
+  postId?: string;
   enableRealtime?: boolean;
 }
 
@@ -22,7 +22,7 @@ export default function CommentSection({
   enableRealtime = true 
 }: CommentSectionProps = {}) {
   const params = useParams();
-  const postId = propPostId || Number(params.id);
+  const postId = propPostId || (params.id as string);
   const {
     comments,
     count,
@@ -37,7 +37,7 @@ export default function CommentSection({
     postId, 
     enableRealtime, // 실시간 업데이트 옵션 전달
   });
-  const { id: userId } = useAuth();
+  const { id: userId } = useSupabaseAuth();
 
   const lastCommentRef = useRef<HTMLDivElement | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -84,7 +84,7 @@ export default function CommentSection({
   }, [loading, hasMore, isFetchingNextPage, fetchNextPage, comments.length]);
 
   const handleDeleteComment = useCallback(
-    async (commentId: number) => {
+    async (commentId: string) => {
       if (confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
         await deleteComment(commentId);
       }

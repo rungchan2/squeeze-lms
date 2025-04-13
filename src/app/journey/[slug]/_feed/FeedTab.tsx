@@ -3,8 +3,8 @@
 import styled from "@emotion/styled";
 import { usePosts, useCompletedMissions } from "@/hooks/usePosts";
 import PostCard from "@/app/(home)/_mypage/PostCard";
-import { useAuth } from "@/components/AuthProvider";
 import Spinner from "@/components/common/Spinner";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import Text from "@/components/Text/Text";
 import { useEffect, useRef, useState } from "react";
 import { InputGroup } from "@/components/ui/input-group";
@@ -17,9 +17,9 @@ import Footer from "@/components/common/Footer";
 
 export default function FeedTab({ slug }: { slug: string }) {
   const { data: posts, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(10, slug);
-  const { id: userId } = useAuth();
+  const { id: userId } = useSupabaseAuth();
   const { completedMissionIds, isLoading: isLoadingCompletedMissions } =
-    useCompletedMissions(userId || 0);
+    useCompletedMissions(userId || "");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortPosts, setSortPosts] = useState<"asc" | "desc">("desc");
 

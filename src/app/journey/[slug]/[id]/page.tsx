@@ -6,5 +6,5 @@ export default async function JourneyPage({
   params: Promise<{ slug: string; id: string }>;
 }) {
   const { slug, id } = await params;
-  return <CreatePostFrom slug={slug} missionInstanceId={Number(id)} />;
+  return <CreatePostFrom slug={slug} missionInstanceId={id} />;
 }

@@ -19,7 +19,7 @@ export async function createPost(post: CreatePost) {
   return { data, error, id: data?.id };
 }
 
-export async function updatePost(post: UpdatePost, id: number) {
+export async function updatePost(post: UpdatePost, id: string) {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("posts")
@@ -34,7 +34,7 @@ export async function createJourney(journey: CreateJourney) {
   return { data, error };
 }
 
-export async function updateJourney(id: number, journey: CreateJourney) {
+export async function updateJourney(id: string, journey: CreateJourney) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("journeys")
@@ -43,13 +43,13 @@ export async function updateJourney(id: number, journey: CreateJourney) {
   return { data, error };
 }
 
-export async function deleteJourney(id: number) {
+export async function deleteJourney(id: string) {
   const supabase = await createClient();
   const { data, error } = await supabase.from("journeys").delete().eq("id", id);
   return { data, error };
 }
 
-export async function getUserPointsByJourneyId(journeyId: number | null) {
+export async function getUserPointsByJourneyId(journeyId: string | null) {
   if (!journeyId) {
     console.log("[getUserPointsByJourneyId] journeyId가 제공되지 않음");
     return { data: [], error: null };
@@ -118,7 +118,7 @@ export async function getUserPointsByJourneyId(journeyId: number | null) {
 }
 
 
-export async function deleteUserFromJourney(journeyId: number, userId: number) {
+export async function deleteUserFromJourney(journeyId: string, userId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("user_journeys")
@@ -129,13 +129,13 @@ export async function deleteUserFromJourney(journeyId: number, userId: number) {
 }
 
 
-export async function getMission(id: number) {
+export async function getMission(id: string) {
   const supabase = createClient();
   const { data, error } = await supabase.from("missions").select("*").eq("id", id).single();
   return { data, error };
 }
 
-export async function getJourneyWeeklyStats(journeyId: number | string) {
+export async function getJourneyWeeklyStats(journeyId: string) {
   try {
     const supabase = createClient();
     
@@ -145,7 +145,7 @@ export async function getJourneyWeeklyStats(journeyId: number | string) {
     const { data: weeks, error: weeksError } = await supabase
       .from("journey_weeks")
       .select("id, name, week_number")
-      .eq("journey_id", journeyIdNumber)
+      .eq("journey_id", journeyId)
       .order("week_number");
 
     if (weeksError) throw weeksError;
@@ -198,7 +198,7 @@ export async function getJourneyWeeklyStats(journeyId: number | string) {
     const { data: journeyParticipants, error: participantsError } = await supabase
       .from("user_journeys")
       .select("user_id, role_in_journey")
-      .eq("journey_id", journeyIdNumber)
+      .eq("journey_id", journeyId)
       .eq("role_in_journey", "student");
 
     if (participantsError) throw participantsError;

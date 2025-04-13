@@ -8,16 +8,15 @@ import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import { FaSquare } from "react-icons/fa";
 import { Editable } from "@chakra-ui/react";
 import { toaster } from "@/components/ui/toaster";
-import { useAuth } from "@/components/AuthProvider";
 import { useWeeks } from "@/hooks/useWeeks";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 const MemoizedMissionComponent = memo(MissionComponent);
 
 interface JourneyWeekCardProps {
   week: JourneyWeek;
   index: number;
-  deleteWeek: (id: number) => void;
-  journeyId: number;
-  journeyUuid: string;
+  deleteWeek: (id: string) => void;
+  journeyId: string;
 }
 
 export default function WeekCard({
@@ -25,16 +24,15 @@ export default function WeekCard({
   deleteWeek,
   index,
   journeyId,
-  journeyUuid,
 }: JourneyWeekCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [missionCount, setMissionCount] = useState(0);
   const [weekName, setWeekName] = useState(week.name);
-  const { role } = useAuth();
+  const { role } = useSupabaseAuth();
   const {
     missionInstances,
     isLoading: isLoadingInstances,
-  } = useJourneyMissionInstances(journeyUuid, week.id);
+  } = useJourneyMissionInstances(journeyId, week.id);
   const { updateWeek } = useWeeks(journeyId);
   // 미션 인스턴스가 로드되면 카운트 업데이트
   useEffect(() => {
@@ -99,7 +97,6 @@ export default function WeekCard({
             weekId={week.id}
             weekName={week.name}
             journeyId={journeyId}
-            journeyUuid={journeyUuid}
             deleteWeek={deleteWeek}
             onTotalMissionCountChange={setMissionCount}
           />

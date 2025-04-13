@@ -8,7 +8,6 @@ import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import { Field, Switch } from "@chakra-ui/react";
-import { useAuth } from "@/components/AuthProvider"; // 수정된 인증 컨텍스트 사용
 import Heading from "@/components/Text/Heading";
 import InputAndTitle from "@/components/InputAndTitle";
 import Button from "@/components/common/Button";
@@ -23,6 +22,7 @@ import { Modal } from "@/components/modal/Modal";
 import Text from "@/components/Text/Text";
 import { user } from "@/utils/data/user";
 import { Loading } from "@/components/common/Loading";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 // 유효성 검증 스키마
 const minLength = "이름은 1자 이상 입력해주세요.";
@@ -47,13 +47,12 @@ export default function ProfilePage() {
     null
   );
   const [password, setPassword] = useState("");
-  // useAuth 훅 사용
-  const { isAuthenticated, loading, uid, refreshUser, profileImage, loginMethod } =
-    useAuth();
+  const { isAuthenticated, loading, id, profileImage } =
+    useSupabaseAuth();
 
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
-  if (!isAuthenticated || !uid) {
+  if (!isAuthenticated || !id) {
     redirect("/login");
   }
 
@@ -75,7 +74,7 @@ export default function ProfilePage() {
       if (isAuthenticated) {
         try {
           setIsLoadingProfile(true);
-          const data = await getPorfile(uid);
+          const data = await getPorfile(id);
           setValue("first_name", data.profile?.first_name || "");
           setValue("last_name", data.profile?.last_name || "");
           setValue("email", data.profile?.email || "");
@@ -90,14 +89,14 @@ export default function ProfilePage() {
     };
 
     fetchProfile();
-  }, [isAuthenticated, setValue, uid]);
+  }, [isAuthenticated, setValue, id]);
 
   // 폼 제출 처리
   const onSubmit = async (data: ProfileForm) => {
-    if (!uid) return;
+    if (!id) return;
 
     try {
-      const { error } = await user.updateProfile(uid, {
+      const { error } = await user.updateProfile(id, {
         first_name: data.first_name,
         last_name: data.last_name,
         profile_image: data.profileImage,
@@ -108,7 +107,6 @@ export default function ProfilePage() {
       if (error) throw error;
 
       // 유저 정보 새로고침
-      await refreshUser();
 
       toaster.create({
         title: "프로필 업데이트 성공",
@@ -131,7 +129,7 @@ export default function ProfilePage() {
   }
 
   const handleDelete = async () => {
-    const { error } = await user.deleteUser(uid);
+    const { error } = await user.deleteUser(id);
     if (error) throw error;
     await logout();
     toaster.create({
@@ -224,12 +222,10 @@ export default function ProfilePage() {
       <Separator size="lg" />
       <Heading level={4}>보안</Heading>
       <div className="button-container">
-        {loginMethod === "email" && (
-          <div className="menu-item" onClick={() => setOpendModal("password")}>
-            <MdLockOpen />
-            비밀번호 초기화
-          </div>
-        )}  
+        <div className="menu-item" onClick={() => setOpendModal("password")}>
+          <MdLockOpen />
+          비밀번호 초기화
+        </div>
         <div className="menu-item" onClick={() => setOpendModal("delete")}>
           <FaRegTrashAlt />
           회원 탈퇴

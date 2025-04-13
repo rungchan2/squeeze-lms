@@ -1,7 +1,7 @@
-import { useAuthStore } from "@/store/auth";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 export function AdminOnly({ children }: { children: React.ReactNode }) {
-  const { role, isAuthenticated } = useAuthStore();
+  const { role, isAuthenticated } = useSupabaseAuth();
   if (!isAuthenticated || role !== "admin") {
     return null;
   }
@@ -9,7 +9,7 @@ export function AdminOnly({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 export function TeacherOnly({ children }: { children: React.ReactNode }) {
-  const { role, isAuthenticated } = useAuthStore();
+  const { role, isAuthenticated } = useSupabaseAuth();
   if (!isAuthenticated || (role !== "teacher" && role !== "admin")) {
     return null;
   }

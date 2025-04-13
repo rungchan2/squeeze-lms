@@ -10,7 +10,6 @@ import { useRouter, usePathname } from "next/navigation";
 import Text from "@/components/Text/Text";
 import { TeacherOnly } from "@/components/auth/AdminOnly";
 import { FaWandMagicSparkles } from "react-icons/fa6";
-import { useAuth } from "@/components/AuthProvider";
 import Link from "next/link";
 import { InputGroup } from "@/components/ui/input-group";
 import { IoSearch } from "react-icons/io5";
@@ -20,18 +19,19 @@ import { IconContainer } from "@/components/common/IconContainer";
 import { useCompletedMissions } from "@/hooks/usePosts";
 import Heading from "@/components/Text/Heading";
 import Footer from "@/components/common/Footer";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 export default function MissionTab({ slug }: { slug: string }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { id: userId } = useAuth();
+  const { id: userId } = useSupabaseAuth();
   const {
     missionInstances,
     isLoading: missionInstancesLoading,
     error: missionInstancesError,
-  } = useJourneyMissionInstances(slug, 0);
+  } = useJourneyMissionInstances(slug, "");
   const { completedMissionIds, isLoading: isLoadingCompletedMissions, refetch: refetchCompletedMissions } =
-    useCompletedMissions(userId || 0, slug);
+    useCompletedMissions(userId || "", slug);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortMission, setSortMission] = useState<"asc" | "desc">("asc");
   

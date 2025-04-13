@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo, memo, useCallback } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import styled from "@emotion/styled";
-import { useJourneyStore } from "@/store/journey";
 import { useJourneyWeeklyStats, WeeklyStat } from "@/hooks/useJourneyWeeklyStats";
 import Heading from "@/components/Text/Heading";
 import Text from "@/components/Text/Text";
@@ -108,13 +107,12 @@ DonutChart.displayName = 'DonutChart';
 
 export default function WeeklySubmissionChart() {
   const { slug } = useParams();
-  const { currentJourneyId, setCurrentJourneyId } = useJourneyStore();
-  const [localJourneyId, setLocalJourneyId] = useState<number | null>(null);
+  const [localJourneyId, setLocalJourneyId] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   
   // slug로부터 journeyId 가져오기
   useEffect(() => {
-    if (!slug || (currentJourneyId && !isInitializing)) return;
+    if (!slug || (slug && !isInitializing)) return;
     
     setIsInitializing(true);
     
@@ -124,7 +122,6 @@ export default function WeeklySubmissionChart() {
         
         if (journeyData && journeyData.length > 0) {
           const id = journeyData[0].id;
-          setCurrentJourneyId(id);
           setLocalJourneyId(id);
         } else {
           console.error("[WeeklySubmissionChart] 여정 데이터가 없음");
@@ -137,10 +134,10 @@ export default function WeeklySubmissionChart() {
     };
     
     initJourney();
-  }, [slug, currentJourneyId, setCurrentJourneyId, isInitializing]);
+  }, [slug, isInitializing]);
   
   // 사용할 journeyId 결정
-  const journeyIdToUse = currentJourneyId || localJourneyId;
+  const journeyIdToUse = localJourneyId;
   
   const { weeklyStats, isLoading, error } = useJourneyWeeklyStats(
     journeyIdToUse ? journeyIdToUse.toString() : undefined

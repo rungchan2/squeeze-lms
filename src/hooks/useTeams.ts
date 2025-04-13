@@ -1,18 +1,18 @@
-import useSWR, { mutate as globalMutate } from "swr";
-import { useAuth } from "@/components/AuthProvider";
+
 import { useCallback, useMemo } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { Team, TeamMember, TeamData, AllTeamData } from "@/types/teams";
 import { team } from "@/utils/data/team";
 import { posts } from "@/utils/data/posts";
-
+import { useSupabaseAuth } from "./useSupabaseAuth";
+import useSWR from "swr";
 /**
  * 팀 관련 기능을 제공하는 훅
  * @param journeyId 여정 ID
  * @returns 팀 데이터 및 팀 관련 함수들
  */
-export function useTeams(journeyId?: number) {
-  const { id: currentUserId } = useAuth();
+export function useTeams(journeyId?: string) {
+  const { id: currentUserId } = useSupabaseAuth();
 
   // 캐시 키 생성 - 현재 사용자 ID가 없으면 null을 반환하여 요청을 방지
   const cacheKey = useMemo(() => {
@@ -322,7 +322,7 @@ export function useTeams(journeyId?: number) {
    * @returns 성공 여부
    */
   const deleteTeam = useCallback(
-    async (teamId: number): Promise<boolean> => {
+    async (teamId: string): Promise<boolean> => {
       if (!teamId || !currentUserId) return false;
 
       try {
@@ -357,7 +357,7 @@ export function useTeams(journeyId?: number) {
    * @returns 성공 여부
    */
   const markPostAsTeamSubmission = useCallback(
-    async (postId: number, missionPoints: number = 0): Promise<boolean> => {
+    async (postId: string, missionPoints: number = 0): Promise<boolean> => {
       if (!data?.team?.id) return false;
 
       try {
@@ -403,7 +403,7 @@ export function useTeams(journeyId?: number) {
 
 
       // 팀별로 멤버 분류
-      const teamMembers: Record<number, TeamMember[]> = {};
+      const teamMembers: Record<string, TeamMember[]> = {};
 
       // 팀 ID 별로 배열 초기화
       teamIds.forEach((id) => {
@@ -464,7 +464,7 @@ export function useTeams(journeyId?: number) {
    * @returns 성공 여부
    */
   const joinTeam = useCallback(
-    async (teamId: number): Promise<boolean> => {
+    async (teamId: string): Promise<boolean> => {
       if (!journeyId || !currentUserId) return false;
 
       try {
@@ -560,7 +560,7 @@ export function useTeams(journeyId?: number) {
    * @returns {Promise<number | null>} 사용자가 속한 팀 ID 또는 null
    */
   const checkUserTeam = useCallback(
-    async (userId: number): Promise<number | null> => {
+    async (userId: string): Promise<string | null> => {
       if (!journeyId) return null;
       
       try {
@@ -580,15 +580,15 @@ export function useTeams(journeyId?: number) {
    * @returns {Promise<Record<number, number[]>>} 각 팀 ID를 키로 하는 사용자 ID 배열
    */
   const getAllTeamUserIds = useCallback(
-    async (): Promise<Record<number, number[]>> => {
+    async (): Promise<Record<string, string[]>> => {
       if (!journeyId) return {};
       
       try {
         const teamsData = await getAllTeams();
-        const result: Record<number, number[]> = {};
+        const result: Record<string, string[]> = {};
         
         Object.entries(teamsData.teamMembers).forEach(([teamId, members]) => {
-          result[Number(teamId)] = members.map(member => member.user_id);
+          result[teamId] = members.map(member => member.user_id);
         });
         
         return result;
@@ -602,15 +602,15 @@ export function useTeams(journeyId?: number) {
   
   /**
    * 특정 여정 내에서 이미 팀에 속한 사용자 ID 목록 조회
-   * @returns {Promise<number[]>} 이미 팀에 속한 사용자 ID 배열
+   * @returns {Promise<string[]>} 이미 팀에 속한 사용자 ID 배열
    */
   const getUsersWithTeam = useCallback(
-    async (): Promise<number[]> => {
+    async (): Promise<string[]> => {
       if (!journeyId) return [];
       
       try {
         const teamsData = await getAllTeams();
-        const usersWithTeam = new Set<number>();
+        const usersWithTeam = new Set<string>();
         
         // 모든 팀 멤버를 순회하며 사용자 ID 수집
         Object.values(teamsData.teamMembers).forEach(members => {

@@ -21,7 +21,8 @@ import { createProfile } from "../../actions";
 import { useOrganization } from "@/hooks/useOrganization";
 import Select from "react-select";
 import { Modal } from "@/components/modal/Modal";
-import { confirmRoleAccessCode, getUser } from "../../actions";
+import { accessCode } from "@/utils/data/accessCode";
+import { auth } from "@/utils/data/auth";
 import { toaster } from "@/components/ui/toaster";
 import constants from "@/utils/constants";
 
@@ -86,7 +87,7 @@ export default function LoginPage() {
 
       try {
         // 서버에서 사용자 확인
-        const userData = await getUser();
+        const userData = await auth.getUser();
         if (!userData && isMounted) {
           router.push("/error?message=로그인 정보가 없거나 유효하지 않습니다");
           return;
@@ -389,7 +390,7 @@ export default function LoginPage() {
             variant="flat"
             disabled={!roleAccessCode}
             onClick={async () => {
-              const { data, error } = await confirmRoleAccessCode(
+              const { data, error } = await accessCode.confirmAccessCode(
                 roleAccessCode,
                 roleAccessType.value as Role
               );

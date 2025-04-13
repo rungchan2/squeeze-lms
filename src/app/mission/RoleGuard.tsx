@@ -1,14 +1,13 @@
 "use client";
 
-import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toaster } from "@/components/ui/toaster";
-
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 export default function RoleGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { loading: authLoading, role } = useAuth();
+  const { loading: authLoading, role } = useSupabaseAuth();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   // 권한 체크 로직

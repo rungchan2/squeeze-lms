@@ -1,12 +1,12 @@
 import useSWR from "swr";
 import { createClient } from "@/utils/supabase/client";
-import { useAuth } from "@/components/AuthProvider";
+import { useSupabaseAuth } from "./useSupabaseAuth";
 
 // 데이터 타입 정의
 type UserJourneyWithProfiles = {
-  id: number;
-  user_id: number | null;
-  journey_id: number | null;
+  id: string;
+  user_id: string | null;
+  journey_id: string | null;
   role_in_journey: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -17,11 +17,11 @@ type UserJourneyWithProfiles = {
 
 // 특정 여정의 사용자 목록을 가져오는 함수
 const getJourneyUser = async (url: string): Promise<UserJourneyWithProfiles[]> => {
-  const journey_id = Number(url.split("/").pop());
+  const journey_id = url.split("/").pop();
   const supabase = createClient();
-  
+
   // 요청 경로에 따라 다른 쿼리 실행
-  if (journey_id === 0) {
+  if (journey_id === undefined) {
     // 이 경우는 처리되지 않음 - getCurrentUserJourneys 함수에서 처리됨
     return [];
   }
@@ -38,7 +38,7 @@ const getJourneyUser = async (url: string): Promise<UserJourneyWithProfiles[]> =
 };
 
 // 현재 로그인한 사용자가 참여한 모든 여정 정보를 가져오는 함수
-const getCurrentUserJourneys = async (userId: number): Promise<UserJourneyWithProfiles[]> => {
+const getCurrentUserJourneys = async (userId: string): Promise<UserJourneyWithProfiles[]> => {
   if (!userId) return [];
   
   const supabase = createClient();
@@ -58,11 +58,11 @@ const getCurrentUserJourneys = async (userId: number): Promise<UserJourneyWithPr
   })) as UserJourneyWithProfiles[];
 };
 
-export const useJourneyUser = (journey_id: number) => {
-  const { id: userId } = useAuth();
+export const useJourneyUser = (journey_id: string) => {
+  const { id: userId } = useSupabaseAuth();
   
   // journey_id가 0이면 현재 로그인한 사용자의 모든 여정 참여 정보 가져오기
-  const isUserJourneysMode = journey_id === 0;
+  const isUserJourneysMode = journey_id === "0";
   
   // 적절한 SWR 키와 fetcher 설정
   const key = isUserJourneysMode 
@@ -117,7 +117,7 @@ export const useJourneyUser = (journey_id: number) => {
   }
 
   // 사용자 추가 함수
-  const addUser = async (userId: number, role: string) => {
+  const addUser = async (userId: string, role: string) => {
     if (isUserJourneysMode) return null; // 모드가 맞지 않으면 동작하지 않음
     
     const supabase = createClient();

@@ -7,7 +7,7 @@ type MissionInstanceWithMission = JourneyMissionInstance & { mission: Mission };
 /**
  * 미션 인스턴스를 가져오는 함수
  */
-async function fetchMissionInstance(instanceId: number | null) {
+async function fetchMissionInstance(instanceId: string | null) {
   if (!instanceId) return null;
   
   const supabase = createClient();
@@ -27,7 +27,7 @@ async function fetchMissionInstance(instanceId: number | null) {
  * @param instanceId 미션 인스턴스 ID
  * @returns 미션 인스턴스 데이터와 상태
  */
-export function useMissionInstance(instanceId: number | null) {
+export function useMissionInstance(instanceId: string | null) {
   const { data, error, isLoading, mutate } = useSWR(
     instanceId ? `mission-instance-${instanceId}` : null,
     () => fetchMissionInstance(instanceId),

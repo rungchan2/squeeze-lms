@@ -26,4 +26,15 @@ export const accessCode = {
     if (error) throw error;
     return true;
   },
+  async confirmAccessCode(code: string, role: Role) {
+    const trimedCode = code.trim();
+    const { data, error } = await supabase
+      .from("role_access_code")
+      .select("*")
+      .eq("code", trimedCode)
+      .eq("role", role)
+      .single();
+    if (error) throw error;
+    return { data, error };
+  },
 };

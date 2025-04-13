@@ -69,7 +69,7 @@ export function useMission() {
    * @param missionData 업데이트할 미션 데이터
    * @returns 업데이트된 미션 데이터
    */
-  const updateMission = useCallback(async (id: number, missionData: UpdateMission) => {
+  const updateMission = useCallback(async (id: string, missionData: UpdateMission) => {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("missions")
@@ -93,7 +93,7 @@ export function useMission() {
    * @param id 삭제할 미션 ID
    * @returns 삭제 성공 여부
    */
-  const deleteMission = useCallback(async (id: number) => {
+  const deleteMission = useCallback(async (id: string) => {
     const supabase = createClient();
     const { error } = await supabase
       .from("missions")
@@ -115,7 +115,7 @@ export function useMission() {
    * @param id 조회할 미션 ID
    * @returns 미션 데이터
    */
-  const getMissionById = useCallback((id: number) => {
+  const getMissionById = useCallback((id: string) => {
     return missions?.find(mission => mission.id === id);
   }, [missions]);
 

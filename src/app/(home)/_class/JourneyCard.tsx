@@ -11,12 +11,12 @@ import { AdminOnly } from "@/components/auth/AdminOnly";
 import { Menu, Portal } from "@chakra-ui/react";
 import { useJourney } from "@/hooks/useJourney";
 import { toaster } from "@/components/ui/toaster";
-import { useAuth } from "@/components/AuthProvider";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 export default function JourneyCard({ journey }: { journey: Journey }) {
   const defaultImage = "https://picsum.photos/200/200";
   const router = useRouter();
-  const { role } = useAuth();
+  const { role } = useSupabaseAuth();
   const { adminNum, participantNum, teacherNum, isUserJoined } = useJourneyUser(
     journey.id
   );
@@ -25,10 +25,10 @@ export default function JourneyCard({ journey }: { journey: Journey }) {
   const handleClick = async () => {
     if (isUserJoined || role === "admin") {
       try {
-        router.push(`/journey/${journey.uuid}`);
+        router.push(`/journey/${journey.id}`);
       } catch (error) {
         console.error("JourneyCard 클릭 처리 중 오류:", error);
-        router.push(`/journey/${journey.uuid}`);
+        router.push(`/journey/${journey.id}`);
       }
     } else {
       toaster.create({
@@ -82,7 +82,7 @@ export default function JourneyCard({ journey }: { journey: Journey }) {
                   value="edit"
                   onClick={(e) => {
                     e.stopPropagation();
-                    router.push(`/journey/${journey.uuid}/edit`);
+                    router.push(`/journey/${journey.id}/edit`);
                   }}
                 >
                   수정

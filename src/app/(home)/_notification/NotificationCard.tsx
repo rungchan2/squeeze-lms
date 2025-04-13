@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 
 interface NotificationCardProps {
   notification: Notification;
-  readNotification: (id: number) => void;
+  readNotification: (id: string) => void;
 }
 
 export default function NotificationCard({

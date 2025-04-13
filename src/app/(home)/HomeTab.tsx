@@ -16,18 +16,16 @@ import Text from "@/components/Text/Text";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AdminOnly } from "@/components/auth/AdminOnly";
 import { useCallback, useEffect, useRef, useMemo } from "react";
-import { useJourneyStore } from "@/store/journey";
-import { useAuth } from "@/components/AuthProvider";
 import { Loading } from "@/components/common/Loading";
 import Footer from "@/components/common/Footer";
 import { toaster } from "@/components/ui/toaster";
 import { Tabs } from "@chakra-ui/react";
 import { useJourneyUser } from "@/hooks/useJourneyUser";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 export default function HomeTab() {
-  const { clearCurrentJourneyId } = useJourneyStore();
   const router = useRouter();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useSupabaseAuth();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab");
 
@@ -40,13 +38,6 @@ export default function HomeTab() {
       router.push("/login");
     }
   }, [isAuthenticated, loading, router]);
-
-  // 홈탭으로 돌아올 때만 상태 초기화
-  useEffect(() => {
-    if (currentTab === "home") {
-      clearCurrentJourneyId();
-    }
-  }, [currentTab, clearCurrentJourneyId]);
 
   if (!isAuthenticated) {
     if (loading) {
@@ -88,7 +79,7 @@ export default function HomeTab() {
 
 function JourneyTab() {
   const router = useRouter();
-  const { role, id: userId } = useAuth();
+  const { role } = useSupabaseAuth();
   const isAdmin = role === "admin";
   
   // 모든 여정 데이터 가져오기
@@ -99,7 +90,7 @@ function JourneyTab() {
     data: userJourneys, 
     isLoading: userJourneysLoading,
     error: userJourneysError
-  } = useJourneyUser(0); // 0을 전달하면 특정 여정이 아닌 사용자의 모든 여정 참여 정보를 가져올 수 있음
+  } = useJourneyUser(""); // 0을 전달하면 특정 여정이 아닌 사용자의 모든 여정 참여 정보를 가져올 수 있음
   
   // 사용자가 참여 중인 여정 ID 목록 생성
   const userJourneyIds = useMemo(() => {
@@ -107,7 +98,7 @@ function JourneyTab() {
     // 새로운 데이터 구조에 맞게 수정 (journeys 필드에서 id 추출)
     return userJourneys.map(journey => 
       journey.journeys?.id || journey.journey_id
-    ).filter(id => id !== null) as number[];
+    ).filter(id => id !== null) as string[];
   }, [userJourneys]);
   
   // 권한에 따라 표시할 여정 목록 필터링
@@ -212,7 +203,7 @@ function NotificationTab() {
   );
 
   // 알림 읽음 처리
-  const handleReadNotification = async (notificationId: number) => {
+  const handleReadNotification = async (notificationId: string) => {
     await markAsRead(notificationId);
     refetch();
   };

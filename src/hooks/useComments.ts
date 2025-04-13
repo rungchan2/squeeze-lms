@@ -1,7 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import useSWRInfinite from "swr/infinite";
-import { useAuth } from "@/components/AuthProvider";
-import { Comment, CreateComment } from "@/types/comments";
+import { Comment, CreateComment } from "@/types";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import {
   getComments,
@@ -11,9 +10,9 @@ import {
   addChannel,
   removeChannel,
 } from "@/utils/data/comment";
-
+import { useSupabaseAuth } from "./useSupabaseAuth";
 interface UseCommentsProps {
-  postId: number;
+  postId: string;
   pageSize?: number;
   enableRealtime?: boolean; // 실시간 업데이트 활성화 여부
 }
@@ -29,9 +28,9 @@ export function useComments({
   pageSize = 10, 
   enableRealtime = false // 기본값은 false로 설정 
 }: UseCommentsProps) {
-  const { id: userId } = useAuth();
+  const { id: userId } = useSupabaseAuth();
   
-  const recentlyProcessedIds = useRef<Set<number>>(new Set());
+  const recentlyProcessedIds = useRef<Set<string>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
   const mountedRef = useRef(true);
   const isSettingUpRef = useRef(false);
@@ -46,7 +45,7 @@ export function useComments({
   };
 
   // 페치 함수 - SWR 키로부터 실제 데이터를 가져옴
-  const fetcher = async ([postId, page, pageSize]: [number, number, number]) => {
+  const fetcher = async ([postId, page, pageSize]: [string, number, number]) => {
     const response = await getComments(postId, pageSize, page);
     return response;
   };
@@ -98,10 +97,10 @@ export function useComments({
       // 임시 ID 생성 (낙관적 업데이트용)
       const tempId = Date.now();
       const tempComment: Comment = {
-        id: tempId,
+        id: tempId.toString(),
         content,
         user_id: userId,
-        post_id: postId,
+        post_id: postId.toString(),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         profiles: {
@@ -113,7 +112,7 @@ export function useComments({
       };
 
       // recentlyProcessedIds에 추가
-      recentlyProcessedIds.current.add(tempId);
+      recentlyProcessedIds.current.add(tempId.toString());
 
       // 낙관적 업데이트
       mutate(async (currentPages) => {
@@ -152,7 +151,7 @@ export function useComments({
       // recentlyProcessedIds에 실제 ID 추가 (실시간 이벤트 처리 시 중복 방지)
       recentlyProcessedIds.current.add(createdComment.id);
       setTimeout(() => {
-        recentlyProcessedIds.current.delete(tempId);
+        recentlyProcessedIds.current.delete(tempId.toString());
         recentlyProcessedIds.current.delete(createdComment.id);
       }, 5000);
 
@@ -169,7 +168,7 @@ export function useComments({
   }, [userId, postId, mutate]);
 
   // 댓글 삭제 함수
-  const deleteComment = useCallback(async (commentId: number) => {
+  const deleteComment = useCallback(async (commentId: string) => {
     if (!userId) {
       throw new Error("로그인이 필요합니다.");
     }
@@ -218,7 +217,7 @@ export function useComments({
   }, [userId, mutate]);
 
   // 댓글 수정 함수
-  const updateComment = useCallback(async (commentId: number, content: string) => {
+  const updateComment = useCallback(async (commentId: string, content: string) => {
     if (!userId) {
       throw new Error("로그인이 필요합니다.");
     }

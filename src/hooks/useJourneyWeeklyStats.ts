@@ -4,7 +4,7 @@ import { z } from "zod";
 
 // 주차별 통계 스키마 정의
 export const WeeklyStatSchema = z.object({
-  id: z.number(),
+  id: z.string().uuid(),
   name: z.string(),
   weekNumber: z.number(),
   totalMissions: z.number(),

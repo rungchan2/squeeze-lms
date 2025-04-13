@@ -11,7 +11,6 @@ import FeedTab from "./_feed/FeedTab";
 import DashboardTab from "./_dashboard/DashboardTab";
 import SettingTab from "./_setting/SettingTab";
 import { useEffect, useState } from "react";
-import { useJourneyStore } from "@/store/journey";
 import { Suspense } from "react";
 import Spinner from "@/components/common/Spinner";
 import { journey } from "@/utils/data/journey";
@@ -23,7 +22,6 @@ interface JourneyClientProps {
 
 export default function JourneyClient({ slug, initialData }: JourneyClientProps) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const { setCurrentJourneyId } = useJourneyStore();
   
   // 페이지 진입 시 slug 설정 - 한 번만 실행
   useEffect(() => {
@@ -35,7 +33,6 @@ export default function JourneyClient({ slug, initialData }: JourneyClientProps)
       try {
         // 서버에서 받은 초기 데이터가 있으면 사용
         if (initialData && initialData.id) {
-          setCurrentJourneyId(initialData.id);
           setIsInitialized(true);
           return;
         }
@@ -43,7 +40,6 @@ export default function JourneyClient({ slug, initialData }: JourneyClientProps)
         // 초기 데이터가 없으면 클라이언트에서 조회
         const journeyData = await journey.getJourneyByUuidRetrieveId(slug);
         if (journeyData && journeyData.length > 0) {
-          setCurrentJourneyId(journeyData[0].id);
           setIsInitialized(true);
         } else {
           console.error("[JourneyClient] 여정 데이터 없음");
@@ -56,7 +52,7 @@ export default function JourneyClient({ slug, initialData }: JourneyClientProps)
     // 실행 지연을 통해 상태 초기화 경쟁 조건 방지
     const timer = setTimeout(initJourney, 10);
     return () => clearTimeout(timer);
-  }, [slug, setCurrentJourneyId, isInitialized, initialData]);
+  }, [slug, isInitialized, initialData]);
   
   return (
     <div>

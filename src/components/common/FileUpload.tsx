@@ -4,8 +4,8 @@ import { useDropzone } from "react-dropzone";
 import imageCompression from "browser-image-compression";
 import { createClient } from "@/utils/supabase/client";
 import styles from "./FileUpload.module.css";
-import { useAuth } from "../AuthProvider";
 import { redirect } from "next/navigation";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import Image from "next/image";
 import { FaUpload } from "react-icons/fa";
 import Spinner from "./Spinner";
@@ -36,7 +36,7 @@ export default function FileUpload({
   height = "200px",
   width = "100%",
 }: FileUploadProps) {
-  const { isAuthenticated, uid } = useAuth();
+  const { isAuthenticated, id } = useSupabaseAuth();
   const [file, setFile] = useState<FileWithPreview | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -44,13 +44,13 @@ export default function FileUpload({
     initialFileUrl || null
   );
 
-  if (!isAuthenticated || !uid) {
+  if (!isAuthenticated || !id) {
     redirect("/login");
   }
 
   useEffect(() => {
-    checkExistingUpload(uid);
-  }, [uid]);
+    checkExistingUpload(id);
+  }, [id]);
 
   const booledIsAuthenticated = Boolean(isAuthenticated);
 
@@ -156,7 +156,7 @@ export default function FileUpload({
       const supabase = createClient();
       const { data, error } = await supabase.storage
         .from("images")
-        .list(`public/${uid}`);
+        .list(`public/${id}`);
 
       if (error) {
         throw new Error(`파일 목록 조회 실패: ${error.message}`);
@@ -165,7 +165,7 @@ export default function FileUpload({
       if (data && data.length > 0) {
         const { error: deleteError } = await supabase.storage
           .from("images")
-          .remove([`${uid}/${data[0].name}`]);
+          .remove([`${id}/${data[0].name}`]);
 
         if (deleteError) {
           throw new Error(`삭제 실패: ${deleteError.message}`);

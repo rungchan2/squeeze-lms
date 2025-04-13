@@ -17,7 +17,7 @@ import Heading from "@/components/Text/Heading";
 import { toaster } from "@/components/ui/toaster";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useAuth } from "@/components/AuthProvider";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 interface CreateJourneyPageProps {
   initialData?: Journey;
@@ -43,7 +43,7 @@ export default function CreateJourneyPage({
     },
   });
   const router = useRouter();
-  const { role } = useAuth();
+  const { role } = useSupabaseAuth();
   useEffect(() => {
     if (role !== "teacher" && role !== "admin") {
       toaster.create({

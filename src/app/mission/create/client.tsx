@@ -11,14 +11,13 @@ import styled from "@emotion/styled";
 import Heading from "@/components/Text/Heading";
 import { toaster } from "@/components/ui/toaster";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/components/AuthProvider";
 import { useEffect, useState } from "react";
 import { mission } from "@/utils/data/mission";
 import Tiptap from "@/components/richTextInput/RichTextEditor";
-
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 export default function NewMissionPage({ editMissionData }: { editMissionData?: Mission }) {
   const router = useRouter();
-  const { role } = useAuth();
+  const { role } = useSupabaseAuth();
   const [content, setContent] = useState<string | null>(editMissionData?.description || "");
   const [descriptionError, setDescriptionError] = useState<string | null>(null);
   

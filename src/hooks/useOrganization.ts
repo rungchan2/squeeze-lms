@@ -13,7 +13,7 @@ async function getOrganizationList() {
 }
 
 // 단일 조직 조회 함수
-async function getSingleOrganization(id: number) {
+async function getSingleOrganization(id: string) {
   if (!id) return null;
   const { data, error } = await supabase
     .from("organizations")
@@ -39,7 +39,7 @@ async function createOrganization(organization: Omit<Organization, "id">) {
 }
 
 // 조직 수정 함수
-async function updateOrganization(id: number, organization: Partial<Organization>) {
+async function updateOrganization(id: string, organization: Partial<Organization>) {
   const { data, error } = await supabase
     .from("organizations")
     .update(organization)
@@ -55,7 +55,7 @@ async function updateOrganization(id: number, organization: Partial<Organization
 }
 
 // 조직 삭제 함수
-async function deleteOrganization(id: number) {
+async function deleteOrganization(id: string) {
   const { error } = await supabase
     .from("organizations")
     .delete()
@@ -84,7 +84,7 @@ export function useOrganizationList() {
 }
 
 // 단일 조직 조회 훅
-export function useOrganizationDetail(id: number) {
+export function useOrganizationDetail(id: string) {
   const { data, error, isLoading, mutate: revalidate } = useSWR(
     id ? `organization-${id}` : null,
     () => getSingleOrganization(id)

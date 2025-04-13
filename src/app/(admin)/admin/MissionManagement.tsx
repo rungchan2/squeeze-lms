@@ -4,7 +4,7 @@ import { useState, useCallback, memo } from "react";
 import { Loading } from "@/components/common/Loading";
 import { useMission } from "@/hooks/useMission";
 import { Error } from "@/components/common/Error";
-import { useAuth } from "@/components/AuthProvider";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useEffect } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 // 미션 타입 정의
 type Mission = {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   mission_type: string | null;
@@ -80,7 +80,7 @@ const MissionDetailModal = memo(({
   isOpen: boolean;
   onClose: () => void;
   mission: Mission | null;
-  onEdit: (id: number) => void;
+  onEdit: (id: string) => void;
 }) => {
   if (!mission) return null;
   
@@ -147,7 +147,7 @@ const MissionTableRow = memo(({
   mission: Mission;
   isMobile: boolean;
   onOpenDetail: (mission: Mission) => void;
-  onOpenDelete: (e: React.MouseEvent, id: number) => void;
+  onOpenDelete: (e: React.MouseEvent, id: string) => void;
 }) => {
   return (
     <Table.Row 
@@ -190,7 +190,7 @@ const MissionTable = memo(({
   missions: Mission[];
   isMobile: boolean;
   onOpenDetail: (mission: Mission) => void;
-  onOpenDelete: (e: React.MouseEvent, id: number) => void;
+  onOpenDelete: (e: React.MouseEvent, id: string) => void;
 }) => {
   console.log('MissionTable rendering');
   
@@ -245,11 +245,11 @@ MissionTable.displayName = "MissionTable";
 
 export default function MissionManagement() {
   const { missions, isLoading, error, deleteMission, mutate } = useMission();
-  const { role } = useAuth();
+  const { role } = useSupabaseAuth();
   const router = useRouter();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedMissionId, setSelectedMissionId] = useState<number | null>(null);
+  const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   
@@ -271,11 +271,11 @@ export default function MissionManagement() {
     router.push("/mission/create");
   }, [router]);
   
-  const handleEditMission = useCallback((id: number) => {
+  const handleEditMission = useCallback((id: string) => {
     router.push(`/mission/edit/${id}`);
   }, [router]);
   
-  const openDeleteModal = useCallback((e: React.MouseEvent, id: number) => {
+  const openDeleteModal = useCallback((e: React.MouseEvent, id: string) => {
     e.stopPropagation(); // 이벤트 버블링 방지
     setSelectedMissionId(id);
     setIsDeleteModalOpen(true);

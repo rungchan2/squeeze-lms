@@ -15,11 +15,11 @@ import { toaster } from "@/components/ui/toaster";
 import { createBugReport } from "../clientActions";
 import FileUpload from "@/components/common/FileUpload";
 import { redirect } from "next/navigation";
-import { useAuth } from "@/components/AuthProvider";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { createIssue } from "@/utils/github/createIssue";
 
 export default function BugReport() {
-  const { isAuthenticated, id } = useAuth();
+  const { isAuthenticated, id } = useSupabaseAuth();
   if (!isAuthenticated) {
     redirect("/login");
   }

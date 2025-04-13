@@ -2,11 +2,9 @@
 
 // TODO: 1. 제출된 과제 통계 확인할 수 있게 하기
 
-import { useEffect, useRef, useCallback, useState } from "react";
-import { usePosts } from "@/hooks/usePosts";
+import { useEffect, useRef, useCallback } from "react";
 import { Table } from "@chakra-ui/react";
 import { Tabs } from "@chakra-ui/react";
-import { useAuth } from "@/components/AuthProvider";
 import styled from "@emotion/styled";
 import { useParams, useRouter } from "next/navigation";
 import { FaRegTrashAlt } from "react-icons/fa";
@@ -23,9 +21,8 @@ import WeeklySubmissionChart from "./WeeklySubmissionChart";
 import Text from "@/components/Text/Text";
 import useSWRInfinite from "swr/infinite";
 import { createClient } from "@/utils/supabase/client";
-
 interface Post {
-  id: number;
+  id: string;
   title: string;
   content: string;
   created_at: string;
@@ -111,7 +108,6 @@ async function fetchPosts({
 
 export default function TeacherPostsPage() {
   const { slug } = useParams();
-  const { id: userId } = useAuth();
   const router = useRouter();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -189,13 +185,13 @@ export default function TeacherPostsPage() {
     };
   }, [handleObserver, allPosts]);
 
-  const handleDelete = async (postId: number) => {
+  const handleDelete = async (postId: string) => {
     if (confirm("정말 삭제하시겠습니까?")) {
       await posts.deletePost(postId);
     }
   };
 
-  const handleHide = async (postId: number, value: string) => {
+  const handleHide = async (postId: string, value: string) => {
     if (value === "hide") {
       await posts.hidePost(postId);
       toaster.create({

@@ -7,19 +7,16 @@ import Text from "@/components/Text/Text";
 import Spinner from "@/components/common/Spinner";
 import { FaTrophy } from "react-icons/fa";
 import { ProfileImage } from "@/components/navigation/ProfileImage";
-import { useAuth } from "@/components/AuthProvider";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { Box } from "@chakra-ui/react";
 import { z } from "zod";
-import { useJourneyStore } from "@/store/journey";
-import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import { useWeeks } from "@/hooks/useWeeks";
 import Heading from "@/components/Text/Heading";
 import Footer from "@/components/common/Footer";
-import { JourneyMissionInstance } from "@/types";
 
 // Zod 스키마 정의
 const leaderboardUserSchema = z.object({
-  id: z.number(),
+  id: z.string(),
   first_name: z.string().nullable(),
   last_name: z.string().nullable(),
   profile_image: z.string().nullable(),
@@ -33,7 +30,7 @@ const leaderboardUserSchema = z.object({
 type LeaderboardUser = z.infer<typeof leaderboardUserSchema>;
 
 interface WeekProgress {
-  id: number;
+  id: string;
   name: string;
   weekNumber: number;
   totalMissions: number;
@@ -41,8 +38,7 @@ interface WeekProgress {
   completionRate: number;
 }
 export default function DashboardTab({ slug }: { slug?: string }) {
-  const { id: userId } = useAuth();
-  const { currentJourneyId } = useJourneyStore();
+  const { id: userId } = useSupabaseAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [leaderboardUsers, setLeaderboardUsers] = useState<LeaderboardUser[]>([]);
@@ -50,11 +46,11 @@ export default function DashboardTab({ slug }: { slug?: string }) {
   const [totalCompletionRate, setTotalCompletionRate] = useState(0);
 
   // 주차 데이터 가져오기
-  const { weeks = [], isLoading: weeksLoading = false } = useWeeks(currentJourneyId || 0) || {};
+  const { weeks = [], isLoading: weeksLoading = false } = useWeeks(slug || "") || {};
 
   useEffect(() => {
 
-    if (!currentJourneyId) {
+    if (!slug) {
       setIsLoading(false);
       return;
     }
@@ -77,7 +73,7 @@ export default function DashboardTab({ slug }: { slug?: string }) {
               journey_week:journey_week_id(journey_id)
             )
           `)
-          .eq("mission_instance.journey_week.journey_id", currentJourneyId || 0);
+          .eq("mission_instance.journey_week.journey_id", slug || 0);
 
         if (userPointsError) {
           console.error("포인트 데이터 조회 오류:", userPointsError);
@@ -88,7 +84,7 @@ export default function DashboardTab({ slug }: { slug?: string }) {
 
         // 현재 여정에 속한 포인트 데이터만 필터링
         const journeyPointsData = userPointsData?.filter(
-          point => point.mission_instance?.journey_week?.journey_id === currentJourneyId
+          point => point.mission_instance?.journey_week?.journey_id === slug
         ) || [];
 
         
@@ -114,7 +110,7 @@ export default function DashboardTab({ slug }: { slug?: string }) {
 
         // 3. 리더보드 계산
         // 사용자별 점수 합산
-        const userScores: Record<number, number> = {};
+        const userScores: Record<string, number> = {};
         
         journeyPointsData.forEach(point => {
           const profileId = point.profile_id;
@@ -128,7 +124,7 @@ export default function DashboardTab({ slug }: { slug?: string }) {
 
         // 리더보드 데이터 구성
         const leaderboard = Object.keys(userScores).map(userIdStr => {
-          const profileId = Number(userIdStr);
+          const profileId = userIdStr;
           const profile = profiles?.find(p => p.id === profileId);
           
           return {
@@ -239,7 +235,7 @@ export default function DashboardTab({ slug }: { slug?: string }) {
     if (!weeksLoading) {
       fetchDashboardData();
     }
-  }, [currentJourneyId, userId, weeks, weeksLoading]);
+  }, [slug, userId, weeks, weeksLoading]);
   
   // 모든 데이터가 로드될 때까지 스피너 표시
   if (isLoading || weeksLoading) {
@@ -257,7 +253,7 @@ export default function DashboardTab({ slug }: { slug?: string }) {
   }
 
   // 데이터가 없는 경우에 대한 검증 조건 변경
-  if (!currentJourneyId) {
+  if (!slug) {
     return (
       <div>
         <Heading level={2}>데이터를 불러올 수 없습니다</Heading>

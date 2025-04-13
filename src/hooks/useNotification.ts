@@ -1,12 +1,12 @@
 import useSWR from 'swr';
 import { createClient } from "@/utils/supabase/client";
 import { Notification, NotificationInsert } from "@/types";
-import { useAuth } from "@/components/AuthProvider";
+import { useSupabaseAuth } from "./useSupabaseAuth";
 import { useState, useCallback, useEffect } from 'react';
 
 // 알림을 가져오는 fetcher 함수
 const fetchNotifications = async (
-  userId: number,
+  userId: string,
   pageSize: number
 ): Promise<{ notifications: Notification[]; count: number }> => {
   if (!userId) return { notifications: [], count: 0 };
@@ -43,7 +43,7 @@ export const createNotification = async (notification: NotificationInsert) => {
 };
 
 // 알림 읽음 처리 함수
-export const markAsRead = async (notificationId: number) => {
+export const markAsRead = async (notificationId: string) => {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("notifications")
@@ -57,7 +57,7 @@ export const markAsRead = async (notificationId: number) => {
 };
 
 // 모든 알림 읽음 처리 함수
-export const markAllAsRead = async (userId: number) => {
+export const markAllAsRead = async (userId: string) => {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("notifications")
@@ -72,12 +72,12 @@ export const markAllAsRead = async (userId: number) => {
 
 // 무한 스크롤을 위한 알림 훅
 export const useNotifications = (pageSize = 10) => {
-  const { id: userId } = useAuth();
+  const { id: userId } = useSupabaseAuth();
   const [page, setPage] = useState(1);
   const [loadedNotifications, setLoadedNotifications] = useState<Notification[]>([]);
   
   // userId가 숫자가 아니면 기본값 사용
-  const numericUserId = typeof userId === 'number' ? userId : 0;
+  const numericUserId = typeof userId === 'string' ? userId : "";
   
   // SWR로 데이터 가져오기
   const {
@@ -126,12 +126,12 @@ export const useNotifications = (pageSize = 10) => {
 };
 
 // 단일 알림 조회 훅
-export const useNotification = (notificationId: number) => {
-  const { id: userId } = useAuth();
+export const useNotification = (notificationId: string) => {
+  const { id: userId } = useSupabaseAuth();
   
-  const fetchNotification = async ([key, nId, uId]: [string, number, number]): Promise<Notification | null> => {
+  const fetchNotification = async ([key, nId, uId]: [string, string, string]): Promise<Notification | null> => {
     if (!uId) return null;
-    
+      
     const supabase = createClient();
     const { data, error } = await supabase
       .from("notifications")

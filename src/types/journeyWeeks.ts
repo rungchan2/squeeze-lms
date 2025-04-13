@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const journeyWeekSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   journey_id: z.string().uuid(),
   name: z.string(),
   week_number: z.number().nullable(),

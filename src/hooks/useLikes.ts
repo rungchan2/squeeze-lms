@@ -1,114 +1,15 @@
 import useSWR, { useSWRConfig } from 'swr';
-import { createClient } from "@/utils/supabase/client";
 import { useState, useCallback } from 'react';
+import { getLikesCount, addLike, removeLike , getUserLike} from '@/utils/data/like';
+import { LikesCountResponse } from '@/utils/data/like';
 
-// 타입 정의 개선
-interface LikeParams {
-  postId: number;
-  userId: number;
-}
-
-interface LikesCountResponse {
-  count: number;
-}
-
-// ✅ 좋아요 수만 가져오는 최적화된 함수
-async function getLikesCount(key: string, postId: number): Promise<LikesCountResponse> {
-  const supabase = createClient();
-  const { count, error } = await supabase
-    .from("likes")
-    .select("*", { count: "exact", head: true })
-    .eq("post_id", postId);
-  
-  if (error) {
-    throw error;
-  }
-  return { count: count || 0 };
-}
-
-// ✅ 좋아요 추가 함수
-async function addLike({ postId, userId }: LikeParams): Promise<void> {
-  if (!postId || !userId) {
-    console.log("[addLike] 필수 매개변수 누락", { postId, userId });
-    return;
-  }
-
-  try {
-    // 이미 좋아요가 있는지 확인
-    const existingLike = await getUserLike(null, { postId, userId });
-    if (existingLike) {
-      return; // 이미 좋아요가 있으면 중복 추가 방지
-    }
-    
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("likes")
-      .insert([{ post_id: postId, user_id: userId }]);
-    
-    if (error) {
-      throw error;
-    }
-  } catch (err) {
-    console.error("[addLike] 에러 발생:", err);
-    throw err;
-  }
-}
-
-// ✅ 좋아요 삭제 함수
-async function removeLike({ postId, userId }: LikeParams): Promise<void> {
-  if (!postId || !userId) {
-    console.log("[removeLike] 필수 매개변수 누락", { postId, userId });
-    return;
-  }
-
-  try {
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("likes")
-      .delete()
-      .eq("post_id", postId)
-      .eq("user_id", userId);
-    
-    if (error) {
-      throw error;
-    }
-  } catch (err) {
-    console.error("[removeLike] 에러 발생:", err);
-    throw err;
-  }
-}
-
-// ✅ 사용자가 좋아요 했는지 확인하는 함수
-async function getUserLike(_: any, params?: LikeParams) {
-  // params가 undefined인 경우 early return
-  if (!params || !params.postId || !params.userId) {
-    console.log("[getUserLike] 필수 매개변수 누락", params);
-    return null;
-  }
-  
-  const { postId, userId } = params;
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("likes")
-    .select("id")
-    .eq("post_id", postId)
-    .eq("user_id", userId)
-    .maybeSingle();
-  
-  if (error) {
-    throw error;
-  }
-  
-  return data; // id가 있으면 좋아요 있음, null이면 없음
-}
-
-export function useLikes(postId: number) {
+export function useLikes(postId: string) {
   const { mutate } = useSWRConfig();
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const [isUnlikeLoading, setIsUnlikeLoading] = useState(false);
   
   const likesCountKey = `likes-count-${postId}`;
-  const getUserLikeKey = (userId: number) => `user-like-${postId}-${userId}`;
+  const getUserLikeKey = (userId: string) => `user-like-${postId}-${userId}`;
 
   // ✅ 좋아요 수 조회 쿼리
   const {
@@ -125,7 +26,7 @@ export function useLikes(postId: number) {
   );
 
   // ✅ 좋아요 추가 함수 (낙관적 업데이트)
-  const onLike = useCallback(async (userId: number) => {
+  const onLike = useCallback(async (userId: string) => {
     if (!userId || !postId || isLikeLoading) {
       console.log("[onLike] 필수 매개변수 누락 또는 이미 로딩 중", { userId, postId, isLikeLoading });
       return;
@@ -151,6 +52,7 @@ export function useLikes(postId: number) {
         false // 재검증 안함
       );
       
+    
       // 실제 API 호출
       await addLike({ postId, userId });
       
@@ -169,10 +71,10 @@ export function useLikes(postId: number) {
     } finally {
       setIsLikeLoading(false);
     }
-  }, [postId, mutate, isLikeLoading]);
+  }, [postId, mutate, isLikeLoading, getUserLikeKey, likesCountKey]);
 
   // ✅ 좋아요 취소 함수 (낙관적 업데이트)
-  const onUnlike = useCallback(async (userId: number) => {
+  const onUnlike = useCallback(async (userId: string) => {
     if (!userId || !postId || isUnlikeLoading) {
       return;
     }
@@ -220,7 +122,7 @@ export function useLikes(postId: number) {
   }, [postId, mutate, isUnlikeLoading]);
 
   // ✅ 사용자가 좋아요 했는지 확인하는 훅
-  const useUserLike = (userId: number | null) => {
+  const useUserLike = (userId: string | null) => {
     return useSWR(
       userId ? [getUserLikeKey(userId), { postId, userId }] : null,
       ([key, params]) => {

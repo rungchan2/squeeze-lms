@@ -10,8 +10,8 @@ import {
 import { useCallback } from "react";
 
 // 데이터 가져오기 함수
-const fetcher = async (journeyId: number) => {
-  if (!journeyId || journeyId <= 0) {
+const fetcher = async (journeyId: string) => {
+  if (!journeyId) {
     console.warn("유효하지 않은 journeyId로 호출됨:", journeyId);
     return [];
   }
@@ -45,7 +45,7 @@ const fetcher = async (journeyId: number) => {
 };
 
 // 미션 데이터 가져오기 함수
-const fetchMissionsByWeekId = async (weekId: number) => {
+const fetchMissionsByWeekId = async (weekId: string) => {
   if (!weekId) return [];
 
   const supabase = createClient();
@@ -67,9 +67,9 @@ const fetchMissionsByWeekId = async (weekId: number) => {
   return data.map((instance) => instance.missions) as Mission[];
 };
 
-export function useWeeks(journeyId: number) {
+export function useWeeks(journeyId: string) {
   // 유효한 journeyId 검증
-  const validJourneyId = journeyId && journeyId > 0 ? journeyId : 0;
+  const validJourneyId = journeyId ? journeyId : "";
   
   // 훅의 키를 체크하는 로그 추가
   const swrKey = validJourneyId ? `journey-weeks-${validJourneyId}` : null;
@@ -127,7 +127,7 @@ export function useWeeks(journeyId: number) {
 
   // 주차 업데이트 함수
   const updateWeek = useCallback(
-    async (id: number, weekData: UpdateJourneyWeek) => {
+    async (id: string, weekData: UpdateJourneyWeek) => {
       console.log("updateWeek", id, weekData);
       const supabase = createClient();
       const { data, error } = await supabase
@@ -151,7 +151,7 @@ export function useWeeks(journeyId: number) {
 
   // 주차 삭제 함수
   const deleteWeek = useCallback(
-    async (id: number) => {
+    async (id: string) => {
       const supabase = createClient();
 
       // 먼저 해당 주차의 모든 미션 인스턴스 삭제
@@ -184,7 +184,7 @@ export function useWeeks(journeyId: number) {
 
   // 주차에 미션 추가 함수
   const addMissionToWeek = useCallback(
-    async (weekId: number, missionId: number, journeyUuid: string) => {
+    async (weekId: string, missionId: string, journeyUuid: string) => {
       if (!weekId || !missionId) return null;
 
       // 이미 추가된 미션인지 확인
@@ -234,7 +234,7 @@ export function useWeeks(journeyId: number) {
 
   // 주차에서 미션 제거 함수
   const removeMissionFromWeek = useCallback(
-    async (weekId: number, missionId: number) => {
+    async (weekId: string, missionId: string) => {
       if (!weekId || !missionId) return false;
 
       const supabase = createClient();
@@ -258,7 +258,7 @@ export function useWeeks(journeyId: number) {
 
   // 주차의 미션 목록 가져오기 함수
   const getWeekMissions = useCallback(
-    async (weekId: number): Promise<Mission[]> => {
+    async (weekId: string): Promise<Mission[]> => {
       if (!weekId) return [];
 
       try {
@@ -274,7 +274,7 @@ export function useWeeks(journeyId: number) {
 
   // 주차의 미션 개수 가져오기 함수
   const getWeekMissionCount = useCallback(
-    async (weekId: number): Promise<number> => {
+    async (weekId: string): Promise<number> => {
       if (!weekId) return 0;
 
       const supabase = createClient();

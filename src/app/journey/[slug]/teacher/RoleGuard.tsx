@@ -1,19 +1,16 @@
 "use client";
 
-import { useAuth } from "@/components/AuthProvider";
 import { useJourneyUser } from "@/hooks/useJourneyUser";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useJourneyStore } from "@/store/journey";
 import { toaster } from "@/components/ui/toaster";
-
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 export default function RoleGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const params = useParams();
   const slug = params.slug as string;
-  const { loading: authLoading, role } = useAuth();
-  const { currentJourneyId } = useJourneyStore();
+  const { loading: authLoading, role } = useSupabaseAuth();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   // 여정 ID 로드 및 사용자 정보 가져오기
@@ -21,7 +18,7 @@ export default function RoleGuard({ children }: { children: React.ReactNode }) {
     data,
     isLoading: journeyUsersLoading,
     journeyTeacher,
-  } = useJourneyUser(currentJourneyId || 0);
+  } = useJourneyUser(slug);
 
   // 권한 체크 로직
   useEffect(() => {
