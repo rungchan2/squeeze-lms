@@ -4,7 +4,7 @@ import { posts } from "@/utils/data/posts";
 export default async function EditPostPage({
   params,
 }: {
-  params: Promise<{ id: number }>;
+  params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
   const { data, error } = await posts.getPost(id);

@@ -18,6 +18,7 @@ type UserJourneyWithProfiles = {
 // 특정 여정의 사용자 목록을 가져오는 함수
 const getJourneyUser = async (url: string): Promise<UserJourneyWithProfiles[]> => {
   const journey_id = url.split("/").pop();
+  console.log("journey_id", journey_id);
   const supabase = createClient();
 
   // 요청 경로에 따라 다른 쿼리 실행
@@ -60,9 +61,9 @@ const getCurrentUserJourneys = async (userId: string): Promise<UserJourneyWithPr
 
 export const useJourneyUser = (journey_id: string) => {
   const { id: userId } = useSupabaseAuth();
-  
+  console.log("userId", userId);
   // journey_id가 0이면 현재 로그인한 사용자의 모든 여정 참여 정보 가져오기
-  const isUserJourneysMode = journey_id === "0";
+  const isUserJourneysMode = journey_id === "";
   
   // 적절한 SWR 키와 fetcher 설정
   const key = isUserJourneysMode 

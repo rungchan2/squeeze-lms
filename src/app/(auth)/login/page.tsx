@@ -10,12 +10,19 @@ import LoginSignup from "@/components/auth/LoginSignup";
 import Text from "@/components/Text/Text";
 import { useRouter } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const isKakao = Boolean(navigator.userAgent.match("KAKAOTALK"));
+  const { isAuthenticated } = useSupabaseAuth();
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
 
   const handleGoogleLogin = async () => {
     if (isKakao) {
@@ -62,7 +69,7 @@ export default function LoginPage() {
           <Separator flex="1" borderColor="gray.300" borderWidth="1px" />
         </HStack>
 
-        <LoginSignup type="login" />
+        <LoginSignup />
       </div>
       <div className="signup-link">
         계정이 없으신가요? <p onClick={() => router.push("/signup")}>회원가입</p>

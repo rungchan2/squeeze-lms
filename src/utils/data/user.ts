@@ -36,9 +36,12 @@ export const user = {
     const { error } = await supabase.auth.admin.deleteUser(uid);
     return { error };
   },
-  async updateProfile(uid: string, data: any) {
+  async updateProfile(id: string, data: any) {
     const supabase = createClient();
-    const { error } = await supabase.from("profiles").update(data).eq("uid", uid);
+    const { error } = await supabase
+      .from("profiles")
+      .update(data)
+      .eq("id", id);
     return { error };
   },
   async supabaseUser() {
@@ -51,12 +54,14 @@ export const user = {
   },
   async updatePassword(new_password: string) {
     const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({ password: new_password });
+    const { error } = await supabase.auth.updateUser({
+      password: new_password,
+    });
     return { error };
   },
   async createProfile(data: SignupPage) {
     const supabase = createClient();
-    
+
     // 프로필 데이터 구성
     const profileData = {
       email: data.email,
@@ -67,11 +72,23 @@ export const user = {
       organization_id: data.organization_id,
       profile_image: data.profile_image || "",
       marketing_opt_in: data.marketing_opt_in,
-      privacy_agreed: data.privacy_agreed
+      privacy_agreed: data.privacy_agreed,
     };
-    
+
     // 프로필 생성
     const { error } = await supabase.from("profiles").insert(profileData);
     return { error };
+  },
+  async getProfileImage(id: string) {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("profile_image")
+      .eq("id", id)
+      .single();
+    if (error) {
+      throw error;
+    }
+    return data?.profile_image;
   },
 };

@@ -18,8 +18,8 @@ import { BiGridVertical } from "react-icons/bi";
 interface MissionCardProps {
   mission?: Mission;
   isModal?: boolean;
-  onEdit?: (id: number) => void;
-  onDelete?: (id: number) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
   maxWidth?: string;
   missionInstance?: JourneyMissionInstanceWithMission;
   showDetails?: boolean;
@@ -80,7 +80,7 @@ export default function MissionCard({
       ? `${formattedDateStart} ~ ${formattedDateEnd}`
       : "날짜없음";
 
-  const goToEditMission = (missionId: number) => {
+  const goToEditMission = (missionId: string) => {
     router.push(`/mission/edit/${missionId}`);
   };
 

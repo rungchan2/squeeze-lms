@@ -31,7 +31,7 @@ export async function generateMetadata(
     const { data: journeyData, error } = await supabase
       .from("journeys")
       .select("name, image_url")
-      .eq("uuid", slug)
+      .eq("id", slug)
       .single();
 
     if (error || !journeyData) {

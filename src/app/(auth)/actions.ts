@@ -17,12 +17,12 @@ export async function getUser() {
   }
 }
 
-export async function getPorfile(uid: string) {
+export async function getPorfile(id: string) {
   const supabase = await createClient();
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("*")
-    .eq("uid", uid)
+    .eq("id", id)
     .single();
   return { profile, error };
 }
@@ -35,7 +35,7 @@ export async function getUserProfile() {
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("*")
-    .eq("uid", user?.id || "")
+    .eq("id", user?.id || "")
     .single();
   return { profile, error };
 }

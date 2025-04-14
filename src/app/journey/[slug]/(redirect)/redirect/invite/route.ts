@@ -26,7 +26,7 @@ export async function GET(
     const { data: profileIdAndRole } = await supabase_server
       .from("profiles")
       .select("id, role")
-      .eq("uid", user.id)
+      .eq("id", user.id)
       .single();
 
     if (!profileIdAndRole) {
@@ -39,7 +39,7 @@ export async function GET(
     const { data: journey, error: journeyError } = await supabase_server
       .from("journeys")
       .select("id")
-      .eq("uuid", slug)
+      .eq("id", slug)
       .single();
 
     if (journeyError || !journey) {

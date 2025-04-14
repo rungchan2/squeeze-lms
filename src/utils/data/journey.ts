@@ -17,7 +17,7 @@ export const journey = {
     const { data, error } = await supabase
       .from("journeys")
       .select("id")
-      .eq("uuid", journeyUuid);
+      .eq("id", journeyUuid);
     if (error) {
       throw error;
     }

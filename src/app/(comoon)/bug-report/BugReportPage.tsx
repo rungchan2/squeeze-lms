@@ -14,16 +14,21 @@ import { useRouter } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
 import { createBugReport } from "../clientActions";
 import FileUpload from "@/components/common/FileUpload";
-import { redirect } from "next/navigation";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { createIssue } from "@/utils/github/createIssue";
 
 export default function BugReport() {
+  const router = useRouter();
   const { isAuthenticated, id } = useSupabaseAuth();
   if (!isAuthenticated) {
-    redirect("/login");
+    toaster.create({
+      title: "로그인이 필요합니다.",
+      description: "로그인 후 버그 신고를 진행해주세요.",
+      type: "error",
+      duration: 2000,
+    });
+    router.back();
   }
-  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -64,8 +69,12 @@ export default function BugReport() {
 
     // GitHub 이슈 생성 시도 - 오류가 발생해도 나머지 동작은 계속 진행
     try {
-      const issueResponse = await createIssue(data.title, data.description, bugType);
-      
+      const issueResponse = await createIssue(
+        data.title,
+        data.description,
+        bugType
+      );
+
       if (issueResponse.success) {
       } else {
         console.error("GitHub 이슈 생성에 실패했습니다:", issueResponse.error);
@@ -111,7 +120,11 @@ export default function BugReport() {
             title="설명"
             errorMessage={errors.description?.message as string}
           >
-            <Textarea minHeight={120} {...register("description")} placeholder="해당 버그의 재현 방법, 현재 기기/브라우저, 버그로 인한 영향을 작성해주세요." />
+            <Textarea
+              minHeight={120}
+              {...register("description")}
+              placeholder="해당 버그의 재현 방법, 현재 기기/브라우저, 버그로 인한 영향을 작성해주세요."
+            />
           </InputAndTitle>
           <InputAndTitle
             title="심각성"

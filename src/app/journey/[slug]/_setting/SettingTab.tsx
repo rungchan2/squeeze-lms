@@ -189,7 +189,7 @@ export default function SettingTab({ slug }: { slug: string }) {
                                       : "학생"}
                                   </Table.Cell>
                                   <Table.Cell>
-                                    <CopyInput value={code.code} />
+                                    <CopyInput value={code.code ?? ""} />
                                   </Table.Cell>
                                 </Table.Row>
                               ))}

@@ -47,19 +47,25 @@ export default function ProfilePage() {
     null
   );
   const [password, setPassword] = useState("");
-  const { isAuthenticated, loading, id, profileImage } =
-    useSupabaseAuth();
-
+  const { isAuthenticated, loading, id, refreshAuthState } = useSupabaseAuth();
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
-  if (!isAuthenticated || !id) {
-    redirect("/login");
+  if (!loading) {
+    if (!isAuthenticated || !id) {
+      toaster.create({
+        title: "로그인 필요",
+        description: "로그인 후 이용해주세요.",
+        type: "error",
+      });
+      redirect("/login");
+    }
   }
 
   // 폼 설정
   const {
     register,
     handleSubmit,
+    getValues,
     setValue,
     control,
     formState: { errors, isSubmitting },
@@ -75,6 +81,7 @@ export default function ProfilePage() {
         try {
           setIsLoadingProfile(true);
           const data = await getPorfile(id);
+          setValue("profileImage", data.profile?.profile_image || "");
           setValue("first_name", data.profile?.first_name || "");
           setValue("last_name", data.profile?.last_name || "");
           setValue("email", data.profile?.email || "");
@@ -107,6 +114,7 @@ export default function ProfilePage() {
       if (error) throw error;
 
       // 유저 정보 새로고침
+      await refreshAuthState();
 
       toaster.create({
         title: "프로필 업데이트 성공",
@@ -138,7 +146,7 @@ export default function ProfilePage() {
       type: "success",
     });
     redirect("/login");
-    setOpendModal(null);  
+    setOpendModal(null);
   };
 
   const handlePassword = async (data: string) => {
@@ -170,10 +178,9 @@ export default function ProfilePage() {
             placeholder=""
             width="100px"
             height="100px"
-            initialFileUrl={profileImage || ""}
+            initialFileUrl={getValues("profileImage") || ""}
             onUploadComplete={async (fileUrl) => {
               setValue("profileImage", fileUrl);
-              console.log("fileUrl", fileUrl);
             }}
           />
         </InputAndTitle>
@@ -237,10 +244,23 @@ export default function ProfilePage() {
       >
         <ModalContainer>
           <Heading level={4}>비밀번호 초기화</Heading>
-          <InputAndTitle title="변경할 비밀번호" errorMessage={password.length < 6 ? "비밀번호는 6자 이상 입력해주세요." : ""}>
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <InputAndTitle
+            title="변경할 비밀번호"
+            errorMessage={
+              password.length < 6 ? "비밀번호는 6자 이상 입력해주세요." : ""
+            }
+          >
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </InputAndTitle>
-          <Button variant="outline" type="submit" onClick={() => handlePassword(password)}>
+          <Button
+            variant="outline"
+            type="submit"
+            onClick={() => handlePassword(password)}
+          >
             초기화
           </Button>
         </ModalContainer>
@@ -253,7 +273,8 @@ export default function ProfilePage() {
           <Heading level={3}>회원 탈퇴</Heading>
           <div className="modal-text">
             <Text variant="body" color="var(--negative-500)" fontWeight="bold">
-              이 작업은 돌이킬 수 없습니다. 회원 탈퇴 시 모든 데이터가 삭제됩니다.
+              이 작업은 돌이킬 수 없습니다. 회원 탈퇴 시 모든 데이터가
+              삭제됩니다.
             </Text>
           </div>
           <Button variant="outline" type="submit" onClick={handleDelete}>

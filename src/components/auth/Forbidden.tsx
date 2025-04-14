@@ -10,6 +10,7 @@ interface ForbiddenProps {
 export default function Forbidden({ requiredRole }: ForbiddenProps) {
   const router = useRouter();
   const { role } = useSupabaseAuth();
+  console.log("role", role);
 
   useEffect(() => {
     if (!requiredRole.includes(role as Role)) {

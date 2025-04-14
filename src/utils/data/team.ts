@@ -1,4 +1,4 @@
-import { Team, TeamMember, TeamPost, TeamData, AllTeamData } from "@/types";
+import { Team, TeamMember } from "@/types";
 import { createClient } from "@/utils/supabase/client";
 
 const supabase = createClient();

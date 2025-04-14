@@ -15,7 +15,7 @@ export async function GET(request: Request) {
       );
     }
     
-    const { data, error } = await getUserPointsByJourneyId(Number(journeyId));
+    const { data, error } = await getUserPointsByJourneyId(journeyId);
     
     if (error) {
       console.error("GET user-points API 오류:", error);
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     }
     
     try {
-      const { data, error } = await getUserPointsByJourneyId(Number(journeyId));
+      const { data, error } = await getUserPointsByJourneyId(journeyId);
       
       if (error) {
         console.error("POST user-points API 오류:", error);

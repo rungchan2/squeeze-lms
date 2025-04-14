@@ -44,10 +44,6 @@ export default function FileUpload({
     initialFileUrl || null
   );
 
-  if (!isAuthenticated || !id) {
-    redirect("/login");
-  }
-
   useEffect(() => {
     checkExistingUpload(id);
   }, [id]);
@@ -213,7 +209,7 @@ export default function FileUpload({
           error.message.includes("permission")
         ) {
           throw new Error(
-            "인증 오류: 로그인이 필요하거나 파일 업로드 권한이 없습니다."
+            "인증 오류: 로그인이 필요하거나 파일 업로드 권한이 없습니다." + `\n${error.message}`
           );
         }
         throw new Error(`업로드 실패: ${error.message}`);

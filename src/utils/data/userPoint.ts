@@ -6,7 +6,7 @@ export type UpdateUserPoints = Database["public"]["Tables"]["user_points"]["Upda
 export type UserPoints = Database["public"]["Tables"]["user_points"]["Row"];
 
 const userPoint = {
-  getUserPoints: async (userId: number) => {
+  getUserPoints: async (userId: string) => {
     const supabase = createClient();
     const { data, error } = await supabase.from("user_points").select("*, mission_instances(*)").eq("profile_id", userId);
     return { data, error };
@@ -17,7 +17,7 @@ const userPoint = {
     
     try {
       // mission_instance_id가 null이면 기본값 0 사용
-      const missionInstanceId = UserPointData.mission_instance_id || 0;
+      const missionInstanceId = UserPointData.mission_instance_id || "";
 
       // 접근 방식 1: post_id가 있는 경우에만 중복 체크
       if (UserPointData.post_id) {

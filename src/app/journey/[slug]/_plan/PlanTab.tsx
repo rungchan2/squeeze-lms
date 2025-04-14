@@ -15,14 +15,13 @@ import { toaster } from "@/components/ui/toaster";
 import Footer from "@/components/common/Footer";
 import Button from "@/components/common/Button";
 import { Modal } from "@/components/modal/Modal";
-import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { CreateJourneyWeek } from "@/types";
 const MemoizedWeekCard = memo(WeekCard);
 
 export default function PlanTab({ slug }: { slug: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const status = searchParams.get("status");
-  const { id: currentJourneyId } = useSupabaseAuth();
 
   const [weekName, setWeekName] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,14 +47,14 @@ export default function PlanTab({ slug }: { slug: string }) {
 
   // 새 주차 추가 핸들러 예시
   const handleAddWeek = useCallback(async () => {
-    if (!currentJourneyId || !createWeek || !weekName) return;
+    if (!slug || !createWeek || !weekName) return;
     
     try {
       await createWeek({
-        journey_id: currentJourneyId,
+        journey_id: slug,
         name: weekName || `Week ${weeks.length + 1}`,
         week_number: weeks.length + 1,
-      });
+      } as CreateJourneyWeek);
       toaster.create({
         title: "주차가 추가되었습니다.",
         type: "success",
@@ -69,7 +68,7 @@ export default function PlanTab({ slug }: { slug: string }) {
         type: "error",
       });
     }
-  }, [currentJourneyId, weeks, createWeek, weekName]);
+  }, [slug, weeks, createWeek, weekName]);
 
   const openModal = useCallback(() => {
     setWeekName(`Week ${weeks.length + 1}`);

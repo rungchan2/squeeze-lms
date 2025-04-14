@@ -273,7 +273,6 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
-          expiry_date: string | null
           id: string
           mission_type: string | null
           name: string
@@ -283,7 +282,6 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
-          expiry_date?: string | null
           id?: string
           mission_type?: string | null
           name: string
@@ -293,7 +291,6 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string | null
-          expiry_date?: string | null
           id?: string
           mission_type?: string | null
           name?: string
@@ -371,7 +368,7 @@ export type Database = {
           created_at: string | null
           file_url: string | null
           id: string
-          is_hidden: boolean | null
+          is_hidden: boolean
           is_team_submission: boolean | null
           mission_instance_id: string | null
           score: number | null
@@ -380,7 +377,7 @@ export type Database = {
           title: string
           updated_at: string | null
           user_id: string
-          view_count: number | null
+          view_count: number
         }
         Insert: {
           achievement_status?: string | null
@@ -388,7 +385,7 @@ export type Database = {
           created_at?: string | null
           file_url?: string | null
           id?: string
-          is_hidden?: boolean | null
+          is_hidden?: boolean
           is_team_submission?: boolean | null
           mission_instance_id?: string | null
           score?: number | null
@@ -397,7 +394,7 @@ export type Database = {
           title: string
           updated_at?: string | null
           user_id?: string
-          view_count?: number | null
+          view_count?: number
         }
         Update: {
           achievement_status?: string | null
@@ -405,7 +402,7 @@ export type Database = {
           created_at?: string | null
           file_url?: string | null
           id?: string
-          is_hidden?: boolean | null
+          is_hidden?: boolean
           is_team_submission?: boolean | null
           mission_instance_id?: string | null
           score?: number | null
@@ -414,7 +411,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_id?: string
-          view_count?: number | null
+          view_count?: number
         }
         Relationships: [
           {
@@ -754,6 +751,16 @@ export type Database = {
       custom_access_token_hook: {
         Args: { event: Json }
         Returns: Json
+      }
+      custom_access_token_hook2: {
+        Args: { event: Json }
+        Returns: Json
+      }
+      get_distinct_mission_types: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          mission_type: string
+        }[]
       }
     }
     Enums: {

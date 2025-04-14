@@ -22,6 +22,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
 import { JourneyMissionInstanceWithMission } from "@/types";
 import { toaster } from "@/components/ui/toaster";
+import { CreateJourneyMissionInstance } from "@/types";
 interface MissionComponentProps {
   weekId: string;
   weekName: string;
@@ -186,13 +187,13 @@ export default function MissionComponent({
       setIsLoadingMissions(true);
 
       // 미션 인스턴스 생성
-      const newInstance = {
+      const newInstance: CreateJourneyMissionInstance = {
         journey_week_id: weekId,
         mission_id: selectedMissionId,
         status: "not_started" as MissionStatus,
         release_date: releaseDate || null,
         expiry_date: expiryDate || null,
-        journey_id: journeyId,
+        journey_uuid: journeyId,
       };
 
       await createMissionInstance(newInstance as any);
@@ -212,7 +213,7 @@ export default function MissionComponent({
   };
 
   // 미션 수정 핸들러
-  const handleEditMission = (id: number) => {
+  const handleEditMission = (id: string) => {
     // 여기에 수정 로직 추가
     alert(`미션 수정: ${id}`);
   };

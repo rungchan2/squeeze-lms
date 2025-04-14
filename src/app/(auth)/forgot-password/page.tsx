@@ -35,7 +35,7 @@ export default function ForgotPassword() {
         const { data, error } = await supabase
           .from('profiles')
           .select('id')
-          .eq('uid', uuid)
+          .eq('id', uuid)
           .single();
         
         if (error || !data) {

@@ -31,6 +31,7 @@ export default function OrganizationManagement() {
     try {
       await createOrganization({ 
         name: organizationName, 
+        description: "",
         created_at: null, 
         updated_at: null 
       });
@@ -52,7 +53,7 @@ export default function OrganizationManagement() {
     }
   };
   
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("정말 삭제하시겠습니까?")) {
       return;
     }

@@ -33,4 +33,8 @@ export const auth = {
       .single();
     return { profileData: data, error };
   },
+  refreshToken: async () => {
+    const { data, error } = await supabase.auth.refreshSession();
+    return { data, error };
+  },
 };

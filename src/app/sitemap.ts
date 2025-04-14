@@ -7,7 +7,7 @@ async function getJourneys() {
   const supabase = await createClient();
   const { data: journeys } = await supabase
     .from("journeys")
-    .select("uuid, updated_at");
+    .select("id, updated_at");
   return journeys || [];
 }
 
@@ -47,7 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const journeyRoutes = journeys
     .filter(journey => journey.updated_at)
     .map((journey) => ({
-      url: `${BASE_URL}/journey/${journey.uuid}`,
+      url: `${BASE_URL}/journey/${journey.id}`,
       lastModified: new Date(journey.updated_at!),
       changeFrequency: 'weekly' as const,
       priority: 0.8,

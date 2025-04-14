@@ -6,6 +6,7 @@ const nextConfig = {
       "lh3.googleusercontent.com",
       "avatars.githubusercontent.com",
       "picsum.photos",
+      "example.com",
       `${process.env.PROJECT_ID}.supabase.co`,
     ].filter(Boolean),
   },

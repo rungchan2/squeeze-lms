@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from("journeys")
       .select("*")
-      .eq("uuid", uuid)
+      .eq("id", uuid)
       .single();
     
     if (error) {

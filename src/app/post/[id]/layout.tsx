@@ -13,7 +13,7 @@ export async function generateMetadata(
   try {
     // params가 Promise이므로 await로 값을 추출
     const resolvedParams = await params;
-    const id = resolvedParams?.id ? Number(resolvedParams.id) : null;
+    const id = resolvedParams?.id ? resolvedParams.id : null;
     
     if (id === null) {
       console.error("Post ID is missing or invalid");

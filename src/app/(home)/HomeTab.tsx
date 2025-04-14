@@ -13,7 +13,7 @@ import { useNotifications, markAsRead } from "@/hooks/useNotification";
 import MyPage from "./_mypage/MyPage";
 import { FloatingButton } from "@/components/common/FloatingButton";
 import Text from "@/components/Text/Text";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AdminOnly } from "@/components/auth/AdminOnly";
 import { useCallback, useEffect, useRef, useMemo } from "react";
 import { Loading } from "@/components/common/Loading";
@@ -26,8 +26,6 @@ import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 export default function HomeTab() {
   const router = useRouter();
   const { isAuthenticated, loading } = useSupabaseAuth();
-  const searchParams = useSearchParams();
-  const currentTab = searchParams.get("tab");
 
   useEffect(() => {
     if (!isAuthenticated && !loading) {
@@ -91,7 +89,6 @@ function JourneyTab() {
     isLoading: userJourneysLoading,
     error: userJourneysError
   } = useJourneyUser(""); // 0을 전달하면 특정 여정이 아닌 사용자의 모든 여정 참여 정보를 가져올 수 있음
-  
   // 사용자가 참여 중인 여정 ID 목록 생성
   const userJourneyIds = useMemo(() => {
     if (!userJourneys) return [];

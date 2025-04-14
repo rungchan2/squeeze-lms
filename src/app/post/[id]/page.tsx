@@ -10,7 +10,7 @@ import styled from "@emotion/styled";
 
 export default function PostPage() {
   const params = useParams();
-  const postId = Number(params.id);
+  const postId = params.id as string;
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +59,7 @@ export default function PostPage() {
       <PostCard post={post} showDetails={true} />
       <CommentContainer>
         <CommentSection 
-          postId={Number(params.id)}
+          postId={params.id as string}
           enableRealtime={true}
         />
       </CommentContainer>

@@ -31,8 +31,16 @@ export default function UsersPage() {
   const uuid = slug as string;
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrganizationId, setSelectedOrganizationId] = useState<string>(
-    organizationId ?? ""
+    organizationId && organizationId !== "undefined" && organizationId !== "null" 
+      ? organizationId 
+      : ""
   );
+  
+  useEffect(() => {
+    console.log("현재 선택된 조직 ID:", selectedOrganizationId);
+    console.log("사용자 조직 ID:", organizationId);
+  }, [selectedOrganizationId, organizationId]);
+  
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const [invitedUsers, setInvitedUsers] = useState<string[]>([]);
@@ -43,7 +51,15 @@ export default function UsersPage() {
     isLoadingMore = false,
     isReachingEnd = false,
     total = 0,
-  } = useOrganizationUsers(selectedOrganizationId ?? "");
+    mutate,
+  } = useOrganizationUsers(selectedOrganizationId || "");
+  
+  useEffect(() => {
+    if (mutate) {
+      console.log("조직 ID 변경으로 인한 데이터 리로드");
+      mutate();
+    }
+  }, [selectedOrganizationId, mutate]);
 
   // 권한 없을 때 뒤로 가거나 홈으로 가는 함수
   const goBackOrHome = useCallback(() => {
@@ -122,7 +138,7 @@ export default function UsersPage() {
   const organizationOptions =
     organizations?.map((organization) => ({
       label: organization?.name || "알 수 없음",
-      value: organization?.id || 0,
+      value: organization?.id || "",
     })) || [];
 
   // 초대된 사용자 목록 불러오기
@@ -425,7 +441,18 @@ export default function UsersPage() {
                 )}
                 isDisabled={role === "teacher" || role === "user"}
                 onChange={(value) => {
-                  setSelectedOrganizationId(value?.value ? "" : "");
+                  // 조직 ID 검증 및 설정
+                  const selectedOrgId = value?.value && value.value !== "undefined" && value.value !== "null" ? 
+                    String(value.value) : "";
+                  console.log("조직 변경:", selectedOrgId);
+                  
+                  // 이전 값과 같으면 변경하지 않음
+                  if (selectedOrgId === selectedOrganizationId) {
+                    console.log("동일한 조직 ID, 변경 없음");
+                    return;
+                  }
+                  
+                  setSelectedOrganizationId(selectedOrgId);
                 }}
               />
             ) : (

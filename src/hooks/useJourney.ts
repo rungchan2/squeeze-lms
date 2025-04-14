@@ -16,7 +16,7 @@ const fetchJourneys = async () => {
 export const fetchJourneyDetail = async (uuid: string) => {
   const trimmedUuid = uuid.trim();
   const supabase = createClient();
-  const { data, error } = await supabase.from("journeys").select("*").eq("uuid", trimmedUuid).single();
+  const { data, error } = await supabase.from("journeys").select("*").eq("id", trimmedUuid).single();
   if (error) throw new Error(error.message);
   return { data, error };
 };

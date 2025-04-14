@@ -1,7 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo, memo } from "react";
 import { FaHome } from "react-icons/fa";
 import { ProfileImage } from "@/components/navigation/ProfileImage";
 import { Logo } from "@/components/navigation/Logo";
@@ -15,68 +15,83 @@ import { Menu, Portal } from "@chakra-ui/react";
 import { toaster } from "@/components/ui/toaster";
 import { auth } from "@/utils/data/auth";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { user } from "@/utils/data/user";
 
-export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
-  const { profileImage, id, isAuthenticated } = useSupabaseAuth();
+function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
+  const { id, isAuthenticated, profileImage: profileImageFromAuth } = useSupabaseAuth();
   const pathname = usePathname();
   const router = useRouter();
-  const isException = exceptionPath.some((path) => pathname?.includes(path));
-  const isJourney = pathname?.includes("journey");
+  
+  // useMemo를 사용하여 계산 결과 메모이제이션
+  const isException = useMemo(() => 
+    exceptionPath.some((path) => pathname?.includes(path)),
+    [exceptionPath, pathname]
+  );
+  
+  const isJourney = useMemo(() => 
+    pathname?.includes("journey"),
+    [pathname]
+  );
+  
   const [isVisible, setIsVisible] = useState(true);
   const [journeyList, setJourneyList] = useState<UserJourneyWithJourney[]>([]);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
-  
-  useEffect(() => {
-    // 초기 스크롤 위치 설정
-    lastScrollY.current = window.scrollY;
 
-    const handleScroll = () => {
-      if (!ticking.current) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
+  // 스크롤 이벤트 핸들러 메모이제이션
+  const handleScroll = useCallback(() => {
+    if (!ticking.current) {
+      window.requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+        const isScrollingDown = currentScrollY > lastScrollY.current;
 
-          // 스크롤 방향 감지
-          const isScrollingDown = currentScrollY > lastScrollY.current;
+        if (isScrollingDown && currentScrollY > 70) {
+          setIsVisible(false);
+        } else {
+          setIsVisible(true);
+        }
 
-          // 스크롤 방향에 따라 네비게이션 바 표시/숨김
-          if (isScrollingDown && currentScrollY > 70) {
-            setIsVisible(false);
-          } else {
-            setIsVisible(true);
-          }
+        lastScrollY.current = currentScrollY;
+        ticking.current = false;
+      });
 
-          lastScrollY.current = currentScrollY;
-          ticking.current = false;
-        });
-
-        ticking.current = true;
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+      ticking.current = true;
+    }
   }, []);
 
   useEffect(() => {
+    lastScrollY.current = window.scrollY;
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    if (!id) return;
+    
+    const fetchProfileImage = async () => {
+      const data = await user.getProfileImage(id);
+      setProfileImage(data);
+    };
+    
     const fetchJourneyList = async () => {
-      if (id) {
-        try {
-          const journeyList = await getJourney(id);
-          setJourneyList(journeyList as UserJourneyWithJourney[]);
-        } catch (error) {
-          console.error("Error fetching journey list:", error);
-          setJourneyList([]);
-        }
+      try {
+        const journeyList = await getJourney(id);
+        setJourneyList(journeyList as UserJourneyWithJourney[]);
+      } catch (error) {
+        console.error("Error fetching journey list:", error);
+        setJourneyList([]);
       }
     };
+    
+    fetchProfileImage();
     fetchJourneyList();
   }, [id]);
 
-  const onDropDownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const onDropDownChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const journeyId = e.target.value;
     router.push(`/journey/${journeyId}`);
-  };
+  }, [router]);
 
   const handleLogout = useCallback(async () => {
     await auth.userLogout();
@@ -87,7 +102,18 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
     router.replace("/login");
   }, [router]);
 
-  
+  // 드롭다운 옵션 메모이제이션
+  const dropdownOptions = useMemo(() => {
+    if (journeyList && journeyList.length > 0) {
+      return journeyList.map((journey) => (
+        <option value={journey.journeys?.id} key={journey.id}>
+          {journey.journeys?.name}
+        </option>
+      ));
+    }
+    return <option value="" key="0">여행 없음</option>;
+  }, [journeyList]);
+
   return (
     <StyledNavigation $isVisible={isVisible && !isException}>
       <div className="outside-container">
@@ -99,17 +125,7 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
               </IconContainer>
               <Separator orientation="vertical" height="100%" size="sm" />
               <select className="dropdown" onChange={onDropDownChange}>
-                {journeyList && journeyList.length > 0 ? (
-                  journeyList.map((journey) => (
-                    <option value={journey.journeys?.id} key={journey.id}>
-                      {journey.journeys?.name}
-                    </option>
-                  ))
-                ) : (
-                  <option value="" key="0">
-                    여행 없음
-                  </option>
-                )}
+                {dropdownOptions}
               </select>
             </>
           ) : (
@@ -121,7 +137,7 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
           <Menu.Trigger asChild>
             <div className="right-container">
               <ProfileImage
-                profileImage={profileImage}
+                profileImage={profileImageFromAuth}
                 width={30}
                 blockClick={true}
               />
@@ -145,12 +161,12 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
                   버그 신고
                 </Menu.Item>
                 {isAuthenticated && (
-                <Menu.Item
-                  value="logout"
-                  color="fg.error"
-                  _hover={{ bg: "bg.error", color: "fg.error" }}
-                  onClick={handleLogout}
-                  style={{ cursor: "pointer" }}
+                  <Menu.Item
+                    value="logout"
+                    color="fg.error"
+                    _hover={{ bg: "bg.error", color: "fg.error" }}
+                    onClick={handleLogout}
+                    style={{ cursor: "pointer" }}
                   >
                     로그아웃
                   </Menu.Item>
@@ -172,6 +188,9 @@ export function Navigation({ exceptionPath }: { exceptionPath: string[] }) {
     </StyledNavigation>
   );
 }
+
+// React.memo로 감싸서 props가 변경되지 않으면 리렌더링 방지
+export const Navigation = memo(NavigationComponent);
 
 const StyledNavigation = styled.div<{ $isVisible: boolean }>`
   .dropdown {

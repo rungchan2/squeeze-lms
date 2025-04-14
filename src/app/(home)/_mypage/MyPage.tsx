@@ -36,8 +36,12 @@ export default function MyPage() {
 
   useEffect(() => {
     const fetchOrgData = async () => {
+      if (!organizationId) {
+        return;
+      }
+      
       const { data, error } = await organization.getOrganization(
-        organizationId || ""
+        organizationId
       );
       if (error) {
         console.error("Error fetching organization data:", error);
@@ -142,7 +146,12 @@ export default function MyPage() {
                 maxWidth: "100%",
               }}
             >
-              ({orgData ? orgData[0].name : "조직 정보를 불러오는 중입니다."})
+              {!organizationId 
+                ? "조직 정보가 없습니다." 
+                : orgData 
+                  ? `(${orgData[0]?.name})` 
+                  : "(조직 정보를 불러오는 중입니다.)"
+              }
             </Text>
           </div>
         </div>
