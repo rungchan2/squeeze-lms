@@ -24,6 +24,8 @@ import { user } from "@/utils/data/user";
 import { Loading } from "@/components/common/Loading";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
+
+
 // 유효성 검증 스키마
 const minLength = "이름은 1자 이상 입력해주세요.";
 const maxLength = "이름은 10자 이하로 입력해주세요.";
@@ -149,14 +151,32 @@ export default function ProfilePage() {
     setOpendModal(null);
   };
 
-  const handlePassword = async (data: string) => {
-    const { error } = await user.updatePassword(data);
-    if (error) throw error;
-    toaster.create({
-      title: "비밀번호 업데이트 성공",
-      description: "비밀번호가 성공적으로 업데이트되었습니다.",
-    });
-    setOpendModal(null);
+  const handlePasswordReset = async (data: string) => {
+    try {
+      const { error } = await user.updatePassword(data);
+      if (error) throw error;
+      
+      // 모달 먼저 닫기
+      setOpendModal(null);
+      
+      // 토스트 메시지 표시
+      toaster.create({
+        title: "비밀번호 업데이트 성공",
+        description: "비밀번호가 성공적으로 업데이트되었습니다.",
+      });
+      
+      // 비동기로 상태 갱신
+      setTimeout(() => {
+        refreshAuthState();
+      }, 100);
+    } catch (error) {
+      console.error("비밀번호 업데이트 실패:", error);
+      toaster.create({
+        title: "비밀번호 업데이트 실패",
+        description: "비밀번호 업데이트 중 오류가 발생했습니다.",
+        type: "error",
+      });
+    }
   };
   return (
     <Container>
@@ -259,7 +279,7 @@ export default function ProfilePage() {
           <Button
             variant="outline"
             type="submit"
-            onClick={() => handlePassword(password)}
+            onClick={() => handlePasswordReset(password)}
           >
             초기화
           </Button>

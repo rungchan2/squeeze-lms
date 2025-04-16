@@ -99,8 +99,8 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
       title: "로그아웃 되었습니다.",
       type: "success",
     });
-    router.replace("/login");
-  }, [router]);
+    window.location.href = "/login";
+  }, []);
 
   // 드롭다운 옵션 메모이제이션
   const dropdownOptions = useMemo(() => {
