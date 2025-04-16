@@ -61,7 +61,6 @@ const getCurrentUserJourneys = async (userId: string): Promise<UserJourneyWithPr
 
 export const useJourneyUser = (journey_id: string) => {
   const { id: userId } = useSupabaseAuth();
-  console.log("userId", userId);
   // journey_id가 0이면 현재 로그인한 사용자의 모든 여정 참여 정보 가져오기
   const isUserJourneysMode = journey_id === "";
   

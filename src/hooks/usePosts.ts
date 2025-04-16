@@ -5,13 +5,6 @@ import { PostWithRelations } from "@/types";
 import { useSupabaseAuth } from "./useSupabaseAuth";
 import { useState, useCallback, useEffect } from "react";
 
-// 페이지네이션 타입 정의
-type FetchPostsParams = {
-  pageParam: number;
-  pageSize: number;
-  journeySlug?: string;
-  showHidden?: boolean;
-};
 
 // 포스트 페이지 결과 타입
 interface PostsPage {
@@ -278,15 +271,10 @@ async function togglePostHidden(postId: string, isHidden: boolean) {
   
   return data;
 }
-
-// TODO: 1. ✅ 게시물 숨김 상태 갖고오기 및 다시 보이게 하기 기능 구현
-// TODO: 2. ✅ 클라스 별로 게시물 볼 수 있게 쿼리 수정
-// ✅ SWR을 사용한 usePosts 훅
 export function usePosts(pageSize = 10, journeySlug?: string, showHidden = false) {
   const [posts, setPosts] = useState<PostWithRelations[]>([]);
   const [total, setTotal] = useState(0);
   
-  // SWR Infinite로 무한 스크롤 구현
   const getKey = (pageIndex: number, previousPageData: PostsPage | null) => {
     // 이전 페이지 데이터가 없거나 더 불러올 페이지가 있는 경우
     if (previousPageData === null || previousPageData.nextPage !== null) {
