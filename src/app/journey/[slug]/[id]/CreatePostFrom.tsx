@@ -50,19 +50,17 @@ export default function DoMissionPage({
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const initialTeamMembers : TeamMember[] = []
+  const initialTeamMembers: TeamMember[] = [];
 
   // 팀 관련 상태
   const { data: journeyUsers } = useJourneyUser(slug ?? "");
   const [isTeamMission, setIsTeamMission] = useState(false);
-  const [selectedTeamMembers, setSelectedTeamMembers] = useState<TeamMember[]>(initialTeamMembers);
-  
+  const [selectedTeamMembers, setSelectedTeamMembers] =
+    useState<TeamMember[]>(initialTeamMembers);
+
   // useTeams 훅 사용
-  const { 
-    teamData, 
-    markPostAsTeamSubmission 
-  } = useTeams(slug ?? "");
-  
+  const { teamData, markPostAsTeamSubmission } = useTeams(slug ?? "");
+
   // 완료된 미션 목록 관리를 위한 훅 추가
   const { refetch: refetchCompletedMissions } = useCompletedMissions(
     userId || ""
@@ -80,11 +78,13 @@ export default function DoMissionPage({
     // 팀이 있는 경우 팀원 정보 가져오기
     if (teamData && teamData.members && teamData.members.length > 0) {
       const teamMembers = teamData.members.map((member) => ({
-        label: `${member.profiles?.first_name || ''} ${member.profiles?.last_name || ''}`,
+        label: `${member.profiles?.first_name || ""} ${
+          member.profiles?.last_name || ""
+        }`,
         value: member.user_id,
-        isFixed: member.user_id === userId || member.is_leader === true
+        isFixed: member.user_id === userId || member.is_leader === true,
       }));
-      
+
       setSelectedTeamMembers(teamMembers);
     }
   }, [teamData, userId]);
@@ -94,9 +94,14 @@ export default function DoMissionPage({
     if (missionInstance && missionInstance.mission) {
       // mission_type이 'team'인 경우 팀 미션으로 설정
       setIsTeamMission(missionInstance.mission.mission_type === "team");
-      
+
       // 팀원 정보 초기화 (현재 사용자가 팀에 속하지 않은 경우)
-      if (isTeamMission && userId && journeyUsers && (!teamData.members || teamData.members.length === 0)) {
+      if (
+        isTeamMission &&
+        userId &&
+        journeyUsers &&
+        (!teamData.members || teamData.members.length === 0)
+      ) {
         // 현재 사용자를 팀원으로 추가
         const currentUser = journeyUsers.find((user) => user.id === userId);
         if (currentUser) {
@@ -156,18 +161,18 @@ export default function DoMissionPage({
   const handleTeamSubmission = async (postId: string) => {
     try {
       if (!missionInstance) return false;
-      
+
       // useTeams 훅의 markPostAsTeamSubmission 함수 사용
       const success = await markPostAsTeamSubmission(
         postId,
         missionInstance.mission.points || 0
       );
-      
+
       if (!success) {
         console.error("팀 제출 처리 중 오류 발생");
         return false;
       }
-      
+
       return true;
     } catch (error) {
       console.error("팀 제출 처리 중 오류:", error);
@@ -359,7 +364,9 @@ export default function DoMissionPage({
         </InputAndTitle>
         <Tiptap
           placeholder={
-            updateData?.content || "미션가이드에 따라 미션을 완료해주세요."
+            updateData?.content ||
+            missionInstance?.mission.description ||
+            "미션가이드에 따라 미션을 완료해주세요."
           }
           content={content}
           onChange={(value) => {
@@ -388,7 +395,7 @@ export default function DoMissionPage({
             함께 미션을 수행할 팀원을 선택하세요. 선택한 팀원들과 함께 점수를
             받게 됩니다.
           </Text>
-          {(!journeyUsers || journeyUsers.length <= 1) ? (
+          {!journeyUsers || journeyUsers.length <= 1 ? (
             <EmptyTeamMessage>
               <Text variant="body" color="grey-500">
                 팀원이 없습니다. 팀원을 초대해주세요.
@@ -459,7 +466,7 @@ const EmptyTeamMessage = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100px;
+  height: 50px;
   background-color: var(--grey-100);
   border-radius: 8px;
 `;
