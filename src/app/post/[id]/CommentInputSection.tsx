@@ -14,6 +14,7 @@ import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 interface CommentInputSectionProps {
   createComment: (content: string) => Promise<any>;
+  missionInstanceId?: string;
 }
 
 // 훅 추출로 중복 렌더링 방지
@@ -114,8 +115,9 @@ function useCommentInput(createComment: (content: string) => Promise<any>) {
 
 export default function CommentInputSection({
   createComment,
+  missionInstanceId
 }: CommentInputSectionProps) {
-  const { profileImage } = useSupabaseAuth();
+  const { id: userId } = useSupabaseAuth();
   const {
     comment,
     isSubmitting,
@@ -156,13 +158,14 @@ export default function CommentInputSection({
       
       <div className="comment-section-container">
         <div className="comment-section-header">
-          <ProfileImage profileImage={profileImage} size="small" />
+          <ProfileImage profileImage={null} size="small" />
           <MentionInput
             ref={inputRef}
             onKeyDown={handleKeyDown}
             content={comment}
             onChange={handleCommentChange}
             placeholder="댓글..."
+            journeyId={missionInstanceId}
           />
         </div>
         <div className="comment-section-footer">

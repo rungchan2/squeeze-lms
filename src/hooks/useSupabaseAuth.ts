@@ -126,20 +126,38 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
   refreshAuthState: async () => {
     const supabase = createClient();
     console.log("사용자 상태 업데이트 됨");
-    const { data, error } = await supabase.auth.refreshSession();
     
-    if (error) {
-      console.error("Error refreshing session:", error.message);
-      return;
-    }
-    
-    if (data.session) {
-      get().updateAuthState(data.session);
+    try {
+      const { data, error } = await supabase.auth.refreshSession();
       
-      // 프로필 정보 업데이트
-      if (data.session.user?.id) {
-        await fetchUserProfile(data.session.user.id);
+      if (error) {
+        console.error("Error refreshing session:", error.message);
+        return;
       }
+      
+      if (data.session) {
+        // 현재 상태를 저장하여 불필요한 상태 변경 방지
+        const currentState = get();
+        
+        // 상태가 이미 정리된 경우(로그아웃) 업데이트하지 않음
+        if (!currentState.user) {
+          console.log("사용자가 이미 로그아웃됨, 상태 업데이트 건너뜀");
+          return;
+        }
+        
+        get().updateAuthState(data.session);
+        
+        // 프로필 정보 업데이트
+        if (data.session.user?.id) {
+          await fetchUserProfile(data.session.user.id);
+        }
+      } else {
+        // 세션이 없는 경우 상태 정리
+        console.log("새로운 세션이 없음, 상태 정리");
+        get().clearAuthState();
+      }
+    } catch (e) {
+      console.error("Session refresh error:", e);
     }
   },
   

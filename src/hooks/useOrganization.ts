@@ -8,7 +8,7 @@ const supabase = createClient();
 async function getOrganizationList() {
   const { data, error } = await supabase.from("organizations").select("*");
   if (error) throw error;
-  const filteredData = data.filter((item) => item.name !== "스퀴즈팀");
+  const filteredData = data.filter((item) => !item.name.includes("스퀴즈"));
   return filteredData as Organization[];
 }
 

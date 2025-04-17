@@ -22,7 +22,6 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
   const pathname = usePathname();
   const router = useRouter();
   
-  // useMemo를 사용하여 계산 결과 메모이제이션
   const isException = useMemo(() => 
     exceptionPath.some((path) => pathname?.includes(path)),
     [exceptionPath, pathname]
@@ -99,8 +98,8 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
       title: "로그아웃 되었습니다.",
       type: "success",
     });
-    router.replace("/login");
-  }, [router]);
+    window.location.href = "/login";
+  }, []);
 
   // 드롭다운 옵션 메모이제이션
   const dropdownOptions = useMemo(() => {

@@ -61,6 +61,7 @@ export default function PostPage() {
         <CommentSection 
           postId={params.id as string}
           enableRealtime={true}
+          missionInstanceId={post.mission_instance_id?.id}
         />
       </CommentContainer>
     </PostPageContainer>

@@ -15,11 +15,13 @@ import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 interface CommentSectionProps {
   postId?: string;
   enableRealtime?: boolean;
+  missionInstanceId?: string;
 }
 
 export default function CommentSection({ 
   postId: propPostId, 
-  enableRealtime = true 
+  enableRealtime = true,
+  missionInstanceId
 }: CommentSectionProps = {}) {
   const params = useParams();
   const postId = propPostId || (params.id as string);
@@ -168,7 +170,7 @@ export default function CommentSection({
         )}
       </div>
     
-      <CommentInputSection createComment={createComment} />
+      <CommentInputSection createComment={createComment} missionInstanceId={missionInstanceId} />
     </CommentSectionContainer>
   );
 }

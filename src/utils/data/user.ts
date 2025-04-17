@@ -1,9 +1,10 @@
 import { createClient } from "@/utils/supabase/client";
 import { SignupPage } from "@/types";
 
+const supabase = createClient();
+
 export const user = {
   async getUser() {
-    const supabase = createClient();
     const {
       data: { user },
       error,
@@ -11,7 +12,6 @@ export const user = {
     return { user, error };
   },
   async getUserProfile() {
-    const supabase = createClient();
     const {
       data: { user },
       error,
@@ -27,25 +27,18 @@ export const user = {
     return { profile, error: profileError };
   },
   async deleteProfile(uid: string) {
-    const supabase = createClient();
     const { error } = await supabase.from("profiles").delete().eq("uid", uid);
     return { error };
   },
   async deleteUser(uid: string) {
-    const supabase = createClient();
     const { error } = await supabase.auth.admin.deleteUser(uid);
     return { error };
   },
   async updateProfile(id: string, data: any) {
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("profiles")
-      .update(data)
-      .eq("id", id);
+    const { error } = await supabase.from("profiles").update(data).eq("id", id);
     return { error };
   },
   async supabaseUser() {
-    const supabase = createClient();
     const {
       data: { user },
       error,
@@ -53,15 +46,12 @@ export const user = {
     return { user, error };
   },
   async updatePassword(new_password: string) {
-    const supabase = createClient();
     const { error } = await supabase.auth.updateUser({
       password: new_password,
     });
     return { error };
   },
   async createProfile(data: SignupPage) {
-    const supabase = createClient();
-
     // 프로필 데이터 구성
     const profileData = {
       email: data.email,
@@ -80,7 +70,6 @@ export const user = {
     return { error };
   },
   async getProfileImage(id: string) {
-    const supabase = createClient();
     const { data, error } = await supabase
       .from("profiles")
       .select("profile_image")
@@ -91,4 +80,16 @@ export const user = {
     }
     return data?.profile_image;
   },
+};
+
+export async function getMarketingOptIn(id: string): Promise<boolean | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("marketing_opt_in")
+    .eq("id", id)
+    .single();
+
+  if (error) throw error;
+
+  return data?.marketing_opt_in;
 };

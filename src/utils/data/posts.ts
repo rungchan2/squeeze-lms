@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 const supabase = createClient();
 
 // Supabase의 쿼리 결과와 일치하는 타입 정의
-type PostWithMissionInstanceResponse = {
+export type PostWithMissionInstanceResponse = {
   data: {
     id: string;
     title: string;

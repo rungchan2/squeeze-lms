@@ -4,8 +4,16 @@ import React, {
 } from 'react'
 import styled from '@emotion/styled'
 
+// User 인터페이스 추가
+interface User {
+  id: string
+  email: string
+  fullName: string
+  avatarUrl?: string | null
+}
+
 interface MentionListProps {
-  items: string[]
+  items: User[] // 문자열 배열에서 User 객체 배열로 변경
   command: (props: { id: string }) => void
 }
 
@@ -20,7 +28,7 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>((props, ref) =>
     const item = props.items[index]
 
     if (item) {
-      props.command({ id: index.toString() })
+      props.command({ id: item.id }) // 객체의 id 사용
     }
   }
 
@@ -68,7 +76,9 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>((props, ref) =>
             key={index}
             onClick={() => selectItem(index)}
           >
-            {item}
+            <UserInfo>
+              {item.fullName || item.email} {/* 사용자 이름 또는 이메일 표시 */}
+            </UserInfo>
           </DropdownButton>
         ))
         : <div className="item">결과 없음</div>
@@ -121,4 +131,10 @@ const DropdownButton = styled.button`
   &.is-selected {
     background-color: var(--grey-200);
   }
+`;
+
+const UserInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
 `;

@@ -1,15 +1,23 @@
 import { createClient } from "@/utils/supabase/client";
+import { getMarketingOptIn } from "@/utils/data/user";
+
 
 const supabase = createClient();
 
 export const sendEmail = async (
   email: string,
   subject: string,
-  body: string
+  body: string,
+  userId: string
 ) => {
+  const marketingOptIn = await getMarketingOptIn(userId);
+  if (!marketingOptIn) {
+    return { data: {message: "이메일 전송 거절"}, error: null };
+  }
+
   try {
     console.log("이메일 전송 요청:", { email, subject });
-    
+
     const { data, error } = await supabase.functions.invoke("resend", {
       body: { to: email, subject, html: body },
     });
