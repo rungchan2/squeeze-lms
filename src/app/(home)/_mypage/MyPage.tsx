@@ -122,7 +122,7 @@ export default function MyPage() {
 
           <div className="profileInfo">
             <Heading level={4}>
-              안녕하세요 <br /> {firstName} {lastName}님!
+              안녕하세요 <br /> {lastName}{firstName}님!
             </Heading>
             <Text
               variant="body"

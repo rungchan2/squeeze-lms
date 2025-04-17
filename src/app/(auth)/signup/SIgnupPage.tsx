@@ -28,6 +28,7 @@ import { auth } from "@/utils/data/auth";
 import { Modal } from "@/components/modal/Modal";
 import { Role } from "@/types";
 import { accessCode } from "@/utils/data/accessCode";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
 
@@ -37,6 +38,7 @@ export default function SignupPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roleAccessType, setRoleAccessType] = useState<string>("teacher");
   const [confirmedRoleType, setConfirmedRoleType] = useState<Role | null>(null);
+  const { refreshToken } = useSupabaseAuth();
   const roleAccessTypeOptions = [
     { label: "관리자", value: "admin" },
     { label: "교사", value: "teacher" },
@@ -159,9 +161,13 @@ export default function SignupPage() {
           title: "회원가입이 완료되었습니다.",
           type: "success",
         });
-
-        window.location.href = "/login";
         console.log("회원가입 완료");
+        await refreshToken();
+        
+        // 인증 상태가 업데이트될 시간을 주기 위해 짧은 지연 후 리다이렉트
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
       } else {
         console.error("사용자 정보 없음");
         toaster.create({
