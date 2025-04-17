@@ -38,7 +38,7 @@ export default function BugReport() {
     mode: "onChange",
     resolver: zodResolver(createBugReportSchema),
     defaultValues: {
-      user_id: id || 0,
+      user_id: id || "",
       file_url: "",
     },
   });

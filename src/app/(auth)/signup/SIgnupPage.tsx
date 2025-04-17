@@ -28,7 +28,6 @@ import { auth } from "@/utils/data/auth";
 import { Modal } from "@/components/modal/Modal";
 import { Role } from "@/types";
 import { accessCode } from "@/utils/data/accessCode";
-import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
 
@@ -38,7 +37,6 @@ export default function SignupPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roleAccessType, setRoleAccessType] = useState<string>("teacher");
   const [confirmedRoleType, setConfirmedRoleType] = useState<Role | null>(null);
-  const { refreshAuthState } = useSupabaseAuth();
   const roleAccessTypeOptions = [
     { label: "관리자", value: "admin" },
     { label: "교사", value: "teacher" },

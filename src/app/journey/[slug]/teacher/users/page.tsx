@@ -71,6 +71,7 @@ export default function UsersPage() {
         }
       }, 1000);
     } catch (err) {
+      console.error("뒤로 가기 오류:", err);
       router.push("/");
     }
   }, [router, slug]);
@@ -124,13 +125,28 @@ export default function UsersPage() {
   }, [organizationId, role, router, slug, goBackOrHome]);
 
   // 현재 여정 ID가 설정된 후에만 여정 사용자 불러오기
-  const { currentJourneyUsers = [] } = useJourneyUser(uuid ?? "");
+  const { currentJourneyUsers = [], revalidate: revalidateJourneyUsers } = useJourneyUser(uuid ?? "");
 
   // 현재 여정에 이미 참여 중인 사용자 ID 목록
   const currentMemberIds = useMemo(
     () => currentJourneyUsers?.map((user) => user?.id).filter(Boolean) || [],
     [currentJourneyUsers]
   );
+  
+  // 로컬 상태로 멤버 ID 관리 (초기값은 currentMemberIds)
+  const [localMemberIds, setLocalMemberIds] = useState<string[]>([]);
+  
+  // currentMemberIds가 변경될 때만 localMemberIds 업데이트
+  useEffect(() => {
+    // 배열 내용 비교를 통해 실제로 변경되었을 때만 상태 업데이트
+    const isDifferent = 
+      localMemberIds.length !== currentMemberIds.length || 
+      currentMemberIds.some(id => !localMemberIds.includes(id));
+    
+    if (isDifferent) {
+      setLocalMemberIds(currentMemberIds);
+    }
+  }, [currentMemberIds]);
 
   // useOrganizationList 직접 불러오기
   const { organizations = [], isLoading: orgsLoading } = useOrganizationList();
@@ -176,14 +192,14 @@ export default function UsersPage() {
   const isUserInvited = useCallback(
     (userId: string) => {
       if (!userId) return false;
-      // 이미 멤버인 경우
-      if (currentMemberIds.includes(userId)) {
+      // 이미 멤버인 경우 (localMemberIds 사용)
+      if (localMemberIds.includes(userId)) {
         return true;
       }
       // 초대된 경우
       return invitedUsers.includes(userId);
     },
-    [currentMemberIds, invitedUsers]
+    [localMemberIds, invitedUsers]
   );
 
   // 초대 버튼 텍스트 표시
@@ -193,7 +209,7 @@ export default function UsersPage() {
       if (invitingUsers.includes(userId)) {
         return "로딩...";
       }
-      if (currentMemberIds.includes(userId)) {
+      if (localMemberIds.includes(userId)) {
         return "멤버";
       }
       if (invitedUsers.includes(userId)) {
@@ -201,14 +217,14 @@ export default function UsersPage() {
       }
       return "초대";
     },
-    [currentMemberIds, invitedUsers, invitingUsers]
+    [localMemberIds, invitedUsers, invitingUsers]
   );
 
   const handleInvite = async (userId: string, email: string) => {
     if (!userId) return;
     // 이미 멤버이거나 처리 중인 사용자는 무시
     if (
-      currentMemberIds.includes(userId) ||
+      localMemberIds.includes(userId) ||
       invitingUsers.includes(userId) ||
       invitedUsers.includes(userId)
     ) {
@@ -266,7 +282,8 @@ export default function UsersPage() {
               <p>이 메일은 발신 전용이며, 문의사항은 웹사이트를 통해 문의해주세요.</p>a
               <p>© ${new Date().getFullYear()} 스퀴즈. All rights reserved.</p>
             </div>
-          </div>`
+          </div>`,
+          userId
         );
         if (error) {
           toaster.create({
@@ -289,6 +306,56 @@ export default function UsersPage() {
     } finally {
       // 처리 중 상태 해제
       setInvitingUsers((prev) => prev.filter((id) => id !== userId));
+    }
+  };
+
+  // 사용자를 바로 추가하는 함수
+  const handleDirectAdd = async (userId: string) => {
+    // 이미 멤버이거나 처리 중인 사용자는 무시
+    if (localMemberIds.includes(userId)) {
+      toaster.create({
+        title: "이미 클라스 멤버입니다",
+        type: "info",
+      });
+      return;
+    }
+
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("user_journeys")
+        .insert({ 
+          user_id: userId, 
+          journey_id: uuid, 
+          role_in_journey: "user",
+          joined_at: new Date().toISOString()
+        });
+      
+      if (error) {
+        console.error("사용자 추가 실패:", error);
+        toaster.create({
+          title: "사용자 추가 실패",
+          type: "error",
+        });
+      } else {
+        // 성공 메시지 표시
+        toaster.create({
+          title: "사용자가 클라스에 추가되었습니다",
+          type: "success",
+        });
+        
+        // 로컬 상태 즉시 업데이트
+        setLocalMemberIds(prev => [...prev, userId]);
+        
+        // 서버 데이터 다시 불러오기
+        revalidateJourneyUsers();
+      }
+    } catch (error) {
+      console.error("사용자 추가 중 오류:", error);
+      toaster.create({
+        title: "사용자 추가 실패",
+        type: "error",
+      });
     }
   };
 
@@ -340,7 +407,7 @@ export default function UsersPage() {
 
   return (
     <Container>
-      <Tabs.Root defaultValue="members" variant="outline">
+      <Tabs.Root defaultValue="members" variant="line">
         <Tabs.List bg="bg.muted" rounded="l3" p="1">
           <Tabs.Trigger value="members">
             <LuUser />
@@ -356,7 +423,7 @@ export default function UsersPage() {
           <Flex flexDirection="column" gap="16px">
             <Heading level={3}>클라스 멤버</Heading>
             <TableContainer>
-              <Table.Root size="sm" interactive showColumnBorder>
+              <Table.Root size="sm" interactive >
                 <Table.Header>
                   <Table.Row>
                     <Table.ColumnHeader textAlign="center">
@@ -369,7 +436,7 @@ export default function UsersPage() {
                       역할
                     </Table.ColumnHeader>
                     <Table.ColumnHeader textAlign="center">
-                      초대
+                      강퇴
                     </Table.ColumnHeader>
                   </Table.Row>
                 </Table.Header>
@@ -389,9 +456,8 @@ export default function UsersPage() {
                           />
                         </Table.Cell>
                         <Table.Cell>
-                          {(user?.first_name || "") +
-                            " " +
-                            (user?.last_name || "")}
+                          {(user?.last_name || "")+
+                            (user?.first_name || "")}
                         </Table.Cell>
                         <Table.Cell>{user?.role || "일반"}</Table.Cell>
                         <Table.Cell justifyContent="center">
@@ -476,6 +542,9 @@ export default function UsersPage() {
                     <Table.ColumnHeader>
                       초대
                     </Table.ColumnHeader>
+                    <Table.ColumnHeader>
+                      바로추가
+                    </Table.ColumnHeader>
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -494,9 +563,8 @@ export default function UsersPage() {
                           />
                         </Table.Cell>
                         <Table.Cell>
-                          {(user.first_name || "") +
-                            " " +
-                            (user.last_name || "")}
+                          {(user.last_name || "")+
+                            (user.first_name || "")}
                         </Table.Cell>
                         <Table.Cell>{user.role || "일반"}</Table.Cell>
                         <Table.Cell justifyContent="center">
@@ -517,6 +585,26 @@ export default function UsersPage() {
                             }
                           >
                             {getInviteButtonText(user.id)}
+                          </Button>
+                          
+                        </Table.Cell>
+                        <Table.Cell width="fit-content">
+                        <Button
+                            style={{
+                              maxWidth: "100px", 
+                              alignSelf: "center",
+                              marginLeft: "8px",
+                              backgroundColor: "var(--primary-600)",
+                              color: "white",
+                            }}
+                            variant="flat"
+                            onClick={() => handleDirectAdd(user.id)}
+                            disabled={
+                              !user.id ||
+                              localMemberIds.includes(user.id)
+                            }
+                          >
+                            바로추가
                           </Button>
                         </Table.Cell>
                       </Table.Row>

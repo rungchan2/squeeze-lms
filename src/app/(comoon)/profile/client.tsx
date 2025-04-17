@@ -49,7 +49,7 @@ export default function ProfilePage() {
     null
   );
   const [password, setPassword] = useState("");
-  const { isAuthenticated, loading, id, refreshAuthState } = useSupabaseAuth();
+  const { isAuthenticated, loading, id, refreshToken } = useSupabaseAuth();
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
   if (!loading) {
@@ -82,7 +82,7 @@ export default function ProfilePage() {
       if (isAuthenticated) {
         try {
           setIsLoadingProfile(true);
-          const data = await getPorfile(id);
+          const data = await getPorfile(id || "");
           setValue("profileImage", data.profile?.profile_image || "");
           setValue("first_name", data.profile?.first_name || "");
           setValue("last_name", data.profile?.last_name || "");
@@ -116,7 +116,7 @@ export default function ProfilePage() {
       if (error) throw error;
 
       // 유저 정보 새로고침
-      await refreshAuthState();
+      await refreshToken();
 
       toaster.create({
         title: "프로필 업데이트 성공",
@@ -139,7 +139,7 @@ export default function ProfilePage() {
   }
 
   const handleDelete = async () => {
-    const { error } = await user.deleteUser(id);
+    const { error } = await user.deleteUser(id || "");
     if (error) throw error;
     await logout();
     toaster.create({
@@ -167,7 +167,7 @@ export default function ProfilePage() {
       
       // 비동기로 상태 갱신
       setTimeout(() => {
-        refreshAuthState();
+        refreshToken();
       }, 100);
     } catch (error) {
       console.error("비밀번호 업데이트 실패:", error);

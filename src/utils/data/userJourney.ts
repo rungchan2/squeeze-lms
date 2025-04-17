@@ -1,13 +1,11 @@
-"use server";
-
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/client";
 import { UserJourneyWithJourney } from "@/types";
 
 export async function getJourney(userId: string) {
   if (!userId) {
     return [];
   }
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("user_journeys")
       .select("*, journeys(*)")
@@ -26,7 +24,7 @@ export async function getJourney(userId: string) {
 
 
 export async function createJourney(userId: string, journey: UserJourneyWithJourney) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data, error } = await supabase
       .from("user_journeys")
       .insert({ user_id: userId, journey_id: journey.journey_id });
@@ -37,3 +35,5 @@ export async function createJourney(userId: string, journey: UserJourneyWithJour
 
     return data;
 }
+
+
