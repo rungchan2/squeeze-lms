@@ -14,7 +14,6 @@ import {
   RadioGroup,
   HStack,
 } from "@chakra-ui/react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DevTool } from "@hookform/devtools";
@@ -29,15 +28,17 @@ import { auth } from "@/utils/data/auth";
 import { Modal } from "@/components/modal/Modal";
 import { Role } from "@/types";
 import { accessCode } from "@/utils/data/accessCode";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+
 type Agreement = "mailAgreement" | "cookieAgreement";
 
 export default function SignupPage() {
-  const router = useRouter();
   const [isChecked, setIsChecked] = useState<Agreement[]>([]);
   const [roleAccessCode, setRoleAccessCode] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roleAccessType, setRoleAccessType] = useState<string>("teacher");
   const [confirmedRoleType, setConfirmedRoleType] = useState<Role | null>(null);
+  const { refreshAuthState } = useSupabaseAuth();
   const roleAccessTypeOptions = [
     { label: "관리자", value: "admin" },
     { label: "교사", value: "teacher" },
@@ -137,7 +138,6 @@ export default function SignupPage() {
       // 2. 프로필 생성
       if (userData.user) {
         // 사용자 ID 가져오기
-        const uid = userData.user.id;
 
         // 프로필 데이터에 uid 추가
         const profileData: SignupPage = {
@@ -162,7 +162,8 @@ export default function SignupPage() {
           type: "success",
         });
 
-        router.push("/login");
+        window.location.href = "/login";
+        console.log("회원가입 완료");
       } else {
         console.error("사용자 정보 없음");
         toaster.create({

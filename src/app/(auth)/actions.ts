@@ -41,6 +41,7 @@ export async function getUserProfile() {
 }
 
 export async function logout() {
+  console.log("logout");
   const supabase = await createClient();
   await supabase.auth.signOut();
   Cookies.remove("sb-");

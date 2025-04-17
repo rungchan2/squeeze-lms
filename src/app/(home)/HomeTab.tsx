@@ -43,7 +43,7 @@ export default function HomeTab() {
     }
     return null;
   }
-
+//[ ] 불필요 리 렌더링 해소. 탭별로 컴포넌트 분리하기 및 렌더링 확인
   return (
     <HomeContainer>
       <Tabs.Root key="line" defaultValue="classes" variant="line" fitted>

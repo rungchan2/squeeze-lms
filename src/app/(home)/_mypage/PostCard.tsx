@@ -53,7 +53,6 @@ function useCommentsCount(postId: string) {
   };
 }
 
-// memo로 컴포넌트 최적화
 export default memo(function PostCard({
   post,
   showDetails = false,
@@ -99,7 +98,7 @@ export default memo(function PostCard({
 
   // imageUrl을 useMemo로 최적화
   const imageUrl = useMemo(
-    () => post.content?.match(/<img[^>]*src="([^"]+)"[^>]*>/)?.[1],
+    () => post.content?.match(/<img[^>]*src="([^"]+)"[^>]*>/)?.[0],
     [post.content]
   );
 
@@ -160,7 +159,6 @@ export default memo(function PostCard({
       }
     },
     [
-      post.id,
       post.title,
       post.content,
       post.view_count,
@@ -183,7 +181,7 @@ export default memo(function PostCard({
     }
     return null;
   }
-
+  //[ ] 팀 포스팅 시 팀원 이름 전부 표시 및 팀 미션이라는 표시가능.
   return (
     <PostCardContainer showDetails={showDetails} onClick={handlePostClick}>
       <ContentWrapper>
@@ -244,16 +242,23 @@ export default memo(function PostCard({
                     링크 복사
                   </Menu.Item>
                   <OnlyMyPost>
-                    <Menu.Item value="export" style={{ cursor: "pointer" }} onClick={() => {
-                      router.push(`/post/${post.id}/edit`);
-                    }}>
+                    <Menu.Item
+                      value="export"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => {
+                        router.push(`/post/${post.id}/edit`);
+                      }}
+                    >
                       수정
                     </Menu.Item>
                     <Menu.Item
                       style={{ cursor: "pointer" }}
                       value="hide"
                       color="var(--grey-700)"
-                      _hover={{ bg: "var(--grey-200)", color: "var(--grey-700)" }}
+                      _hover={{
+                        bg: "var(--grey-200)",
+                        color: "var(--grey-700)",
+                      }}
                       onClick={(e) => {
                         if (confirm("이 게시물을 숨기시겠습니까?")) {
                           posts.hidePost(post.id);
