@@ -1,13 +1,13 @@
 import NewMissionPage from "../../create/client";
-import { getMission } from "@/app/journey/[slug]/clientActions";
+import { mission } from "@/utils/data/mission";
 
 export default async function EditMissionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   console.log("id", id);
-  const mission = await getMission(id);
-  if (mission.error) {
-    return <div>Error: {mission.error.message}</div>;
+  const missionData = await mission.getMission(id);
+  if (missionData.error) {
+    return <div>Error: {missionData.error.message}</div>;
   }
   
-  return <NewMissionPage editMissionData={mission.data || undefined} />;
+  return <NewMissionPage editMissionData={missionData.data || undefined} />;
 }

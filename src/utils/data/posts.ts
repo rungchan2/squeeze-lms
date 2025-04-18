@@ -1,8 +1,8 @@
 import {
+  CreatePost,
   UpdatePost,
 } from "@/types";
 import { createClient } from "@/utils/supabase/client";
-const supabase = createClient();
 
 // Supabase의 쿼리 결과와 일치하는 타입 정의
 export type PostWithMissionInstanceResponse = {
@@ -22,70 +22,98 @@ export type PostWithMissionInstanceResponse = {
 }
 
 export const posts = {
-  getPost: async (id: string): Promise<PostWithMissionInstanceResponse> => {
-    const { data, error } = await supabase
-      .from("posts")
-      .select(`
-        id, title, content, user_id, created_at, updated_at, 
-        view_count, score, is_hidden,
-        mission_instance:mission_instance_id(*)
-      `)
-      .eq("id", id)
-      .single();
-    return { data, error };
-  },
-  deletePost: async (postId: string) => {
-    const { data, error } = await supabase
-      .from("posts")
-      .delete()
-      .eq("id", postId);
-    return { data, error };
-  },
+}
 
-  hidePost: async (postId: string) => {
-    const { data, error } = await supabase
-      .from("posts")
-      .update({ is_hidden: true })
-      .eq("id", postId);
-    return { data, error };
-  },
+export async function getPost(id: string): Promise<PostWithMissionInstanceResponse> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .select(`
+      id, title, content, user_id, created_at, updated_at, 
+      view_count, score, is_hidden,
+      mission_instance:mission_instance_id(*)
+    `)
+    .eq("id", id)
+    .single();
+  return { data, error };
+}
 
-  unhidePost: async (postId: string) => {
-    const { data, error } = await supabase
-      .from("posts")
-      .update({ is_hidden: false })
-      .eq("id", postId);
-    return { data, error };
-  },
+export async function deletePost(postId: string) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .delete()
+    .eq("id", postId);
+  return { data, error };
+}
 
-  updatePost: async (postId: string, post: UpdatePost) => {
-    const { data, error } = await supabase
-      .from("posts")
-      .update(post)
-      .eq("id", postId);
-    return { data, error };
-  },
-  updateTeamPost: async (postId: string, post: {
-    team_id: string;
-    is_team_submission: boolean;
-    team_points: number;
-  }) => {
-    const { data, error } = await supabase
-      .from("posts")
-      .update(post)
-      .eq("id", postId);
+export async function hidePost(postId: string) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .update({ is_hidden: true })
+    .eq("id", postId);
+  return { data, error };
+}
 
-    if (error) {
-      throw error;
-    }
+export async function unhidePost(postId: string) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .update({ is_hidden: false })
+    .eq("id", postId);
+  return { data, error };
+}
 
-    return data;
-  },
-  addViewCount: async (postId: string, prevViewCount: number) => {
-    const { data, error } = await supabase
-      .from("posts")
-      .update({ view_count: prevViewCount + 1 })
-      .eq("id", postId);
-    return { data, error };
-  },
-};
+export async function updateTeamPost(postId: string, post: {
+  team_id: string;
+  is_team_submission: boolean;
+  team_points: number;
+}) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .update(post)
+    .eq("id", postId);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function addViewCount(postId: string, prevViewCount: number) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .update({ view_count: prevViewCount + 1 })
+    .eq("id", postId);
+  return { data, error };
+}
+
+export async function updatePost(post: UpdatePost, id: string) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .update(post)
+    .eq("id", id);
+  return { data, error };
+}
+export async function createPost(post: CreatePost) {
+  const supabase = createClient();
+  const insertData: CreatePost = {
+    content: post.content,
+    user_id: post.user_id,
+    mission_instance_id: post.mission_instance_id,
+    title: post.title,
+    score: post.score,
+  };
+  const { data, error } = await supabase
+    .from("posts")
+    .insert(insertData)
+    .select("id")
+    .single();
+  return { data, error, id: data?.id };
+}
+

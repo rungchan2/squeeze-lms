@@ -39,7 +39,6 @@ export default async function JourneyPage({ params }: Params) {
     }
 
     if (!data) {
-      console.log("[JourneyPage] 여정 데이터 없음:", slug);
       return (
         <Box 
           display="flex" 

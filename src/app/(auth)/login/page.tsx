@@ -5,7 +5,7 @@ import styled from "@emotion/styled";
 import Heading from "@/components/Text/Heading";
 import { HStack, Separator } from "@chakra-ui/react";
 import Image from "next/image";
-import { socialLogin } from "@/app/(auth)/clientActions";
+import { socialLogin } from "@/utils/data/auth";
 import LoginSignup from "@/components/auth/LoginSignup";
 import Text from "@/components/Text/Text";
 import { useRouter } from "next/navigation";

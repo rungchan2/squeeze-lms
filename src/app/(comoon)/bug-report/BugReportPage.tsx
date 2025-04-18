@@ -12,7 +12,7 @@ import { NativeSelect } from "@chakra-ui/react";
 import { CreateBugReport, createBugReportSchema } from "@/types";
 import { useRouter } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
-import { createBugReport } from "../clientActions";
+import { createBugReport } from "@/utils/data/bugReport";
 import FileUpload from "@/components/common/FileUpload";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { createIssue } from "@/utils/github/createIssue";

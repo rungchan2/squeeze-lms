@@ -22,7 +22,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import Select from "react-select";
 import { Modal } from "@/components/modal/Modal";
 import { accessCode } from "@/utils/data/accessCode";
-import { auth } from "@/utils/data/auth";
+import { getUser } from "@/utils/data/auth";
 import { toaster } from "@/components/ui/toaster";
 import constants from "@/utils/constants";
 
@@ -87,7 +87,7 @@ export default function LoginPage() {
 
       try {
         // 서버에서 사용자 확인
-        const userData = await auth.getUser();
+        const userData = await getUser();
         if (!userData && isMounted) {
           router.push("/error?message=로그인 정보가 없거나 유효하지 않습니다");
           return;

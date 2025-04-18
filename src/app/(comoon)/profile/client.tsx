@@ -15,12 +15,13 @@ import { toaster } from "@/components/ui/toaster";
 import FileUpload from "@/components/common/FileUpload";
 import { redirect } from "next/navigation";
 import { Separator } from "@chakra-ui/react";
-import { getPorfile, logout } from "@/app/(auth)/actions";
+import { getUserById } from "@/utils/data/user";
+import { userLogout } from "@/utils/data/auth";
 import { MdLockOpen } from "react-icons/md";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { Modal } from "@/components/modal/Modal";
 import Text from "@/components/Text/Text";
-import { user } from "@/utils/data/user";
+import { updateProfile, deleteUser, updatePassword } from "@/utils/data/user";
 import { Loading } from "@/components/common/Loading";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
@@ -82,13 +83,13 @@ export default function ProfilePage() {
       if (isAuthenticated) {
         try {
           setIsLoadingProfile(true);
-          const data = await getPorfile(id || "");
-          setValue("profileImage", data.profile?.profile_image || "");
-          setValue("first_name", data.profile?.first_name || "");
-          setValue("last_name", data.profile?.last_name || "");
-          setValue("email", data.profile?.email || "");
-          setValue("phone", data.profile?.phone || "");
-          setValue("marketing_opt_in", data.profile?.marketing_opt_in || false);
+          const data = await getUserById(id || "");
+          setValue("profileImage", data.profile_image || "");
+          setValue("first_name", data.first_name || "");
+          setValue("last_name", data.last_name || "");
+          setValue("email", data.email || "");
+          setValue("phone", data.phone || "");
+          setValue("marketing_opt_in", data.marketing_opt_in || false);
         } catch (error) {
           console.error("프로필 데이터 로딩 중 오류:", error);
         } finally {
@@ -105,7 +106,7 @@ export default function ProfilePage() {
     if (!id) return;
 
     try {
-      const { error } = await user.updateProfile(id, {
+      const { error } = await updateProfile(id, {
         first_name: data.first_name,
         last_name: data.last_name,
         profile_image: data.profileImage,
@@ -139,9 +140,9 @@ export default function ProfilePage() {
   }
 
   const handleDelete = async () => {
-    const { error } = await user.deleteUser(id || "");
+    const { error } = await deleteUser(id || "");
     if (error) throw error;
-    await logout();
+    await userLogout();
     toaster.create({
       title: "회원 탈퇴 성공",
       description: "회원 탈퇴가 성공적으로 완료되었습니다.",
@@ -153,7 +154,7 @@ export default function ProfilePage() {
 
   const handlePasswordReset = async (data: string) => {
     try {
-      const { error } = await user.updatePassword(data);
+      const { error } = await updatePassword(data);
       if (error) throw error;
       
       // 모달 먼저 닫기

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { uploadFile } from "@/app/(comoon)/clientActions";
+import { uploadFile } from "@/utils/data/storage";
 import { useDropzone } from "react-dropzone";
 import imageCompression from "browser-image-compression";
 import { createClient } from "@/utils/supabase/client";
@@ -11,7 +11,7 @@ import { FaUpload } from "react-icons/fa";
 import Spinner from "./Spinner";
 import Text from "../Text/Text";
 import { sanitizeFileName } from "@/utils/file";
-import { getImageUrl } from "@/app/(comoon)/clientActions";
+import { getImageUrl } from "@/utils/data/storage";
 
 
 interface FileWithPreview extends File {

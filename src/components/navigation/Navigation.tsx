@@ -13,9 +13,9 @@ import { getJourney } from "@/utils/data/userJourney";
 import { Separator } from "@chakra-ui/react";
 import { Menu, Portal } from "@chakra-ui/react";
 import { toaster } from "@/components/ui/toaster";
-import { auth } from "@/utils/data/auth";
+import { userLogout } from "@/utils/data/auth";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
-import { user } from "@/utils/data/user";
+import { getProfileImage } from "@/utils/data/user";
 
 function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
   const { id, isAuthenticated, profileImage: profileImageFromAuth } = useSupabaseAuth();
@@ -69,7 +69,7 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
     if (!id) return;
     
     const fetchProfileImage = async () => {
-      const data = await user.getProfileImage(id);
+      const data = await getProfileImage(id);
       setProfileImage(data);
     };
     
@@ -93,7 +93,7 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
   }, [router]);
 
   const handleLogout = useCallback(async () => {
-    await auth.userLogout();
+    await userLogout();
     toaster.create({
       title: "로그아웃 되었습니다.",
       type: "success",

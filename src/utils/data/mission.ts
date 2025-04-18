@@ -21,3 +21,11 @@ export const mission = {
         return { data, error };
     },
 }
+
+export async function getMissionTypes() {
+    const supabase = createClient();
+    const { data, error } = await supabase.rpc(
+      "get_distinct_mission_types" as any
+    );
+    return { data, error };
+}

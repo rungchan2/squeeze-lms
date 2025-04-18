@@ -9,7 +9,7 @@ import styled from "@emotion/styled";
 import { useParams, useRouter } from "next/navigation";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { IconContainer } from "@/components/common/IconContainer";
-import { posts } from "@/utils/data/posts";
+import { deletePost, hidePost, unhidePost } from "@/utils/data/posts";
 import dayjs from "@/utils/dayjs/dayjs";
 import { toaster } from "@/components/ui/toaster";
 import { Loading } from "@/components/common/Loading";
@@ -187,19 +187,19 @@ export default function TeacherPostsPage() {
 
   const handleDelete = async (postId: string) => {
     if (confirm("정말 삭제하시겠습니까?")) {
-      await posts.deletePost(postId);
+      await deletePost(postId);
     }
   };
 
   const handleHide = async (postId: string, value: string) => {
     if (value === "hide") {
-      await posts.hidePost(postId);
+      await hidePost(postId);
       toaster.create({
         title: "게시물이 숨김 처리되었습니다.",
         type: "success",
       });
     } else {
-      await posts.unhidePost(postId);
+      await unhidePost(postId);
       toaster.create({
         title: "게시물이 숨김 해제되었습니다.",
         type: "success",

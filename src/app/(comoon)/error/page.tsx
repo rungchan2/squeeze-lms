@@ -6,7 +6,7 @@ import Button from "@/components/common/Button";
 import Heading from "@/components/Text/Heading";
 import styled from "@emotion/styled";
 import { useSearchParams } from 'next/navigation'
-import { logout } from "@/app/(auth)/actions";
+import { userLogout } from "@/utils/data/auth";
 
 export default function ErrorPage() {
   const searchParams = useSearchParams()
@@ -14,7 +14,7 @@ export default function ErrorPage() {
   const router = useRouter();
 
   const handleLogout = async () => {
-    await logout();
+    await userLogout();
     router.push("/login");
   };
 

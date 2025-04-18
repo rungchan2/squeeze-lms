@@ -3,9 +3,9 @@ import { useCallback, useMemo } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { Team, TeamMember, TeamData, AllTeamData } from "@/types/teams";
 import { team } from "@/utils/data/team";
-import { posts } from "@/utils/data/posts";
 import { useSupabaseAuth } from "./useSupabaseAuth";
 import useSWR from "swr";
+import { updateTeamPost } from "@/utils/data/posts";
 /**
  * 팀 관련 기능을 제공하는 훅
  * @param journeyId 여정 ID
@@ -362,7 +362,7 @@ export function useTeams(journeyId?: string) {
 
       try {
         // post 테이블 업데이트
-        await posts.updateTeamPost(postId, {
+        await updateTeamPost(postId, {
           team_id: data.team.id,
           is_team_submission: true,
           team_points: missionPoints,
