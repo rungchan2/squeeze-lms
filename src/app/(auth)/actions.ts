@@ -25,7 +25,7 @@ export async function createProfile(profile: CreateUser) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .insert(profile)
+    .insert(profile as any)
     .single();
   return { data, error };
 }

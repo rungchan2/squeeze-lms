@@ -19,77 +19,26 @@ import { MdOutlineCalendarViewWeek } from "react-icons/md";
 import Heading from "@/components/Text/Heading";
 import WeeklySubmissionChart from "./WeeklySubmissionChart";
 import Text from "@/components/Text/Text";
-import useSWRInfinite from "swr/infinite";
-import { PostsResponse, fetchPosts } from "@/utils/data/posts";
-
-interface Post {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-  is_hidden: boolean;
-  profiles?: {
-    first_name: string;
-    last_name: string;
-  };
-}
-
-
-// 페이지네이션으로 포스트를 가져오는 함
+import { usePosts } from "@/hooks/usePosts";
+import { PostWithRelations } from "@/types";
 
 export default function TeacherPostsPage() {
   const { slug } = useParams();
   const router = useRouter();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
-
-  // SWR 키 생성 함수 정의
-  const getKey = (pageIndex: number, previousPageData: PostsResponse | null) => {
-    // 이전 페이지 데이터가 없거나 nextPage가 null이 아닌 경우 계속 로드
-    if (previousPageData === null || previousPageData.nextPage !== null) {
-      return [`posts-${slug}-teacher`, pageIndex];
-    }
-    return null; // 더 이상 데이터가 없으면 null 반환
-  };
   
-  // useSWRInfinite 훅 사용
+  // usePosts 훅 사용
   const {
-    data,
+    data: allPosts,
     error,
-    size,
-    setSize,
     isLoading,
-    isValidating,
-  } = useSWRInfinite<PostsResponse>(
-    getKey,
-    async (key, pageIndex) => fetchPosts({ 
-      pageParam: pageIndex, 
-      journeySlug: slug as string, 
-      showHidden: true 
-    }),
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 60000, // 1분 동안 중복 요청 방지
-    }
-  );
-  
-  // 데이터 가공
-  const allPosts = data 
-    ? data.flatMap(page => page.data)
-        .filter((post, index, self) => 
-          index === self.findIndex(p => p.id === post.id)
-        ) // 중복 제거
-    : [];
-  const totalPosts = data && data[0] ? data[0].total : 0;
-  const hasNextPage = data ? data[data.length - 1]?.nextPage !== null : false;
-  const isFetchingNextPage = isValidating && size > 0 && !isLoading;
-  
-  // 다음 페이지 불러오기 함수
-  const fetchNextPage = useCallback(() => {
-    if (hasNextPage) {
-      setSize(size + 1);
-    }
-  }, [setSize, size, hasNextPage]);
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+    total: totalPosts
+  } = usePosts(10, slug as string, true);
   
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -107,7 +56,7 @@ export default function TeacherPostsPage() {
     }
 
     observerRef.current = new IntersectionObserver(handleObserver, {
-      rootMargin: "0px 0px 200px 0px",
+      threshold: 0.1,
     });
 
     if (loadMoreRef.current) {
@@ -124,6 +73,7 @@ export default function TeacherPostsPage() {
   const handleDelete = async (postId: string) => {
     if (confirm("정말 삭제하시겠습니까?")) {
       await deletePost(postId);
+      refetch(); // 데이터 다시 불러오기
     }
   };
 
@@ -141,6 +91,7 @@ export default function TeacherPostsPage() {
         type: "success",
       });
     }
+    refetch(); // 데이터 다시 불러오기
   };
 
   if (isLoading) return <Loading />;
@@ -184,7 +135,7 @@ export default function TeacherPostsPage() {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {allPosts.map((post: Post, index: number) => (
+                {allPosts.map((post: PostWithRelations, index: number) => (
                   <Table.Row
                     key={`post-${post.id}-${index}`}
                     onClick={() => router.push(`/post/${post.id}`)}
@@ -212,7 +163,10 @@ export default function TeacherPostsPage() {
                     </Table.Cell>
                     <Table.Cell textAlign="right">
                       <IconContainer
-                        onClick={() => handleDelete(post.id)}
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          handleDelete(post.id);
+                        }}
                         hoverColor="var(--negative-600)"
                         iconColor="var(--negative-600)"
                       >
