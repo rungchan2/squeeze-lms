@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { jwtDecode } from "jwt-decode";
 import { create } from "zustand";
@@ -172,8 +172,22 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
   },
 }));
 
+// 최근 프로필 로드 시간 추적을 위한 변수
+let lastProfileFetchTime = 0;
+const THROTTLE_INTERVAL = 5000; // 5초
+
 // 사용자 프로필 정보 가져오기
 const fetchUserProfile = async (userId: string) => {
+  // 중복 호출 방지 (5초 이내 중복 호출 방지)
+  const now = Date.now();
+  if (now - lastProfileFetchTime < THROTTLE_INTERVAL) {
+    console.log("프로필 요청 스로틀링: 최근에 이미 요청됨");
+    return;
+  }
+  
+  lastProfileFetchTime = now;
+  console.log("프로필 정보 로드 중...");
+  
   const supabase = createClient();
   const { data, error } = await supabase
     .from("profiles")
@@ -218,8 +232,12 @@ const initAuthListener = () => {
           useAuthStore.getState().updateAuthState(session);
           
           // 로그인 또는 토큰 갱신 시 최신 프로필 정보도 가져오기
+          // 단, 프로필 이미지가 없는 경우에만 가져오기
           if (session.user?.id) {
-            await fetchUserProfile(session.user.id);
+            const currentState = useAuthStore.getState();
+            if (!currentState.profileImage) {
+              await fetchUserProfile(session.user.id);
+            }
           }
         }
       } else if (event === 'SIGNED_OUT') {
@@ -239,8 +257,12 @@ const initAuthListener = () => {
       useAuthStore.getState().updateAuthState(session);
       
       // 세션이 있으면 프로필 정보도 함께 가져오기
+      // 단, 프로필 이미지가 없는 경우에만 가져오기
       if (session.user?.id) {
-        fetchUserProfile(session.user.id);
+        const currentState = useAuthStore.getState();
+        if (!currentState.profileImage) {
+          fetchUserProfile(session.user.id);
+        }
       }
     } else {
       useAuthStore.getState().setLoading(false);
@@ -264,18 +286,31 @@ if (typeof window !== 'undefined') {
 export function useSupabaseAuth() {
   const authState = useAuthStore();
   
-  // 컴포넌트에서 필요한 추가 기능 설정
-  useEffect(() => {
-    // 컴포넌트가 마운트될 때 이미 로드된 상태라면 프로필 정보 갱신
-    if (!authState.loading && authState.user?.id) {
-      fetchUserProfile(authState.user.id);
-    }
-  }, [authState.loading, authState.user?.id]);
-  
-  return {
+  // 메모이제이션된 결과 객체
+  const memoizedResult = useMemo(() => ({
     ...authState,
     isAuthenticated: !!authState.user,
     id: authState.user?.id || null,
     refreshToken: authState.refreshAuthState,
-  };
+  }), [
+    authState.user, 
+    authState.loading,
+    authState.firstName,
+    authState.lastName,
+    authState.role,
+    authState.isAdmin,
+    authState.organizationId,
+    authState.profileImage,
+    authState.session,
+  ]);
+  
+  // 컴포넌트에서 필요한 추가 기능 설정 - 초기화 시에만 실행하도록 의존성 배열 비움
+  useEffect(() => {
+    // 컴포넌트가 마운트될 때 이미 로드된 상태이고 프로필 이미지가 없는 경우만 갱신
+    if (!authState.loading && authState.user?.id && !authState.profileImage) {
+      fetchUserProfile(authState.user.id);
+    }
+  }, []); // 빈 의존성 배열로 최초 렌더링 시에만 실행
+  
+  return memoizedResult;
 }

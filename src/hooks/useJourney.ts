@@ -25,8 +25,7 @@ export const useJourney = () => {
   const { data: journeys, error, isLoading, mutate: revalidate } = useSWR(
     "/api/journeys",
     fetchJourneys
-  );
-  
+  );  
   // 여정 추가 함수
   const addJourney = async (journeyData: CreateJourney) => {
     const supabase = createClient();

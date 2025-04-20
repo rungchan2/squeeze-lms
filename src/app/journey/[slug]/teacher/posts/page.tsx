@@ -20,7 +20,8 @@ import Heading from "@/components/Text/Heading";
 import WeeklySubmissionChart from "./WeeklySubmissionChart";
 import Text from "@/components/Text/Text";
 import useSWRInfinite from "swr/infinite";
-import { createClient } from "@/utils/supabase/client";
+import { PostsResponse, fetchPosts } from "@/utils/data/posts";
+
 interface Post {
   id: string;
   title: string;
@@ -33,78 +34,8 @@ interface Post {
   };
 }
 
-interface PostsResponse {
-  data: Post[];
-  nextPage: number | null;
-  total: number;
-}
 
-// 페이지네이션으로 포스트를 가져오는 함수
-async function fetchPosts({ 
-  pageParam = 0, 
-  journeySlug, 
-  showHidden = false 
-}: { 
-  pageParam?: number;
-  journeySlug?: string;
-  showHidden?: boolean;
-}): Promise<PostsResponse> {
-  const supabase = createClient();
-  const pageSize = 10;
-  const from = pageParam * pageSize;
-  const to = from + pageSize - 1;
-  
-  let query = supabase
-    .from("posts")
-    .select(`
-      *,
-      profiles (
-        id, first_name, last_name, organization_id, profile_image,
-        organizations (
-          id, name
-        )
-      )
-    `, { count: 'exact' })
-    .order("created_at", { ascending: false });
-    
-  if (!showHidden) {
-    query = query.eq("is_hidden", false);
-  }
-  
-  // journeySlug가 제공된 경우 해당 journey의 게시물만 필터링
-  if (journeySlug) {
-    // mission_instance_id를 통해 journey와 연결
-    const { data: missionInstances } = await supabase
-      .from("journey_mission_instances")
-      .select("id")
-      .eq("journey_uuid", journeySlug);
-    
-    if (missionInstances && missionInstances.length > 0) {
-      const instanceIds = missionInstances.map(instance => instance.id);
-      query = query.in("mission_instance_id", instanceIds);
-    } else {
-      // 해당 journey에 대한 mission instance가 없으면 빈 결과 반환
-      return {
-        data: [],
-        nextPage: null,
-        total: 0
-      };
-    }
-  }
-    
-  const { data, error, count } = await query.range(from, to);
-    
-  if (error) throw error;
-  
-  const hasNextPage = count ? from + pageSize < count : false;
-  const nextPage = hasNextPage ? pageParam + 1 : null;
-  
-  return {
-    data: data as Post[],
-    nextPage,
-    total: count ?? 0
-  };
-}
+// 페이지네이션으로 포스트를 가져오는 함
 
 export default function TeacherPostsPage() {
   const { slug } = useParams();
@@ -143,7 +74,12 @@ export default function TeacherPostsPage() {
   );
   
   // 데이터 가공
-  const allPosts = data ? data.flatMap(page => page.data) : [];
+  const allPosts = data 
+    ? data.flatMap(page => page.data)
+        .filter((post, index, self) => 
+          index === self.findIndex(p => p.id === post.id)
+        ) // 중복 제거
+    : [];
   const totalPosts = data && data[0] ? data[0].total : 0;
   const hasNextPage = data ? data[data.length - 1]?.nextPage !== null : false;
   const isFetchingNextPage = isValidating && size > 0 && !isLoading;
@@ -212,7 +148,7 @@ export default function TeacherPostsPage() {
 
   return (
     <TeacherPostsPageContainer>
-      <Tabs.Root defaultValue="week" variant="plain">
+      <Tabs.Root defaultValue="week" variant="line">
         <Tabs.List bg="bg.muted" rounded="l3" p="1">
           <Tabs.Trigger value="week">
             <MdOutlineCalendarViewWeek />
@@ -248,9 +184,9 @@ export default function TeacherPostsPage() {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {allPosts.map((post: Post) => (
+                {allPosts.map((post: Post, index: number) => (
                   <Table.Row
-                    key={post.id}
+                    key={`post-${post.id}-${index}`}
                     onClick={() => router.push(`/post/${post.id}`)}
                     style={{ cursor: "pointer" }}
                   >

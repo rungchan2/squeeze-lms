@@ -11,8 +11,8 @@ export const userSchema = z.object({
   profile_image: z.string().nullable(),
   role: roleSchema.nullable(),
   organization_id: z.string().uuid().nullable(),
-  marketing_opt_in: z.boolean().nullable(),
-  privacy_agreed: z.boolean().nullable(),
+  marketing_opt_in: z.boolean(),
+  privacy_agreed: z.boolean(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
 })

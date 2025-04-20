@@ -1,6 +1,21 @@
 import { createClient } from "@/utils/supabase/client";
 import { CreateUser, SignupPage, User } from "@/types";
 
+// null 값을 undefined로 변환하는 헬퍼 함수
+function nullToUndefined<T extends object>(obj: T): any {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [key, value === null ? undefined : value])
+  );
+}
+export async function getSession() {
+  const supabase = createClient();
+  const {
+    data: { session },
+    error,  
+  } = await supabase.auth.getSession();
+  return { session, error };
+}
+
 export async function getUser() {
   const supabase = createClient();
   const {
@@ -71,7 +86,7 @@ export async function getUserProfile() {
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("*")
-    .eq("uid", session.user.id || "")
+    .eq("id", session.user.id || "")
     .single();
   if (profileError) {
     throw new Error("사용자 프로필을 찾을 수 없습니다.");
@@ -117,7 +132,8 @@ export async function createProfile(data: SignupPage) {
     marketing_opt_in: data.marketing_opt_in,
     privacy_agreed: data.privacy_agreed,
   };
-  const { error } = await supabase.from("profiles").insert(profileData);
+  
+  const { error } = await supabase.from("profiles").insert(profileData as any);
   return { error };
 }
 
@@ -144,16 +160,4 @@ export async function getMarketingOptIn(id: string): Promise<boolean | null> {
   if (error) throw error;
 
   return data?.marketing_opt_in;
-}
-
-export async function createUser(userData: CreateUser) {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("profiles")
-    .insert(userData)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data as User;
 }

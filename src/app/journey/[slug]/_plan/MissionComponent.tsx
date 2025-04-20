@@ -193,7 +193,7 @@ export default function MissionComponent({
         status: "not_started" as MissionStatus,
         release_date: releaseDate || null,
         expiry_date: expiryDate || null,
-        journey_uuid: journeyId,
+        journey_id: journeyId,
       };
 
       await createMissionInstance(newInstance as any);

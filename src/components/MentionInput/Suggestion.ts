@@ -65,10 +65,10 @@ const getUsers = async (): Promise<User[]> => {
     
     const supabase = createClient()
 
-    // 1. 미션 인스턴스로부터 journey_uuid 가져오기
+    // 1. 미션 인스턴스로부터 journey_id 가져오기
     const { data: missionInstance, error: missionError } = await supabase
       .from('journey_mission_instances')
-      .select('journey_uuid')
+      .select('journey_id')
       .eq('id', currentMissionInstanceId)
       .single()
 
@@ -77,7 +77,7 @@ const getUsers = async (): Promise<User[]> => {
       return []
     }
 
-    const journeyUuid = missionInstance.journey_uuid
+    const journeyUuid = missionInstance.journey_id
 
     // 2. journey_uuid로 참여자 목록 가져오기
     // NULL 체크 추가

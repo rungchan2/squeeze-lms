@@ -1,8 +1,15 @@
 import {
   CreatePost,
+  Post,
   UpdatePost,
 } from "@/types";
 import { createClient } from "@/utils/supabase/client";
+
+export interface PostsResponse {
+  data: Post[];
+  nextPage: number | null;
+  total: number;
+}
 
 // Supabase의 쿼리 결과와 일치하는 타입 정의
 export type PostWithMissionInstanceResponse = {
@@ -108,6 +115,7 @@ export async function createPost(post: CreatePost) {
     mission_instance_id: post.mission_instance_id,
     title: post.title,
     score: post.score,
+    journey_id: post.journey_id,
   };
   const { data, error } = await supabase
     .from("posts")
@@ -117,3 +125,77 @@ export async function createPost(post: CreatePost) {
   return { data, error, id: data?.id };
 }
 
+export async function fetchPosts({ 
+  pageParam = 0, 
+  journeySlug, 
+  showHidden = false 
+}: { 
+  pageParam?: number;
+  journeySlug?: string;
+  showHidden?: boolean;
+}): Promise<PostsResponse> {
+  const supabase = createClient();
+  const pageSize = 10;
+  const from = pageParam * pageSize;
+  const to = from + pageSize - 1;
+  
+  let query = supabase
+    .from("posts")
+    .select(`
+      *,
+      profiles (
+        id, first_name, last_name, organization_id, profile_image,
+        organizations (
+          id, name
+        )
+      )
+    `, { count: 'exact' })
+    .order("created_at", { ascending: false });
+    
+  if (!showHidden) {
+    query = query.eq("is_hidden", false);
+  }
+  
+  // journeySlug가 제공된 경우 해당 journey의 게시물만 필터링
+  if (journeySlug) {
+    // mission_instance_id를 통해 journey와 연결
+    const { data: missionInstances } = await supabase
+      .from("journey_mission_instances")
+      .select("id")
+      .eq("journey_id", journeySlug);
+    
+    if (missionInstances && missionInstances.length > 0) {
+      const instanceIds = missionInstances.map(instance => instance.id);
+      query = query.in("mission_instance_id", instanceIds);
+    } else {
+      // 해당 journey에 대한 mission instance가 없으면 빈 결과 반환
+      return {
+        data: [],
+        nextPage: null,
+        total: 0
+      };
+    }
+  }
+    
+  const { data, error, count } = await query.range(from, to);
+    
+  if (error) throw error;
+  
+  const hasNextPage = count ? from + pageSize < count : false;
+  const nextPage = hasNextPage ? pageParam + 1 : null;
+  
+  return {
+    data: data as Post[],
+    nextPage,
+    total: count ?? 0
+  };
+}
+
+export async function getJourenyPosts(journeyId: string) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .select("* mission_instance_id(*)")
+    .eq("journey_id", journeyId);
+  return { data, error };
+} 

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getJourneyWeeklyStats } from '@/app/journey/[slug]/clientActions';
+import { NextRequest, NextResponse } from "next/server";
+import { getJourneyWeeklyStats } from "@/app/journey/[slug]/actions";
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,55 +25,48 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error("주차별 통계 API 오류:", error);
-      
+
       let errorMessage = "통계 가져오기 오류";
       if (error instanceof Error) {
         errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null) {
+      } else if (typeof error === "object" && error !== null) {
         errorMessage = JSON.stringify(error);
       }
-      
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: 500 }
-      );
+
+      return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 
     return NextResponse.json({
       data,
-      timestamp: new Date().toISOString()
-    }, {
-      headers: {
-        'Cache-Control': 'no-store, max-age=0'
-      }
+      timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
     console.error("주차별 통계 가져오기 오류:", error);
-    
+
     let errorMessage = "통계 가져오기 오류";
     let errorDetails = null;
-    
+
     if (error instanceof Error) {
       errorMessage = error.message;
-    } else if (typeof error === 'object' && error !== null) {
+    } else if (typeof error === "object" && error !== null) {
       errorMessage = error.message || "알 수 없는 오류";
-      errorDetails = error.details || error.code ? { 
-        code: error.code, 
-        details: error.details 
-      } : null;
+      errorDetails =
+        error.details || error.code
+          ? {
+              code: error.code,
+              details: error.details,
+            }
+          : null;
     }
-    
+
     return NextResponse.json(
       {
         error: errorMessage,
-        details: errorDetails
+        details: errorDetails,
       },
       {
         status: 500,
-        headers: {
-          'Cache-Control': 'no-store, max-age=0'
-        }
       }
     );
   }
-} 
+}

@@ -1,10 +1,9 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { usePosts, useCompletedMissions } from "@/hooks/usePosts";
+import { usePosts } from "@/hooks/usePosts";
 import PostCard from "@/app/(home)/_mypage/PostCard";
 import Spinner from "@/components/common/Spinner";
-import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import Text from "@/components/Text/Text";
 import { useEffect, useRef, useState } from "react";
 import { InputGroup } from "@/components/ui/input-group";
@@ -17,9 +16,6 @@ import Footer from "@/components/common/Footer";
 
 export default function FeedTab({ slug }: { slug: string }) {
   const { data: posts, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(10, slug);
-  const { id: userId } = useSupabaseAuth();
-  const { completedMissionIds, isLoading: isLoadingCompletedMissions } =
-    useCompletedMissions(userId || "");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortPosts, setSortPosts] = useState<"asc" | "desc">("desc");
 
@@ -57,7 +53,7 @@ export default function FeedTab({ slug }: { slug: string }) {
   }, [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // 로딩 중이면 스피너 표시
-  if (isLoading || isLoadingCompletedMissions) {
+  if (isLoading) {
     return <Spinner />;
   }
 

@@ -68,7 +68,7 @@ export default function JourneyClient({
   };
 
   return (
-    <div>
+    <div style={{ maxWidth: "var(--breakpoint-tablet)", margin: "0 auto" }}>
       <Tabs.Root defaultValue="plan" key={slug} variant="line" width="100%">
         <Tabs.List width="100%" justifyContent="center">
           <Tabs.Trigger value="plan" {...triggerStyle}>

@@ -18,7 +18,7 @@ export default async function EditPostPage({
   };
   return (
     <CreatePostFrom
-      slug={data.mission_instance?.journey_uuid}
+      slug={data.mission_instance?.journey_id}
       updateDataId={id}
       updateData={updateData}
       missionInstanceId={data.mission_instance?.id || ""}

@@ -16,7 +16,7 @@ import { MdPrivacyTip, MdFeedback, MdLogout } from "react-icons/md";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
-import { useMyLikedPosts } from "@/hooks/usePosts";
+import { useLikedPosts, PostType } from "@/hooks/usePosts2";
 import PostCard from "./PostCard";
 import { getOrganizationById } from "@/utils/data/organization";
 import { Error } from "@/components/common/Error";
@@ -28,7 +28,7 @@ import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { userLogout } from "@/utils/data/auth";
 export default function MyPage() {
   const [orgData, setOrgData] = useState<any>(null);
-  const { data: myLikedPosts } = useMyLikedPosts();
+  const { data: myLikedPosts } = useLikedPosts(PostType.LIKED_POSTS);
   const router = useRouter();
   const { profileImage, organizationId, user, lastName, firstName } =
     useSupabaseAuth();

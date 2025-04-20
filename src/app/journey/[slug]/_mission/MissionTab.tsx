@@ -28,24 +28,12 @@ export default function MissionTab({ slug }: { slug: string }) {
   const {
     missionInstances,
     isLoading: missionInstancesLoading,
-    error: missionInstancesError,
   } = useJourneyMissionInstances(slug, "");
-  const { completedMissionIds, isLoading: isLoadingCompletedMissions, refetch: refetchCompletedMissions } =
+  const { completedMissionIds, isLoading: isLoadingCompletedMissions } =
     useCompletedMissions(userId || "", slug);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortMission, setSortMission] = useState<"asc" | "desc">("asc");
-  
-  // 디버깅용 useEffect
-  useEffect(() => {
 
-    
-    // 컴포넌트가 마운트 된 후 3초 후에 자동 refetch
-    const timer = setTimeout(() => {
-      refetchCompletedMissions();
-    }, 3000);
-    
-    return () => clearTimeout(timer);
-  }, [completedMissionIds, missionInstances, userId, slug, refetchCompletedMissions]);
   
   // 현재 URL에서 slug 추출
   const getSlugFromPathname = () => {

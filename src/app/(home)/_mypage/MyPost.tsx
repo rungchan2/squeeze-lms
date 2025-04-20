@@ -1,9 +1,9 @@
 import PostCard from "@/app/(home)/_mypage/PostCard";
-import { useMyPosts } from "@/hooks/usePosts";
+import { useLikedPosts, PostType } from "@/hooks/usePosts2";
 import Spinner from "@/components/common/Spinner";
 import { Error } from "@/components/common/Error";
 export default function MyPost() {
-  const { data, isLoading: isMyPostsLoading, error } = useMyPosts();
+  const { data, isLoading: isMyPostsLoading, error } = useLikedPosts(PostType.MY_POSTS);
   if (isMyPostsLoading) {
     return (
       <div>

@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     let query = supabase
       .from("journey_mission_instances")
       .select(`*, missions(*)`)
-      .eq("journey_uuid", journeyUuid);
+      .eq("journey_id", journeyUuid);
     
     // 주차 ID가 있으면 필터링
     if (weekId) {
@@ -53,10 +53,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       data: transformedData,
       timestamp: new Date().toISOString()
-    }, {
-      headers: {
-        'Cache-Control': 'no-store, max-age=0'
-      }
     });
   } catch (error) {
     console.error("[API] mission-instances 예외:", error);
@@ -67,9 +63,6 @@ export async function POST(request: NextRequest) {
       },
       { 
         status: 500,
-        headers: {
-          'Cache-Control': 'no-store, max-age=0'
-        }
       }
     );
   }

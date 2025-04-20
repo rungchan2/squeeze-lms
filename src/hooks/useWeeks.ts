@@ -211,7 +211,7 @@ export function useWeeks(journeyId: string) {
         status: "not_started",
         release_date: "",
         expiry_date: "",
-        journey_uuid: journeyUuid,
+        journey_id: journeyUuid,
       };
 
       const { data, error } = await supabase
