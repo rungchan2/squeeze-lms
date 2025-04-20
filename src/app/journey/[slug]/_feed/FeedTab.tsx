@@ -1,12 +1,11 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { usePosts, useCompletedMissions } from "@/hooks/usePosts";
+import { usePosts } from "@/hooks/usePosts";
 import PostCard from "@/app/(home)/_mypage/PostCard";
 import Spinner from "@/components/common/Spinner";
-import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import Text from "@/components/Text/Text";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { InputGroup } from "@/components/ui/input-group";
 import { IoSearch } from "react-icons/io5";
 import { Input } from "@chakra-ui/react";
@@ -17,9 +16,6 @@ import Footer from "@/components/common/Footer";
 
 export default function FeedTab({ slug }: { slug: string }) {
   const { data: posts, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = usePosts(10, slug);
-  const { id: userId } = useSupabaseAuth();
-  const { completedMissionIds, isLoading: isLoadingCompletedMissions } =
-    useCompletedMissions(userId || "");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortPosts, setSortPosts] = useState<"asc" | "desc">("desc");
 
@@ -27,39 +23,7 @@ export default function FeedTab({ slug }: { slug: string }) {
   
   // 무한 스크롤을 위한 observer ref
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const lastPostRef = useRef<HTMLDivElement | null>(null);
-
-  // Intersection Observer 설정
-  useEffect(() => {
-    if (isLoading) return;
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    const currentObserver = observerRef.current;
-    const lastElement = lastPostRef.current;
-
-    if (lastElement && hasNextPage) {
-      currentObserver.observe(lastElement);
-    }
-
-    return () => {
-      if (lastElement) {
-        currentObserver.unobserve(lastElement);
-      }
-    };
-  }, [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  // 로딩 중이면 스피너 표시
-  if (isLoading || isLoadingCompletedMissions) {
-    return <Spinner />;
-  }
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   // 검색어로 게시물 필터링
   const filteredPosts = posts?.filter(post => {
@@ -77,10 +41,46 @@ export default function FeedTab({ slug }: { slug: string }) {
     
     return sortPosts === "asc" ? dateA - dateB : dateB - dateA;
   });
+  
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage]
+  );
+
+  // Intersection Observer 설정
+  useEffect(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver(handleObserver, {
+      threshold: 0.1,
+    });
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [handleObserver, sortedPosts]);
 
   const handleSortPosts = () => {
     setSortPosts(sortPosts === "asc" ? "desc" : "asc");
   };
+
+  // 로딩 중이면 스피너 표시
+  if (isLoading) {
+    return <Spinner />;
+  }
 
   return (
     <FeedTabContainer>
@@ -112,19 +112,19 @@ export default function FeedTab({ slug }: { slug: string }) {
       
       {sortedPosts.length > 0 ? (
         <div className="posts-container">
-          {sortedPosts.map((post: any, index: number) => (
-            <div
-              key={post.id}
-              ref={index === sortedPosts.length - 1 ? lastPostRef : null}
-            >
+          {sortedPosts.map((post: any) => (
+            <div key={post.id}>
               <PostCard post={post} />
             </div>
           ))}
-          {isFetchingNextPage && (
-            <div className="loading-more">
-              <Spinner size="24px" />
-            </div>
-          )}
+          <div ref={loadMoreRef} className="loading-more">
+            {isFetchingNextPage && <Spinner size="24px" />}
+            {!hasNextPage && sortedPosts.length > 0 && (
+              <Text variant="caption" color="var(--grey-500)">
+                더 이상 게시물이 없습니다.
+              </Text>
+            )}
+          </div>
         </div>
       ) : (
         <div className="empty-state">

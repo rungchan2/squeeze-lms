@@ -1,6 +1,6 @@
 "use client";
 
-import { logout } from "@/app/(auth)/actions";
+import { userLogout } from "@/utils/data/auth";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Button from "@/components/common/Button";
@@ -15,7 +15,7 @@ export default function AuthCodeError() {
   const error_description = params.get('error_description');
 
   const handleLogout = async () => {
-    await logout();
+    await userLogout();
     router.push("/login");
   };
   

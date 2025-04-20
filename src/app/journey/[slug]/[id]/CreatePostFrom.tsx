@@ -11,7 +11,7 @@ import styled from "@emotion/styled";
 import Button from "@/components/common/Button";
 import { useEffect, useState, useCallback } from "react";
 import { toaster } from "@/components/ui/toaster";
-import { createPost, updatePost } from "@/app/journey/[slug]/clientActions";
+import { createPost, updatePost } from "@/utils/data/posts";
 import { Input } from "@chakra-ui/react";
 import InputAndTitle from "@/components/InputAndTitle";
 import userPoint from "@/utils/data/userPoint";
@@ -63,7 +63,8 @@ export default function DoMissionPage({
 
   // 완료된 미션 목록 관리를 위한 훅 추가
   const { refetch: refetchCompletedMissions } = useCompletedMissions(
-    userId || ""
+    userId || "",
+    slug || ""
   );
 
   useEffect(() => {
@@ -200,6 +201,7 @@ export default function DoMissionPage({
         mission_instance_id: missionInstance.id,
         title: title,
         score: missionInstance.mission.points || 0,
+        journey_id: missionInstance.journey_id || "",
       });
 
       if (error) {

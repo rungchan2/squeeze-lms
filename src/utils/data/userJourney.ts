@@ -36,4 +36,13 @@ export async function createJourney(userId: string, journey: UserJourneyWithJour
     return data;
 }
 
+export async function deleteUserFromJourney(journeyId: string, userId: string) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("user_journeys")
+    .delete()
+    .eq("journey_id", journeyId)
+    .eq("user_id", userId);
+  return { data, error };
+}
 

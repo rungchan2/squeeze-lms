@@ -89,6 +89,8 @@ body {
   padding-top: 82px; /* 네비게이션 바 높이만큼 상단 패딩 추가 */
   padding-left: 16px;
   padding-right: 16px;
+
+  -webkit-tap-highlight-color: transparent;
 }
 
 .container {

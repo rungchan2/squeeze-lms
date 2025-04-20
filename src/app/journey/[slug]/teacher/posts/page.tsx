@@ -9,7 +9,7 @@ import styled from "@emotion/styled";
 import { useParams, useRouter } from "next/navigation";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { IconContainer } from "@/components/common/IconContainer";
-import { posts } from "@/utils/data/posts";
+import { deletePost, hidePost, unhidePost } from "@/utils/data/posts";
 import dayjs from "@/utils/dayjs/dayjs";
 import { toaster } from "@/components/ui/toaster";
 import { Loading } from "@/components/common/Loading";
@@ -19,141 +19,26 @@ import { MdOutlineCalendarViewWeek } from "react-icons/md";
 import Heading from "@/components/Text/Heading";
 import WeeklySubmissionChart from "./WeeklySubmissionChart";
 import Text from "@/components/Text/Text";
-import useSWRInfinite from "swr/infinite";
-import { createClient } from "@/utils/supabase/client";
-interface Post {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-  is_hidden: boolean;
-  profiles?: {
-    first_name: string;
-    last_name: string;
-  };
-}
-
-interface PostsResponse {
-  data: Post[];
-  nextPage: number | null;
-  total: number;
-}
-
-// 페이지네이션으로 포스트를 가져오는 함수
-async function fetchPosts({ 
-  pageParam = 0, 
-  journeySlug, 
-  showHidden = false 
-}: { 
-  pageParam?: number;
-  journeySlug?: string;
-  showHidden?: boolean;
-}): Promise<PostsResponse> {
-  const supabase = createClient();
-  const pageSize = 10;
-  const from = pageParam * pageSize;
-  const to = from + pageSize - 1;
-  
-  let query = supabase
-    .from("posts")
-    .select(`
-      *,
-      profiles (
-        id, first_name, last_name, organization_id, profile_image,
-        organizations (
-          id, name
-        )
-      )
-    `, { count: 'exact' })
-    .order("created_at", { ascending: false });
-    
-  if (!showHidden) {
-    query = query.eq("is_hidden", false);
-  }
-  
-  // journeySlug가 제공된 경우 해당 journey의 게시물만 필터링
-  if (journeySlug) {
-    // mission_instance_id를 통해 journey와 연결
-    const { data: missionInstances } = await supabase
-      .from("journey_mission_instances")
-      .select("id")
-      .eq("journey_uuid", journeySlug);
-    
-    if (missionInstances && missionInstances.length > 0) {
-      const instanceIds = missionInstances.map(instance => instance.id);
-      query = query.in("mission_instance_id", instanceIds);
-    } else {
-      // 해당 journey에 대한 mission instance가 없으면 빈 결과 반환
-      return {
-        data: [],
-        nextPage: null,
-        total: 0
-      };
-    }
-  }
-    
-  const { data, error, count } = await query.range(from, to);
-    
-  if (error) throw error;
-  
-  const hasNextPage = count ? from + pageSize < count : false;
-  const nextPage = hasNextPage ? pageParam + 1 : null;
-  
-  return {
-    data: data as Post[],
-    nextPage,
-    total: count ?? 0
-  };
-}
+import { usePosts } from "@/hooks/usePosts";
+import { PostWithRelations } from "@/types";
 
 export default function TeacherPostsPage() {
   const { slug } = useParams();
   const router = useRouter();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
-
-  // SWR 키 생성 함수 정의
-  const getKey = (pageIndex: number, previousPageData: PostsResponse | null) => {
-    // 이전 페이지 데이터가 없거나 nextPage가 null이 아닌 경우 계속 로드
-    if (previousPageData === null || previousPageData.nextPage !== null) {
-      return [`posts-${slug}-teacher`, pageIndex];
-    }
-    return null; // 더 이상 데이터가 없으면 null 반환
-  };
   
-  // useSWRInfinite 훅 사용
+  // usePosts 훅 사용
   const {
-    data,
+    data: allPosts,
     error,
-    size,
-    setSize,
     isLoading,
-    isValidating,
-  } = useSWRInfinite<PostsResponse>(
-    getKey,
-    async (key, pageIndex) => fetchPosts({ 
-      pageParam: pageIndex, 
-      journeySlug: slug as string, 
-      showHidden: true 
-    }),
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 60000, // 1분 동안 중복 요청 방지
-    }
-  );
-  
-  // 데이터 가공
-  const allPosts = data ? data.flatMap(page => page.data) : [];
-  const totalPosts = data && data[0] ? data[0].total : 0;
-  const hasNextPage = data ? data[data.length - 1]?.nextPage !== null : false;
-  const isFetchingNextPage = isValidating && size > 0 && !isLoading;
-  
-  // 다음 페이지 불러오기 함수
-  const fetchNextPage = useCallback(() => {
-    if (hasNextPage) {
-      setSize(size + 1);
-    }
-  }, [setSize, size, hasNextPage]);
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+    total: totalPosts
+  } = usePosts(10, slug as string, true);
   
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -171,7 +56,7 @@ export default function TeacherPostsPage() {
     }
 
     observerRef.current = new IntersectionObserver(handleObserver, {
-      rootMargin: "0px 0px 200px 0px",
+      threshold: 0.1,
     });
 
     if (loadMoreRef.current) {
@@ -187,24 +72,26 @@ export default function TeacherPostsPage() {
 
   const handleDelete = async (postId: string) => {
     if (confirm("정말 삭제하시겠습니까?")) {
-      await posts.deletePost(postId);
+      await deletePost(postId);
+      refetch(); // 데이터 다시 불러오기
     }
   };
 
   const handleHide = async (postId: string, value: string) => {
     if (value === "hide") {
-      await posts.hidePost(postId);
+      await hidePost(postId);
       toaster.create({
         title: "게시물이 숨김 처리되었습니다.",
         type: "success",
       });
     } else {
-      await posts.unhidePost(postId);
+      await unhidePost(postId);
       toaster.create({
         title: "게시물이 숨김 해제되었습니다.",
         type: "success",
       });
     }
+    refetch(); // 데이터 다시 불러오기
   };
 
   if (isLoading) return <Loading />;
@@ -212,7 +99,7 @@ export default function TeacherPostsPage() {
 
   return (
     <TeacherPostsPageContainer>
-      <Tabs.Root defaultValue="week" variant="plain">
+      <Tabs.Root defaultValue="week" variant="line">
         <Tabs.List bg="bg.muted" rounded="l3" p="1">
           <Tabs.Trigger value="week">
             <MdOutlineCalendarViewWeek />
@@ -248,9 +135,9 @@ export default function TeacherPostsPage() {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {allPosts.map((post: Post) => (
+                {allPosts.map((post: PostWithRelations, index: number) => (
                   <Table.Row
-                    key={post.id}
+                    key={`post-${post.id}-${index}`}
                     onClick={() => router.push(`/post/${post.id}`)}
                     style={{ cursor: "pointer" }}
                   >
@@ -276,7 +163,10 @@ export default function TeacherPostsPage() {
                     </Table.Cell>
                     <Table.Cell textAlign="right">
                       <IconContainer
-                        onClick={() => handleDelete(post.id)}
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          handleDelete(post.id);
+                        }}
                         hoverColor="var(--negative-600)"
                         iconColor="var(--negative-600)"
                       >

@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useServerInsertedHTML } from "next/navigation";
 // import { ThemeProvider } from "next-themes"
 import createEmotionServer from "@emotion/server/create-instance";
-import useSWR, { SWRConfig } from "swr";
+import { SWRConfig } from "swr";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -34,7 +34,6 @@ export function Providers({ children }: ProvidersProps) {
   });
 
   if (!mounted) return null;
-
   return (
     <CacheProvider value={emotionCache}>
       <SWRConfig

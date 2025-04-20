@@ -1,5 +1,8 @@
+const nextPWA = require('next-pwa');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+
   reactStrictMode: true,
   images: {
     domains: [
@@ -10,9 +13,6 @@ const nextConfig = {
       `${process.env.PROJECT_ID}.supabase.co`,
     ].filter(Boolean),
   },
-  experimental: {
-    // ... 다른 experimental 설정들 ...
-  },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production" ? {
       exclude: ['error'],
@@ -20,4 +20,12 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig; 
+const withPWA = nextPWA({
+  dest: 'public',
+  register: true,
+});
+
+const config = withPWA(nextConfig);
+
+
+module.exports = config; 

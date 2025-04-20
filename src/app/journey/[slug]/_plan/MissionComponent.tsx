@@ -17,7 +17,7 @@ import { IoSearch } from "react-icons/io5";
 import ChipGroup from "@/components/common/ChipGroup";
 import { useWeeks } from "@/hooks/useWeeks";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
-import { getMissionTypes } from "@/app/journey/[slug]/clientActions";
+import { getMissionTypes } from "@/utils/data/mission";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
 import { JourneyMissionInstanceWithMission } from "@/types";
@@ -193,7 +193,7 @@ export default function MissionComponent({
         status: "not_started" as MissionStatus,
         release_date: releaseDate || null,
         expiry_date: expiryDate || null,
-        journey_uuid: journeyId,
+        journey_id: journeyId,
       };
 
       await createMissionInstance(newInstance as any);

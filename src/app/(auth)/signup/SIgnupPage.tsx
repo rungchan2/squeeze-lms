@@ -22,9 +22,9 @@ import { useOrganization } from "@/hooks/useOrganization";
 import Select from "react-select";
 import { toaster } from "@/components/ui/toaster";
 import constants from "@/utils/constants";
-import { user } from "@/utils/data/user";
+import { createProfile } from "@/utils/data/user";
 import { signupPageSchema, type SignupPage } from "@/types";
-import { auth } from "@/utils/data/auth";
+import { signUpWithEmail } from "@/utils/data/auth";
 import { Modal } from "@/components/modal/Modal";
 import { Role } from "@/types";
 import { accessCode } from "@/utils/data/accessCode";
@@ -121,7 +121,7 @@ export default function SignupPage() {
   const onSubmit = async (data: SignupPage) => {
     try {
       // 1. 인증 계정 생성
-      const { userData, error } = await auth.signUpWithEmail(
+      const { userData, error } = await signUpWithEmail(
         data.email,
         data.password
       );
@@ -146,7 +146,7 @@ export default function SignupPage() {
         };
 
         // 프로필 생성
-        const { error: profileError } = await user.createProfile(profileData);
+        const { error: profileError } = await createProfile(profileData);
 
         if (profileError) {
           console.error("프로필 생성 오류:", profileError);

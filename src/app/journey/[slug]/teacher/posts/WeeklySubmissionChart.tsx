@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, memo } from "react";
+import { useState, useMemo, memo } from "react";
 import styled from "@emotion/styled";
 import { useJourneyWeeklyStats, WeeklyStat } from "@/hooks/useJourneyWeeklyStats";
 import Heading from "@/components/Text/Heading";
@@ -8,15 +8,71 @@ import Text from "@/components/Text/Text";
 import Spinner from "@/components/common/Spinner";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { useParams } from "next/navigation";
-import { journey } from "@/utils/data/journey";
+
+// 미제출 상세 정보 표시 컴포넌트
+const IncompleteDetailsList = styled.ul`
+  list-style: none;
+  padding: 0;
+  max-height: 150px; /* 스크롤 추가 */
+  overflow-y: auto;
+  border-top: 1px solid var(--grey-200);
+  padding-top: 1rem;
+
+  li {
+    font-size: 0.875rem; /* caption과 비슷하게 */
+    color: var(--grey-700);
+
+    strong {
+      color: var(--grey-900);
+    }
+  }
+`;
+
+// 토글 버튼
+const ToggleDetailsButton = styled.button`
+  background: none;
+  border: none;
+  color: var(--primary-500);
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+  align-self: flex-start; /* 왼쪽 정렬 */
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
 
 // 도넛 차트 컴포넌트 (메모이제이션)
 const DonutChart = memo(({ weekStat }: { weekStat: WeeklyStat }) => {
+  const [isDetailsVisible, setIsDetailsVisible] = useState(false);
+
   // 차트 데이터를 메모이제이션
   const chartData = useMemo(() => [
     { name: "제출완료", value: weekStat.submissionRate },
     { name: "미제출", value: weekStat.remainingRate }
   ], [weekStat.submissionRate, weekStat.remainingRate]);
+
+  // 미제출 상세 정보 메모이제이션
+  const incompleteDetails = useMemo(() => {
+    if (!weekStat.incompleteMissionList || weekStat.incompleteMissionList.length === 0) {
+      return <Text variant="caption" color="var(--grey-500)">모든 학생이 모든 미션을 제출했습니다.</Text>;
+    }
+    return (
+      <IncompleteDetailsList>
+        {weekStat.incompleteMissionList.map((item, index) => (
+          <li key={`${item.user_id}-${item.mission_name}-${index}`}>
+            <strong>{item.user_name}</strong> - {item.mission_name}
+          </li>
+        ))}
+      </IncompleteDetailsList>
+    );
+  }, [weekStat.incompleteMissionList]);
+
+  const toggleDetails = () => {
+    setIsDetailsVisible(prev => !prev);
+  };
 
   return (
     <WeekChartContainer>
@@ -93,13 +149,16 @@ const DonutChart = memo(({ weekStat }: { weekStat: WeeklyStat }) => {
           </Text>
         </StatItem>
       </SubmissionDetails>
+
+      {/* 미제출 상세 정보 토글 버튼 및 리스트 */}      
+      <ToggleDetailsButton onClick={toggleDetails}>
+        {isDetailsVisible ? '미제출 상세 숨기기' : '미제출 상세 보기'}
+      </ToggleDetailsButton>
+
+      {isDetailsVisible && incompleteDetails}
+
     </WeekChartContainer>
   );
-}, (prevProps, nextProps) => {
-  // 이전 props와 현재 props가 동일하면 리렌더링하지 않음
-  return prevProps.weekStat.id === nextProps.weekStat.id &&
-    prevProps.weekStat.submissionRate === nextProps.weekStat.submissionRate &&
-    prevProps.weekStat.submittedMissions === nextProps.weekStat.submittedMissions;
 });
 
 // 컴포넌트 표시 이름 설정 (개발 도구에서 확인용)
@@ -107,37 +166,9 @@ DonutChart.displayName = 'DonutChart';
 
 export default function WeeklySubmissionChart() {
   const { slug } = useParams();
-  const [localJourneyId, setLocalJourneyId] = useState<string | null>(null);
-  const [isInitializing, setIsInitializing] = useState(true);
-  
-  // slug로부터 journeyId 가져오기
-  useEffect(() => {
-    if (!slug || (slug && !isInitializing)) return;
-    
-    setIsInitializing(true);
-    
-    const initJourney = async () => {
-      try {
-        const journeyData = await journey.getJourneyByUuidRetrieveId(slug as string);
-        
-        if (journeyData && journeyData.length > 0) {
-          const id = journeyData[0].id;
-          setLocalJourneyId(id);
-        } else {
-          console.error("[WeeklySubmissionChart] 여정 데이터가 없음");
-        }
-      } catch (err) {
-        console.error("[WeeklySubmissionChart] 초기화 오류:", err);
-      } finally {
-        setIsInitializing(false);
-      }
-    };
-    
-    initJourney();
-  }, [slug, isInitializing]);
   
   // 사용할 journeyId 결정
-  const journeyIdToUse = localJourneyId;
+  const journeyIdToUse = slug;
   
   const { weeklyStats, isLoading, error } = useJourneyWeeklyStats(
     journeyIdToUse ? journeyIdToUse.toString() : undefined
@@ -148,7 +179,7 @@ export default function WeeklySubmissionChart() {
     return weeklyStats || [];
   }, [weeklyStats]);
 
-  if (isInitializing || isLoading) {
+  if (isLoading) {
     return <Spinner />;
   }
 
@@ -164,26 +195,26 @@ export default function WeeklySubmissionChart() {
     console.error("[WeeklySubmissionChart] 오류:", error);
     
     return (
-      <ErrorContainer>
+      <EmptyAndErrorState>
         <Text fontWeight="bold" color="var(--negative-700)">오류 발생</Text>
         <Text>{errorMessage}</Text>
         <RetryButton onClick={() => window.location.reload()}>
           <Text fontWeight="bold" color="white">다시 시도</Text>
         </RetryButton>
-      </ErrorContainer>
+      </EmptyAndErrorState>
     );
   }
 
   if (memoizedWeeklyStats.length === 0) {
     return (
-      <EmptyState>
+      <EmptyAndErrorState>
         <Text color="var(--grey-500)">주차 데이터가 없습니다.</Text>
         <Text variant="caption" color="var(--grey-400)">
           {journeyIdToUse 
             ? "이 Journey에 주차 또는 미션 데이터가 없습니다." 
             : "Journey ID를 불러오지 못했습니다."}
         </Text>
-      </EmptyState>
+      </EmptyAndErrorState>
     );
   }
 
@@ -284,24 +315,15 @@ const SubmissionDetails = styled.div`
   margin-top: 0.5rem;
 `;
 
-const EmptyState = styled.div`
+const EmptyAndErrorState = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  align-items: center;
   padding: 2rem;
+  gap: 1rem;
   background-color: var(--grey-50);
   border-radius: 8px;
   border: 1px dashed var(--grey-300);
-`;
-
-const ErrorContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-  background-color: var(--negative-50);
-  border-radius: 8px;
-  border: 1px dashed var(--negative-300);
 `;
 
 const RetryButton = styled.button`

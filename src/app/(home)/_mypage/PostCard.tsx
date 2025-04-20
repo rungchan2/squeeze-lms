@@ -14,11 +14,11 @@ import dayjs from "@/utils/dayjs/dayjs";
 import { PostWithRelations } from "@/types";
 import { useLikes } from "@/hooks/useLikes";
 import RichTextViewer from "@/components/richTextInput/RichTextViewer";
-import { useEffect, useCallback, useMemo, memo } from "react";
+import { useCallback, useMemo, memo } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { Menu, Portal } from "@chakra-ui/react";
 import { FaEllipsis } from "react-icons/fa6";
-import { posts } from "@/utils/data/posts";
+import { hidePost, deletePost } from "@/utils/data/posts";
 import useSWR from "swr";
 import { getCommentsNumber } from "@/utils/data/comment";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
@@ -261,7 +261,7 @@ export default memo(function PostCard({
                       }}
                       onClick={(e) => {
                         if (confirm("이 게시물을 숨기시겠습니까?")) {
-                          posts.hidePost(post.id);
+                          hidePost(post.id);
                         }
                         e.stopPropagation();
                       }}
@@ -276,7 +276,7 @@ export default memo(function PostCard({
                       _hover={{ bg: "bg.error", color: "fg.error" }}
                       onClick={(e) => {
                         if (confirm("삭제하시겠습니까?")) {
-                          posts.deletePost(post.id);
+                          deletePost(post.id);
                           router.back();
                         }
                         e.stopPropagation();

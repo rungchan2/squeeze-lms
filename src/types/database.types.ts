@@ -122,7 +122,7 @@ export type Database = {
           created_at: string | null
           expiry_date: string | null
           id: string
-          journey_uuid: string | null
+          journey_id: string | null
           journey_week_id: string
           mission_id: string
           release_date: string | null
@@ -133,7 +133,7 @@ export type Database = {
           created_at?: string | null
           expiry_date?: string | null
           id?: string
-          journey_uuid?: string | null
+          journey_id?: string | null
           journey_week_id: string
           mission_id: string
           release_date?: string | null
@@ -144,7 +144,7 @@ export type Database = {
           created_at?: string | null
           expiry_date?: string | null
           id?: string
-          journey_uuid?: string | null
+          journey_id?: string | null
           journey_week_id?: string
           mission_id?: string
           release_date?: string | null
@@ -370,6 +370,7 @@ export type Database = {
           id: string
           is_hidden: boolean
           is_team_submission: boolean | null
+          journey_id: string | null
           mission_instance_id: string | null
           score: number | null
           team_id: string | null
@@ -387,6 +388,7 @@ export type Database = {
           id?: string
           is_hidden?: boolean
           is_team_submission?: boolean | null
+          journey_id?: string | null
           mission_instance_id?: string | null
           score?: number | null
           team_id?: string | null
@@ -404,6 +406,7 @@ export type Database = {
           id?: string
           is_hidden?: boolean
           is_team_submission?: boolean | null
+          journey_id?: string | null
           mission_instance_id?: string | null
           score?: number | null
           team_id?: string | null
@@ -414,6 +417,13 @@ export type Database = {
           view_count?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "posts_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "posts_mission_instance_id_fkey"
             columns: ["mission_instance_id"]
@@ -444,12 +454,12 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
-          marketing_opt_in: boolean | null
+          marketing_opt_in: boolean
           organization_id: string | null
           phone: string | null
-          privacy_agreed: boolean | null
+          privacy_agreed: boolean
           profile_image: string | null
-          role: string | null
+          role: Database["public"]["Enums"]["role"]
           updated_at: string | null
         }
         Insert: {
@@ -458,12 +468,12 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
-          marketing_opt_in?: boolean | null
+          marketing_opt_in?: boolean
           organization_id?: string | null
           phone?: string | null
-          privacy_agreed?: boolean | null
+          privacy_agreed?: boolean
           profile_image?: string | null
-          role?: string | null
+          role?: Database["public"]["Enums"]["role"]
           updated_at?: string | null
         }
         Update: {
@@ -472,12 +482,12 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
-          marketing_opt_in?: boolean | null
+          marketing_opt_in?: boolean
           organization_id?: string | null
           phone?: string | null
-          privacy_agreed?: boolean | null
+          privacy_agreed?: boolean
           profile_image?: string | null
-          role?: string | null
+          role?: Database["public"]["Enums"]["role"]
           updated_at?: string | null
         }
         Relationships: [
@@ -756,11 +766,23 @@ export type Database = {
         Args: { event: Json }
         Returns: Json
       }
+      get_auth_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_distinct_mission_types: {
         Args: Record<PropertyKey, never>
         Returns: {
           mission_type: string
         }[]
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_teacher: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
     }
     Enums: {

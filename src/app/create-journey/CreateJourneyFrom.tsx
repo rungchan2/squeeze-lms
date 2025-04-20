@@ -3,11 +3,7 @@
 import FileUpload from "@/components/common/FileUpload";
 import styled from "@emotion/styled";
 import { CreateJourney, createJourneySchema, Journey } from "@/types";
-import {
-  createJourney,
-  updateJourney,
-  deleteJourney,
-} from "../journey/[slug]/clientActions";
+import { deleteJourney, updateJourney, createJourney } from "@/utils/data/journey";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@chakra-ui/react";

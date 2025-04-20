@@ -16,19 +16,19 @@ import { MdPrivacyTip, MdFeedback, MdLogout } from "react-icons/md";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
-import { useMyLikedPosts } from "@/hooks/usePosts";
+import { useLikedPosts, PostType } from "@/hooks/usePosts2";
 import PostCard from "./PostCard";
-import { organization } from "@/utils/data/organization";
+import { getOrganizationById } from "@/utils/data/organization";
 import { Error } from "@/components/common/Error";
 import constants from "@/utils/constants";
 import { AdminOnly } from "@/components/auth/AdminOnly";
 import { MdAdminPanelSettings } from "react-icons/md";
 import { Tabs } from "@chakra-ui/react";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
-import { auth } from "@/utils/data/auth";
+import { userLogout } from "@/utils/data/auth";
 export default function MyPage() {
   const [orgData, setOrgData] = useState<any>(null);
-  const { data: myLikedPosts } = useMyLikedPosts();
+  const { data: myLikedPosts } = useLikedPosts(PostType.LIKED_POSTS);
   const router = useRouter();
   const { profileImage, organizationId, user, lastName, firstName } =
     useSupabaseAuth();
@@ -40,7 +40,7 @@ export default function MyPage() {
         return;
       }
       
-      const { data, error } = await organization.getOrganization(
+      const { data, error } = await getOrganizationById(
         organizationId
       );
       if (error) {
@@ -53,7 +53,7 @@ export default function MyPage() {
   }, [organizationId]);
 
   const handleLogout = useCallback(() => {
-    auth.userLogout();
+    userLogout();
     router.push("/login");
   }, [router]);
   return (

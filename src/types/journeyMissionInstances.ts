@@ -18,7 +18,7 @@ export const journeyMissionInstanceSchema = z.object({
   expiry_date: z.string().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
-  journey_uuid: z.string().uuid().nullable(),
+  journey_id: z.string().uuid().nullable(),
 });
 
 export const createJourneyMissionInstanceSchema = journeyMissionInstanceSchema.omit({

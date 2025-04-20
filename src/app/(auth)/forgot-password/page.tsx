@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { user } from '@/utils/data/user';
+import { updatePassword } from '@/utils/data/user';
 import { toaster } from '@/components/ui/toaster';
 import { createClient } from '@/utils/supabase/client';
 import { Box } from '@chakra-ui/react';
@@ -77,7 +77,7 @@ export default function ForgotPassword() {
     
     try {
       // 비밀번호 업데이트
-      const { error } = await user.updatePassword(password);
+      const { error } = await updatePassword(password);
       
       if (error) {
         throw error;

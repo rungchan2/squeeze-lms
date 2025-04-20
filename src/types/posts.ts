@@ -31,6 +31,7 @@ export const postSchema = z.object({
   content: z.string(),
   user_id: z.string().uuid(),
   mission_instance_id: z.string().uuid(),
+  journey_id: z.string().uuid(),
   score: z.number(),
   created_at: z.string(),
   updated_at: z.string(),
@@ -53,6 +54,7 @@ export const createPostSchema = postSchema.omit({
 });
 
 export const updatePostSchema = createPostSchema.omit({
+  journey_id: true,
   mission_instance_id: true,
   score: true,
 });
