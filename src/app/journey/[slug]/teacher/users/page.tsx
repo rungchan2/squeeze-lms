@@ -52,7 +52,6 @@ export default function UsersPage() {
   
   useEffect(() => {
     if (mutate) {
-      console.log("조직 ID 변경으로 인한 데이터 리로드");
       mutate();
     }
   }, [selectedOrganizationId, mutate]);
@@ -486,11 +485,9 @@ export default function UsersPage() {
                   // 조직 ID 검증 및 설정
                   const selectedOrgId = value?.value && value.value !== "undefined" && value.value !== "null" ? 
                     String(value.value) : "";
-                  console.log("조직 변경:", selectedOrgId);
                   
                   // 이전 값과 같으면 변경하지 않음
                   if (selectedOrgId === selectedOrganizationId) {
-                    console.log("동일한 조직 ID, 변경 없음");
                     return;
                   }
                   

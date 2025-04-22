@@ -76,8 +76,6 @@ export const useNotifications = (pageSize = 10) => {
   const [page, setPage] = useState(1);
   const [loadedNotifications, setLoadedNotifications] = useState<Notification[]>([]);
   
-  // userId가 숫자가 아니면 기본값 사용
-  const numericUserId = typeof userId === 'string' ? userId : "";
   
   // SWR로 데이터 가져오기
   const {
@@ -87,8 +85,8 @@ export const useNotifications = (pageSize = 10) => {
     isValidating,
     mutate
   } = useSWR(
-    numericUserId ? [`notifications-${numericUserId}`, pageSize * page] : null,
-    ([_, size]) => fetchNotifications(numericUserId, size),
+    userId ? [`notifications-${userId}`, pageSize * page] : null,
+    ([_, size]) => fetchNotifications(userId, size),
     {
       revalidateOnFocus: false,
       dedupingInterval: 60000, // 1분
@@ -121,7 +119,7 @@ export const useNotifications = (pageSize = 10) => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage: isValidating && !isLoading,
-    refetch: mutate
+    mutate
   };
 };
 
@@ -157,6 +155,6 @@ export const useNotification = (notificationId: string) => {
   return {
     notification: data,
     error,
-    refetch: mutate
+    mutate
   };
 };

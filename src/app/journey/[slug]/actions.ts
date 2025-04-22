@@ -14,6 +14,17 @@ export async function getJourneyByUuid(uuid: string) {
   return { data, error };
 }
 
+export async function getMissionById(id: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("missions")
+    .select("*")
+    .eq("id", id)
+    .single();
+  return { data, error };
+}
+
+
 export async function getJourneyWeeklyStats(journeyId: string) {
   try {
     const supabase = await createClient();

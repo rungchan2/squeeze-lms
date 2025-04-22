@@ -72,9 +72,11 @@ export async function deleteMissionInstance (id: string, mutate: () => void) {
           .eq("id", id);
 
         if (instanceError) {
-          throw new Error(
-            `미션 인스턴스 삭제 중 오류: ${instanceError.message}`
-          );
+          if (instanceError.code === "23503") {
+            throw new Error(instanceError.code);
+          } else {
+            throw new Error(`미션 인스턴스 삭제 중 오류: ${instanceError.message}`);
+          }
         }
 
         // 캐시 업데이트

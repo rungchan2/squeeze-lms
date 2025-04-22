@@ -125,7 +125,6 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
   
   refreshAuthState: async () => {
     const supabase = createClient();
-    console.log("사용자 상태 업데이트 됨");
     
     try {
       const { data, error } = await supabase.auth.refreshSession();
@@ -141,7 +140,6 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
         
         // 상태가 이미 정리된 경우(로그아웃) 업데이트하지 않음
         if (!currentState.user) {
-          console.log("사용자가 이미 로그아웃됨, 상태 업데이트 건너뜀");
           return;
         }
         
@@ -153,7 +151,6 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
         }
       } else {
         // 세션이 없는 경우 상태 정리
-        console.log("새로운 세션이 없음, 상태 정리");
         get().clearAuthState();
       }
     } catch (e) {
@@ -181,12 +178,10 @@ const fetchUserProfile = async (userId: string) => {
   // 중복 호출 방지 (5초 이내 중복 호출 방지)
   const now = Date.now();
   if (now - lastProfileFetchTime < THROTTLE_INTERVAL) {
-    console.log("프로필 요청 스로틀링: 최근에 이미 요청됨");
     return;
   }
   
   lastProfileFetchTime = now;
-  console.log("프로필 정보 로드 중...");
   
   const supabase = createClient();
   const { data, error } = await supabase

@@ -259,12 +259,24 @@ export default function MissionComponent({
                   await deleteMissionInstance(instance.id);
                   // UI 즉시 업데이트
                   await mutateMissionInstances();
-                } catch (error) {
-                  console.error("Error removing mission:", error);
                   toaster.create({
-                    title: error instanceof Error ? error.message : "미션 삭제 중 오류가 발생했습니다.",
-                    type: "error",
+                    title: "미션이 삭제되었습니다.",
+                    type: "warning",
                   });
+                } catch (error : any) {
+                  console.log("에러", error.toString().split(":")[1].trim());
+                  if ( error.toString().split(":")[1].trim() === "23503") {
+                    toaster.create({
+                      title: "이미 완료한 미션 에서 참조 하고 있습니다.",
+                      description: "관련된 미션 및 포인트를 삭제후 다시 시도해주세요.",
+                      type: "error",
+                    });
+                  } else {
+                    toaster.create({
+                      title: "미션 삭제 중 오류가 발생했습니다." + error,
+                      type: "error",
+                    });
+                  }
                 } finally {
                   setIsLoadingMissions(false);
                 }

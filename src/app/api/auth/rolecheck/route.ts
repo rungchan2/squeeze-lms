@@ -53,11 +53,9 @@ export async function GET(request: NextRequest) {
       );
     }
     const decodedToken = jwtDecode<DecodedToken>(session.access_token);
-    console.log("decodedToken", decodedToken);
     
     // 사용자 역할 가져오기 (JWT에서)
     const { role } = decodedToken.app_metadata || {};
-    console.log("role", role);
 
     if (!role) {
       return NextResponse.json(

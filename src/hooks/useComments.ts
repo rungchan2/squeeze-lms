@@ -26,16 +26,11 @@ interface PageData {
 export function useComments({ 
   postId, 
   pageSize = 10, 
-  enableRealtime = false // 기본값은 false로 설정 
 }: UseCommentsProps) {
   const { id: userId } = useSupabaseAuth();
   
   const recentlyProcessedIds = useRef<Set<string>>(new Set());
-  const channelRef = useRef<RealtimeChannel | null>(null);
-  const mountedRef = useRef(true);
-  const isSettingUpRef = useRef(false);
 
-  // SWR 키 생성 함수 - 페이지 인덱스를 받아 API 요청에 필요한 키를 반환
   const getKey = (pageIndex: number, previousPageData: PageData | null) => {
     // 이전 페이지 데이터가 없거나 빈 배열이면 더 이상 데이터가 없는 것
     if (previousPageData && !previousPageData.data?.length) return null;
@@ -81,11 +76,6 @@ export function useComments({
   const totalCount = pagesData && pagesData[0]?.count ? pagesData[0].count : 0;
   const hasMore = pagesData && pagesData[pagesData.length - 1]?.data?.length === pageSize;
   const isFetchingNextPage = size > 1 && isValidating;
-
-  // 댓글 새로고침
-  const refreshComments = useCallback(() => {
-    mutate();
-  }, [mutate]);
 
   // 댓글 생성 함수
   const createComment = useCallback(async (content: string) => {
@@ -268,58 +258,7 @@ export function useComments({
   }, [userId, mutate]);
 
   // 실시간 구독 설정 - enableRealtime 옵션에 따라 활성화
-  useEffect(() => {
-    if (!postId || !enableRealtime) return; // enableRealtime이 false면 실시간 구독하지 않음
-
-    mountedRef.current = true;
-
-    const setupChannel = async () => {
-      // 이미 설정 중이면 중복 실행 방지
-      if (isSettingUpRef.current) return;
-      isSettingUpRef.current = true;
-
-      try {
-        // 기존 채널이 있으면 제거
-        if (channelRef.current) {
-          await removeChannel(channelRef.current);
-          channelRef.current = null;
-        }
-
-        // 새 채널 설정
-        const channel = await addChannel(
-          postId,
-          mountedRef,
-          recentlyProcessedIds.current,
-          () => mutate()  // 실시간 업데이트 시 캐시 갱신
-        );
-
-        // 컴포넌트가 언마운트되지 않았으면 채널 저장
-        if (mountedRef.current) {
-          channelRef.current = channel;
-        } else {
-          // 설정 도중 언마운트된 경우 채널 정리
-          removeChannel(channel);
-        }
-      } catch (error) {
-        console.error("실시간 구독 설정 실패:", error);
-      } finally {
-        isSettingUpRef.current = false;
-      }
-    };
-
-    setupChannel();
-
-    return () => {
-      // 컴포넌트 언마운트 표시
-      mountedRef.current = false;
-      
-      // 컴포넌트 언마운트 시 채널 제거
-      if (channelRef.current) {
-        removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-    };
-  }, [postId, enableRealtime]); // enableRealtime 의존성 추가
+  
 
   return {
     comments,
@@ -331,7 +270,7 @@ export function useComments({
     createComment,
     deleteComment,
     updateComment,
-    refreshComments,
     fetchNextPage,
+    mutate,
   };
 }

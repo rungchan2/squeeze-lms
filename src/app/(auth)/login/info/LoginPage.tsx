@@ -287,7 +287,6 @@ export default function LoginPage() {
               }}
               onChange={(e) => {
                 setValue("organization_id", e?.value || "");
-                console.log(e?.value);
               }}
             />
           </InputAndTitle>
@@ -394,7 +393,7 @@ export default function LoginPage() {
                 roleAccessCode,
                 roleAccessType.value as Role
               );
-              console.log("data", data, "error", error);
+
               if (error || !data) {
                 toaster.create({
                   title: "권한 인증 실패",

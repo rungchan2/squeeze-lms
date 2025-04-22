@@ -6,7 +6,6 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const journeyId = searchParams.get("journey_id");
     
-    console.log("GET user-points API 호출:", { journeyId });
     
     if (!journeyId) {
       return NextResponse.json(
@@ -28,7 +27,6 @@ export async function GET(request: Request) {
       );
     }
     
-    console.log("GET user-points API 응답:", { count: data?.length || 0 });
     
     return NextResponse.json(data, {
       headers: {
@@ -57,7 +55,6 @@ export async function POST(request: Request) {
     try {
       body = await request.json();
       journeyId = body.journeyId;
-      console.log("POST user-points API 호출:", { journeyId });
     } catch (parseError) {
       console.error("POST user-points JSON 파싱 오류:", parseError);
       return NextResponse.json(
@@ -86,8 +83,6 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
-      
-      console.log("POST user-points API 응답:", { count: data?.length || 0 });
       
       return NextResponse.json(data, {
         headers: {

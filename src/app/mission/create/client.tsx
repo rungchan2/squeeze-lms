@@ -12,7 +12,7 @@ import Heading from "@/components/Text/Heading";
 import { toaster } from "@/components/ui/toaster";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { mission } from "@/utils/data/mission";
+import { updateMission, createMission } from "@/utils/data/mission";
 import Tiptap from "@/components/richTextInput/RichTextEditor";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 export default function NewMissionPage({ editMissionData }: { editMissionData?: Mission }) {
@@ -54,7 +54,7 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
     
     console.log(data);
     if (editMissionData) {
-      const { error: updateError } = await mission.updateMission(editMissionData.id, {
+      const { error: updateError } = await updateMission(editMissionData.id, {
         ...data,
         description: content
       });
@@ -66,7 +66,7 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
         return;
       }
     } else {
-      const { error: createError } = await mission.createMission({
+      const { error: createError } = await createMission({
         ...data,
         description: content
       });
