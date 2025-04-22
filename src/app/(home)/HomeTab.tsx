@@ -1,31 +1,77 @@
 "use client";
 
 import { MdSpaceDashboard } from "react-icons/md";
-import { FaBell, FaPlus } from "react-icons/fa";
+import { FaBell } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
-import JourneyCard from "@/app/(home)/_class/JourneyCard";
-import { useJourney } from "@/hooks/useJourney";
-import Spinner from "@/components/common/Spinner";
 import styled from "@emotion/styled";
-import NoJourney from "./_class/NoJourney";
-import NotificationCard from "./_notification/NotificationCard";
-import { useNotifications, markAsRead } from "@/hooks/useNotification";
+
 import MyPage from "./_mypage/MyPage";
-import { FloatingButton } from "@/components/common/FloatingButton";
-import Text from "@/components/Text/Text";
 import { useRouter } from "next/navigation";
-import { AdminOnly } from "@/components/auth/AdminOnly";
-import { useCallback, useEffect, useRef, useMemo } from "react";
+import { useEffect } from "react";
 import { Loading } from "@/components/common/Loading";
 import Footer from "@/components/common/Footer";
 import { toaster } from "@/components/ui/toaster";
-import { Tabs } from "@chakra-ui/react";
-import { useJourneyUser } from "@/hooks/useJourneyUser";
+import { Tabs, Link } from "@chakra-ui/react";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import JourneyTab from "./_class/JourneyTab";
+import NotificationTab from "./_notification/NotificationTab";
+import { createClient } from "@/utils/supabase/client";
+import { useNotifications } from "@/hooks/useNotification";
 
 export default function HomeTab() {
   const router = useRouter();
   const { isAuthenticated, loading } = useSupabaseAuth();
+  const { mutate } = useNotifications();
+
+  // 현재 해시로부터 초기 탭 값 결정
+  const getInitialTab = () => {
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash.replace("#", "");
+      if (hash && ["classes", "notifications", "profile"].includes(hash)) {
+        return hash;
+      }
+    }
+    return "classes";
+  };
+
+  // 토스터 액션에서 탭 전환을 위한 함수
+
+  useEffect(() => {
+    const switchToNotificationsTab = () => {
+      window.location.hash = "notifications";
+      // SWR 캐시 업데이트
+      mutate();
+      // 해시 변경만으로 탭이 바뀌지 않는 경우 페이지 리로드
+      if (window.location.hash === "#notifications") {
+        window.location.reload();
+      }
+    };
+
+    const supabase = createClient();
+    const channel = supabase
+      .channel("notifications")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications" },
+        (payload) => {
+          console.log(payload);
+          toaster.create({
+            type: "info",
+            title: "새로운 알림이 있습니다.",
+            description: `${payload.new.message}`,
+            action: {
+              label: "보기",
+              onClick: switchToNotificationsTab,
+            },
+            duration: 5000,
+          });
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [router, mutate]);
 
   useEffect(() => {
     if (!isAuthenticated && !loading) {
@@ -43,22 +89,40 @@ export default function HomeTab() {
     }
     return null;
   }
-//[ ] 불필요 리 렌더링 해소. 탭별로 컴포넌트 분리하기 및 렌더링 확인
+  const linkStyle = {
+    textDecoration: "none",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  };
+  //[ ] 불필요 리 렌더링 해소. 탭별로 컴포넌트 분리하기 및 렌더링 확인
+
   return (
     <HomeContainer>
-      <Tabs.Root key="line" defaultValue="classes" variant="line" fitted>
+      <Tabs.Root
+        key="line"
+        defaultValue={getInitialTab()}
+        variant="line"
+        fitted
+      >
         <Tabs.List>
-          <Tabs.Trigger value="classes">
-            <MdSpaceDashboard />
-            클라스
+          <Tabs.Trigger value="classes" asChild>
+            <Link unstyled href="#classes" style={linkStyle}>
+              <MdSpaceDashboard />
+              클라스
+            </Link>
           </Tabs.Trigger>
-          <Tabs.Trigger value="notifications">
-            <FaBell />
-            알림
+          <Tabs.Trigger value="notifications" asChild>
+            <Link unstyled href="#notifications" style={linkStyle}>
+              <FaBell />
+              알림
+            </Link>
           </Tabs.Trigger>
-          <Tabs.Trigger value="profile">
-            <FaUser />
-            프로필
+          <Tabs.Trigger value="profile" asChild>
+            <Link unstyled href="#profile" style={linkStyle}>
+              <FaUser />
+              프로필
+            </Link>
           </Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="classes">
@@ -74,205 +138,6 @@ export default function HomeTab() {
     </HomeContainer>
   );
 }
-
-function JourneyTab() {
-  const router = useRouter();
-  const { role } = useSupabaseAuth();
-  const isAdmin = role === "admin";
-  
-  // 모든 여정 데이터 가져오기
-  const { journeys, error, isLoading } = useJourney();
-  
-  // 현재 사용자가 참여 중인 여정 목록 가져오기
-  const { 
-    data: userJourneys, 
-    isLoading: userJourneysLoading,
-    error: userJourneysError
-  } = useJourneyUser(""); // 0을 전달하면 특정 여정이 아닌 사용자의 모든 여정 참여 정보를 가져올 수 있음
-  // 사용자가 참여 중인 여정 ID 목록 생성
-  const userJourneyIds = useMemo(() => {
-    if (!userJourneys) return [];
-    // 새로운 데이터 구조에 맞게 수정 (journeys 필드에서 id 추출)
-    return userJourneys.map(journey => 
-      journey.journeys?.id || journey.journey_id
-    ).filter(id => id !== null) as string[];
-  }, [userJourneys]);
-  
-  // 권한에 따라 표시할 여정 목록 필터링
-  const filteredJourneys = useMemo(() => {
-    if (isAdmin) {
-      // 관리자는 모든 여정 볼 수 있음
-      return journeys || [];
-    } else {
-      // 일반 사용자는 참여 중인 여정만 볼 수 있음
-      return (journeys || []).filter(journey => 
-        userJourneyIds.includes(journey.id)
-      );
-    }
-  }, [isAdmin, journeys, userJourneyIds]);
-  
-  // 에러 처리
-  if (error) {
-    return (
-      <div>
-        <Text variant="body" color="red">Error: {error.message}</Text>
-      </div>
-    );
-  }
-  
-  if (userJourneysError && !isAdmin) {
-    return (
-      <div>
-        <Text variant="body" color="red">사용자 여정 정보를 불러오는 중 오류가 발생했습니다.</Text>
-      </div>
-    );
-  }
-  
-  // 로딩 중 표시
-  const isPageLoading = isLoading || (!isAdmin && userJourneysLoading);
-  
-  return (
-    <JourneysContainer>
-      {isPageLoading ? (
-        <div>
-          <Spinner size="32px" />
-        </div>
-      ) : filteredJourneys.length > 0 ? (
-        filteredJourneys.map((journey) => (
-          <JourneyCard journey={journey} key={journey.id} />
-        ))
-      ) : (
-        <NoJourney />
-      )}
-      
-      <AdminOnly>
-        <FloatingButton onClick={() => router.push("/create-journey")}>
-          <FaPlus />
-          <Text variant="body" fontWeight="bold" color="var(--white)">
-            새 조직
-          </Text>
-        </FloatingButton>
-      </AdminOnly>
-      <Footer />
-    </JourneysContainer>
-  );
-}
-
-const JourneysContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-`;
-
-function NotificationTab() {
-  const {
-    notifications,
-    error,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
-  } = useNotifications(10);
-
-  // 무한 스크롤을 위한 인터섹션 옵저버
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const lastItemRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (isFetchingNextPage) return;
-
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-
-      observerRef.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
-        }
-      });
-
-      if (node) {
-        observerRef.current.observe(node);
-      }
-    },
-    [isFetchingNextPage, fetchNextPage, hasNextPage]
-  );
-
-  // 알림 읽음 처리
-  const handleReadNotification = async (notificationId: string) => {
-    await markAsRead(notificationId);
-    refetch();
-  };
-
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
-  if (isLoading) {
-    return (
-      <div>
-        <Spinner size="32px" style={{ marginTop: "12px" }} />
-      </div>
-    );
-  }
-
-  return (
-    <NotificationsContainer>
-      {notifications.length === 0 ? (
-        <EmptyState>알림이 없습니다.</EmptyState>
-      ) : (
-        <div className="notification-list">
-          {notifications.map((notification, index) => {
-            const isLastItem = index === notifications.length - 1;
-            return (
-              <div key={notification.id} ref={isLastItem ? lastItemRef : null}>
-                <NotificationCard
-                  notification={notification}
-                  readNotification={handleReadNotification}
-                />
-              </div>
-            );
-          })}
-
-          {isFetchingNextPage && (
-            <div>
-              <Spinner size="24px" style={{ marginTop: "12px" }} />
-            </div>
-          )}
-        </div>
-      )}
-      <Footer />
-    </NotificationsContainer>
-  );
-}
-
-const NotificationsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-
-  .notification-list {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-`;
-
-const EmptyState = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100px;
-  width: 100%;
-  background-color: var(--grey-100);
-  border-radius: 8px;
-  margin-top: 16px;
-  padding: 16px;
-  color: var(--grey-600);
-`;
 
 function ProfileTab() {
   return (

@@ -86,9 +86,6 @@ export function useAllUsers(pageSize = 10) {
 
 // 조직에 속한 사용자 무한 스크롤 훅
 export function useOrganizationUsers(organizationId: string, pageSize = 10) {
-  console.log(
-    `useOrganizationUsers 초기화: orgId=${organizationId}, pageSize=${pageSize}`
-  );
 
   // 페이지 크기 유효성 검사
   const validPageSize =
@@ -97,18 +94,15 @@ export function useOrganizationUsers(organizationId: string, pageSize = 10) {
   const getKey = (pageIndex: number, previousPageData: any) => {
     // 유효성 검사
     if (!organizationId || organizationId === "") {
-      console.log(`getKey: organizationId 없음 - null 반환`);
       return null;
     }
 
     if (previousPageData && !previousPageData.data.length) {
-      console.log(`getKey: 이전 페이지 데이터 없음 - null 반환`);
       return null;
     }
 
     // 키 생성 형식을 변경 - 더 명확한 구분자 사용
     const key = `organization:${organizationId}:pageIndex:${pageIndex}:pageSize:${validPageSize}`;
-    console.log(`getKey: ${key} 생성됨`);
     return key;
   };
 
@@ -116,11 +110,9 @@ export function useOrganizationUsers(organizationId: string, pageSize = 10) {
     useSWRInfinite(
       getKey,
       async (key) => {
-        console.log(`무한 스크롤 fetcher 호출: key=${key}`);
 
         try {
           if (!key) {
-            console.log(`key가 없음, 빈 결과 반환`);
             return { data: [], count: 0 };
           }
           const parts = key.split(":");
@@ -160,18 +152,11 @@ export function useOrganizationUsers(organizationId: string, pageSize = 10) {
             finalPageSize = validPageSize;
           }
 
-          console.log(
-            `최종 파싱 값: orgId=${orgId}, pageIndex=${pageIndex}, pageSize=${finalPageSize}`
-          );
-
           if (!orgId) {
             console.error(`유효하지 않은 organizationId: ${orgId}`);
             return { data: [], count: 0 };
           }
 
-          console.log(
-            `fetchOrganizationUsers 호출 준비: orgId=${orgId}, pageIndex=${pageIndex}, pageSize=${finalPageSize}`
-          );
           return getOrganizationUsersByPage(orgId, pageIndex, finalPageSize);
         } catch (e: any) {
           console.error("데이터 로딩 오류:", {

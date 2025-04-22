@@ -117,7 +117,6 @@ export default function CommentInputSection({
   createComment,
   missionInstanceId
 }: CommentInputSectionProps) {
-  const { id: userId } = useSupabaseAuth();
   const {
     comment,
     isSubmitting,
@@ -128,6 +127,7 @@ export default function CommentInputSection({
     handleSendComment,
     handleKeyDown
   } = useCommentInput(createComment);
+  const { profileImage } = useSupabaseAuth();
 
   // 컴포넌트 마운트 시 입력창에 포커스
   useEffect(() => {
@@ -158,7 +158,7 @@ export default function CommentInputSection({
       
       <div className="comment-section-container">
         <div className="comment-section-header">
-          <ProfileImage profileImage={null} size="small" />
+          <ProfileImage profileImage={profileImage || ""} size="small" />
           <MentionInput
             ref={inputRef}
             onKeyDown={handleKeyDown}

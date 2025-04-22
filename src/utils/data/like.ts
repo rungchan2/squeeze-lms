@@ -29,7 +29,6 @@ export async function getLikesCount(
 // ✅ 좋아요 추가 함수
 export async function addLike({ postId, userId }: LikeParams): Promise<void> {
   if (!postId || !userId) {
-    console.log("[addLike] 필수 매개변수 누락", { postId, userId });
     return;
   }
 
@@ -57,7 +56,6 @@ export async function addLike({ postId, userId }: LikeParams): Promise<void> {
 // ✅ 좋아요 삭제 함수
 export async function removeLike({ postId, userId }: LikeParams): Promise<void> {
   if (!postId || !userId) {
-    console.log("[removeLike] 필수 매개변수 누락", { postId, userId });
     return;
   }
 
@@ -82,7 +80,6 @@ export async function removeLike({ postId, userId }: LikeParams): Promise<void> 
 export async function getUserLike(_: any, params?: LikeParams) {
   // params가 undefined인 경우 early return
   if (!params || !params.postId || !params.userId) {
-    console.log("[getUserLike] 필수 매개변수 누락", params);
     return null;
   }
 

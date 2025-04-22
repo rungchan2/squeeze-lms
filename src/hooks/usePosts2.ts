@@ -60,7 +60,6 @@ async function getPosts(userId: string, type: PostType) {
 // ✅ 통합된 usePosts 훅
 export function useLikedPosts(type: PostType = PostType.LIKED_POSTS) {
   const { id: userId } = useSupabaseAuth();
-  console.log("userId", userId);
 
   const { data, error, isLoading, mutate } = useSWR(
     userId ? [`posts-${type}-${userId}`, userId, type] : null,

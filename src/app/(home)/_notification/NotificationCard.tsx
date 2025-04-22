@@ -93,7 +93,6 @@ export default function NotificationCard({
               maxWidth={100}
               onClick={(e) => {
                 e.stopPropagation();
-                console.log("notification.link", notification.link);
                 router.push(notification.link || "");
               }}
             >

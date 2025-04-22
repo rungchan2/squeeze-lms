@@ -18,7 +18,6 @@ type UserJourneyWithProfiles = {
 // 특정 여정의 사용자 목록을 가져오는 함수
 const getJourneyUser = async (url: string): Promise<UserJourneyWithProfiles[]> => {
   const journey_id = url.split("/").pop();
-  console.log("journey_id", journey_id);
   const supabase = createClient();
 
   // 요청 경로에 따라 다른 쿼리 실행

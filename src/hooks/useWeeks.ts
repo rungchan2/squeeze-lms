@@ -128,7 +128,6 @@ export function useWeeks(journeyId: string) {
   // 주차 업데이트 함수
   const updateWeek = useCallback(
     async (id: string, weekData: UpdateJourneyWeek) => {
-      console.log("updateWeek", id, weekData);
       const supabase = createClient();
       const { data, error } = await supabase
         .from("journey_weeks")

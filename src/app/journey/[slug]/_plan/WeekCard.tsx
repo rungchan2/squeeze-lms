@@ -46,7 +46,6 @@ export default function WeekCard({
     setIsOpen((prev) => !prev);
   };
   const handleUpdateWeekName = () => {
-    console.log("updateWeek", week.id, weekName, week.week_number);
     updateWeek(week.id, { name: weekName, week_number: week.week_number });
     toaster.create({
       title: "주차 이름이 수정되었습니다.",

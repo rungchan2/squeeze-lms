@@ -204,7 +204,6 @@ const MissionTable = memo(
     onOpenDetail: (mission: Mission) => void;
     onOpenDelete: (e: React.MouseEvent, id: string) => void;
   }) => {
-    console.log("MissionTable rendering");
 
     return (
       <ResponsiveTable isMobile={isMobile}>
@@ -259,8 +258,6 @@ MissionTable.displayName = "MissionTable";
 export default function MissionManagement() {
   const isMobile = useMediaQuery("(max-width: var(--breakpoint-tablet))");
   const { missions, isLoading, error, deleteMission, mutate } = useMission();
-  const { role } = useSupabaseAuth();
-  console.log("role", role);
   const router = useRouter();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);

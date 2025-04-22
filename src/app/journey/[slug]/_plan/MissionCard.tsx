@@ -36,8 +36,6 @@ export default function MissionCard({
   style,
 }: MissionCardProps) {
   const router = useRouter();
-  const params = useParams();
-  const slug = params.slug;
   const searchParams = useSearchParams();
   const isTabMission = searchParams.get("tab") === "missions";
 
@@ -156,10 +154,6 @@ export default function MissionCard({
               <IconContainer
                 onClick={() => {
                   onDelete?.(mission.id);
-                  toaster.create({
-                    title: "미션이 삭제되었습니다.",
-                    type: "warning",
-                  });
                 }}
                 hoverColor="var(--negative-500)"
               >

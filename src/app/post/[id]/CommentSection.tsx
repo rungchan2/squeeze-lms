@@ -11,6 +11,7 @@ import { FiTrash2 } from "react-icons/fi";
 import CommentInputSection from "./CommentInputSection";
 import Heading from "@/components/Text/Heading";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { createClient } from "@/utils/supabase/client";
 
 interface CommentSectionProps {
   postId?: string;
@@ -18,10 +19,9 @@ interface CommentSectionProps {
   missionInstanceId?: string;
 }
 
-export default function CommentSection({ 
-  postId: propPostId, 
-  enableRealtime = true,
-  missionInstanceId
+export default function CommentSection({
+  postId: propPostId,
+  missionInstanceId,
 }: CommentSectionProps = {}) {
   const params = useParams();
   const postId = propPostId || (params.id as string);
@@ -35,9 +35,9 @@ export default function CommentSection({
     fetchNextPage,
     hasMore,
     isFetchingNextPage,
-  } = useComments({ 
-    postId, 
-    enableRealtime, // 실시간 업데이트 옵션 전달
+    mutate,
+  } = useComments({
+    postId,
   });
   const { id: userId } = useSupabaseAuth();
 
@@ -47,14 +47,14 @@ export default function CommentSection({
   // 무한 스크롤 관찰자 설정 - 디바운스 적용
   useEffect(() => {
     if (loading) return;
-    
+
     let timeout: NodeJS.Timeout | null = null;
-    
+
     // 기존 observer 연결 해제
     if (observerRef.current) {
       observerRef.current.disconnect();
     }
-    
+
     // 더 로드할 댓글이 있을 때만 observer 설정
     if (hasMore) {
       observerRef.current = new IntersectionObserver(
@@ -62,7 +62,7 @@ export default function CommentSection({
           if (entries[0].isIntersecting && !isFetchingNextPage) {
             // 디바운스 적용 - 여러 번 호출되는 것 방지
             if (timeout) clearTimeout(timeout);
-            
+
             timeout = setTimeout(() => {
               fetchNextPage();
             }, 300);
@@ -70,13 +70,13 @@ export default function CommentSection({
         },
         { threshold: 0.1, rootMargin: "100px" }
       );
-      
+
       // lastCommentRef가 설정되어 있고 유효할 때만 관찰 시작
       if (lastCommentRef.current) {
         observerRef.current.observe(lastCommentRef.current);
       }
     }
-    
+
     return () => {
       if (timeout) clearTimeout(timeout);
       if (observerRef.current) {
@@ -84,6 +84,40 @@ export default function CommentSection({
       }
     };
   }, [loading, hasMore, isFetchingNextPage, fetchNextPage, comments.length]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`comments-${postId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'comments',
+          filter: `post_id=eq.${postId}`,
+        },
+        () => {
+          mutate();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'comments',
+          filter: `post_id=eq.${postId}`,
+        },
+        () => {
+          mutate();
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [postId, mutate]);
 
   const handleDeleteComment = useCallback(
     async (commentId: string) => {
@@ -105,7 +139,7 @@ export default function CommentSection({
   return (
     <CommentSectionContainer>
       <Heading level={3}>댓글 {count}개</Heading>
-      
+
       {/* 댓글 목록 */}
       <div className="comments-list">
         {comments.length === 0 ? (
@@ -115,7 +149,7 @@ export default function CommentSection({
             {comments.map((comment, index) => {
               // 마지막 항목에만 ref 설정
               const isLastItem = index === comments.length - 1;
-              
+
               return (
                 <CommentItem
                   key={comment.id}
@@ -152,25 +186,26 @@ export default function CommentSection({
                 </CommentItem>
               );
             })}
-            
+
             {/* 로딩 인디케이터 - 하단에 표시 */}
             {isFetchingNextPage && (
               <div className="loading-more">
                 <Spinner size="small" />
               </div>
             )}
-            
+
             {/* 모든 댓글을 로드한 경우 메시지 표시 */}
             {!hasMore && comments.length > 10 && (
-              <div className="no-more-comments">
-                모든 댓글을 불러왔습니다.
-              </div>
+              <div className="no-more-comments">모든 댓글을 불러왔습니다.</div>
             )}
           </>
         )}
       </div>
-    
-      <CommentInputSection createComment={createComment} missionInstanceId={missionInstanceId} />
+
+      <CommentInputSection
+        createComment={createComment}
+        missionInstanceId={missionInstanceId}
+      />
     </CommentSectionContainer>
   );
 }
@@ -197,7 +232,7 @@ const CommentSectionContainer = styled.div`
     justify-content: center;
     padding: 1rem;
   }
-  
+
   .no-more-comments {
     text-align: center;
     color: var(--grey-500);

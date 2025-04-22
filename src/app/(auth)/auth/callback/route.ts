@@ -46,7 +46,6 @@ export async function GET(request: Request) {
           profile_image: data.user.user_metadata.picture || "",
         };
 
-        console.log("userData:", userData.data);
         if (userData.data === null) {
           const response = NextResponse.redirect(`${origin}/login/info`);
           const encryptedData = encrypt(JSON.stringify(neededuserData));
