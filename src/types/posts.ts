@@ -66,6 +66,10 @@ export const userWithOrganizationSchema = pickedUserSchema.extend({
 export const postWithRelationsSchema = postSchema.extend({
   profiles: userWithOrganizationSchema,
   mission_instance_id: pickedMissionSchema,
+  teamInfo: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+  }).nullable().optional(),
 });
 
 export const postWithRelationsSchemaWithPost = postSchema.extend({

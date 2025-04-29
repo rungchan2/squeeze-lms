@@ -9,7 +9,7 @@ import Heading from "@/components/Text/Heading";
 import Text from "@/components/Text/Text";
 import styled from "@emotion/styled";
 import Button from "@/components/common/Button";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { createPost, updatePost } from "@/utils/data/posts";
 import { Input } from "@chakra-ui/react";
@@ -20,7 +20,6 @@ import { useCompletedMissions } from "@/hooks/usePosts";
 import { Error } from "@/components/common/Error";
 import { JourneyMissionInstanceWithMission } from "@/types";
 import { StlyedSelect } from "@/components/select/Select";
-import { useJourneyUser } from "@/hooks/useJourneyUser";
 import { useTeams } from "@/hooks/useTeams";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
@@ -52,9 +51,7 @@ export default function DoMissionPage({
 
   const initialTeamMembers: TeamMember[] = [];
 
-  // 팀 관련 상태
-  const { data: journeyUsers } = useJourneyUser(slug ?? "");
-  const [isTeamMission, setIsTeamMission] = useState(false);
+  const isTeamMission = missionInstance?.mission.mission_type === "team";
   const [selectedTeamMembers, setSelectedTeamMembers] =
     useState<TeamMember[]>(initialTeamMembers);
 
@@ -66,6 +63,16 @@ export default function DoMissionPage({
     userId || "",
     slug || ""
   );
+  // 권한 체크는 useEffect 내에서 수행, hooks는 조건부로 실행하면 안됨
+  useEffect(() => {
+    if (updateData && userId !== updateData?.user_id) {
+      toaster.create({
+        title: "권한이 없습니다.",
+        type: "error",
+      });
+      router.push(`/journey/${slug}`);
+    }
+  }, [updateData, userId, router, slug]);
 
   useEffect(() => {
     if (updateData) {
@@ -90,80 +97,15 @@ export default function DoMissionPage({
     }
   }, [teamData, userId]);
 
-  // 팀 미션 여부 확인 및 팀 멤버 가져오기
-  useEffect(() => {
-    if (missionInstance && missionInstance.mission) {
-      // mission_type이 'team'인 경우 팀 미션으로 설정
-      setIsTeamMission(missionInstance.mission.mission_type === "team");
-
-      // 팀원 정보 초기화 (현재 사용자가 팀에 속하지 않은 경우)
-      if (
-        isTeamMission &&
-        userId &&
-        journeyUsers &&
-        (!teamData.members || teamData.members.length === 0)
-      ) {
-        // 현재 사용자를 팀원으로 추가
-        const currentUser = journeyUsers.find((user) => user.id === userId);
-        if (currentUser) {
-          setSelectedTeamMembers([
-            {
-              label:
-                currentUser.profiles?.first_name +
-                " " +
-                currentUser.profiles?.last_name,
-              value: userId,
-              isFixed: true,
-            },
-          ]);
-        }
-      }
-    }
-  }, [missionInstance, userId, isTeamMission, journeyUsers, teamData.members]);
-
-  // 권한 없을 때 뒤로 가거나 여정 페이지로 가는 함수
-  const goBackOrJourney = useCallback(() => {
-    try {
-      // 뒤로 가기 시도
-      router.back();
-
-      // 만약 뒤로 가기가 불가능하면(직접 URL 접근 등) 1초 후 여정 페이지로 리다이렉션
-      setTimeout(() => {
-        // 현재 URL이 여전히 같은 페이지라면 여정 페이지로 리다이렉션
-        if (
-          window.location.pathname.includes(`/journey/${slug}/${updateDataId}`)
-        ) {
-          router.push(`/journey/${slug}`);
-        }
-      }, 1000);
-    } catch (e) {
-      // 오류 발생 시 여정 페이지로 리다이렉션
-      router.push(`/journey/${slug}`);
-    }
-  }, [router, slug, updateDataId]);
-
-  // 권한 체크는 useEffect 내에서 수행, hooks는 조건부로 실행하면 안됨
-  useEffect(() => {
-    if (updateData && userId !== updateData?.user_id) {
-      toaster.create({
-        title: "권한이 없습니다.",
-        type: "error",
-      });
-      goBackOrJourney();
-    }
-  }, [updateData, userId, goBackOrJourney]);
-
   if (!userId) return <Error message="로그인이 필요합니다." />;
   if (isLoading) return <Spinner />;
   if (error) return <Error message={`오류가 발생했습니다: ${error.message}`} />;
-  // if (!missionInstance) return <Error message="미션을 찾을 수 없습니다." />;
 
   // 팀 생성 또는 업데이트 처리
   const handleTeamSubmission = async (postId: string) => {
     try {
       if (!missionInstance) return false;
 
-      // useTeams 훅의 markPostAsTeamSubmission 함수 사용
       const success = await markPostAsTeamSubmission(
         postId,
         missionInstance.mission.points || 0
@@ -254,11 +196,7 @@ export default function DoMissionPage({
         type: "success",
       });
 
-      // 캐시 무효화를 위해 reload 후 리다이렉션
-      setTimeout(() => {
-        // replace 메서드를 사용하여 캐시 무효화
-        window.location.href = `/journey/${slug}`;
-      }, 500);
+      router.push(`/journey/${slug}`);
     } catch (error: any) {
       console.error("미션 제출 중 예외 발생:", error);
       toaster.create({
@@ -335,13 +273,6 @@ export default function DoMissionPage({
     }
   };
 
-  // 팀원 옵션 생성
-  const teamOptions =
-    journeyUsers?.map((user) => ({
-      label: user.profiles?.first_name + " " + user.profiles?.last_name,
-      value: user.id,
-    })) || [];
-
   return (
     <MissionContainer>
       <div className="mission-container">
@@ -391,13 +322,13 @@ export default function DoMissionPage({
       {isTeamMission && (
         <TeamSelectSection>
           <Text variant="body" color="grey-700" fontWeight="bold">
-            팀원 선택
+            과제 수행 팀 : {teamData?.team?.name}
           </Text>
           <Text variant="small" className="help-text">
             함께 미션을 수행할 팀원을 선택하세요. 선택한 팀원들과 함께 점수를
             받게 됩니다.
           </Text>
-          {!journeyUsers || journeyUsers.length <= 1 ? (
+          {teamData?.members && teamData.members.length <= 1 ? (
             <EmptyTeamMessage>
               <Text variant="body" color="grey-500">
                 팀원이 없습니다. 팀원을 초대해주세요.
@@ -405,11 +336,16 @@ export default function DoMissionPage({
             </EmptyTeamMessage>
           ) : (
             <StlyedSelect
-              options={teamOptions}
               defaultValues={selectedTeamMembers}
-              onChange={setSelectedTeamMembers}
+              isDisabled
+              options={teamData?.members.map((member) => ({
+                label: `${member.profiles?.first_name || ""} ${
+                  member.profiles?.last_name || ""
+                }`,
+                value: member.user_id,
+              }))}
+              onChange={() => {}}
               onBlur={() => {}}
-              isDisabled={!journeyUsers || journeyUsers.length <= 1}
             />
           )}
         </TeamSelectSection>

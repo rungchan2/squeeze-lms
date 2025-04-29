@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "@emotion/styled";
 import { FloatingButton } from "@/components/common/FloatingButton";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";

@@ -14,8 +14,12 @@ type LayoutProps = {
 };
 
 export const metadata: Metadata = {
-  title: "스퀴즈!",
+  title: {
+    default: "스퀴즈!",
+    template: "%s | 스퀴즈!",
+  },
   description: "스퀴즈와 함께 학습을 디자인 해봐요!",
+  manifest: "/manifest.webmanifest",
   openGraph: {
     title: "스퀴즈!",
     description: "스퀴즈와 함께 학습을 디자인 해봐요!",
@@ -28,6 +32,7 @@ export const metadata: Metadata = {
       },
     ],
   },
+  keywords: ["스퀴즈", "학습", "디자인", "학습 디자인", "학습 디자인 툴", "학습 디자인 툴 추천", "학습 디자인 툴 추천 사이트", "학습 디자인 툴 추천 사이트 추천", "학습 디자인 툴 추천 사이트 추천 사이트"],
   icons: {
     icon: [
       { url: '/favicon-196.png', sizes: '196x196', type: 'image/png' },
@@ -36,7 +41,6 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-icon-180.png',
   },
-  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -180,9 +184,9 @@ export default function RootLayout({ children }: LayoutProps) {
           <Toaster />
           <SpeedInsights />
           <KakaoScript />
-          <Pwa />
         </Providers>
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
+        <Pwa />
       </body>
     </html>
   );

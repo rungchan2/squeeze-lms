@@ -3,6 +3,7 @@ import useSWRInfinite from "swr/infinite";
 import { createClient } from "@/utils/supabase/client";
 import { PostWithRelations } from "@/types";
 import { useState, useCallback, useEffect } from "react";
+import { getTeamMembers } from "@/utils/data/team";
 
 // 포스트 페이지 결과 타입
 interface PostsPage {
@@ -34,6 +35,9 @@ async function getPosts(
         organizations (
           id, name
         )
+      ),
+      teams (
+        id, name
       )
     `,
       { count: "exact" }
@@ -48,8 +52,7 @@ async function getPosts(
   }
   const { data, error, count } = await query.range(from, to);
 
-  console.log("data", data);
-
+  
   if (error) throw error;
 
   const hasNextPage = count ? from + pageSize < count : false;

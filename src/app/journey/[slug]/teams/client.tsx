@@ -15,7 +15,7 @@ import InputAndTitle from "@/components/InputAndTitle";
 import { Input } from "@chakra-ui/react";
 import { formatDifference } from "@/utils/dayjs/calcDifference";
 import { FaRegTrashAlt, FaTrash } from "react-icons/fa";
-import { team } from "@/utils/data/team";
+import { removeTeamMember, addTeamMember, getTeamMembers } from "@/utils/data/team";
 import { IoRefreshSharp } from "react-icons/io5";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useParams } from "next/navigation";
@@ -289,7 +289,7 @@ export default function TeamsPage() {
       } else {
         // 다른 사용자를 추가하는 경우
         try {
-          const addMemberError = await team.addTeamMember(teamId, userId);
+          const addMemberError = await addTeamMember(teamId, userId);
           if (addMemberError) {
             console.error("팀원 추가 중 오류:", addMemberError);
             success = false;
@@ -309,7 +309,7 @@ export default function TeamsPage() {
       if (userId === currentUserId && teamId === currentUserTeamId) continue;
 
       try {
-        const removeMemberError = await team.removeTeamMember(teamId, userId);
+        const removeMemberError = await removeTeamMember(teamId, userId);
         if (removeMemberError) {
           console.error("팀원 제거 중 오류:", removeMemberError);
           success = false;
@@ -384,7 +384,7 @@ export default function TeamsPage() {
       await mutateAllTeams();
       
       // 특정 팀에 대한 멤버 조회
-      const teamMembers = await team.getTeamMembers([teamId]);
+      const teamMembers = await getTeamMembers([teamId]);
       
       // 팀 소속 사용자 목록 업데이트
       const updatedUsersWithTeam = await getUsersWithTeam();
