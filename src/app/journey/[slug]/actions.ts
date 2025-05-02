@@ -71,7 +71,7 @@ export const sendNotification = async (
 
       // 옵션 설정
       const options = {
-        TTL: 60 * 60 * 24 * 30, // 30일 (초 단위)
+        TTL: 60 * 60 * 24 * 60, // 60일 (초 단위)
         vapidDetails: vapidDetails,
         headers: {
           "Content-Type": "application/json",

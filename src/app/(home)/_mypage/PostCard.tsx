@@ -331,7 +331,6 @@ export default memo(function PostCard({
           </InteractionItem>
           <InteractionItem onClick={handleShare} data-kakao-share="true">
             <FaShare />
-            <Text variant="caption">공유</Text>
           </InteractionItem>
         </InteractionContainer>
       </ContentWrapper>
