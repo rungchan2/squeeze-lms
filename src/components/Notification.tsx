@@ -1,6 +1,5 @@
 "use client";
 
-import { createClient } from "@/utils/supabase/client";
 import { urlB64ToUint8Array } from "@/utils/utils";
 import { PiBellSimpleSlashBold, PiBellRingingBold } from "react-icons/pi";
 import { toaster } from "@/components/ui/toaster";

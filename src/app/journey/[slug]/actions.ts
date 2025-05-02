@@ -52,29 +52,15 @@ export const sendNotification = async (
       // 푸시 구독 정보 파싱
       const subscription = JSON.parse(data.notification_json);
 
-      // 알림을 위한 간단한 데이터 구조 - 문자열로 전달됨
+      // 알림을 위한 최소한의 데이터 구조 - 브라우저 호환성을 위해 단순화
       const notificationPayload = JSON.stringify({
-        title: title, // 명시적으로 제목 설정
-        body: body, // 내용
-        icon: icon, // 아이콘
-        url: url || "/", // 클릭 시 이동할 URL
-        tag: `notification-${Date.now()}`, // 고유 태그
-        requireInteraction: true, // 사용자 상호작용 필요 (자동으로 닫히지 않음)
-        vibrate: [100, 100, 100], // 진동 패턴
-        timestamp: Date.now(), // 타임스탬프
-        actions: [
-          {
-            action: "accept",
-            title: "수락",
-            icon: "/images/icons/accept.png"
-          },
-          {
-            action: "reject",
-            title: "거절",
-            icon: "/images/icons/reject.png"
-          }
-        ],
+        title: title,
+        body: body,
+        icon: icon || "/apple-icon-180.png",
+        url: url || "/"
       });
+
+      console.log("전송할 알림 페이로드:", notificationPayload);
 
       // VAPID 세부 정보
       const vapidDetails = {
@@ -85,10 +71,11 @@ export const sendNotification = async (
 
       // 옵션 설정
       const options = {
-        TTL: 60 * 60, // 1시간 (초 단위)
+        TTL: 60 * 60 * 24 * 30, // 30일 (초 단위)
         vapidDetails: vapidDetails,
         headers: {
           "Content-Type": "application/json",
+          "Urgency": "high", // 높은 우선순위 설정
         },
         urgency: "high" as Urgency,
       };

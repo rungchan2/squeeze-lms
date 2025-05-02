@@ -583,21 +583,18 @@ export type Database = {
           created_at: string | null
           id: string
           notification_json: string
-          updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
           notification_json: string
-          updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
           notification_json?: string
-          updated_at?: string | null
           user_id?: string
         }
         Relationships: [

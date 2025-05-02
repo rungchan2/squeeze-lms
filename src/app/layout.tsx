@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s | 스퀴즈!",
   },
   description: "스퀴즈와 함께 학습을 디자인 해봐요!",
-  manifest: "/manifest.webmanifest",
+  manifest: "/manifest.json",
   openGraph: {
     title: "스퀴즈!",
     description: "스퀴즈와 함께 학습을 디자인 해봐요!",

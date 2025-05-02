@@ -20,17 +20,19 @@ const nextConfig = {
   },
 };
 
+// PWA 설정 수정
 const withPWA = nextPWA({
   dest: 'public',
-  register: true,
+  disable: process.env.NODE_ENV === 'development', // 개발 환경에서 비활성화
+  register: false, // 수동으로 등록하므로 자동 등록 비활성화
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
-  buildExcludes: [/app-build-manifest.json$/],
+  // 오류 발생하는 파일들 제외
+  buildExcludes: [/^\/_next\//, /\/app-build-manifest\.json$/, /_error\.js$/],
+  maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB 이하 파일만 캐싱
 });
 
 const config = withPWA({
-  ...nextConfig,
+	...nextConfig,
 });
 
-
-module.exports = config; 
+module.exports = config;

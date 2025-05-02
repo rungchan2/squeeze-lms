@@ -323,25 +323,14 @@ export default function NotificationTest() {
 
     try {
       setIsLoading(true);
+
       
-      // 현재 시간을 포함한 제목
-      const timeString = new Date().toLocaleTimeString('ko-KR', { 
-        hour: '2-digit', 
-        minute: '2-digit'
-      });
-      
-      // 명시적으로 title 필드를 설정
-      const notificationTitle = title 
-        ? `${title} (${timeString})` 
-        : `스퀴즈 알림 (${timeString})`;
-      
-      console.log('전송할 알림 제목:', notificationTitle);
       
       const result = await sendNotification(
         message,     // body
         userId,      // user_id
         "/favicon-196.png", // icon
-        notificationTitle,  // title - 명시적으로 전달
+        title,  // title - 명시적으로 전달
         notificationUrl     // url
       );
       
@@ -349,10 +338,54 @@ export default function NotificationTest() {
       const response = JSON.parse(result);
       
       if (response.error) {
-        setStatus(`알림 전송 실패: ${response.error}`);
-        setIsError(true);
+        // 구독 만료 오류 처리
+        if (response.expired) {
+          setStatus("구독이 만료되었습니다. 새 구독을 생성합니다...");
+          setIsError(true);
+          setHasSubscription(false);
+          setSubscription(null);
+          
+          // 서비스 워커 구독 정보도 삭제
+          if ("serviceWorker" in navigator) {
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription();
+            if (subscription) {
+              await subscription.unsubscribe();
+              console.log("만료된 서비스 워커 구독 해제됨");
+            }
+            
+            // 새 구독 생성 시도
+            try {
+              const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_KEY;
+              if (!vapidPublicKey) {
+                throw new Error("VAPID 키가 설정되지 않았습니다.");
+              }
+              
+              // VAPID 키를 Uint8Array로 변환
+              const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+              
+              // 새 구독 생성
+              const newSubscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: convertedVapidKey,
+              });
+              
+              // 새 구독 정보 저장
+              await saveSubscription(newSubscription);
+              
+              setStatus("새 구독이 생성되었습니다. 알림을 다시 시도해주세요.");
+            } catch (renewError) {
+              console.error("구독 갱신 오류:", renewError);
+              setStatus("새 구독 생성 실패: " + (renewError instanceof Error ? renewError.message : "알 수 없는 오류"));
+              setIsError(true);
+            }
+          }
+        } else {
+          setStatus(`알림 전송 실패: ${response.error}`);
+          setIsError(true);
+        }
       } else {
-        setStatus(`알림이 성공적으로 전송되었습니다! 제목: ${notificationTitle}`);
+        setStatus(`알림이 성공적으로 전송되었습니다!`);
         setIsError(false);
       }
     } catch (error) {
