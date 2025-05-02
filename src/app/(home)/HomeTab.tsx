@@ -38,13 +38,11 @@ export default function HomeTab() {
 
   useEffect(() => {
     const switchToNotificationsTab = () => {
+      // 해시 변경하여 URL 업데이트
       window.location.hash = "notifications";
       // SWR 캐시 업데이트
       mutate();
-      // 해시 변경만으로 탭이 바뀌지 않는 경우 페이지 리로드
-      if (window.location.hash === "#notifications") {
-        window.location.reload();
-      }
+      // 페이지 리로드는 제거 - Tippy.js 메모리 누수 방지
     };
 
     const supabase = createClient();

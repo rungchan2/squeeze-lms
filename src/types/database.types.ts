@@ -117,6 +117,54 @@ export type Database = {
           },
         ]
       }
+      email_queue: {
+        Row: {
+          content: string
+          content_ref_id: string | null
+          created_at: string | null
+          error_message: string | null
+          id: number
+          processed: boolean | null
+          processed_at: string | null
+          recipient_email: string
+          recipient_name: string | null
+          response: string | null
+          retry_count: number | null
+          status_code: number | null
+          subject: string
+        }
+        Insert: {
+          content: string
+          content_ref_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: number
+          processed?: boolean | null
+          processed_at?: string | null
+          recipient_email: string
+          recipient_name?: string | null
+          response?: string | null
+          retry_count?: number | null
+          status_code?: number | null
+          subject: string
+        }
+        Update: {
+          content?: string
+          content_ref_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: number
+          processed?: boolean | null
+          processed_at?: string | null
+          recipient_email?: string
+          recipient_name?: string | null
+          response?: string | null
+          retry_count?: number | null
+          status_code?: number | null
+          subject?: string
+        }
+        Relationships: []
+      }
       journey_mission_instances: {
         Row: {
           created_at: string | null
@@ -305,6 +353,7 @@ export type Database = {
           id: string
           link: string | null
           message: string
+          notification_json: string | null
           read_at: string | null
           receiver_id: string
           type: string
@@ -314,6 +363,7 @@ export type Database = {
           id?: string
           link?: string | null
           message: string
+          notification_json?: string | null
           read_at?: string | null
           receiver_id: string
           type: string
@@ -323,6 +373,7 @@ export type Database = {
           id?: string
           link?: string | null
           message?: string
+          notification_json?: string | null
           read_at?: string | null
           receiver_id?: string
           type?: string
@@ -459,6 +510,7 @@ export type Database = {
           phone: string | null
           privacy_agreed: boolean
           profile_image: string | null
+          push_subscription: string | null
           role: Database["public"]["Enums"]["role"]
           updated_at: string | null
         }
@@ -473,6 +525,7 @@ export type Database = {
           phone?: string | null
           privacy_agreed?: boolean
           profile_image?: string | null
+          push_subscription?: string | null
           role?: Database["public"]["Enums"]["role"]
           updated_at?: string | null
         }
@@ -487,6 +540,7 @@ export type Database = {
           phone?: string | null
           privacy_agreed?: boolean
           profile_image?: string | null
+          push_subscription?: string | null
           role?: Database["public"]["Enums"]["role"]
           updated_at?: string | null
         }
@@ -523,6 +577,35 @@ export type Database = {
           role?: Database["public"]["Enums"]["role"]
         }
         Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string | null
+          id: string
+          notification_json: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notification_json: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notification_json?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_members: {
         Row: {
@@ -758,6 +841,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bytea_to_text: {
+        Args: { data: string }
+        Returns: string
+      }
       custom_access_token_hook: {
         Args: { event: Json }
         Returns: Json
@@ -776,6 +863,57 @@ export type Database = {
           mission_type: string
         }[]
       }
+      http: {
+        Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_delete: {
+        Args:
+          | { uri: string }
+          | { uri: string; content: string; content_type: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_get: {
+        Args: { uri: string } | { uri: string; data: Json }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_head: {
+        Args: { uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_header: {
+        Args: { field: string; value: string }
+        Returns: Database["public"]["CompositeTypes"]["http_header"]
+      }
+      http_list_curlopt: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          curlopt: string
+          value: string
+        }[]
+      }
+      http_patch: {
+        Args: { uri: string; content: string; content_type: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_post: {
+        Args:
+          | { uri: string; content: string; content_type: string }
+          | { uri: string; data: Json }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_put: {
+        Args: { uri: string; content: string; content_type: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_reset_curlopt: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      http_set_curlopt: {
+        Args: { curlopt: string; value: string }
+        Returns: boolean
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -783,6 +921,14 @@ export type Database = {
       is_teacher: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      text_to_bytea: {
+        Args: { data: string }
+        Returns: string
+      }
+      urlencode: {
+        Args: { data: Json } | { string: string } | { string: string }
+        Returns: string
       }
     }
     Enums: {
@@ -795,7 +941,23 @@ export type Database = {
       role: "user" | "teacher" | "admin"
     }
     CompositeTypes: {
-      [_ in never]: never
+      http_header: {
+        field: string | null
+        value: string | null
+      }
+      http_request: {
+        method: unknown | null
+        uri: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content_type: string | null
+        content: string | null
+      }
+      http_response: {
+        status: number | null
+        content_type: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content: string | null
+      }
     }
   }
 }

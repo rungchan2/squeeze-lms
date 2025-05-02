@@ -12,8 +12,8 @@ interface SelectOption {
 interface SelectProps {
   options: SelectOption[];
   defaultValues: SelectOption[];
-  onChange: (value: any) => void;
-  onBlur: (value: any) => void;
+  onChange?: (value: any) => void;
+  onBlur?: (value: any) => void;
   isDisabled?: boolean;
 }
 
@@ -53,7 +53,7 @@ export const StlyedSelect = ({
     }
 
     // 정렬된 값을 상위 컴포넌트에 전달
-    onChange(orderOptions(newValue));
+    onChange?.(orderOptions(newValue));
   };
 
   return (
@@ -63,7 +63,7 @@ export const StlyedSelect = ({
       onChange={handleChange}
       closeMenuOnSelect={false}
       components={animatedComponents}
-      defaultValue={orderOptions(defaultValues)}
+      value={orderOptions(defaultValues)}
       isMulti
       options={options}
       placeholder="팀원을 선택하세요"

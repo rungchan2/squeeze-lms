@@ -42,7 +42,7 @@ const MentionInput = forwardRef<MentionInputRef, MentionInputProps>(({
         HTMLAttributes: {
           class: 'mention',
         },
-        renderLabel({ options, node }) {
+        renderHTML({ options, node }) {
           if (node.attrs.label) {
             return `@${node.attrs.label}`;
           } else if (node.attrs.id) {

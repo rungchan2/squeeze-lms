@@ -50,7 +50,7 @@ export default function PostPage() {
     }
   }, [postId, supabase]);
 
-  if (loading) return <div className="p-4 flex justify-center"><Spinner size="medium" /></div>;
+  if (loading) return <div><Spinner size="medium" /></div>;
   if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
   if (!post) return <div>게시물을 찾을 수 없습니다.</div>;
 

@@ -8,10 +8,8 @@ import { IconContainer } from "@/components/common/IconContainer";
 import dayjs from "@/utils/dayjs/dayjs";
 import { TeacherOnly } from "@/components/auth/AdminOnly";
 import { calcDifference } from "@/utils/dayjs/calcDifference";
-import { toaster } from "@/components/ui/toaster";
 import { FaEdit } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { useParams } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { BiGridVertical } from "react-icons/bi";
 
@@ -48,7 +46,13 @@ export default function MissionCard({
         isTabMission={isTabMission}
         style={style}
       >
-        <Text variant="body" color="var(--grey-500)" fontWeight="bold" className="description-text" style={{ padding: "16px" }}>
+        <Text
+          variant="body"
+          color="var(--grey-500)"
+          fontWeight="bold"
+          className="description-text"
+          style={{ padding: "16px" }}
+        >
           미션을 찾을 수 없습니다.
         </Text>
       </StyledMissionCard>
@@ -106,9 +110,26 @@ export default function MissionCard({
         )}
         <div className="mission-item-header">
           <div className="description-container">
-            <Text variant="body" fontWeight="bold" className="description-text">
-              {mission.name}
-            </Text>
+            <div className="mission-name-container">
+              {mission.mission_type === "team" && (
+                <Text
+                  variant="body"
+                  fontWeight="bold"
+                  className="description-text"
+                  color="var(--primary-600)"
+                  style={{ marginRight: "4px" }}
+              >
+                  {mission.mission_type === "team" ? "[팀 미션]" : ""}
+                </Text>
+              )}
+              <Text
+                variant="body"
+                fontWeight="bold"
+                className="description-text"
+              >
+                {mission.name}
+              </Text>
+            </div>
             <Text
               variant="caption"
               className="description-text"
@@ -189,6 +210,13 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
   border-radius: ${(props) => (props.isModal ? "4px 0 0 4px" : "4px")};
   flex: 1;
   max-width: ${(props) => props.maxWidth};
+
+  .mission-name-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
 
   .horizontal-mission-container {
     display: flex;

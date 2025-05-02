@@ -185,6 +185,7 @@ export default memo(function PostCard({
   return (
     <PostCardContainer showDetails={showDetails} onClick={handlePostClick}>
       <ContentWrapper>
+        
         <UserInfoContainer>
           <div className="user-info-wrapper">
             <ProfileImage
@@ -194,10 +195,10 @@ export default memo(function PostCard({
             <div className="vertical-user-info-wrapper">
               <UserNameWrapper>
                 <Text variant="caption" fontWeight="bold">
-                  {post?.profiles?.first_name}
+                  {post.teamInfo?.name ? post.teamInfo?.name : post?.profiles?.first_name}
                 </Text>
                 <Text variant="caption" fontWeight="bold">
-                  의 포스팅
+                  {post.teamInfo?.name ? "(팀 미션)" : "의 미션"}
                 </Text>
               </UserNameWrapper>
               <UserDetailsWrapper>
@@ -330,7 +331,6 @@ export default memo(function PostCard({
           </InteractionItem>
           <InteractionItem onClick={handleShare} data-kakao-share="true">
             <FaShare />
-            <Text variant="caption">공유</Text>
           </InteractionItem>
         </InteractionContainer>
       </ContentWrapper>
@@ -433,7 +433,6 @@ const UserInfoContainer = styled.div`
 const UserNameWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 4px;
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -443,7 +442,7 @@ const UserNameWrapper = styled.div`
 const UserDetailsWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   color: var(--grey-600);
   font-size: 12px;
   overflow: hidden;

@@ -3,7 +3,7 @@ import React, {
   useState,
 } from 'react'
 import styled from '@emotion/styled'
-
+import { ProfileImage } from '../navigation/ProfileImage'
 // User 인터페이스 추가
 interface User {
   id: string
@@ -21,7 +21,7 @@ interface MentionListRef {
   onKeyDown: (props: { event: KeyboardEvent }) => boolean
 }
 
-const MentionList = forwardRef<MentionListRef, MentionListProps>((props, ref) => {
+export const MentionList = forwardRef<MentionListRef, MentionListProps>((props, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(0)
 
   const selectItem = (index: number) => {
@@ -77,7 +77,8 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>((props, ref) =>
             onClick={() => selectItem(index)}
           >
             <UserInfo>
-              {item.fullName || item.email} {/* 사용자 이름 또는 이메일 표시 */}
+              <ProfileImage profileImage={item.avatarUrl || null} size="small" />
+              {item.fullName}
             </UserInfo>
           </DropdownButton>
         ))
@@ -88,8 +89,6 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>((props, ref) =>
 })
 
 MentionList.displayName = 'MentionList'
-
-export default MentionList
 
 const DropdownMenu = styled.div`
   background: var(--white);
@@ -102,7 +101,7 @@ const DropdownMenu = styled.div`
   overflow: auto;
   padding: 0.4rem;
   position: relative;
-  max-height: 200px;
+  max-height: 250px;
   z-index: 100;
 
   .item {
@@ -135,6 +134,8 @@ const DropdownButton = styled.button`
 
 const UserInfo = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.9rem;
 `;

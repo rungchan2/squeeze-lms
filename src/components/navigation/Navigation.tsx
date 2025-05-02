@@ -15,26 +15,26 @@ import { Menu, Portal } from "@chakra-ui/react";
 import { toaster } from "@/components/ui/toaster";
 import { userLogout } from "@/utils/data/auth";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
-import { getProfileImage } from "@/utils/data/user";
+import NotificationRequest from "../Notification";
 
 function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
-  const { id, isAuthenticated, profileImage: profileImageFromAuth } = useSupabaseAuth();
+  const {
+    id,
+    isAuthenticated,
+    profileImage: profileImageFromAuth,
+  } = useSupabaseAuth();
   const pathname = usePathname();
   const router = useRouter();
-  
-  const isException = useMemo(() => 
-    exceptionPath.some((path) => pathname?.includes(path)),
+
+  const isException = useMemo(
+    () => exceptionPath.some((path) => pathname?.includes(path)),
     [exceptionPath, pathname]
   );
-  
-  const isJourney = useMemo(() => 
-    pathname?.includes("journey"),
-    [pathname]
-  );
-  
+
+  const isJourney = useMemo(() => pathname?.includes("journey"), [pathname]);
+
   const [isVisible, setIsVisible] = useState(true);
   const [journeyList, setJourneyList] = useState<UserJourneyWithJourney[]>([]);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
 
@@ -67,12 +67,6 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
 
   useEffect(() => {
     if (!id) return;
-    
-    const fetchProfileImage = async () => {
-      const data = await getProfileImage(id);
-      setProfileImage(data);
-    };
-    
     const fetchJourneyList = async () => {
       try {
         const journeyList = await getJourney(id);
@@ -82,15 +76,17 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
         setJourneyList([]);
       }
     };
-    
-    fetchProfileImage();
+
     fetchJourneyList();
   }, [id]);
 
-  const onDropDownChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const journeyId = e.target.value;
-    router.push(`/journey/${journeyId}`);
-  }, [router]);
+  const onDropDownChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const journeyId = e.target.value;
+      router.push(`/journey/${journeyId}`);
+    },
+    [router]
+  );
 
   const handleLogout = useCallback(async () => {
     await userLogout();
@@ -110,7 +106,11 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
         </option>
       ));
     }
-    return <option value="" key="0">여행 없음</option>;
+    return (
+      <option value="" key="0">
+        여행 없음
+      </option>
+    );
   }, [journeyList]);
 
   return (
@@ -131,58 +131,58 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
             <Logo width={100} />
           )}
         </div>
-
-        <Menu.Root>
-          <Menu.Trigger asChild>
-            <div className="right-container">
+        <div className="right-container">
+          <NotificationRequest />
+          <Menu.Root>
+            <Menu.Trigger>
               <ProfileImage
                 profileImage={profileImageFromAuth}
                 width={30}
                 blockClick={true}
               />
-            </div>
-          </Menu.Trigger>
-          <Portal>
-            <Menu.Positioner>
-              <Menu.Content>
-                <Menu.Item
-                  value="profile"
-                  onClick={() => router.push("/profile")}
-                  style={{ cursor: "pointer" }}
-                >
-                  내 프로필
-                </Menu.Item>
-                <Menu.Item
-                  value="bug-report"
-                  onClick={() => router.push("/bug-report")}
-                  style={{ cursor: "pointer" }}
-                >
-                  버그 신고
-                </Menu.Item>
-                {isAuthenticated && (
+            </Menu.Trigger>
+            <Portal>
+              <Menu.Positioner>
+                <Menu.Content>
                   <Menu.Item
-                    value="logout"
-                    color="fg.error"
-                    _hover={{ bg: "bg.error", color: "fg.error" }}
-                    onClick={handleLogout}
+                    value="profile"
+                    onClick={() => router.push("/profile")}
                     style={{ cursor: "pointer" }}
                   >
-                    로그아웃
+                    내 프로필
                   </Menu.Item>
-                )}
-                {!isAuthenticated && (
                   <Menu.Item
-                    value="login"
-                    onClick={() => router.push("/login")}
+                    value="bug-report"
+                    onClick={() => router.push("/bug-report")}
                     style={{ cursor: "pointer" }}
                   >
-                    로그인
+                    버그 신고
                   </Menu.Item>
-                )}
-              </Menu.Content>
-            </Menu.Positioner>
-          </Portal>
-        </Menu.Root>
+                  {isAuthenticated && (
+                    <Menu.Item
+                      value="logout"
+                      color="fg.error"
+                      _hover={{ bg: "bg.error", color: "fg.error" }}
+                      onClick={handleLogout}
+                      style={{ cursor: "pointer" }}
+                    >
+                      로그아웃
+                    </Menu.Item>
+                  )}
+                  {!isAuthenticated && (
+                    <Menu.Item
+                      value="login"
+                      onClick={() => router.push("/login")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      로그인
+                    </Menu.Item>
+                  )}
+                </Menu.Content>
+              </Menu.Positioner>
+            </Portal>
+          </Menu.Root>
+        </div>
       </div>
     </StyledNavigation>
   );
@@ -219,6 +219,12 @@ const StyledNavigation = styled.div<{ $isVisible: boolean }>`
   transition: transform 0.3s ease-in-out;
   transform: translateY(${(props) => (props.$isVisible ? "0" : "-100%")});
   z-index: 1000;
+
+  .right-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
   .outside-container {
     max-width: var(--breakpoint-tablet);

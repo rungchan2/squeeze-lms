@@ -188,7 +188,7 @@ const fetchUserProfile = async (userId: string) => {
     .from("profiles")
     .select("first_name, last_name, profile_image") // role 제외
     .eq("id", userId)
-    .single();
+    .maybeSingle();
 
     if (error) {
       console.error("Error fetching user profile:", error.message);

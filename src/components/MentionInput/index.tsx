@@ -53,7 +53,7 @@ const MentionInput: FC<MentionInputProps> = ({
       <EditorContent
         editor={editor}
         className={`p-2 min-h-[80px] focus:outline-none rounded-lg ${
-          readOnly ? 'bg-gray-50' : 'bg-white border'
+          readOnly ? 'var(--gray-50)' : 'var(--gray-100)'
         }`}
       />
       {placeholder && !editor?.isEmpty && (
