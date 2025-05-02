@@ -91,21 +91,28 @@ function useCommentInput(
           const { firstName, lastName } = userData;
           const userName = `${firstName || ''} ${lastName || ''}`.trim();
           
+          // 알림 API 지원 확인
+          const isNotificationSupported = typeof window !== 'undefined' && typeof Notification !== 'undefined';
+          
           // 각 멘션된 사용자에게 알림 보내기
-          extractedMentions.forEach(async (user) => {
-            try {
-              await sendNotification(
-                `${userName}님이 댓글에서 회원님을 언급했습니다: "${excludeHtmlTags(comment).substring(0, 50)}${excludeHtmlTags(comment).length > 50 ? '...' : ''}"`,
-                user.id,
-                "/icons/mention-notification.png",
-                `스퀴즈 게시물의 새 멘션이 있습니다.`,
-                `/post/${postId}`
-              );
-              console.log(`알림 전송 성공 (사용자: ${user.id})`);
-            } catch (err) {
-              console.error(`알림 전송 실패 (사용자: ${user.id}):`, err);
-            }
-          });
+          if (isNotificationSupported) {
+            extractedMentions.forEach(async (user) => {
+              try {
+                await sendNotification(
+                  `${userName}님이 댓글에서 회원님을 언급했습니다: "${excludeHtmlTags(comment).substring(0, 50)}${excludeHtmlTags(comment).length > 50 ? '...' : ''}"`,
+                  user.id,
+                  "/icons/mention-notification.png",
+                  `스퀴즈 게시물의 새 멘션이 있습니다.`,
+                  `/post/${postId}`
+                );
+                console.log(`알림 전송 성공 (사용자: ${user.id})`);
+              } catch (err) {
+                console.error(`알림 전송 실패 (사용자: ${user.id}):`, err);
+              }
+            });
+          } else {
+            console.log('이 브라우저는 알림 기능을 지원하지 않습니다. 멘션 알림 전송을 건너뜁니다.');
+          }
         }
         
         // 성공 시 상태 초기화

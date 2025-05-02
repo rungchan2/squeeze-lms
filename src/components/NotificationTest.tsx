@@ -335,7 +335,7 @@ export default function NotificationTest() {
       );
       
       console.log("알림 전송 결과:", result);
-      const response = JSON.parse(result);
+      const response = JSON.parse(result || "{}");
       
       if (response.error) {
         // 구독 만료 오류 처리
