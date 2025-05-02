@@ -10,3 +10,7 @@ export function urlB64ToUint8Array(base64String: string): Uint8Array {
 	}
 	return outputArray;
 }
+
+export function excludeHtmlTags(text: string) {
+  return text.replace(/<[^>]*>?/g, "");
+}

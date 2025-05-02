@@ -8,10 +8,8 @@ import { IconContainer } from "@/components/common/IconContainer";
 import dayjs from "@/utils/dayjs/dayjs";
 import { TeacherOnly } from "@/components/auth/AdminOnly";
 import { calcDifference } from "@/utils/dayjs/calcDifference";
-import { toaster } from "@/components/ui/toaster";
 import { FaEdit } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { useParams } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { BiGridVertical } from "react-icons/bi";
 

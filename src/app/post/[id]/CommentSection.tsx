@@ -205,6 +205,7 @@ export default function CommentSection({
       <CommentInputSection
         createComment={createComment}
         missionInstanceId={missionInstanceId}
+        postId={postId}
       />
     </CommentSectionContainer>
   );

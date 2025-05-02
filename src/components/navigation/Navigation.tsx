@@ -134,7 +134,7 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
         <div className="right-container">
           <NotificationRequest />
           <Menu.Root>
-            <Menu.Trigger asChild>
+            <Menu.Trigger>
               <ProfileImage
                 profileImage={profileImageFromAuth}
                 width={30}

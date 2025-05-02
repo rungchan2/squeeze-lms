@@ -12,14 +12,27 @@ import { useState } from "react";
 import Spinner from "@/components/common/Spinner";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { Popover, Portal } from "@chakra-ui/react";
+import { sendNotification } from "@/app/journey/[slug]/actions";
+import { excludeHtmlTags } from "@/utils/utils";
+
+// 멘션된 사용자 데이터 타입 정의
+interface MentionData {
+  id: string;
+  display: string;
+}
 
 interface CommentInputSectionProps {
   createComment: (content: string) => Promise<any>;
   missionInstanceId?: string;
+  postTitle?: string; // 게시물 제목 추가
+  postId?: string; // 게시물 ID 추가
 }
 
 // 훅 추출로 중복 렌더링 방지
-function useCommentInput(createComment: (content: string) => Promise<any>) {
+function useCommentInput(
+  createComment: (content: string) => Promise<any>,
+  userData: { userId: string; firstName: string; lastName: string },
+) {
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -36,29 +49,77 @@ function useCommentInput(createComment: (content: string) => Promise<any>) {
     [error]
   );
 
+  // 멘션된 사용자 정보 추출 (댓글 내용에서 @id:name 형식으로 된 부분 파싱)
+  const extractMentions = useCallback((content: string): MentionData[] => {
+    const mentions: MentionData[] = [];
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, 'text/html');
+    const mentionElements = doc.querySelectorAll('span.mention');
+
+    mentionElements.forEach(element => {
+      const id = element.getAttribute('data-id');
+      const display = element.getAttribute('data-label');
+      
+      if (id && display) {
+        mentions.push({
+          id,
+          display
+        });
+      }
+    });
+
+    return mentions;
+  }, []);
+
   // 댓글 전송 핸들러
-  const handleSendComment = useCallback(async () => {
+  const handleSendComment = useCallback(async (postId: string) => {
     if (!comment.trim() || isSubmitting) return;
 
     try {
       setIsSubmitting(true);
       setError(null);
-
+      
       const result = await createComment(comment);
 
       if (result) {
+        // 댓글에서 멘션된 사용자 추출
+        const extractedMentions = extractMentions(comment);
+        console.log("extractedMentions", extractedMentions, postId);
+        // 멘션된 사용자들에게 알림 전송
+        if (extractedMentions.length > 0 && postId) {
+          console.log("시작");
+          const { firstName, lastName } = userData;
+          const userName = `${firstName || ''} ${lastName || ''}`.trim();
+          
+          // 각 멘션된 사용자에게 알림 보내기
+          extractedMentions.forEach(async (user) => {
+            try {
+              await sendNotification(
+                `${userName}님이 댓글에서 회원님을 언급했습니다: "${excludeHtmlTags(comment).substring(0, 50)}${excludeHtmlTags(comment).length > 50 ? '...' : ''}"`,
+                user.id,
+                "/icons/mention-notification.png",
+                `스퀴즈 게시물의 새 멘션이 있습니다.`,
+                `/post/${postId}`
+              );
+              console.log(`알림 전송 성공 (사용자: ${user.id})`);
+            } catch (err) {
+              console.error(`알림 전송 실패 (사용자: ${user.id}):`, err);
+            }
+          });
+        }
+        
         // 성공 시 상태 초기화
         setComment("");
-
+        
         // 성공 피드백 표시
         setShowSuccess(true);
-
+        
         // 기존 타이머 제거
         if (submitTimerRef.current) {
           clearTimeout(submitTimerRef.current);
           submitTimerRef.current = null;
         }
-
+        
         // 새 타이머 설정
         submitTimerRef.current = setTimeout(() => {
           setShowSuccess(false);
@@ -81,14 +142,14 @@ function useCommentInput(createComment: (content: string) => Promise<any>) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [comment, isSubmitting, createComment]);
+  }, [comment, isSubmitting, createComment, userData, extractMentions]);
 
   // 키보드 이벤트 핸들러
   const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent) => {
+    (postId: string) => (event: React.KeyboardEvent) => {
       if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
-        handleSendComment();
+        handleSendComment(postId);
       }
     },
     [handleSendComment]
@@ -113,14 +174,26 @@ function useCommentInput(createComment: (content: string) => Promise<any>) {
     handleCommentChange,
     handleSendComment,
     handleKeyDown,
-    setError,
+    setError
   };
 }
 
 export default function CommentInputSection({
   createComment,
   missionInstanceId,
+  postId
 }: CommentInputSectionProps) {
+  const { id: userId, user } = useSupabaseAuth();
+  const profileImage = useSupabaseAuth().profileImage;
+  const [isOpen, setIsOpen] = useState(false);
+  
+  // 사용자 정보 준비
+  const userData = {
+    userId: userId || "",
+    firstName: user?.user_metadata?.first_name || "",
+    lastName: user?.user_metadata?.last_name || ""
+  };
+
   const {
     comment,
     isSubmitting,
@@ -129,10 +202,8 @@ export default function CommentInputSection({
     inputRef,
     handleCommentChange,
     handleSendComment,
-    handleKeyDown,
-  } = useCommentInput(createComment);
-  const { profileImage } = useSupabaseAuth();
-  const [isOpen, setIsOpen] = useState(false);
+    handleKeyDown
+  } = useCommentInput(createComment, userData);
 
   // 컴포넌트 마운트 시 입력창에 포커스
   useEffect(() => {
@@ -141,7 +212,7 @@ export default function CommentInputSection({
         inputRef.current.focus();
       }
     }, 200);
-
+    
     return () => {
       clearTimeout(timer);
     };
@@ -152,15 +223,15 @@ export default function CommentInputSection({
       {showSuccess && (
         <SuccessMessage>댓글이 성공적으로 등록되었습니다!</SuccessMessage>
       )}
-
+      
       {error && <ErrorMessage>{error}</ErrorMessage>}
-
+      
       <div className="comment-section-container">
         <div className="comment-section-header">
           <ProfileImage profileImage={profileImage || ""} size="small" />
           <MentionInput
             ref={inputRef}
-            onKeyDown={handleKeyDown}
+            onKeyDown={handleKeyDown(postId || "")}
             content={comment}
             onChange={handleCommentChange}
             placeholder="댓글..."
@@ -193,7 +264,7 @@ export default function CommentInputSection({
           <SendButton
             onClick={(e) => {
               e.preventDefault();
-              handleSendComment();
+              handleSendComment(postId || "");
             }}
             disabled={!comment.trim() || isSubmitting}
             $isSubmitting={isSubmitting}

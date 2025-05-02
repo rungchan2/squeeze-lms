@@ -203,7 +203,6 @@ const suggestionConfig = {
 
       onExit() {
         popup?.[0].destroy()
-        component?.destroy()
       },
     }
   },
