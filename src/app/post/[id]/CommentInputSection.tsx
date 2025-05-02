@@ -11,6 +11,7 @@ import { ProfileImage } from "@/components/navigation/ProfileImage";
 import { useState } from "react";
 import Spinner from "@/components/common/Spinner";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { Popover, Portal } from "@chakra-ui/react";
 
 interface CommentInputSectionProps {
   createComment: (content: string) => Promise<any>;
@@ -27,10 +28,13 @@ function useCommentInput(createComment: (content: string) => Promise<any>) {
   const submitTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 댓글 내용 변경 핸들러
-  const handleCommentChange = useCallback((html: string) => {
-    setComment(html);
-    if (error) setError(null); // 에러 메시지 초기화
-  }, [error]);
+  const handleCommentChange = useCallback(
+    (html: string) => {
+      setComment(html);
+      if (error) setError(null); // 에러 메시지 초기화
+    },
+    [error]
+  );
 
   // 댓글 전송 핸들러
   const handleSendComment = useCallback(async () => {
@@ -39,22 +43,22 @@ function useCommentInput(createComment: (content: string) => Promise<any>) {
     try {
       setIsSubmitting(true);
       setError(null);
-      
+
       const result = await createComment(comment);
 
       if (result) {
         // 성공 시 상태 초기화
         setComment("");
-        
+
         // 성공 피드백 표시
         setShowSuccess(true);
-        
+
         // 기존 타이머 제거
         if (submitTimerRef.current) {
           clearTimeout(submitTimerRef.current);
           submitTimerRef.current = null;
         }
-        
+
         // 새 타이머 설정
         submitTimerRef.current = setTimeout(() => {
           setShowSuccess(false);
@@ -109,13 +113,13 @@ function useCommentInput(createComment: (content: string) => Promise<any>) {
     handleCommentChange,
     handleSendComment,
     handleKeyDown,
-    setError
+    setError,
   };
 }
 
 export default function CommentInputSection({
   createComment,
-  missionInstanceId
+  missionInstanceId,
 }: CommentInputSectionProps) {
   const {
     comment,
@@ -128,6 +132,7 @@ export default function CommentInputSection({
     handleKeyDown,
   } = useCommentInput(createComment);
   const { profileImage } = useSupabaseAuth();
+  const [isOpen, setIsOpen] = useState(false);
 
   // 컴포넌트 마운트 시 입력창에 포커스
   useEffect(() => {
@@ -136,7 +141,7 @@ export default function CommentInputSection({
         inputRef.current.focus();
       }
     }, 200);
-    
+
     return () => {
       clearTimeout(timer);
     };
@@ -145,17 +150,11 @@ export default function CommentInputSection({
   return (
     <CommentSectionContainer>
       {showSuccess && (
-        <SuccessMessage>
-          댓글이 성공적으로 등록되었습니다!
-        </SuccessMessage>
+        <SuccessMessage>댓글이 성공적으로 등록되었습니다!</SuccessMessage>
       )}
-      
-      {error && (
-        <ErrorMessage>
-          {error}
-        </ErrorMessage>
-      )}
-      
+
+      {error && <ErrorMessage>{error}</ErrorMessage>}
+
       <div className="comment-section-container">
         <div className="comment-section-header">
           <ProfileImage profileImage={profileImage || ""} size="small" />
@@ -169,14 +168,28 @@ export default function CommentInputSection({
           />
         </div>
         <div className="comment-section-footer">
-          <button className="comment-section-footer-button">
-            <VscMention size={24} onClick={() => {
-              if (inputRef.current) {
-                handleCommentChange(comment + '@');
-                inputRef.current.focus();
-              }
-            }}/>
-          </button>
+            <Popover.Root open={isOpen} onOpenChange={(e) => setIsOpen(e.open)}>
+              <Popover.Trigger asChild>
+                <VscMention
+                  size={24}
+                  onClick={() => {
+                    if (inputRef.current) {
+                      inputRef.current.focus();
+                    }
+                  }}
+                />
+              </Popover.Trigger>
+              <Portal>
+                <Popover.Positioner>
+                  <Popover.Content>
+                    <Popover.Arrow />
+                    <Popover.Body>
+                      &quot;@&quot;를 입력해보세요! 친구들을 대상으로 댓글을 남길 수 있어요.
+                    </Popover.Body>
+                  </Popover.Content>
+                </Popover.Positioner>
+              </Portal>
+            </Popover.Root>
           <SendButton
             onClick={(e) => {
               e.preventDefault();
@@ -206,7 +219,7 @@ const CommentSectionContainer = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  z-index: 9999;
+  z-index: 99;
   margin: 0;
   width: 100%;
 
@@ -233,7 +246,8 @@ const CommentSectionContainer = styled.div`
 
   .comment-section-footer {
     display: flex;
-    justify-content: space-between;
+    gap: 10px;
+    justify-content: flex-end;
     height: 100%;
     padding: 8px 0;
   }
@@ -259,7 +273,8 @@ const SendButton = styled.button<{ $isSubmitting: boolean }>`
   background: none;
   border: none;
   cursor: pointer;
-  color: ${(props) => props.$isSubmitting ? 'var(--primary-500)' : 'var(--grey-700)'};
+  color: ${(props) =>
+    props.$isSubmitting ? "var(--primary-500)" : "var(--grey-700)"};
   display: flex;
   align-items: center;
   justify-content: center;
