@@ -11,6 +11,12 @@ export const sendNotification = async (
   url?: string
 ) => {
   try {
+    // Notification API 지원 여부 체크 (클라이언트 사이드에서만 동작)
+    if (typeof window !== 'undefined' && typeof Notification === 'undefined') {
+      console.log('이 브라우저는 알림 기능을 지원하지 않습니다.');
+      return;
+    }
+
     // VAPID 키 확인
     const vapidKeys = {
       publicKey: process.env.NEXT_PUBLIC_VAPID_KEY!,
