@@ -125,7 +125,7 @@ export default function CommentInputSection({
     inputRef,
     handleCommentChange,
     handleSendComment,
-    handleKeyDown
+    handleKeyDown,
   } = useCommentInput(createComment);
   const { profileImage } = useSupabaseAuth();
 
@@ -140,7 +140,7 @@ export default function CommentInputSection({
     return () => {
       clearTimeout(timer);
     };
-  }, []);
+  }, [inputRef]);
 
   return (
     <CommentSectionContainer>
@@ -170,7 +170,12 @@ export default function CommentInputSection({
         </div>
         <div className="comment-section-footer">
           <button className="comment-section-footer-button">
-            <VscMention size={24} />
+            <VscMention size={24} onClick={() => {
+              if (inputRef.current) {
+                handleCommentChange(comment + '@');
+                inputRef.current.focus();
+              }
+            }}/>
           </button>
           <SendButton
             onClick={(e) => {

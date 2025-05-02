@@ -5,12 +5,27 @@ const nextConfig = {
 
   reactStrictMode: true,
   images: {
-    domains: [
-      "lh3.googleusercontent.com",
-      "avatars.githubusercontent.com",
-      "picsum.photos",
-      "example.com",
-      `${process.env.PROJECT_ID}.supabase.co`,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: 'example.com',
+      },
+      {
+        protocol: 'https',
+        hostname: `${process.env.PROJECT_ID}.supabase.co`,
+      },
     ].filter(Boolean),
   },
   compiler: {

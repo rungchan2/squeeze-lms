@@ -1,6 +1,6 @@
 import { ReactRenderer } from '@tiptap/react'
 import tippy from 'tippy.js'
-import MentionList from './MentionList'
+import { MentionList } from './MentionList'
 import { createClient } from '@/utils/supabase/client'
 import { Editor, Range } from '@tiptap/core'
 
@@ -120,7 +120,7 @@ const getUsers = async (): Promise<User[]> => {
     const formattedUsers = users.map((user: DbUser) => ({
       id: user.id,
       email: user.email,
-      fullName: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+      fullName: `${user.last_name}${user.first_name}`.trim(),
       avatarUrl: user.profile_image
     }))
 
@@ -175,6 +175,7 @@ const suggestionConfig = {
           interactive: true,
           trigger: 'manual',
           placement: 'bottom-start',
+          theme: 'light',
         })
       },
 
@@ -216,7 +217,6 @@ const suggestionConfig = {
     range: Range; 
     props: { id: string } 
   }) => {
-    // props는 MentionList에서 command 함수에 전달한 id를 포함합니다
     const userId = props.id;
     
     // 현재 선택된 사용자 찾기

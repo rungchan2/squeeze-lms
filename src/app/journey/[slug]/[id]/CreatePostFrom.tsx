@@ -49,11 +49,9 @@ export default function DoMissionPage({
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const initialTeamMembers: TeamMember[] = [];
-
   const isTeamMission = missionInstance?.mission.mission_type === "team";
   const [selectedTeamMembers, setSelectedTeamMembers] =
-    useState<TeamMember[]>(initialTeamMembers);
+    useState<TeamMember[] | undefined>();
 
   // useTeams 훅 사용
   const { teamData, markPostAsTeamSubmission } = useTeams(slug ?? "");
@@ -317,16 +315,10 @@ export default function DoMissionPage({
           isModal={true}
           missionInstance={missionInstance as any}
         />
-      </div>
-      {/* 팀 미션인 경우 팀원 선택 컴포넌트 추가 */}
-      {isTeamMission && (
+        {isTeamMission && (
         <TeamSelectSection>
           <Text variant="body" color="grey-700" fontWeight="bold">
             과제 수행 팀 : {teamData?.team?.name}
-          </Text>
-          <Text variant="small" className="help-text">
-            함께 미션을 수행할 팀원을 선택하세요. 선택한 팀원들과 함께 점수를
-            받게 됩니다.
           </Text>
           {teamData?.members && teamData.members.length <= 1 ? (
             <EmptyTeamMessage>
@@ -336,20 +328,21 @@ export default function DoMissionPage({
             </EmptyTeamMessage>
           ) : (
             <StlyedSelect
-              defaultValues={selectedTeamMembers}
-              isDisabled
+              defaultValues={selectedTeamMembers || []}
+              isDisabled={true}
               options={teamData?.members.map((member) => ({
                 label: `${member.profiles?.first_name || ""} ${
                   member.profiles?.last_name || ""
                 }`,
                 value: member.user_id,
               }))}
-              onChange={() => {}}
-              onBlur={() => {}}
             />
           )}
         </TeamSelectSection>
       )}
+      </div>
+      {/* 팀 미션인 경우 팀원 선택 컴포넌트 추가 */}
+      
       <div className="button-container">
         <Button
           variant="flat"
@@ -389,6 +382,7 @@ const MissionContainer = styled.div`
 
 const TeamSelectSection = styled.div`
   display: flex;
+  margin-top: 16px;
   flex-direction: column;
   gap: 8px;
   background-color: var(--grey-100);
