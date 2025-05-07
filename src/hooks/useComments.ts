@@ -1,14 +1,11 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useRef, useCallback } from "react";
 import useSWRInfinite from "swr/infinite";
 import { Comment, CreateComment } from "@/types";
-import { RealtimeChannel } from "@supabase/supabase-js";
 import {
   getComments,
   createComment as createCommentApi,
   deleteComment as deleteCommentApi,
   updateComment as updateCommentApi,
-  addChannel,
-  removeChannel,
 } from "@/utils/data/comment";
 import { useSupabaseAuth } from "./useSupabaseAuth";
 interface UseCommentsProps {

@@ -14,13 +14,6 @@ self.addEventListener("push", async (e) => {
 		const icon = payload.icon || "/apple-icon-180.png";
 		const url = payload.url || "/";
 		
-		console.log("사용할 알림 정보:", {
-			title,
-			body,
-			icon,
-			url
-		});
-		
 		// 알림 표시 - 최소한의 옵션만 사용
 		e.waitUntil(
 			self.registration.showNotification(title, {

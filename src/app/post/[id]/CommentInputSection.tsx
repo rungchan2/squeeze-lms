@@ -31,7 +31,7 @@ interface CommentInputSectionProps {
 // 훅 추출로 중복 렌더링 방지
 function useCommentInput(
   createComment: (content: string) => Promise<any>,
-  userData: { userId: string; firstName: string; lastName: string },
+  userData: { userId: string; firstName: string; lastName: string }
 ) {
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,17 +53,17 @@ function useCommentInput(
   const extractMentions = useCallback((content: string): MentionData[] => {
     const mentions: MentionData[] = [];
     const parser = new DOMParser();
-    const doc = parser.parseFromString(content, 'text/html');
-    const mentionElements = doc.querySelectorAll('span.mention');
+    const doc = parser.parseFromString(content, "text/html");
+    const mentionElements = doc.querySelectorAll("span.mention");
 
-    mentionElements.forEach(element => {
-      const id = element.getAttribute('data-id');
-      const display = element.getAttribute('data-label');
-      
+    mentionElements.forEach((element) => {
+      const id = element.getAttribute("data-id");
+      const display = element.getAttribute("data-label");
+
       if (id && display) {
         mentions.push({
           id,
-          display
+          display,
         });
       }
     });
@@ -72,84 +72,94 @@ function useCommentInput(
   }, []);
 
   // 댓글 전송 핸들러
-  const handleSendComment = useCallback(async (postId: string) => {
-    if (!comment.trim() || isSubmitting) return;
+  const handleSendComment = useCallback(
+    async (postId: string) => {
+      if (!comment.trim() || isSubmitting) return;
 
-    try {
-      setIsSubmitting(true);
-      setError(null);
-      
-      const result = await createComment(comment);
+      try {
+        setIsSubmitting(true);
+        setError(null);
 
-      if (result) {
-        // 댓글에서 멘션된 사용자 추출
-        const extractedMentions = extractMentions(comment);
-        console.log("extractedMentions", extractedMentions, postId);
-        // 멘션된 사용자들에게 알림 전송
-        if (extractedMentions.length > 0 && postId) {
-          console.log("시작");
-          const { firstName, lastName } = userData;
-          const userName = `${firstName || ''} ${lastName || ''}`.trim();
-          
-          // 알림 API 지원 확인
-          const isNotificationSupported = typeof window !== 'undefined' && typeof Notification !== 'undefined';
-          
-          // 각 멘션된 사용자에게 알림 보내기
-          if (isNotificationSupported) {
-            extractedMentions.forEach(async (user) => {
-              try {
-                await sendNotification(
-                  `${userName}님이 댓글에서 회원님을 언급했습니다: "${excludeHtmlTags(comment).substring(0, 50)}${excludeHtmlTags(comment).length > 50 ? '...' : ''}"`,
-                  user.id,
-                  "/icons/mention-notification.png",
-                  `스퀴즈 게시물의 새 멘션이 있습니다.`,
-                  `/post/${postId}`
-                );
-                console.log(`알림 전송 성공 (사용자: ${user.id})`);
-              } catch (err) {
-                console.error(`알림 전송 실패 (사용자: ${user.id}):`, err);
+        const result = await createComment(comment);
+
+        if (result) {
+          // 댓글에서 멘션된 사용자 추출
+          const extractedMentions = extractMentions(comment);
+          console.log("extractedMentions", extractedMentions, postId);
+          // 멘션된 사용자들에게 알림 전송
+          if (extractedMentions.length > 0 && postId) {
+            const { firstName, lastName } = userData;
+            const userName = `${firstName || ""} ${lastName || ""}`.trim();
+
+            // 알림 API 지원 확인
+            const isNotificationSupported =
+              typeof window !== "undefined" &&
+              typeof Notification !== "undefined";
+            console.log("isNotificationSupported", isNotificationSupported);
+            // 각 멘션된 사용자에게 알림 보내기
+            if (isNotificationSupported) {
+              extractedMentions.forEach(async (user) => {
+                try {
+                  const result = await sendNotification(
+                    `${userName}님이 댓글에서 회원님을 언급했습니다: "${excludeHtmlTags(
+                      comment
+                    ).substring(0, 50)}${
+                      excludeHtmlTags(comment).length > 50 ? "..." : ""
+                    }"`,
+                    user.id,
+                    "/favicon-196.png",
+                    `스퀴즈 게시물의 새 멘션이 있습니다.`,
+                    `/post/${postId}`
+                  );
+                  console.log(`알림 전송 성공 (사용자: ${user.id})`, result);
+                } catch (err) {
+                  console.error(`알림 전송 실패 (사용자: ${user.id}):`, err);
+                }
+              });
+            } else {
+              console.log(
+                "이 브라우저는 알림 기능을 지원하지 않습니다. 멘션 알림 전송을 건너뜁니다."
+              );
+            }
+          }
+
+          // 성공 시 상태 초기화
+          setComment("");
+
+          // 성공 피드백 표시
+          setShowSuccess(true);
+
+          // 기존 타이머 제거
+          if (submitTimerRef.current) {
+            clearTimeout(submitTimerRef.current);
+            submitTimerRef.current = null;
+          }
+
+          // 새 타이머 설정
+          submitTimerRef.current = setTimeout(() => {
+            setShowSuccess(false);
+          }, 1500);
+
+          // 입력창 초기화 및 포커스
+          if (inputRef.current) {
+            inputRef.current.clear();
+            // 모바일에서는 포커스를 잠시 지연
+            setTimeout(() => {
+              if (inputRef.current) {
+                inputRef.current.focus();
               }
-            });
-          } else {
-            console.log('이 브라우저는 알림 기능을 지원하지 않습니다. 멘션 알림 전송을 건너뜁니다.');
+            }, 50);
           }
         }
-        
-        // 성공 시 상태 초기화
-        setComment("");
-        
-        // 성공 피드백 표시
-        setShowSuccess(true);
-        
-        // 기존 타이머 제거
-        if (submitTimerRef.current) {
-          clearTimeout(submitTimerRef.current);
-          submitTimerRef.current = null;
-        }
-        
-        // 새 타이머 설정
-        submitTimerRef.current = setTimeout(() => {
-          setShowSuccess(false);
-        }, 1500);
-
-        // 입력창 초기화 및 포커스
-        if (inputRef.current) {
-          inputRef.current.clear();
-          // 모바일에서는 포커스를 잠시 지연
-          setTimeout(() => {
-            if (inputRef.current) {
-              inputRef.current.focus();
-            }
-          }, 50);
-        }
+      } catch (err: any) {
+        console.error("댓글 전송 오류:", err);
+        setError(err.message || "댓글 전송 중 오류가 발생했습니다.");
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (err: any) {
-      console.error("댓글 전송 오류:", err);
-      setError(err.message || "댓글 전송 중 오류가 발생했습니다.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [comment, isSubmitting, createComment, userData, extractMentions]);
+    },
+    [comment, isSubmitting, createComment, userData, extractMentions]
+  );
 
   // 키보드 이벤트 핸들러
   const handleKeyDown = useCallback(
@@ -181,24 +191,24 @@ function useCommentInput(
     handleCommentChange,
     handleSendComment,
     handleKeyDown,
-    setError
+    setError,
   };
 }
 
 export default function CommentInputSection({
   createComment,
   missionInstanceId,
-  postId
+  postId,
 }: CommentInputSectionProps) {
   const { id: userId, user } = useSupabaseAuth();
   const profileImage = useSupabaseAuth().profileImage;
   const [isOpen, setIsOpen] = useState(false);
-  
+
   // 사용자 정보 준비
   const userData = {
     userId: userId || "",
     firstName: user?.user_metadata?.first_name || "",
-    lastName: user?.user_metadata?.last_name || ""
+    lastName: user?.user_metadata?.last_name || "",
   };
 
   const {
@@ -209,7 +219,7 @@ export default function CommentInputSection({
     inputRef,
     handleCommentChange,
     handleSendComment,
-    handleKeyDown
+    handleKeyDown,
   } = useCommentInput(createComment, userData);
 
   // 컴포넌트 마운트 시 입력창에 포커스
@@ -219,7 +229,7 @@ export default function CommentInputSection({
         inputRef.current.focus();
       }
     }, 200);
-    
+
     return () => {
       clearTimeout(timer);
     };
@@ -230,9 +240,9 @@ export default function CommentInputSection({
       {showSuccess && (
         <SuccessMessage>댓글이 성공적으로 등록되었습니다!</SuccessMessage>
       )}
-      
+
       {error && <ErrorMessage>{error}</ErrorMessage>}
-      
+
       <div className="comment-section-container">
         <div className="comment-section-header">
           <ProfileImage profileImage={profileImage || ""} size="small" />
@@ -246,28 +256,29 @@ export default function CommentInputSection({
           />
         </div>
         <div className="comment-section-footer">
-            <Popover.Root open={isOpen} onOpenChange={(e) => setIsOpen(e.open)}>
-              <Popover.Trigger asChild>
-                <VscMention
-                  size={24}
-                  onClick={() => {
-                    if (inputRef.current) {
-                      inputRef.current.focus();
-                    }
-                  }}
-                />
-              </Popover.Trigger>
-              <Portal>
-                <Popover.Positioner>
-                  <Popover.Content>
-                    <Popover.Arrow />
-                    <Popover.Body>
-                      &quot;@&quot;를 입력해보세요! 친구들을 대상으로 댓글을 남길 수 있어요.
-                    </Popover.Body>
-                  </Popover.Content>
-                </Popover.Positioner>
-              </Portal>
-            </Popover.Root>
+          <Popover.Root open={isOpen} onOpenChange={(e) => setIsOpen(e.open)}>
+            <Popover.Trigger asChild>
+              <VscMention
+                size={24}
+                onClick={() => {
+                  if (inputRef.current) {
+                    inputRef.current.focus();
+                  }
+                }}
+              />
+            </Popover.Trigger>
+            <Portal>
+              <Popover.Positioner>
+                <Popover.Content>
+                  <Popover.Arrow />
+                  <Popover.Body>
+                    &quot;@&quot;를 입력해보세요! 친구들을 대상으로 댓글을 남길
+                    수 있어요.
+                  </Popover.Body>
+                </Popover.Content>
+              </Popover.Positioner>
+            </Portal>
+          </Popover.Root>
           <SendButton
             onClick={(e) => {
               e.preventDefault();

@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 
 export default function Pwa() {
 	useEffect(() => {
-		console.log("serviceWorker" in navigator);
 		if ("serviceWorker" in navigator) {
 			window.addEventListener("load", async function () {
 				try {
