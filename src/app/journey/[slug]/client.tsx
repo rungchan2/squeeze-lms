@@ -12,7 +12,7 @@ import SettingTab from "./_setting/SettingTab";
 import { useEffect, useState } from "react";
 import { Suspense } from "react";
 import Spinner from "@/components/common/Spinner";
-import { journey } from "@/utils/data/journey";
+import { getJourneyByUuidRetrieveId } from "@/utils/data/journey";
 import { Tabs } from "@chakra-ui/react";
 
 interface JourneyClientProps {
@@ -41,7 +41,7 @@ export default function JourneyClient({
         }
 
         // 초기 데이터가 없으면 클라이언트에서 조회
-        const journeyData = await journey.getJourneyByUuidRetrieveId(slug);
+        const journeyData = await getJourneyByUuidRetrieveId(slug);
         if (journeyData && journeyData.length > 0) {
           setIsInitialized(true);
         } else {

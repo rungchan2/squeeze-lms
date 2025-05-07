@@ -12,6 +12,14 @@ export const sendNotification = async (
 ) => {
   try {
     // Notification API 지원 여부 체크 (클라이언트 사이드에서만 동작)
+    console.log("알림 전송 시작", {
+      body: body,
+      user_id: user_id,
+      icon: icon,
+      title: title,
+      url: url
+    });
+
     if (typeof window !== 'undefined' && typeof Notification === 'undefined') {
       console.log('이 브라우저는 알림 기능을 지원하지 않습니다.');
       return;
@@ -57,7 +65,8 @@ export const sendNotification = async (
     try {
       // 푸시 구독 정보 파싱
       const subscription = JSON.parse(data.notification_json);
-
+      console.log("subscription", subscription);
+      
       // 알림을 위한 최소한의 데이터 구조 - 브라우저 호환성을 위해 단순화
       const notificationPayload = JSON.stringify({
         title: title,
