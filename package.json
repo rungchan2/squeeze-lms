@@ -12,7 +12,7 @@
     "update-type": "supabase gen types typescript --linked --debug > src/types/database.types.ts"
   },
   "dependencies": {
-    "@chakra-ui/react": "^3.8.1",
+    "@chakra-ui/react": "^3.17.0",
     "@emotion/css": "^11.13.5",
     "@emotion/react": "^11.14.0",
     "@emotion/server": "^11.11.0",
