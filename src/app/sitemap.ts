@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { createClient, createSitemapClient } from "@/utils/supabase/server";
+import { createSitemapClient } from "@/utils/supabase/server";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.squeezeedu.com';
 

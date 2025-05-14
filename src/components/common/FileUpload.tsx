@@ -4,7 +4,6 @@ import { useDropzone } from "react-dropzone";
 import imageCompression from "browser-image-compression";
 import { createClient } from "@/utils/supabase/client";
 import styles from "./FileUpload.module.css";
-import { redirect } from "next/navigation";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import Image from "next/image";
 import { FaUpload } from "react-icons/fa";

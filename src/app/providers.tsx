@@ -9,6 +9,7 @@ import { useServerInsertedHTML } from "next/navigation";
 import createEmotionServer from "@emotion/server/create-instance";
 import { SWRConfig } from "swr";
 
+
 interface ProvidersProps {
   children: React.ReactNode;
   excludeAuthOnLogin?: boolean;

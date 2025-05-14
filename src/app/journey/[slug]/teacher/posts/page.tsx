@@ -21,13 +21,19 @@ import WeeklySubmissionChart from "./WeeklySubmissionChart";
 import Text from "@/components/Text/Text";
 import { usePosts } from "@/hooks/usePosts";
 import { PostWithRelations } from "@/types";
+import { excludeHtmlTags } from "@/utils/utils";
+import RichTextViewer from "@/components/richTextInput/RichTextViewer";
+
+
+import Button from "@/components/common/Button";
+import { Dialog, CloseButton, Portal } from "@chakra-ui/react";
 
 export default function TeacherPostsPage() {
   const { slug } = useParams();
   const router = useRouter();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
-  
+
   // usePosts 훅 사용
   const {
     data: allPosts,
@@ -37,9 +43,9 @@ export default function TeacherPostsPage() {
     fetchNextPage,
     hasNextPage,
     refetch,
-    total: totalPosts
+    total: totalPosts,
   } = usePosts(10, slug as string, true);
-  
+
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
@@ -111,7 +117,7 @@ export default function TeacherPostsPage() {
           </Tabs.Trigger>
           <Tabs.Indicator rounded="l2" />
         </Tabs.List>
-        
+
         <Tabs.Content value="week">
           <WeeklySubmissionChart />
         </Tabs.Content>
@@ -119,18 +125,25 @@ export default function TeacherPostsPage() {
         <Tabs.Content value="all">
           <div className="posts-container">
             <Heading level={3}>제출된 미션</Heading>
-            
+
             <Text variant="body" color="var(--grey-600)" className="data-count">
               전체 {totalPosts}개 중 {allPosts.length}개 표시 중
             </Text>
-            
-            <Table.Root key="outline" size="sm" variant="outline" interactive backgroundColor="var(--white)">
+
+            <Table.Root
+              key="outline"
+              size="sm"
+              variant="outline"
+              interactive
+              backgroundColor="var(--white)"
+            >
               <Table.Header>
                 <Table.Row>
                   <Table.ColumnHeader>제목</Table.ColumnHeader>
                   <Table.ColumnHeader>작성자</Table.ColumnHeader>
                   <Table.ColumnHeader>숨김</Table.ColumnHeader>
                   <Table.ColumnHeader>제출날짜</Table.ColumnHeader>
+                  <Table.ColumnHeader>제출내용</Table.ColumnHeader>
                   <Table.ColumnHeader></Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
@@ -146,12 +159,13 @@ export default function TeacherPostsPage() {
                       {post.profiles?.first_name} {post.profiles?.last_name}
                     </Table.Cell>
                     <Table.Cell
-                      textAlign="center"
                       onClick={(e: React.MouseEvent) => e.stopPropagation()}
                     >
                       <select
                         defaultValue={post.is_hidden ? "hide" : "show"}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleHide(post.id, e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                          handleHide(post.id, e.target.value)
+                        }
                         className="select-box"
                       >
                         <option value="show">보임</option>
@@ -160,6 +174,44 @@ export default function TeacherPostsPage() {
                     </Table.Cell>
                     <Table.Cell>
                       {dayjs(post.created_at).format("YYYY-MM-DD")}
+                    </Table.Cell>
+                    <Table.Cell>
+                    
+                    <Dialog.Root
+                      key="center"
+                      placement="center"
+                      motionPreset="slide-in-bottom"
+                    >
+                      <Dialog.Trigger asChild>
+                      <Button
+                        maxWidth={100}
+                        variant="plain"
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                        }}
+                      >
+                        제출내용 보기
+                      </Button>
+                      </Dialog.Trigger>
+                      <Portal>
+                        <Dialog.Backdrop />
+                        <Dialog.Positioner>
+                          <Dialog.Content onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                            <Dialog.Header>
+                              <Dialog.Title>
+                                {post.title} / {post.profiles?.last_name}{post.profiles?.first_name}
+                              </Dialog.Title>
+                            </Dialog.Header>
+                            <Dialog.Body >
+                              <RichTextViewer content={post.content} />
+                            </Dialog.Body>
+                            <Dialog.CloseTrigger asChild>
+                              <CloseButton size="sm" />
+                            </Dialog.CloseTrigger>
+                          </Dialog.Content>
+                        </Dialog.Positioner>
+                      </Portal>
+                    </Dialog.Root>
                     </Table.Cell>
                     <Table.Cell textAlign="right">
                       <IconContainer
@@ -177,11 +229,15 @@ export default function TeacherPostsPage() {
                 ))}
               </Table.Body>
             </Table.Root>
-            
+
             <div ref={loadMoreRef} className="load-more">
               {isFetchingNextPage && <Loading />}
               {!hasNextPage && allPosts.length > 0 && (
-                <Text variant="caption" color="var(--grey-500)" className="no-more">
+                <Text
+                  variant="caption"
+                  color="var(--grey-500)"
+                  className="no-more"
+                >
                   모든 데이터를 불러왔습니다.
                 </Text>
               )}
@@ -214,18 +270,18 @@ const TeacherPostsPageContainer = styled.div`
       background-color: var(--grey-100);
     }
   }
-  
+
   .data-count {
     margin-bottom: 1rem;
   }
-  
+
   .load-more {
     padding: 1rem 0;
     display: flex;
     justify-content: center;
     min-height: 60px;
   }
-  
+
   .no-more {
     padding: 1rem;
   }
