@@ -375,7 +375,7 @@ export default function SignupPage() {
           <InputAndTitle title="권한 종류">
             <RadioGroup.Root
               value={roleAccessType}
-              onValueChange={(e) => setRoleAccessType(e.value)}
+              onValueChange={(e) => setRoleAccessType(e.value || "")}
             >
               <HStack gap="6">
                 {roleAccessTypeOptions.map((item) => (
