@@ -8,6 +8,7 @@ import { KakaoScript } from "@/components/KaKao";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Viewport } from "next";
 import Pwa from "@/components/pwa";
+import { PostHogProvider } from "./posthog";
 type LayoutProps = {
   children: React.ReactNode;
   params: { [key: string]: string };
@@ -178,13 +179,15 @@ export default function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="ko">
       <body>
-        <Providers>
-          <Navigation exceptionPath={["/login", "/signup"]} />
-          {children}
-          <Toaster />
-          <SpeedInsights />
-          <KakaoScript />
-        </Providers>
+        <PostHogProvider>
+          <Providers>
+            <Navigation exceptionPath={["/login", "/signup"]} />
+            {children}
+            <Toaster />
+            <SpeedInsights />
+            <KakaoScript />
+          </Providers>
+        </PostHogProvider>
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
         <Pwa />
       </body>
