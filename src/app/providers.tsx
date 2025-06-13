@@ -8,6 +8,9 @@ import { useServerInsertedHTML } from "next/navigation";
 // import { ThemeProvider } from "next-themes"
 import createEmotionServer from "@emotion/server/create-instance";
 import { SWRConfig } from "swr";
+import { Analytics } from "@vercel/analytics/next"
+
+
 
 
 interface ProvidersProps {
@@ -48,6 +51,7 @@ export function Providers({ children }: ProvidersProps) {
       >
         <ChakraProvider value={defaultSystem}>
           {children}
+          <Analytics />
         </ChakraProvider>
       </SWRConfig>
     </CacheProvider>
