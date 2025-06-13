@@ -51,12 +51,6 @@ export default function MissionTab({ slug }: { slug: string }) {
     }
   };
 
-  // 미션 카드 클릭 핸들러
-  const handleMissionClick = (missionInstanceId: number) => {
-    const slug = getSlugFromPathname();
-    router.push(`/journey/${slug}/${missionInstanceId}`);
-  };
-
   // 로딩 중이면 스피너 표시
   if (missionInstancesLoading || isLoadingCompletedMissions) {
     return <Spinner />;

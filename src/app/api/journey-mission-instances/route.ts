@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
     let query = supabase
       .from("journey_mission_instances")
       .select(`*, missions(*)`)
-      .eq("journey_id", journeyUuid);
+      .eq("journey_id", journeyUuid)
+      .lte("release_date", new Date().toISOString());
     
     // 주차 ID가 있으면 필터링
     if (weekId) {
