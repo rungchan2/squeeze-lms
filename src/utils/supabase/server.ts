@@ -69,3 +69,44 @@ export async function createSitemapClient() {
     }
   )
 }
+
+// 관리자 전용 클라이언트 - Service Role Key 사용
+export function createAdminClient() {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  
+  console.log('[ADMIN_CLIENT] Environment check:', {
+    hasServiceRoleKey: !!serviceRoleKey,
+    hasSupabaseUrl: !!supabaseUrl,
+    serviceRoleKeyLength: serviceRoleKey?.length || 0
+  });
+  
+  if (!serviceRoleKey) {
+    console.error('[ADMIN_CLIENT] SUPABASE_SERVICE_ROLE_KEY not found in environment variables');
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is required');
+  }
+  
+  if (!supabaseUrl) {
+    console.error('[ADMIN_CLIENT] NEXT_PUBLIC_SUPABASE_URL not found in environment variables');
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL environment variable is required');
+  }
+  
+  return createServerClient<Database>(
+    supabaseUrl,
+    serviceRoleKey,
+    {
+      cookies: {
+        getAll() {
+          return []
+        },
+        setAll() {
+          // Admin client doesn't need cookies
+        },
+      },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      }
+    }
+  )
+}

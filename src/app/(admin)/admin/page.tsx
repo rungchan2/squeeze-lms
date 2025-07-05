@@ -6,6 +6,7 @@ import OrganizationManagement from "./OrganizationManagement";
 import { LuUser, LuFolder, LuSquareCheck } from "react-icons/lu";
 import styled from "@emotion/styled";
 import MissionManagement from "./MissionManagement";
+import UserManagement from "./UserManagement";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";  
 
 export default function AdminPage() {
@@ -47,7 +48,9 @@ export default function AdminPage() {
         <Tabs.Content value="projects">
           <MissionManagement />
         </Tabs.Content>
-        <Tabs.Content value="posts">기능 추가 중</Tabs.Content>
+        <Tabs.Content value="posts">
+          <UserManagement />
+        </Tabs.Content>
       </Tabs.Root>
     </AdminPageContainer>
   );
