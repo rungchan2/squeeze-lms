@@ -52,7 +52,7 @@ export async function getAllUsersByPage(page: number, pageSize: number) {
   const { data, error, count } = await supabase
     .from("profiles")
     .select("*", { count: "exact" })
-    .order("id", { ascending: true })
+    .order("created_at", { ascending: false })
     .range(from, to);
 
   if (error) throw error;

@@ -20,11 +20,25 @@ interface BulkCreateResult {
   total: number;
   created: number;
   failed: number;
+  skipped: number;
   errors: Array<{
     row: number;
     email: string;
     error: string;
   }>;
+  skippedUsers: Array<{
+    row: number;
+    email: string;
+    reason: string;
+  }>;
+}
+
+interface ProgressUpdate {
+  type: 'progress' | 'result';
+  current?: number;
+  total?: number;
+  email?: string;
+  result?: BulkCreateResult;
 }
 
 export async function POST(request: NextRequest) {
@@ -91,7 +105,9 @@ export async function POST(request: NextRequest) {
       total: users.length,
       created: 0,
       failed: 0,
-      errors: []
+      errors: [],
+      skipped: 0,
+      skippedUsers: []
     };
 
     // Process each user

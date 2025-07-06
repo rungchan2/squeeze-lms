@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "src/app/api/users/bulk-create/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/users/bulk-create-stream/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}
