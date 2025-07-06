@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAllUsers } from "@/hooks/useUsers";
 import { Table, Button, Stack, Badge } from "@chakra-ui/react";
 import { FaDownload } from "react-icons/fa";
@@ -8,6 +8,33 @@ import BulkUserCreationModal from "./BulkUserCreationModal";
 export default function UserManagement() {
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
   const { users, isLoading, loadMore, isLoadingMore, isReachingEnd, total, mutate } = useAllUsers(20);
+  const observerRef = useRef<HTMLDivElement>(null);
+
+  // Infinite scroll using Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (target.isIntersecting && !isLoadingMore && !isReachingEnd) {
+          loadMore();
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '20px',
+      }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.unobserve(observerRef.current);
+      }
+    };
+  }, [isLoadingMore, isReachingEnd, loadMore]);
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -120,16 +147,31 @@ export default function UserManagement() {
         </Table.Body>
       </Table.Root>
 
+      {/* Infinite scroll trigger element */}
       {!isReachingEnd && (
+        <div 
+          ref={observerRef}
+          style={{ 
+            height: '20px', 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center',
+            marginTop: '16px'
+          }}
+        >
+          {isLoadingMore && (
+            <Text variant="caption" color="var(--grey-600)">
+              로딩 중...
+            </Text>
+          )}
+        </div>
+      )}
+      
+      {isReachingEnd && users && users.length > 0 && (
         <Stack direction="row" justifyContent="center" marginTop={4}>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={loadMore}
-            disabled={isLoadingMore}
-          >
-            {isLoadingMore ? "로딩 중..." : "더 보기"}
-          </Button>
+          <Text variant="caption" color="var(--grey-600)">
+            모든 사용자를 불러왔습니다
+          </Text>
         </Stack>
       )}
 

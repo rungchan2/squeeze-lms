@@ -26,10 +26,16 @@ interface CreationResult {
   total: number;
   created: number;
   failed: number;
+  skipped: number;
   errors: Array<{
     row: number;
     email: string;
     error: string;
+  }>;
+  skippedUsers: Array<{
+    row: number;
+    email: string;
+    reason: string;
   }>;
 }
 
@@ -51,6 +57,7 @@ export default function BulkUserCreationModal({
   const [fieldMapping, setFieldMapping] = useState<FieldMapping>({});
   const [isCreating, setIsCreating] = useState(false);
   const [creationProgress, setCreationProgress] = useState(0);
+  const [currentEmail, setCurrentEmail] = useState<string>('');
   const [creationResult, setCreationResult] = useState<CreationResult | null>(null);
 
   const resetModal = () => {
@@ -59,6 +66,7 @@ export default function BulkUserCreationModal({
     setFieldMapping({});
     setIsCreating(false);
     setCreationProgress(0);
+    setCurrentEmail('');
     setCreationResult(null);
   };
 
@@ -119,6 +127,7 @@ export default function BulkUserCreationModal({
     setIsCreating(true);
     setStep(Step.CREATING);
     setCreationProgress(0);
+    setCurrentEmail('');
 
     try {
       // Transform CSV data to user objects
@@ -133,10 +142,10 @@ export default function BulkUserCreationModal({
         return user;
       });
 
-      // Create users via API
-      console.log('[BULK_CREATE_UI] Sending request with users:', users.length);
+      console.log('[BULK_CREATE_UI] Starting streaming request with users:', users.length);
       
-      const response = await fetch('/api/users/bulk-create', {
+      // Use streaming API for real-time progress
+      const response = await fetch('/api/users/bulk-create-stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,42 +153,85 @@ export default function BulkUserCreationModal({
         body: JSON.stringify({ users }),
       });
 
-      console.log('[BULK_CREATE_UI] Response status:', response.status);
-      console.log('[BULK_CREATE_UI] Response headers:', Object.fromEntries(response.headers.entries()));
-
-      // Check if response is JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const textResponse = await response.text();
-        console.error('[BULK_CREATE_UI] Non-JSON response:', textResponse);
-        throw new Error(`Server returned non-JSON response: ${response.status} ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      console.log('[BULK_CREATE_UI] Parsed result:', result);
-
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to create users');
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      setCreationResult(result);
-      setCreationProgress(100);
-      setStep(Step.RESULT);
-
-      if (result.success) {
-        toaster.create({
-          title: "사용자 생성 완료",
-          description: `${result.created}명의 사용자가 성공적으로 생성되었습니다.`,
-          type: "success",
-        });
-        onSuccess();
-      } else {
-        toaster.create({
-          title: "일부 사용자 생성 실패",
-          description: `${result.created}명 성공, ${result.failed}명 실패`,
-          type: "warning",
-        });
+      if (!response.body) {
+        throw new Error('No response body received');
       }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+          
+          buffer += decoder.decode(value, { stream: true });
+          
+          // Process complete lines
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep incomplete line in buffer
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                
+                if (data.error) {
+                  throw new Error(data.error);
+                }
+                
+                if (data.type === 'progress') {
+                  const progress = Math.round((data.current / data.total) * 100);
+                  setCreationProgress(progress);
+                  setCurrentEmail(data.email || '');
+                } else if (data.type === 'result') {
+                  setCreationResult(data.result);
+                  setCreationProgress(100);
+                  setStep(Step.RESULT);
+                  
+                  // Show toast notifications
+                  if (data.result.success) {
+                    const skippedText = data.result.skipped > 0 ? `, ${data.result.skipped}명 중복` : '';
+                    toaster.create({
+                      title: "사용자 생성 완료",
+                      description: `${data.result.created}명 생성${skippedText}`,
+                      type: "success",
+                    });
+                    onSuccess();
+                  } else {
+                    // Check if timeout occurred
+                    const hasTimeoutError = data.result.errors.some((error: any) => error.email === 'TIMEOUT');
+                    if (hasTimeoutError) {
+                      toaster.create({
+                        title: "타임아웃으로 중단됨",
+                        description: `${data.result.created}명 생성 완료, 나머지는 시간 제한으로 중단됨`,
+                        type: "warning",
+                      });
+                    } else {
+                      toaster.create({
+                        title: "일부 사용자 생성 실패",
+                        description: `${data.result.created}명 성공, ${data.result.failed}명 실패, ${data.result.skipped}명 중복`,
+                        type: "warning",
+                      });
+                    }
+                  }
+                }
+              } catch (parseError) {
+                console.error('[BULK_CREATE_UI] Parse error:', parseError, 'Line:', line);
+              }
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock();
+      }
+
     } catch (error) {
       console.error('Bulk user creation error:', error);
       toaster.create({
@@ -266,6 +318,11 @@ export default function BulkUserCreationModal({
               <ChakraText fontSize="sm" textAlign="center">
                 {creationProgress}% 완료
               </ChakraText>
+              {currentEmail && (
+                <ChakraText fontSize="sm" textAlign="center" color="var(--grey-600)">
+                  처리 중: {currentEmail}
+                </ChakraText>
+              )}
             </Stack>
           </Stack>
         );
@@ -278,11 +335,24 @@ export default function BulkUserCreationModal({
               <ChakraText>총 사용자: {creationResult.total}명</ChakraText>
               <ChakraText color="green.500">성공: {creationResult.created}명</ChakraText>
               <ChakraText color="red.500">실패: {creationResult.failed}명</ChakraText>
+              <ChakraText color="orange.500">중복 스킵: {creationResult.skipped}명</ChakraText>
             </Stack>
+            {creationResult.skippedUsers && creationResult.skippedUsers.length > 0 && (
+              <Stack gap={2}>
+                <Text variant="body" fontWeight="bold">중복된 이메일:</Text>
+                <Stack gap={1} maxHeight="150px" overflowY="auto">
+                  {creationResult.skippedUsers.map((skipped, index) => (
+                    <ChakraText key={index} fontSize="sm" color="orange.500">
+                      행 {skipped.row} ({skipped.email}): {skipped.reason}
+                    </ChakraText>
+                  ))}
+                </Stack>
+              </Stack>
+            )}
             {creationResult.errors.length > 0 && (
               <Stack gap={2}>
                 <Text variant="body" fontWeight="bold">오류 목록:</Text>
-                <Stack gap={1} maxHeight="200px" overflowY="auto">
+                <Stack gap={1} maxHeight="150px" overflowY="auto">
                   {creationResult.errors.map((error, index) => (
                     <ChakraText key={index} fontSize="sm" color="red.500">
                       행 {error.row} ({error.email}): {error.error}
