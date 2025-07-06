@@ -4,19 +4,6 @@ globs: **/auth/*.ts", "**/utils/supabase/*.ts
 alwaysApply: true
 ---
 
-# 인증 흐름 규칙
-
-## 인증 관리
-- Supabase Auth를 사용한 인증 처리
-- `useSupabaseAuth` 컴포넌트를 통한 전역 인증 상태 관리, 훅을 사용하여 인증 상태 및 사용자 정보 접근
-
-## 인증 상태
-- 사용자 정보는 `useSupabaseAuth` 훅을 통해 접근
-  ```typescript
-  const { id: userId } = useSupabaseAuth();
-  ```
-- 인증 필요 페이지는 `AuthProvider`를 통한 리다이렉션 처리
-
 ## 사용자 프로필
 - 사용자 정보는 `profiles` 테이블에 저장
 - 프로필 이미지는 Supabase Storage에 저장
