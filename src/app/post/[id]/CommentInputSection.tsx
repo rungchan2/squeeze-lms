@@ -245,7 +245,11 @@ export default function CommentInputSection({
 
       <div className="comment-section-container">
         <div className="comment-section-header">
-          <ProfileImage profileImage={profileImage || ""} size="small" />
+          <ProfileImage
+            profileImage={profileImage || ""}
+            size="small"
+            id={userId}
+          />
           <MentionInput
             ref={inputRef}
             onKeyDown={handleKeyDown(postId || "")}

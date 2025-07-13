@@ -8,6 +8,7 @@ interface ProfileImageProps {
   width?: number;
   size?: "small" | "medium" | "large" | "xlarge";
   blockClick?: boolean;
+  id?: string;
 }
 
 export function ProfileImage({
@@ -15,6 +16,7 @@ export function ProfileImage({
   width,
   size = "medium",
   blockClick = false,
+  id,
 }: ProfileImageProps) {
   const imageUrl = profileImage || defaultProfile.src;
   const router = useRouter();
@@ -41,7 +43,7 @@ export function ProfileImage({
       onClick={(e) => {
         if (blockClick) return;
         e.stopPropagation();
-        router.push("/profile");
+        router.push(`/profile/${id}`);
       }}
     >
       <Image

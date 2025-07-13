@@ -77,7 +77,7 @@ export const MentionList = forwardRef<MentionListRef, MentionListProps>((props, 
             onClick={() => selectItem(index)}
           >
             <UserInfo>
-              <ProfileImage profileImage={item.avatarUrl || null} size="small" />
+              <ProfileImage profileImage={item.avatarUrl || null} size="small" id={item.id} />
               {item.fullName}
             </UserInfo>
           </DropdownButton>

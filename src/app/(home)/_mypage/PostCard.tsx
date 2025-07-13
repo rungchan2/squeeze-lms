@@ -191,6 +191,7 @@ export default memo(function PostCard({
             <ProfileImage
               profileImage={post?.profiles?.profile_image || ""}
               width={40}
+              id={post?.profiles?.id}
             />
             <div className="vertical-user-info-wrapper">
               <UserNameWrapper>

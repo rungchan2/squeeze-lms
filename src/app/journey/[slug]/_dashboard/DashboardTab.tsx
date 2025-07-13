@@ -430,6 +430,7 @@ export default function DashboardTab({ slug }: { slug?: string }) {
                   <ProfileImage
                     profileImage={user.profile_image || ""}
                     width={40}
+                    id={user.id}
                   />
                   <div className="user-details">
                     <Text variant="body" fontWeight="bold">

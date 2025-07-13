@@ -401,16 +401,16 @@ export default function UsersPage() {
               <Table.Root size="sm" interactive >
                 <Table.Header>
                   <Table.Row>
-                    <Table.ColumnHeader textAlign="center">
+                    <Table.ColumnHeader >
                       프로필
                     </Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="center">
+                    <Table.ColumnHeader >
                       이름
                     </Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="center">
+                    <Table.ColumnHeader >
                       역할
                     </Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="center">
+                    <Table.ColumnHeader >
                       강퇴
                     </Table.ColumnHeader>
                   </Table.Row>
@@ -428,6 +428,7 @@ export default function UsersPage() {
                             profileImage={user?.profile_image ?? null}
                             width={32}
                             size="small"
+                            id={user?.id}
                           />
                         </Table.Cell>
                         <Table.Cell>
@@ -533,6 +534,7 @@ export default function UsersPage() {
                             profileImage={user.profile_image || null}
                             width={32}
                             size="small"
+                            id={user?.id}
                           />
                         </Table.Cell>
                         <Table.Cell>
