@@ -159,6 +159,7 @@ export default function CommentSection({
                     <ProfileImage
                       profileImage={comment.profiles?.profile_image || null}
                       size="small"
+                      id={comment.profiles?.id}
                     />
                     <div className="comment-info">
                       <div className="comment-author">

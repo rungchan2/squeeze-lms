@@ -2,7 +2,7 @@
 
 // TODO: 1. 제출된 과제 통계 확인할 수 있게 하기
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { Table } from "@chakra-ui/react";
 import { Tabs } from "@chakra-ui/react";
 import styled from "@emotion/styled";
@@ -20,6 +20,8 @@ import Heading from "@/components/Text/Heading";
 import WeeklySubmissionChart from "./WeeklySubmissionChart";
 import Text from "@/components/Text/Text";
 import { usePosts } from "@/hooks/usePosts";
+import { useWeeks } from "@/hooks/useWeeks";
+import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import { PostWithRelations } from "@/types";
 import { excludeHtmlTags } from "@/utils/utils";
 import RichTextViewer from "@/components/richTextInput/RichTextViewer";
@@ -34,6 +36,11 @@ export default function TeacherPostsPage() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
+  // 필터 상태 관리
+  const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+  const [selectedWeekId, setSelectedWeekId] = useState<string>("");
+  const [searchTitle, setSearchTitle] = useState<string>("");
+
   // usePosts 훅 사용
   const {
     data: allPosts,
@@ -45,6 +52,79 @@ export default function TeacherPostsPage() {
     refetch,
     total: totalPosts,
   } = usePosts(10, slug as string, true);
+
+  // useWeeks 훅 사용
+  const { weeks = [], isLoading: weeksLoading = false } = useWeeks(slug as string) || {};
+
+  // useJourneyMissionInstances 훅 사용 (주차 필터링을 위해)
+  const { missionInstances = [], isLoading: missionInstancesLoading = false } = useJourneyMissionInstances(slug as string) || {};
+
+  // 학생 목록 추출 (memoized)
+  const studentOptions = useMemo(() => {
+    const uniqueStudents = new Map();
+    allPosts.forEach((post: PostWithRelations) => {
+      if (post.profiles) {
+        const studentId = post.profiles.id;
+        if (!uniqueStudents.has(studentId)) {
+          uniqueStudents.set(studentId, {
+            id: studentId,
+            name: `${post.profiles.last_name}${post.profiles.first_name}`,
+            first_name: post.profiles.first_name,
+            last_name: post.profiles.last_name
+          });
+        }
+      }
+    });
+    return Array.from(uniqueStudents.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [allPosts]);
+
+  // 주차 목록 추출 (memoized)
+  const weekOptions = useMemo(() => {
+    return weeks
+      .sort((a, b) => (a.week_number || 0) - (b.week_number || 0))
+      .map(week => ({
+        id: week.id,
+        name: week.name,
+        week_number: week.week_number
+      }));
+  }, [weeks]);
+
+  // 필터링된 포스트 데이터 (memoized)
+  const filteredPosts = useMemo(() => {
+    let filtered = allPosts;
+
+    // 학생 필터 적용
+    if (selectedStudentId) {
+      filtered = filtered.filter((post: PostWithRelations) => 
+        post.profiles?.id === selectedStudentId
+      );
+    }
+
+    // 주차 필터 적용 (mission_instance_id를 통해 필터링)
+    if (selectedWeekId) {
+      // 선택된 주차에 속한 mission instance들의 ID 목록 가져오기
+      const weekMissionInstanceIds = missionInstances
+        .filter(instance => instance.journey_week_id === selectedWeekId)
+        .map(instance => instance.id);
+      
+      filtered = filtered.filter((post: PostWithRelations) => {
+        // PostWithRelations에서 mission_instance_id는 mission 객체이므로 원본 post에서 가져와야 함
+        const missionInstanceId = (post as any).mission_instance_id;
+        return typeof missionInstanceId === 'string' 
+          ? weekMissionInstanceIds.includes(missionInstanceId)
+          : false;
+      });
+    }
+
+    // 제목 검색 필터 적용
+    if (searchTitle.trim()) {
+      filtered = filtered.filter((post: PostWithRelations) => 
+        post.title.toLowerCase().includes(searchTitle.toLowerCase().trim())
+      );
+    }
+
+    return filtered;
+  }, [allPosts, selectedStudentId, selectedWeekId, searchTitle, missionInstances]);
 
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -127,8 +207,58 @@ export default function TeacherPostsPage() {
             <Heading level={3}>제출된 미션</Heading>
 
             <Text variant="body" color="var(--grey-600)" className="data-count">
-              전체 {totalPosts}개 중 {allPosts.length}개 표시 중
+              전체 {totalPosts}개 중 {filteredPosts.length}개 표시 중
             </Text>
+
+            {/* 필터 영역 */}
+            <div className="filter-container">
+              <div className="filter-group">
+                <label htmlFor="search-title">제목 검색:</label>
+                <input
+                  id="search-title"
+                  type="text"
+                  value={searchTitle}
+                  onChange={(e) => setSearchTitle(e.target.value)}
+                  placeholder="제목으로 검색..."
+                  className="filter-input"
+                />
+              </div>
+
+              <div className="filter-group">
+                <label htmlFor="student-filter">학생 선택:</label>
+                <select
+                  id="student-filter"
+                  value={selectedStudentId}
+                  onChange={(e) => setSelectedStudentId(e.target.value)}
+                  className="filter-select"
+                >
+                  <option value="">전체 학생</option>
+                  {studentOptions.map((student) => (
+                    <option key={student.id} value={student.id}>
+                      {student.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="filter-group">
+                <label htmlFor="week-filter">주차 선택:</label>
+                <select
+                  id="week-filter"
+                  value={selectedWeekId}
+                  onChange={(e) => setSelectedWeekId(e.target.value)}
+                  className="filter-select"
+                  disabled={weeksLoading || missionInstancesLoading}
+                >
+                  <option value="">전체 주차</option>
+                  {weekOptions.map((week) => (
+                    <option key={week.id} value={week.id}>
+                      {week.week_number ? `${week.week_number}주차: ` : ''}{week.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
             <Table.Root
               key="outline"
@@ -148,7 +278,7 @@ export default function TeacherPostsPage() {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {allPosts.map((post: PostWithRelations, index: number) => (
+                {filteredPosts.map((post: PostWithRelations, index: number) => (
                   <Table.Row
                     key={`post-${post.id}-${index}`}
                     onClick={() => router.push(`/post/${post.id}`)}
@@ -232,7 +362,7 @@ export default function TeacherPostsPage() {
 
             <div ref={loadMoreRef} className="load-more">
               {isFetchingNextPage && <Loading />}
-              {!hasNextPage && allPosts.length > 0 && (
+              {!hasNextPage && filteredPosts.length > 0 && (
                 <Text
                   variant="caption"
                   color="var(--grey-500)"
@@ -284,5 +414,78 @@ const TeacherPostsPageContainer = styled.div`
 
   .no-more {
     padding: 1rem;
+  }
+
+  .filter-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: var(--grey-50);
+    border-radius: 8px;
+    border: 1px solid var(--grey-200);
+    flex-wrap: wrap;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 200px;
+    flex: 1;
+  }
+
+  .filter-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--grey-700);
+  }
+
+  .filter-select,
+  .filter-input {
+    border: 1px solid var(--grey-300);
+    background-color: var(--white);
+    color: var(--grey-700);
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: border-color 0.2s ease;
+
+    &:hover {
+      border-color: var(--grey-400);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-500);
+      box-shadow: 0 0 0 2px var(--primary-100);
+    }
+
+    &:disabled {
+      background-color: var(--grey-100);
+      color: var(--grey-500);
+      cursor: not-allowed;
+    }
+  }
+
+  .filter-select {
+    cursor: pointer;
+  }
+
+  .filter-input {
+    &::placeholder {
+      color: var(--grey-500);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .filter-container {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .filter-group {
+      min-width: unset;
+    }
   }
 `;

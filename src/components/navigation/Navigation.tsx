@@ -139,6 +139,7 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
                 profileImage={profileImageFromAuth}
                 width={30}
                 blockClick={true}
+                id={id}
               />
             </Menu.Trigger>
             <Portal>

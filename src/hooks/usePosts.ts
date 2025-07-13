@@ -18,7 +18,8 @@ async function getPosts(
   pageIndex: number,
   pageSize: number,
   journeySlug?: string,
-  showHidden = false
+  showHidden = false,
+  userId?: string
 ): Promise<PostsPage> {
   const supabase = createClient();
 
@@ -49,6 +50,9 @@ async function getPosts(
   }
   if (journeySlug) {
     query = query.eq("journey_id", journeySlug);
+  }
+  if (userId) {
+    query = query.eq("user_id", userId);
   }
   const { data, error, count } = await query.range(from, to);
 
@@ -147,7 +151,8 @@ async function getCompletedMissionIds(
 export function usePosts(
   pageSize = 10,
   journeySlug?: string,
-  showHidden = false
+  showHidden = false,
+  userId?: string
 ) {
   const [posts, setPosts] = useState<PostWithRelations[]>([]);
   const [total, setTotal] = useState(0);
@@ -156,11 +161,12 @@ export function usePosts(
     // 이전 페이지 데이터가 없거나 더 불러올 페이지가 있는 경우
     if (previousPageData === null || previousPageData.nextPage !== null) {
       return [
-        `posts-${journeySlug || "all"}-${showHidden ? "hidden" : "visible"}`,
+        `posts-${journeySlug || "all"}-${showHidden ? "hidden" : "visible"}-${userId || "all"}`,
         pageIndex,
         pageSize,
         journeySlug,
         showHidden,
+        userId,
       ];
     }
     return null; // 더 이상 데이터가 없으면 null 반환
@@ -170,8 +176,8 @@ export function usePosts(
   const { data, error, size, setSize, isLoading, isValidating, mutate } =
     useSWRInfinite<PostsPage>(
       getKey,
-      ([key, pageIndex, pageSize, journeySlug, showHiddenParam]) =>
-        getPosts(key, pageIndex, pageSize, journeySlug, showHiddenParam),
+      ([key, pageIndex, pageSize, journeySlug, showHiddenParam, userId]) =>
+        getPosts(key, pageIndex, pageSize, journeySlug, showHiddenParam, userId),
       {
         revalidateOnFocus: false,
         dedupingInterval: 30000, // 30초 동안 중복 요청 방지
