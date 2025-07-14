@@ -32,13 +32,19 @@ async function getPosts(
       `
       *,
       profiles (
-        id, first_name, last_name, organization_id, profile_image,
+        id, email, first_name, last_name, organization_id, profile_image, created_at,
         organizations (
           id, name
         )
       ),
       teams (
         id, name
+      ),
+      journey_mission_instances!mission_instance_id (
+        id,
+        missions (
+          id, name, description, points, mission_type
+        )
       )
     `,
       { count: "exact" }
