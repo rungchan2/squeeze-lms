@@ -6,10 +6,12 @@ import { journeyMissionInstanceSchema } from "./journeyMissionInstances";
 
 const pickedUserSchema = userSchema.pick({
   id: true,
+  email: true,
   first_name: true,
   last_name: true,
   organization_id: true,
   profile_image: true,
+  created_at: true,
 });
 
 const pickedOrganizationSchema = organizationSchema.pick({
@@ -63,9 +65,14 @@ export const userWithOrganizationSchema = pickedUserSchema.extend({
   organizations: pickedOrganizationSchema,
 });
 
+const journeyMissionInstanceWithMissionSchema = z.object({
+  id: z.string().uuid(),
+  missions: pickedMissionSchema,
+}).nullable().optional();
+
 export const postWithRelationsSchema = postSchema.extend({
   profiles: userWithOrganizationSchema,
-  mission_instance_id: pickedMissionSchema,
+  journey_mission_instances: journeyMissionInstanceWithMissionSchema,
   teamInfo: z.object({
     id: z.string().uuid(),
     name: z.string(),

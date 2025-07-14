@@ -22,13 +22,15 @@ import Text from "@/components/Text/Text";
 import { usePosts } from "@/hooks/usePosts";
 import { useWeeks } from "@/hooks/useWeeks";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
+import { useJourneyBySlug } from "@/hooks/useJourneyBySlug";
 import { PostWithRelations } from "@/types";
-import { excludeHtmlTags } from "@/utils/utils";
 import RichTextViewer from "@/components/richTextInput/RichTextViewer";
+import { exportPostsToExcel } from "@/utils/excel/exportPosts";
 
 
 import Button from "@/components/common/Button";
 import { Dialog, CloseButton, Portal } from "@chakra-ui/react";
+import { HiOutlineDocumentDownload } from "react-icons/hi";
 
 export default function TeacherPostsPage() {
   const { slug } = useParams();
@@ -58,6 +60,9 @@ export default function TeacherPostsPage() {
 
   // useJourneyMissionInstances 훅 사용 (주차 필터링을 위해)
   const { missionInstances = [], isLoading: missionInstancesLoading = false } = useJourneyMissionInstances(slug as string) || {};
+
+  // useJourneyBySlug 훅 사용 (여정 정보 가져오기)
+  const { journey, isLoading: journeyLoading } = useJourneyBySlug(slug as string);
 
   // 학생 목록 추출 (memoized)
   const studentOptions = useMemo(() => {
@@ -180,6 +185,36 @@ export default function TeacherPostsPage() {
     refetch(); // 데이터 다시 불러오기
   };
 
+  const handleExportToExcel = () => {
+    if (!journey || !weeks || !missionInstances) {
+      toaster.create({
+        title: "데이터를 불러오는 중입니다. 잠시 후 다시 시도해주세요.",
+        type: "error",
+      });
+      return;
+    }
+
+    try {
+      const filename = exportPostsToExcel({
+        posts: filteredPosts,
+        journeyName: journey.name,
+        weeks: weekOptions,
+        missionInstances: missionInstances,
+      });
+      
+      toaster.create({
+        title: `${filename} 파일이 다운로드되었습니다.`,
+        type: "success",
+      });
+    } catch (error) {
+      console.error('Excel export error:', error);
+      toaster.create({
+        title: "Excel 파일 내보내기에 실패했습니다.",
+        type: "error",
+      });
+    }
+  };
+
   if (isLoading) return <Loading />;
   if (error) return <Error message={(error as Error).message} />;
 
@@ -212,6 +247,16 @@ export default function TeacherPostsPage() {
 
             {/* 필터 영역 */}
             <div className="filter-container">
+              <div className="filter-group">
+                <Button
+                  onClick={handleExportToExcel}
+                  variant="outline"
+                  disabled={journeyLoading || !journey || filteredPosts.length === 0}
+                >
+                  <HiOutlineDocumentDownload style={{ marginRight: '8px' }} />
+                  Excel로 내보내기
+                </Button>
+              </div>
               <div className="filter-group">
                 <label htmlFor="search-title">제목 검색:</label>
                 <input
@@ -433,6 +478,13 @@ const TeacherPostsPageContainer = styled.div`
     gap: 0.5rem;
     min-width: 200px;
     flex: 1;
+    
+    &:first-child {
+      flex: 0 0 auto;
+      min-width: auto;
+      align-items: flex-start;
+      justify-content: flex-end;
+    }
   }
 
   .filter-group label {
