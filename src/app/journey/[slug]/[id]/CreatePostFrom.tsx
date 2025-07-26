@@ -49,7 +49,12 @@ export default function DoMissionPage({
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isTeamMission = missionInstance?.mission.mission_type === "team";
+  // Helper function for legacy team mission check
+  const isTeamMissionType = (missionType: string | null): boolean => {
+    return missionType === "team";
+  };
+  
+  const isTeamMission = isTeamMissionType(missionInstance?.mission.mission_type || null);
   const [selectedTeamMembers, setSelectedTeamMembers] =
     useState<TeamMember[] | undefined>();
 

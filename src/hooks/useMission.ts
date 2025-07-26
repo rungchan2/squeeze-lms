@@ -1,6 +1,12 @@
 import useSWR from 'swr';
 import { createClient } from "@/utils/supabase/client";
 import { Mission, CreateMission, UpdateMission } from '@/types';
+import { CreateMissionQuestion } from '@/types/missionQuestions';
+import { 
+  getMissionWithQuestions as getMissionWithQuestionsAPI,
+  createMissionWithQuestions as createMissionWithQuestionsAPI,
+  migrateLegacyMission 
+} from '@/utils/data/mission';
 import { useCallback } from 'react';
 
 /**
@@ -119,6 +125,61 @@ export function useMission() {
     return missions?.find(mission => mission.id === id);
   }, [missions]);
 
+  /**
+   * 질문과 함께 미션 생성 함수 (Enhanced)
+   * @param missionData 생성할 미션 데이터
+   * @param questions 질문 배열 (옵션)
+   * @returns 생성된 미션 데이터
+   */
+  const createMissionWithQuestions = useCallback(async (
+    missionData: CreateMission, 
+    questions: CreateMissionQuestion[] = []
+  ) => {
+    const { data, error } = await createMissionWithQuestionsAPI(missionData, questions);
+    
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    // 캐시 업데이트
+    mutate();
+    
+    return data;
+  }, [mutate]);
+
+  /**
+   * 질문과 함께 미션 조회 함수 (Enhanced)
+   * @param id 조회할 미션 ID
+   * @returns 미션 데이터 (질문 포함)
+   */
+  const getMissionWithQuestionsById = useCallback(async (id: string) => {
+    const { data, error } = await getMissionWithQuestionsAPI(id);
+    
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    return data;
+  }, []);
+
+  /**
+   * 레거시 미션을 새 형식으로 마이그레이션
+   * @param id 마이그레이션할 미션 ID
+   * @returns 마이그레이션 결과
+   */
+  const migrateMissionToQuestions = useCallback(async (id: string) => {
+    const { data, error } = await migrateLegacyMission(id);
+    
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    // 캐시 업데이트
+    mutate();
+    
+    return data;
+  }, [mutate]);
+
   return {
     missions: missions || [],
     isLoading,
@@ -127,6 +188,11 @@ export function useMission() {
     updateMission,
     deleteMission,
     getMissionById,
-    mutate // 수동으로 데이터를 다시 가져오기 위한 함수
+    mutate, // 수동으로 데이터를 다시 가져오기 위한 함수
+    
+    // Enhanced functions for missions with questions
+    createMissionWithQuestions,
+    getMissionWithQuestionsById,
+    migrateMissionToQuestions,
   };
 } 

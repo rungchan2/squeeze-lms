@@ -8,10 +8,16 @@ import { IconContainer } from "@/components/common/IconContainer";
 import dayjs from "@/utils/dayjs/dayjs";
 import { TeacherOnly } from "@/components/auth/AdminOnly";
 import { calcDifference } from "@/utils/dayjs/calcDifference";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaQuestionCircle, FaList, FaCheckSquare, FaImage, FaMix } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { BiGridVertical } from "react-icons/bi";
+import { useMissionQuestions } from "@/hooks/useMissionQuestions";
+
+// Helper function to check if mission is a team mission (legacy compatibility)
+const isTeamMission = (missionType: string | null): boolean => {
+  return missionType === "team";
+};
 
 interface MissionCardProps {
   mission?: Mission;
@@ -36,6 +42,11 @@ export default function MissionCard({
   const router = useRouter();
   const searchParams = useSearchParams();
   const isTabMission = searchParams.get("tab") === "missions";
+  
+  // Fetch questions for this mission if showDetails is true
+  const { questions, isLoading: isLoadingQuestions } = useMissionQuestions(
+    showDetails && mission?.id ? mission.id : null
+  );
 
   if (!mission) {
     return (
@@ -92,6 +103,38 @@ export default function MissionCard({
 
   const description = RemoveHtmlTags(mission.description || "");
 
+  // Helper function to get question type icon
+  const getQuestionTypeIcon = (questionType: string) => {
+    switch (questionType) {
+      case 'essay':
+        return <FaList />;
+      case 'multiple_choice':
+        return <FaCheckSquare />;
+      case 'image_upload':
+        return <FaImage />;
+      case 'mixed':
+        return <FaMix />;
+      default:
+        return <FaQuestionCircle />;
+    }
+  };
+
+  // Helper function to get question type label
+  const getQuestionTypeLabel = (questionType: string) => {
+    switch (questionType) {
+      case 'essay':
+        return '주관식';
+      case 'multiple_choice':
+        return '객관식';
+      case 'image_upload':
+        return '이미지';
+      case 'mixed':
+        return '복합형';
+      default:
+        return '기타';
+    }
+  };
+
   return (
     <StyledMissionCard
       isModal={isModal}
@@ -111,7 +154,7 @@ export default function MissionCard({
         <div className="mission-item-header">
           <div className="description-container">
             <div className="mission-name-container">
-              {mission.mission_type === "team" && (
+              {isTeamMission(mission.mission_type) && (
                 <Text
                   variant="body"
                   fontWeight="bold"
@@ -119,7 +162,7 @@ export default function MissionCard({
                   color="var(--primary-600)"
                   style={{ marginRight: "4px" }}
               >
-                  {mission.mission_type === "team" ? "[팀 미션]" : ""}
+                  [팀 미션]
                 </Text>
               )}
               <Text
@@ -138,6 +181,44 @@ export default function MissionCard({
               {description}
             </Text>
           </div>
+          
+          {/* Question structure display when showDetails is true */}
+          {showDetails && questions && questions.length > 0 && (
+            <QuestionsPreview>
+              <Text variant="caption" fontWeight="bold" color="var(--grey-700)">
+                질문 구조 ({questions.length}개)
+              </Text>
+              <QuestionsList>
+                {questions.slice(0, 3).map((question, index) => (
+                  <QuestionItem key={question.id}>
+                    <QuestionTypeIcon>
+                      {getQuestionTypeIcon(question.question_type)}
+                    </QuestionTypeIcon>
+                    <QuestionText>
+                      <Text variant="caption" color="var(--grey-600)">
+                        {index + 1}. {question.question_text.length > 30 
+                          ? `${question.question_text.substring(0, 30)}...` 
+                          : question.question_text}
+                      </Text>
+                    </QuestionText>
+                    <QuestionTypeLabel>
+                      <Text variant="caption" color="var(--primary-600)">
+                        {getQuestionTypeLabel(question.question_type)}
+                      </Text>
+                    </QuestionTypeLabel>
+                  </QuestionItem>
+                ))}
+                {questions.length > 3 && (
+                  <div style={{ textAlign: 'center' }}>
+                    <Text variant="caption" color="var(--grey-500)">
+                      +{questions.length - 3}개 더...
+                    </Text>
+                  </div>
+                )}
+              </QuestionsList>
+            </QuestionsPreview>
+          )}
+          
           {!isModal && missionInstance && (
             <div className="horizontal-mission-container">
               <Text variant="caption" color="var(--grey-600)">
@@ -199,7 +280,7 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
   width: 100%;
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   padding: 10px 10px;
   border: 1px solid var(--grey-200);
@@ -305,4 +386,49 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
       border: none;
     }
   }
+`;
+
+const QuestionsPreview = styled.div`
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--grey-50);
+  border-radius: 4px;
+  border: 1px solid var(--grey-200);
+`;
+
+const QuestionsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+`;
+
+const QuestionItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+`;
+
+const QuestionTypeIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--primary-500);
+  flex-shrink: 0;
+`;
+
+const QuestionText = styled.div`
+  flex: 1;
+  overflow: hidden;
+`;
+
+const QuestionTypeLabel = styled.div`
+  padding: 2px 6px;
+  background: var(--primary-100);
+  border-radius: 8px;
+  flex-shrink: 0;
+  font-size: 10px;
 `;

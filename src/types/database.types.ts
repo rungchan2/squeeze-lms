@@ -1,3 +1,4 @@
+
 export type Json =
   | string
   | number
@@ -7,6 +8,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -34,6 +40,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      blog: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bug_reports: {
         Row: {
           created_at: string | null
@@ -162,6 +198,45 @@ export type Database = {
           retry_count?: number | null
           status_code?: number | null
           subject?: string
+        }
+        Relationships: []
+      }
+      inquiry: {
+        Row: {
+          automation_needs: string
+          created_at: string
+          current_tools: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string
+          status: string | null
+          tool_issues: string | null
+          updated_at: string
+        }
+        Insert: {
+          automation_needs: string
+          created_at?: string
+          current_tools?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone: string
+          status?: string | null
+          tool_issues?: string | null
+          updated_at?: string
+        }
+        Update: {
+          automation_needs?: string
+          created_at?: string
+          current_tools?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string
+          status?: string | null
+          tool_issues?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -317,12 +392,74 @@ export type Database = {
           },
         ]
       }
+      mission_questions: {
+        Row: {
+          correct_answer: string | null
+          created_at: string | null
+          id: string
+          is_required: boolean | null
+          max_characters: number | null
+          max_images: number | null
+          mission_id: string
+          options: Json | null
+          placeholder_text: string | null
+          points: number | null
+          question_order: number
+          question_text: string
+          question_type: Database["public"]["Enums"]["mission_type"]
+          required_image: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          correct_answer?: string | null
+          created_at?: string | null
+          id?: string
+          is_required?: boolean | null
+          max_characters?: number | null
+          max_images?: number | null
+          mission_id: string
+          options?: Json | null
+          placeholder_text?: string | null
+          points?: number | null
+          question_order?: number
+          question_text: string
+          question_type?: Database["public"]["Enums"]["mission_type"]
+          required_image?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          correct_answer?: string | null
+          created_at?: string | null
+          id?: string
+          is_required?: boolean | null
+          max_characters?: number | null
+          max_images?: number | null
+          mission_id?: string
+          options?: Json | null
+          placeholder_text?: string | null
+          points?: number | null
+          question_order?: number
+          question_text?: string
+          question_type?: Database["public"]["Enums"]["mission_type"]
+          required_image?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_questions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       missions: {
         Row: {
           created_at: string | null
           description: string | null
           id: string
-          mission_type: string | null
+          mission_type: Database["public"]["Enums"]["mission_type"] | null
           name: string
           points: number | null
           updated_at: string | null
@@ -331,7 +468,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
-          mission_type?: string | null
+          mission_type?: Database["public"]["Enums"]["mission_type"] | null
           name: string
           points?: number | null
           updated_at?: string | null
@@ -340,7 +477,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
-          mission_type?: string | null
+          mission_type?: Database["public"]["Enums"]["mission_type"] | null
           name?: string
           points?: number | null
           updated_at?: string | null
@@ -415,6 +552,10 @@ export type Database = {
       posts: {
         Row: {
           achievement_status: string | null
+          answered_questions: number | null
+          answers_data: Json | null
+          auto_score: number | null
+          completion_rate: number | null
           content: string | null
           created_at: string | null
           file_url: string | null
@@ -422,17 +563,23 @@ export type Database = {
           is_hidden: boolean
           is_team_submission: boolean | null
           journey_id: string | null
+          manual_score: number | null
           mission_instance_id: string | null
           score: number | null
           team_id: string | null
           team_points: number | null
           title: string
+          total_questions: number | null
           updated_at: string | null
           user_id: string
           view_count: number
         }
         Insert: {
           achievement_status?: string | null
+          answered_questions?: number | null
+          answers_data?: Json | null
+          auto_score?: number | null
+          completion_rate?: number | null
           content?: string | null
           created_at?: string | null
           file_url?: string | null
@@ -440,17 +587,23 @@ export type Database = {
           is_hidden?: boolean
           is_team_submission?: boolean | null
           journey_id?: string | null
+          manual_score?: number | null
           mission_instance_id?: string | null
           score?: number | null
           team_id?: string | null
           team_points?: number | null
           title: string
+          total_questions?: number | null
           updated_at?: string | null
           user_id?: string
           view_count?: number
         }
         Update: {
           achievement_status?: string | null
+          answered_questions?: number | null
+          answers_data?: Json | null
+          auto_score?: number | null
+          completion_rate?: number | null
           content?: string | null
           created_at?: string | null
           file_url?: string | null
@@ -458,11 +611,13 @@ export type Database = {
           is_hidden?: boolean
           is_team_submission?: boolean | null
           journey_id?: string | null
+          manual_score?: number | null
           mission_instance_id?: string | null
           score?: number | null
           team_id?: string | null
           team_points?: number | null
           title?: string
+          total_questions?: number | null
           updated_at?: string | null
           user_id?: string
           view_count?: number
@@ -497,6 +652,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      posts_backup_20250726: {
+        Row: {
+          achievement_status: string | null
+          content: string | null
+          created_at: string | null
+          file_url: string | null
+          id: string | null
+          is_hidden: boolean | null
+          is_team_submission: boolean | null
+          journey_id: string | null
+          mission_instance_id: string | null
+          score: number | null
+          team_id: string | null
+          team_points: number | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+          view_count: number | null
+        }
+        Insert: {
+          achievement_status?: string | null
+          content?: string | null
+          created_at?: string | null
+          file_url?: string | null
+          id?: string | null
+          is_hidden?: boolean | null
+          is_team_submission?: boolean | null
+          journey_id?: string | null
+          mission_instance_id?: string | null
+          score?: number | null
+          team_id?: string | null
+          team_points?: number | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          achievement_status?: string | null
+          content?: string | null
+          created_at?: string | null
+          file_url?: string | null
+          id?: string | null
+          is_hidden?: boolean | null
+          is_team_submission?: boolean | null
+          journey_id?: string | null
+          mission_instance_id?: string | null
+          score?: number | null
+          team_id?: string | null
+          team_points?: number | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          view_count?: number | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -845,6 +1057,10 @@ export type Database = {
         Args: { data: string }
         Returns: string
       }
+      create_default_questions_for_existing_missions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       custom_access_token_hook: {
         Args: { event: Json }
         Returns: Json
@@ -861,6 +1077,17 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           mission_type: string
+        }[]
+      }
+      get_migration_samples: {
+        Args: { sample_count?: number }
+        Returns: {
+          post_id: string
+          original_content_preview: string
+          new_answers_data: Json
+          original_score: number
+          new_manual_score: number
+          completion_rate: number
         }[]
       }
       http: {
@@ -918,9 +1145,21 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_crawler: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_teacher: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      migrate_posts_to_new_structure: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      migrate_remaining_posts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       text_to_bytea: {
         Args: { data: string }
@@ -930,6 +1169,14 @@ export type Database = {
         Args: { data: Json } | { string: string } | { string: string }
         Returns: string
       }
+      validate_migration: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          check_name: string
+          status: string
+          details: string
+        }[]
+      }
     }
     Enums: {
       mission_status:
@@ -938,6 +1185,7 @@ export type Database = {
         | "submitted"
         | "completed"
         | "rejected"
+      mission_type: "essay" | "multiple_choice" | "image_upload" | "mixed"
       role: "user" | "teacher" | "admin"
     }
     CompositeTypes: {
@@ -962,21 +1210,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -994,14 +1246,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -1017,14 +1271,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -1040,14 +1296,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -1055,14 +1313,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
@@ -1080,6 +1340,7 @@ export const Constants = {
         "completed",
         "rejected",
       ],
+      mission_type: ["essay", "multiple_choice", "image_upload", "mixed"],
       role: ["user", "teacher", "admin"],
     },
   },
