@@ -135,6 +135,33 @@ export default function MissionCard({
     }
   };
 
+  // Helper function to get mission type icon (legacy support)
+  const getMissionTypeIcon = (missionType: string | null) => {
+    // Legacy type mapping
+    if (missionType === 'text' || missionType === 'individual' || missionType === '과제') {
+      return <FaList />;
+    }
+    if (missionType === 'image') {
+      return <FaImage />;
+    }
+    if (missionType === 'team') {
+      return <FaMix />;
+    }
+    // New ENUM types
+    switch (missionType) {
+      case 'essay':
+        return <FaList />;
+      case 'multiple_choice':
+        return <FaCheckSquare />;
+      case 'image_upload':
+        return <FaImage />;
+      case 'mixed':
+        return <FaMix />;
+      default:
+        return <FaQuestionCircle />;
+    }
+  };
+
   return (
     <StyledMissionCard
       isModal={isModal}
@@ -154,6 +181,9 @@ export default function MissionCard({
         <div className="mission-item-header">
           <div className="description-container">
             <div className="mission-name-container">
+              <MissionTypeIcon>
+                {getMissionTypeIcon(mission.mission_type)}
+              </MissionTypeIcon>
               {isTeamMission(mission.mission_type) && (
                 <Text
                   variant="body"
@@ -431,4 +461,15 @@ const QuestionTypeLabel = styled.div`
   border-radius: 8px;
   flex-shrink: 0;
   font-size: 10px;
+`;
+
+const MissionTypeIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--primary-500);
+  margin-right: 6px;
+  flex-shrink: 0;
 `;

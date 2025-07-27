@@ -45,6 +45,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          image_file_id: number | null
           image_url: string | null
           subtitle: string | null
           title: string
@@ -54,6 +55,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          image_file_id?: number | null
           image_url?: string | null
           subtitle?: string | null
           title: string
@@ -63,15 +65,25 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          image_file_id?: number | null
           image_url?: string | null
           subtitle?: string | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "blog_image_file_id_fkey"
+            columns: ["image_file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bug_reports: {
         Row: {
+          attachment_file_id: number | null
           created_at: string | null
           description: string | null
           file_url: string | null
@@ -82,6 +94,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          attachment_file_id?: number | null
           created_at?: string | null
           description?: string | null
           file_url?: string | null
@@ -92,6 +105,7 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          attachment_file_id?: number | null
           created_at?: string | null
           description?: string | null
           file_url?: string | null
@@ -103,10 +117,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "bug_reports_attachment_file_id_fkey"
+            columns: ["attachment_file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "bug_reports_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bug_reports_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_files"
             referencedColumns: ["id"]
           },
         ]
@@ -149,6 +177,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_files"
             referencedColumns: ["id"]
           },
         ]
@@ -200,6 +235,57 @@ export type Database = {
           subject?: string
         }
         Relationships: []
+      }
+      files: {
+        Row: {
+          file_size: number | null
+          file_type: Database["public"]["Enums"]["file_type"]
+          id: number
+          is_active: boolean | null
+          mime_type: string | null
+          original_name: string
+          uploaded_at: string | null
+          uploaded_by: string | null
+          url: string
+        }
+        Insert: {
+          file_size?: number | null
+          file_type: Database["public"]["Enums"]["file_type"]
+          id?: number
+          is_active?: boolean | null
+          mime_type?: string | null
+          original_name: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+          url: string
+        }
+        Update: {
+          file_size?: number | null
+          file_type?: Database["public"]["Enums"]["file_type"]
+          id?: number
+          is_active?: boolean | null
+          mime_type?: string | null
+          original_name?: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "files_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_files"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       inquiry: {
         Row: {
@@ -324,6 +410,13 @@ export type Database = {
             referencedRelation: "journeys"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "journey_weeks_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys_with_files"
+            referencedColumns: ["id"]
+          },
         ]
       }
       journeys: {
@@ -332,6 +425,7 @@ export type Database = {
           date_end: string | null
           date_start: string | null
           id: string
+          image_file_id: number | null
           image_url: string | null
           name: string
           updated_at: string | null
@@ -341,6 +435,7 @@ export type Database = {
           date_end?: string | null
           date_start?: string | null
           id?: string
+          image_file_id?: number | null
           image_url?: string | null
           name: string
           updated_at?: string | null
@@ -350,11 +445,20 @@ export type Database = {
           date_end?: string | null
           date_start?: string | null
           id?: string
+          image_file_id?: number | null
           image_url?: string | null
           name?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "journeys_image_file_id_fkey"
+            columns: ["image_file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       likes: {
         Row: {
@@ -390,6 +494,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_files"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mission_questions: {
@@ -400,7 +511,9 @@ export type Database = {
           is_required: boolean | null
           max_characters: number | null
           max_images: number | null
+          min_characters: number | null
           mission_id: string
+          multiple_select: boolean | null
           options: Json | null
           placeholder_text: string | null
           points: number | null
@@ -417,7 +530,9 @@ export type Database = {
           is_required?: boolean | null
           max_characters?: number | null
           max_images?: number | null
+          min_characters?: number | null
           mission_id: string
+          multiple_select?: boolean | null
           options?: Json | null
           placeholder_text?: string | null
           points?: number | null
@@ -434,7 +549,9 @@ export type Database = {
           is_required?: boolean | null
           max_characters?: number | null
           max_images?: number | null
+          min_characters?: number | null
           mission_id?: string
+          multiple_select?: boolean | null
           options?: Json | null
           placeholder_text?: string | null
           points?: number | null
@@ -523,6 +640,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "notifications_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_files"
+            referencedColumns: ["id"]
+          },
         ]
       }
       organizations: {
@@ -554,11 +678,11 @@ export type Database = {
           achievement_status: string | null
           answered_questions: number | null
           answers_data: Json | null
+          attachment_file_id: number | null
           auto_score: number | null
           completion_rate: number | null
           content: string | null
           created_at: string | null
-          file_url: string | null
           id: string
           is_hidden: boolean
           is_team_submission: boolean | null
@@ -578,11 +702,11 @@ export type Database = {
           achievement_status?: string | null
           answered_questions?: number | null
           answers_data?: Json | null
+          attachment_file_id?: number | null
           auto_score?: number | null
           completion_rate?: number | null
           content?: string | null
           created_at?: string | null
-          file_url?: string | null
           id?: string
           is_hidden?: boolean
           is_team_submission?: boolean | null
@@ -602,11 +726,11 @@ export type Database = {
           achievement_status?: string | null
           answered_questions?: number | null
           answers_data?: Json | null
+          attachment_file_id?: number | null
           auto_score?: number | null
           completion_rate?: number | null
           content?: string | null
           created_at?: string | null
-          file_url?: string | null
           id?: string
           is_hidden?: boolean
           is_team_submission?: boolean | null
@@ -624,10 +748,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "posts_attachment_file_id_fkey"
+            columns: ["attachment_file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "posts_journey_id_fkey"
             columns: ["journey_id"]
             isOneToOne: false
             referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys_with_files"
             referencedColumns: ["id"]
           },
           {
@@ -649,6 +787,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_files"
             referencedColumns: ["id"]
           },
         ]
@@ -722,6 +867,7 @@ export type Database = {
           phone: string | null
           privacy_agreed: boolean
           profile_image: string | null
+          profile_image_file_id: number | null
           push_subscription: string | null
           role: Database["public"]["Enums"]["role"]
           updated_at: string | null
@@ -737,6 +883,7 @@ export type Database = {
           phone?: string | null
           privacy_agreed?: boolean
           profile_image?: string | null
+          profile_image_file_id?: number | null
           push_subscription?: string | null
           role?: Database["public"]["Enums"]["role"]
           updated_at?: string | null
@@ -752,6 +899,7 @@ export type Database = {
           phone?: string | null
           privacy_agreed?: boolean
           profile_image?: string | null
+          profile_image_file_id?: number | null
           push_subscription?: string | null
           role?: Database["public"]["Enums"]["role"]
           updated_at?: string | null
@@ -762,6 +910,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_profile_image_file_id_fkey"
+            columns: ["profile_image_file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
             referencedColumns: ["id"]
           },
         ]
@@ -817,6 +972,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_files"
+            referencedColumns: ["id"]
+          },
         ]
       }
       team_members: {
@@ -860,6 +1022,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_files"
             referencedColumns: ["id"]
           },
         ]
@@ -949,6 +1118,13 @@ export type Database = {
             referencedRelation: "journeys"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "teams_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys_with_files"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_journeys: {
@@ -988,10 +1164,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "user_journeys_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys_with_files"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_journeys_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_journeys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_files"
             referencedColumns: ["id"]
           },
         ]
@@ -1046,11 +1236,82 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_points_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_files"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      journeys_with_files: {
+        Row: {
+          created_at: string | null
+          date_end: string | null
+          date_start: string | null
+          id: string | null
+          image_file_id: number | null
+          image_name: string | null
+          image_size: number | null
+          image_uploaded_at: string | null
+          image_url: string | null
+          image_url_new: string | null
+          image_url_old: string | null
+          name: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journeys_image_file_id_fkey"
+            columns: ["image_file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles_with_files: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          first_name: string | null
+          id: string | null
+          last_name: string | null
+          marketing_opt_in: boolean | null
+          organization_id: string | null
+          phone: string | null
+          privacy_agreed: boolean | null
+          profile_image: string | null
+          profile_image_file_id: number | null
+          profile_image_name: string | null
+          profile_image_size: number | null
+          profile_image_uploaded_at: string | null
+          profile_image_url_new: string | null
+          profile_image_url_old: string | null
+          push_subscription: string | null
+          role: Database["public"]["Enums"]["role"] | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_profile_image_file_id_fkey"
+            columns: ["profile_image_file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       bytea_to_text: {
@@ -1069,6 +1330,10 @@ export type Database = {
         Args: { event: Json }
         Returns: Json
       }
+      delete_file: {
+        Args: { p_file_id: number }
+        Returns: boolean
+      }
       get_auth_role: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1078,6 +1343,18 @@ export type Database = {
         Returns: {
           mission_type: string
         }[]
+      }
+      get_file_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          file_type: Database["public"]["Enums"]["file_type"]
+          file_count: number
+          total_size_mb: number
+        }[]
+      }
+      get_file_url: {
+        Args: { p_file_id: number }
+        Returns: string
       }
       get_migration_samples: {
         Args: { sample_count?: number }
@@ -1153,6 +1430,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      migrate_existing_urls_to_files: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          table_name: string
+          migrated_count: number
+        }[]
+      }
       migrate_posts_to_new_structure: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1164,6 +1448,16 @@ export type Database = {
       text_to_bytea: {
         Args: { data: string }
         Returns: string
+      }
+      upload_file: {
+        Args: {
+          p_original_name: string
+          p_url: string
+          p_file_type: Database["public"]["Enums"]["file_type"]
+          p_file_size?: number
+          p_mime_type?: string
+        }
+        Returns: number
       }
       urlencode: {
         Args: { data: Json } | { string: string } | { string: string }
@@ -1179,6 +1473,7 @@ export type Database = {
       }
     }
     Enums: {
+      file_type: "image" | "file"
       mission_status:
         | "not_started"
         | "in_progress"
@@ -1333,6 +1628,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      file_type: ["image", "file"],
       mission_status: [
         "not_started",
         "in_progress",

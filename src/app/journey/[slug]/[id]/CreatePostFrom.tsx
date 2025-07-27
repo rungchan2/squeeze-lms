@@ -22,12 +22,21 @@ import { JourneyMissionInstanceWithMission } from "@/types";
 import { StlyedSelect } from "@/components/select/Select";
 import { useTeams } from "@/hooks/useTeams";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { useMissionQuestions } from "@/hooks/useMissionQuestions";
+import EssayQuestionInput from "@/components/mission/EssayQuestionInput";
+import MultipleChoiceInput from "@/components/mission/MultipleChoiceInput";
+import ImageUploadInput from "@/components/mission/ImageUploadInput";
+import MixedQuestionInput from "@/components/mission/MixedQuestionInput";
+import { AnyAnswer, AnswersData } from "@/types/missionQuestions";
 
 type TeamMember = {
   label: string;
   value: string;
   isFixed: boolean;
 };
+
+// Use proper types from missionQuestions
+type AnswerData = AnyAnswer;
 
 export default function DoMissionPage({
   updateData,
@@ -48,6 +57,186 @@ export default function DoMissionPage({
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [structuredAnswers, setStructuredAnswers] = useState<AnswerData[]>([]);
+  const [questionValidations, setQuestionValidations] = useState<Record<string, boolean>>({});
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  
+  // Fetch mission questions
+  const { questions, isLoading: isLoadingQuestions } = useMissionQuestions(
+    missionInstance?.mission.id || null
+  );
+  
+  // Check if this is a modern mission with questions or legacy mission
+  const isModernMission = questions && questions.length > 0;
+  
+  // Progress tracking for modern missions
+  const calculateModernProgress = () => {
+    if (!questions || questions.length === 0) return 0;
+    let progress = 0;
+    
+    // Title progress
+    if (title.trim()) progress += 20;
+    
+    // Questions progress (80% total)
+    const questionProgress = (structuredAnswers.length / questions.length) * 80;
+    progress += questionProgress;
+    
+    return Math.min(progress, 100);
+  };
+  
+  // Progress tracking for legacy missions
+  const calculateLegacyProgress = () => {
+    let progress = 0;
+    if (title.trim()) progress += 33;
+    if (content.trim()) progress += 67;
+    return Math.min(progress, 100);
+  };
+  
+  const calculateProgress = () => {
+    return isModernMission ? calculateModernProgress() : calculateLegacyProgress();
+  };
+
+  // Handle structured answer changes
+  const handleQuestionAnswer = (questionId: string, answer: any) => {
+    const question = questions?.find(q => q.id === questionId);
+    if (!question) return;
+
+    let answerData: AnswerData;
+
+    // Create proper answer object based on question type
+    switch (question.question_type) {
+      case 'essay':
+        answerData = {
+          question_id: questionId,
+          question_order: question.question_order || 0,
+          answer_type: 'essay' as const,
+          answer_text: answer,
+          selected_option: null,
+          image_urls: [],
+          is_correct: null,
+          points_earned: null,
+        };
+        break;
+      case 'multiple_choice':
+        answerData = {
+          question_id: questionId,
+          question_order: question.question_order || 0,
+          answer_type: 'multiple_choice' as const,
+          answer_text: null,
+          selected_option: Array.isArray(answer) ? answer.join(',') : answer,
+          image_urls: [],
+          is_correct: null,
+          points_earned: null,
+        };
+        break;
+      case 'image_upload':
+        answerData = {
+          question_id: questionId,
+          question_order: question.question_order || 0,
+          answer_type: 'image_upload' as const,
+          answer_text: null,
+          selected_option: null,
+          image_urls: answer,
+          is_correct: null,
+          points_earned: null,
+        };
+        break;
+      case 'mixed':
+        answerData = {
+          question_id: questionId,
+          question_order: question.question_order || 0,
+          answer_type: 'mixed' as const,
+          answer_text: answer.text || null,
+          selected_option: null,
+          image_urls: answer.images || [],
+          is_correct: null,
+          points_earned: null,
+        };
+        break;
+      default:
+        return; // Skip unsupported question types
+    }
+
+    setStructuredAnswers(prev => {
+      const filtered = prev.filter(a => a.question_id !== questionId);
+      return [...filtered, answerData].sort((a, b) => a.question_order - b.question_order);
+    });
+  };
+
+  // Handle question validation
+  const handleQuestionValidation = (questionId: string, isValid: boolean) => {
+    setQuestionValidations(prev => ({
+      ...prev,
+      [questionId]: isValid
+    }));
+  };
+
+  // Check if all required questions are answered
+  const areAllRequiredQuestionsAnswered = () => {
+    if (!questions) return true;
+    
+    const requiredQuestions = questions.filter(q => q.is_required);
+    return requiredQuestions.every(q => questionValidations[q.id] === true);
+  };
+
+  // Auto-save functionality
+  const autoSave = async () => {
+    if (!title.trim() && structuredAnswers.length === 0 && !content.trim()) {
+      return; // Nothing to save
+    }
+
+    try {
+      setIsAutoSaving(true);
+      // Save to localStorage for now (could be enhanced to save to server)
+      const autoSaveData = {
+        title,
+        content,
+        structuredAnswers,
+        missionInstanceId,
+        timestamp: new Date().toISOString(),
+      };
+      
+      localStorage.setItem(
+        `autosave_mission_${missionInstanceId}`, 
+        JSON.stringify(autoSaveData)
+      );
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+    } finally {
+      setIsAutoSaving(false);
+    }
+  };
+
+  // Load auto-saved data on component mount
+  useEffect(() => {
+    if (missionInstanceId && !updateData) {
+      try {
+        const saved = localStorage.getItem(`autosave_mission_${missionInstanceId}`);
+        if (saved) {
+          const autoSaveData = JSON.parse(saved);
+          if (autoSaveData.title) setTitle(autoSaveData.title);
+          if (autoSaveData.content) setContent(autoSaveData.content);
+          if (autoSaveData.structuredAnswers) {
+            setStructuredAnswers(autoSaveData.structuredAnswers);
+          }
+          setLastSaved(new Date(autoSaveData.timestamp));
+        }
+      } catch (error) {
+        console.error("Failed to load auto-saved data:", error);
+      }
+    }
+  }, [missionInstanceId, updateData]);
+
+  // Auto-save timer
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      autoSave();
+    }, 2000); // Auto-save after 2 seconds of inactivity
+
+    return () => clearTimeout(timer);
+  }, [title, content, structuredAnswers]);
 
   // Helper function for legacy team mission check
   const isTeamMissionType = (missionType: string | null): boolean => {
@@ -129,9 +318,40 @@ export default function DoMissionPage({
   const handleSubmit = async (
     missionInstance: JourneyMissionInstanceWithMission
   ) => {
-    if (!content.trim()) {
+    // Enhanced validation for different mission types
+    if (isModernMission) {
+      const unansweredQuestions = questions?.filter(q => 
+        q.is_required && !questionValidations[q.id]
+      ) || [];
+      
+      if (unansweredQuestions.length > 0) {
+        const questionNumbers = unansweredQuestions.map((q, index) => 
+          questions?.findIndex(question => question.id === q.id) + 1
+        ).join(', ');
+        
+        toaster.create({
+          title: "필수 질문에 답변이 필요합니다.",
+          description: `질문 ${questionNumbers}번에 답변해주세요.`,
+          type: "warning",
+        });
+        return;
+      }
+    } else {
+      if (!content.trim()) {
+        toaster.create({
+          title: "미션 내용을 입력해주세요.",
+          description: "텍스트 영역에 미션에 대한 답변을 작성해주세요.",
+          type: "warning",
+        });
+        return;
+      }
+    }
+
+    // Title validation
+    if (title.length > 100) {
       toaster.create({
-        title: "미션 내용을 입력해주세요.",
+        title: "제목이 너무 깁니다.",
+        description: "제목을 100자 이내로 줄여주세요.",
         type: "warning",
       });
       return;
@@ -140,14 +360,33 @@ export default function DoMissionPage({
     try {
       setIsSubmitting(true);
 
-      const { data, error } = await createPost({
-        content: content,
+      // Prepare post data based on mission type
+      const postData = {
         user_id: userId,
         mission_instance_id: missionInstance.id,
         title: title,
         score: missionInstance.mission.points || 0,
         journey_id: missionInstance.journey_id || "",
-      });
+        content: isModernMission ? "" : content, // Legacy content
+        ...(isModernMission && {
+          answers_data: {
+            answers: structuredAnswers,
+            submission_metadata: {
+              total_questions: questions?.length || 0,
+              answered_questions: structuredAnswers.length,
+              submission_time: new Date().toISOString(),
+              auto_graded: false,
+              manual_review_required: true,
+            }
+          },
+          total_questions: questions?.length || 0,
+          answered_questions: structuredAnswers.length,
+          completion_rate: questions?.length ? 
+            (structuredAnswers.length / questions.length) * 100 : 0,
+        })
+      };
+
+      const { data, error } = await createPost(postData);
 
       if (error) {
         console.error("미션 제출 오류:", error);
@@ -193,9 +432,15 @@ export default function DoMissionPage({
       // 완료된 미션 목록 갱신
       await refetchCompletedMissions();
 
+      // Clean up auto-save data on successful submission
+      localStorage.removeItem(`autosave_mission_${missionInstanceId}`);
+
       // 성공 알림 후 캐시 무효화 리다이렉션
       toaster.create({
         title: "미션이 성공적으로 제출되었습니다!",
+        description: isModernMission ? 
+          `${structuredAnswers.length}개 질문에 답변하여 제출했습니다.` :
+          "답변이 성공적으로 저장되었습니다.",
         type: "success",
       });
 
@@ -276,19 +521,108 @@ export default function DoMissionPage({
     }
   };
 
+  // Render question input component based on type
+  const renderQuestionInput = (question: any, index: number) => {
+    const initialValue = getInitialAnswerForQuestion(question.id);
+    
+    switch (question.question_type) {
+      case 'essay':
+        return (
+          <EssayQuestionInput
+            key={question.id}
+            question={question}
+            questionIndex={index}
+            initialValue={initialValue?.answer_text || ""}
+            onChange={handleQuestionAnswer}
+            onValidation={handleQuestionValidation}
+          />
+        );
+      case 'multiple_choice':
+        return (
+          <MultipleChoiceInput
+            key={question.id}
+            question={question}
+            questionIndex={index}
+            initialValue={initialValue?.selected_option ? 
+              (question.multiple_select ? 
+                initialValue.selected_option.split(',') : 
+                initialValue.selected_option) : 
+              (question.multiple_select ? [] : "")}
+            onChange={handleQuestionAnswer}
+            onValidation={handleQuestionValidation}
+          />
+        );
+      case 'image_upload':
+        return (
+          <ImageUploadInput
+            key={question.id}
+            question={question}
+            questionIndex={index}
+            initialValue={initialValue?.image_urls || []}
+            onChange={handleQuestionAnswer}
+            onValidation={handleQuestionValidation}
+          />
+        );
+      case 'mixed':
+        return (
+          <MixedQuestionInput
+            key={question.id}
+            question={question}
+            questionIndex={index}
+            initialValue={{
+              text: initialValue?.answer_text || "",
+              images: initialValue?.image_urls || []
+            }}
+            onChange={handleQuestionAnswer}
+            onValidation={handleQuestionValidation}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Get initial answer for a question (for edit mode)
+  const getInitialAnswerForQuestion = (questionId: string) => {
+    return structuredAnswers.find(a => a.question_id === questionId);
+  };
+
   return (
     <MissionContainer>
       <div className="mission-container">
-        <Heading level={4}>
-          {missionInstance
-            ? missionInstance.mission.name
-            : "미션 (삭제된 과제 입니다)"}
-        </Heading>
+        <div className="mission-header">
+          <Heading level={4}>
+            {missionInstance
+              ? missionInstance.mission.name
+              : "미션 (삭제된 과제 입니다)"}
+          </Heading>
+          <ProgressSection>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text variant="caption" color="var(--grey-600)">
+                진행률: {calculateProgress()}%
+              </Text>
+              <AutoSaveStatus>
+                {isAutoSaving ? (
+                  <Text variant="caption" color="var(--primary-500)">저장 중...</Text>
+                ) : lastSaved ? (
+                  <Text variant="caption" color="var(--grey-500)">
+                    {lastSaved.toLocaleTimeString()}에 저장됨
+                  </Text>
+                ) : null}
+              </AutoSaveStatus>
+            </div>
+            <ProgressBarStyled>
+              <ProgressFill progress={calculateProgress()} />
+            </ProgressBarStyled>
+          </ProgressSection>
+        </div>
         <InputAndTitle
           title="미션 제목"
           errorMessage={
             title.length === 0
-              ? "미션 제목을 입력해주세요. (이름을 포함해 주세요)"
+              ? "미션 제목을 입력해주세요. (본인의 이름을 포함하면 더 좋습니다)"
+              : title.length > 100
+              ? "제목이 너무 깁니다. 100자 이내로 작성해주세요."
               : ""
           }
         >
@@ -298,18 +632,33 @@ export default function DoMissionPage({
             placeholder="학년 미션 제목을 입력해주세요."
           />
         </InputAndTitle>
-        <Tiptap
-          placeholder={
-            updateData?.content ||
-            missionInstance?.mission.description ||
-            "미션가이드에 따라 미션을 완료해주세요."
-          }
-          content={content}
-          onChange={(value) => {
-            setContent(value);
-          }}
-          inputHeight="250px"
-        />
+
+        {/* Modern Mission Interface */}
+        {isModernMission && questions ? (
+          <ModernMissionSection>
+            <QuestionsContainer>
+              {questions
+                .sort((a, b) => (a.question_order || 0) - (b.question_order || 0))
+                .map((question, index) => renderQuestionInput(question, index))}
+            </QuestionsContainer>
+          </ModernMissionSection>
+        ) : (
+          /* Legacy Mission Interface */
+          <LegacyMissionSection>
+            <Tiptap
+              placeholder={
+                updateData?.content ||
+                missionInstance?.mission.description ||
+                "미션가이드에 따라 미션을 완료해주세요."
+              }
+              content={content}
+              onChange={(value) => {
+                setContent(value);
+              }}
+              inputHeight="250px"
+            />
+          </LegacyMissionSection>
+        )}
 
         <Text variant="body" color="grey-700" fontWeight="bold">
           미션 상세 설명
@@ -356,7 +705,7 @@ export default function DoMissionPage({
               ? handleUpdate
               : () => handleSubmit(missionInstance as any)
           }
-          disabled={isSubmitting || title.length === 0}
+          disabled={isSubmitting || title.length === 0 || title.length > 100 || (isModernMission && !areAllRequiredQuestionsAnswered())}
         >
           {isSubmitting ? <Spinner /> : updateData ? "수정완료" : "제출"}
         </Button>
@@ -378,6 +727,12 @@ const MissionContainer = styled.div`
     display: flex;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .mission-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .button-container {
@@ -406,4 +761,55 @@ const EmptyTeamMessage = styled.div`
   height: 50px;
   background-color: var(--grey-100);
   border-radius: 8px;
+`;
+
+const ProgressSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: var(--grey-50);
+  border-radius: 6px;
+  border: 1px solid var(--grey-200);
+`;
+
+const ModernMissionSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const LegacyMissionSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const QuestionsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 100%;
+`;
+
+const AutoSaveStatus = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const ProgressBarStyled = styled.div`
+  width: 100%;
+  height: 8px;
+  background: var(--grey-200);
+  border-radius: 4px;
+  overflow: hidden;
+`;
+
+const ProgressFill = styled.div<{ progress: number }>`
+  height: 100%;
+  background: var(--primary-500);
+  width: ${props => props.progress}%;
+  transition: width 0.3s ease;
+  border-radius: 4px;
 `;

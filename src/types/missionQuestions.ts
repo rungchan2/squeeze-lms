@@ -14,8 +14,10 @@ export const missionQuestionSchema = z.object({
   points: z.number().int().min(0).nullable(),
   is_required: z.boolean().nullable(),
   max_characters: z.number().int().min(1).nullable(),
+  min_characters: z.number().int().min(0).nullable(),
   placeholder_text: z.string().nullable(),
   required_image: z.boolean().nullable(),
+  multiple_select: z.boolean().nullable(),
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
 });
@@ -43,7 +45,16 @@ export const multipleChoiceOptionSchema = z.object({
 export const essayQuestionSchema = createMissionQuestionSchema.extend({
   question_type: z.literal('essay'),
   max_characters: z.number().int().min(1).optional(),
+  min_characters: z.number().int().min(0).optional(),
   placeholder_text: z.string().optional(),
+}).refine((data) => {
+  if (data.min_characters && data.max_characters) {
+    return data.min_characters <= data.max_characters;
+  }
+  return true;
+}, {
+  message: "최소 글자수는 최대 글자수보다 작거나 같아야 합니다",
+  path: ["min_characters"],
 });
 
 // Multiple choice question specific validation
@@ -51,6 +62,7 @@ export const multipleChoiceQuestionSchema = createMissionQuestionSchema.extend({
   question_type: z.literal('multiple_choice'),
   options: z.array(multipleChoiceOptionSchema).min(2, "최소 2개의 선택지가 필요합니다"),
   correct_answer: z.string().min(1, "정답을 선택해주세요"),
+  min_characters: z.number().int().min(0).nullable(),
 });
 
 // Image upload question specific validation
@@ -58,19 +70,29 @@ export const imageUploadQuestionSchema = createMissionQuestionSchema.extend({
   question_type: z.literal('image_upload'),
   max_images: z.number().int().min(1).max(10),
   required_image: z.boolean().optional(),
+  min_characters: z.number().int().min(0).nullable(),
 });
 
 // Mixed question specific validation (text + image)
 export const mixedQuestionSchema = createMissionQuestionSchema.extend({
   question_type: z.literal('mixed'),
   max_characters: z.number().int().min(1).optional(),
+  min_characters: z.number().int().min(0).optional(),
   max_images: z.number().int().min(1).max(10).optional(),
   placeholder_text: z.string().optional(),
   required_image: z.boolean().optional(),
+}).refine((data) => {
+  if (data.min_characters && data.max_characters) {
+    return data.min_characters <= data.max_characters;
+  }
+  return true;
+}, {
+  message: "최소 글자수는 최대 글자수보다 작거나 같아야 합니다",
+  path: ["min_characters"],
 });
 
 // Union schema for all question types
-export const anyQuestionSchema = z.discriminatedUnion("question_type", [
+export const anyQuestionSchema = z.union([
   essayQuestionSchema,
   multipleChoiceQuestionSchema,
   imageUploadQuestionSchema,
@@ -198,9 +220,12 @@ export const getQuestionSchemaByType = (type: string) => {
 // Default question templates
 export const defaultQuestionTemplates = {
   essay: {
+    mission_id: '',
     question_text: "자유롭게 답변해주세요.",
     question_type: 'essay' as const,
+    question_order: 1,
     max_characters: 1000,
+    min_characters: 10,
     placeholder_text: "여기에 답변을 작성해주세요.",
     points: 100,
     is_required: true,
@@ -208,10 +233,13 @@ export const defaultQuestionTemplates = {
     max_images: null,
     required_image: null,
     options: null,
+    multiple_select: null,
   },
   multiple_choice: {
+    mission_id: '',
     question_text: "올바른 답을 선택해주세요.",
     question_type: 'multiple_choice' as const,
+    question_order: 1,
     options: [
       { text: "선택지 1", is_correct: false },
       { text: "선택지 2", is_correct: true },
@@ -221,26 +249,35 @@ export const defaultQuestionTemplates = {
     points: 100,
     is_required: true,
     max_characters: null,
+    min_characters: null,
     max_images: null,
     required_image: null,
     placeholder_text: null,
+    multiple_select: false,
   },
   image_upload: {
+    mission_id: '',
     question_text: "이미지를 업로드해주세요.",
     question_type: 'image_upload' as const,
+    question_order: 1,
     max_images: 3,
     required_image: true,
     points: 100,
     is_required: true,
     correct_answer: null,
     max_characters: null,
+    min_characters: null,
     placeholder_text: null,
     options: null,
+    multiple_select: null,
   },
   mixed: {
+    mission_id: '',
     question_text: "텍스트와 이미지로 답변해주세요.",
     question_type: 'mixed' as const,
+    question_order: 1,
     max_characters: 500,
+    min_characters: 10,
     max_images: 2,
     placeholder_text: "설명을 작성하고 이미지를 첨부해주세요.",
     points: 100,
@@ -248,5 +285,6 @@ export const defaultQuestionTemplates = {
     correct_answer: null,
     required_image: null,
     options: null,
+    multiple_select: null,
   },
 } as const;

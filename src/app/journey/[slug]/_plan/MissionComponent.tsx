@@ -183,6 +183,16 @@ export default function MissionComponent({
   const handleConfirmAddMission = async () => {
     if (!selectedMissionId) return;
 
+    // 날짜 유효성 검사
+    if (releaseDate && expiryDate && new Date(releaseDate) >= new Date(expiryDate)) {
+      toaster.create({
+        title: "날짜 오류",
+        description: "공개 일자는 마감 일자보다 이전이어야 합니다.",
+        type: "error",
+      });
+      return;
+    }
+
     try {
       setIsLoadingMissions(true);
 
@@ -200,13 +210,22 @@ export default function MissionComponent({
 
       // UI 즉시 업데이트
       await mutateMissionInstances();
-      // 카운트 업데이트는 useEffect에서 처리됨
+
+      toaster.create({
+        title: "미션이 추가되었습니다.",
+        type: "success",
+      });
 
       // 모달 닫기
       setShowDateModal(false);
       setShowSearch(false);
     } catch (error) {
       console.error("Error adding mission:", error);
+      toaster.create({
+        title: "미션 추가 실패",
+        description: "미션을 추가하는 중 오류가 발생했습니다.",
+        type: "error",
+      });
     } finally {
       setIsLoadingMissions(false);
     }
@@ -398,7 +417,6 @@ export default function MissionComponent({
                 type="date"
                 value={releaseDate}
                 onChange={(e) => setReleaseDate(e.target.value)}
-                required
               />
             </div>
             <div className="input-group">
@@ -408,7 +426,6 @@ export default function MissionComponent({
                 type="date"
                 value={expiryDate}
                 onChange={(e) => setExpiryDate(e.target.value)}
-                required
               />
             </div>
           </div>

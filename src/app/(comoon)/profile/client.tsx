@@ -12,7 +12,7 @@ import Heading from "@/components/Text/Heading";
 import InputAndTitle from "@/components/InputAndTitle";
 import Button from "@/components/common/Button";
 import { toaster } from "@/components/ui/toaster";
-import FileUpload from "@/components/common/FileUpload";
+import FileUpload from "@/components/FileUpload";
 import { redirect } from "next/navigation";
 import { Separator } from "@chakra-ui/react";
 import { getUserById } from "@/utils/data/user";
@@ -36,6 +36,7 @@ const schema = z.object({
   last_name: z.string().min(1, minLength).max(10, maxLength),
   email: z.string().email("이메일 형식이 올바르지 않습니다."),
   profileImage: z.string().optional(),
+  profileImageFileId: z.number().optional(),
   phone: z
     .string()
     .min(10, "전화번호는 10자 이상 입력해주세요.")
@@ -85,6 +86,7 @@ export default function ProfilePage() {
           setIsLoadingProfile(true);
           const data = await getUserById(id || "");
           setValue("profileImage", data.profile_image || "");
+          setValue("profileImageFileId", data.profile_image_file_id || undefined);
           setValue("first_name", data.first_name || "");
           setValue("last_name", data.last_name || "");
           setValue("email", data.email || "");
@@ -110,6 +112,7 @@ export default function ProfilePage() {
         first_name: data.first_name,
         last_name: data.last_name,
         profile_image: data.profileImage,
+        profile_image_file_id: data.profileImageFileId,
         phone: data.phone,
         marketing_opt_in: data.marketing_opt_in,
       });
@@ -196,12 +199,19 @@ export default function ProfilePage() {
         </div>
         <InputAndTitle title="프로필 이미지">
           <FileUpload
-            placeholder=""
+            placeholder="프로필 이미지를 업로드하세요"
             width="100px"
             height="100px"
             initialFileUrl={getValues("profileImage") || ""}
-            onUploadComplete={async (fileUrl) => {
+            initialFileId={getValues("profileImageFileId")}
+            acceptedFileTypes={{ "image/*": [".jpeg", ".jpg", ".png", ".webp"] }}
+            maxFiles={1}
+            multiple={false}
+            onUploadComplete={async (fileUrl, fileId) => {
               setValue("profileImage", fileUrl);
+              if (fileId) {
+                setValue("profileImageFileId", fileId);
+              }
             }}
           />
         </InputAndTitle>

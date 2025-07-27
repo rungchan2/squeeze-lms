@@ -1,6 +1,6 @@
 "use client";
 
-import FileUpload from "@/components/common/FileUpload";
+import FileUpload from "@/components/FileUpload";
 import styled from "@emotion/styled";
 import { CreateJourney, createJourneySchema, Journey } from "@/types";
 import { deleteJourney, updateJourney, createJourney } from "@/utils/data/journey";
@@ -33,6 +33,7 @@ export default function CreateJourneyPage({
     resolver: zodResolver(createJourneySchema),
     defaultValues: {
       image_url: initialData?.image_url || "",
+      image_file_id: initialData?.image_file_id || undefined,
       name: initialData?.name || "",
       date_start: initialData?.date_start || "",
       date_end: initialData?.date_end || "",
@@ -53,6 +54,7 @@ export default function CreateJourneyPage({
   useEffect(() => {
     if (initialData) {
       setValue("image_url", initialData.image_url || "");
+      setValue("image_file_id", initialData.image_file_id || undefined);
       setValue("name", initialData.name || "");
       setValue("date_start", initialData.date_start || "");
       setValue("date_end", initialData.date_end || "");
@@ -113,11 +115,20 @@ export default function CreateJourneyPage({
           errorMessage={errors.image_url?.message}
         >
           <FileUpload
+            placeholder="클라스 이미지를 업로드하세요"
             initialFileUrl={watch("image_url")}
+            initialFileId={watch("image_file_id")}
             width="150px"
             height="150px"
-            {...register("image_url")}
-            onUploadComplete={(fileUrl) => setValue("image_url", fileUrl)}
+            acceptedFileTypes={{ "image/*": [".jpeg", ".jpg", ".png", ".webp"] }}
+            maxFiles={1}
+            multiple={false}
+            onUploadComplete={(fileUrl, fileId) => {
+              setValue("image_url", fileUrl);
+              if (fileId) {
+                setValue("image_file_id", fileId);
+              }
+            }}
           />
         </InputAndTitle>
         <InputAndTitle title="클라스 이름" errorMessage={errors.name?.message}>

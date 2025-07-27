@@ -30,7 +30,13 @@ export function useMissionQuestions(missionId: string | null) {
       throw new Error(error.message);
     }
     
-    return data || [];
+    // Ensure all questions have the multiple_select field for backward compatibility
+    const questionsWithDefaults = (data || []).map(question => ({
+      ...question,
+      multiple_select: question.multiple_select ?? false, // Default to false if null/undefined
+    }));
+    
+    return questionsWithDefaults;
   }, [missionId]);
 
   // SWR 훅 사용
@@ -175,6 +181,7 @@ export function useMissionQuestions(missionId: string | null) {
       max_characters: question.max_characters,
       placeholder_text: question.placeholder_text,
       required_image: question.required_image,
+      multiple_select: question.multiple_select,
     };
     
     return await createQuestion(duplicatedData);

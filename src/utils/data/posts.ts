@@ -109,14 +109,42 @@ export async function updatePost(post: UpdatePost, id: string) {
 }
 export async function createPost(post: CreatePost) {
   const supabase = createClient();
-  const insertData: CreatePost = {
+  
+  // Build insert data with all provided fields
+  const insertData: any = {
     content: post.content,
     user_id: post.user_id,
     mission_instance_id: post.mission_instance_id,
     title: post.title,
     score: post.score,
     journey_id: post.journey_id,
+    team_id: post.team_id,
+    is_team_submission: post.is_team_submission,
+    file_url: post.file_url,
+    achievement_status: post.achievement_status,
+    team_points: post.team_points,
   };
+
+  // Include new mission-related fields if provided
+  if (post.answers_data !== undefined) {
+    insertData.answers_data = post.answers_data;
+  }
+  if (post.auto_score !== undefined) {
+    insertData.auto_score = post.auto_score;
+  }
+  if (post.manual_score !== undefined) {
+    insertData.manual_score = post.manual_score;
+  }
+  if (post.total_questions !== undefined) {
+    insertData.total_questions = post.total_questions;
+  }
+  if (post.answered_questions !== undefined) {
+    insertData.answered_questions = post.answered_questions;
+  }
+  if (post.completion_rate !== undefined) {
+    insertData.completion_rate = post.completion_rate;
+  }
+
   const { data, error } = await supabase
     .from("posts")
     .insert(insertData)

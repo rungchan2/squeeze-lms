@@ -13,7 +13,7 @@ import Heading from "@/components/Text/Heading";
 import Text from "@/components/Text/Text";
 import { toaster } from "@/components/ui/toaster";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { 
   updateMission, 
   createMission, 
@@ -61,6 +61,7 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
               max_characters: q.max_characters,
               placeholder_text: q.placeholder_text,
               required_image: q.required_image,
+              multiple_select: (q as any).multiple_select || false,
             })));
             setUseQuestionBuilder(true);
           }
@@ -105,12 +106,27 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
 
   console.log(errors);
 
+  // Calculate total points from questions
+  const totalPoints = useMemo(() => {
+    if (!useQuestionBuilder || questions.length === 0) {
+      return editMissionData?.points || 100;
+    }
+    return questions.reduce((sum, question) => sum + (question.points || 0), 0);
+  }, [useQuestionBuilder, questions, editMissionData?.points]);
+
   // Initialize form with mission type
   useEffect(() => {
     const initialType = editMissionData?.mission_type || 'essay';
     setMissionType(initialType);
     setValue('mission_type', convertMissionType(initialType) as 'essay' | 'multiple_choice' | 'image_upload' | 'mixed');
   }, [editMissionData?.mission_type, setValue]);
+
+  // Update points when questions change
+  useEffect(() => {
+    if (useQuestionBuilder) {
+      setValue('points', totalPoints);
+    }
+  }, [totalPoints, useQuestionBuilder, setValue]);
 
   const onSubmit = async (data: CreateMission) => {
     console.log('Form submission data:', data);
@@ -214,12 +230,21 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
           <Input {...register("name")} placeholder="미션 이름을 입력해주세요." />
         </InputAndTitle>
         <InputAndTitle title="미션 점수" errorMessage={errors.points?.message}>
-          <Input
-            {...register("points", {
-              valueAsNumber: true,
-            })}
-            placeholder="미션 점수를 입력해주세요.(숫자)"
-          />
+          {useQuestionBuilder ? (
+            <PointsDisplayContainer>
+              <PointsDisplay>{totalPoints}점</PointsDisplay>
+              <Text variant="caption" color="var(--grey-600)">
+                (질문별 점수의 합계)
+              </Text>
+            </PointsDisplayContainer>
+          ) : (
+            <Input
+              {...register("points", {
+                valueAsNumber: true,
+              })}
+              placeholder="미션 점수를 입력해주세요.(숫자)"
+            />
+          )}
         </InputAndTitle>
         <InputAndTitle
           title="미션 타입"
@@ -394,4 +419,20 @@ const LoadingContainer = styled.div`
   background: white;
   border-radius: 8px;
   border: 1px solid var(--grey-200);
+`;
+
+const PointsDisplayContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--grey-50);
+  border: 1px solid var(--grey-200);
+  border-radius: 6px;
+`;
+
+const PointsDisplay = styled.div`
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary-600);
 `;

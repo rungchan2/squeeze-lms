@@ -70,7 +70,7 @@ export default function QuestionBuilder({
     onChange(cleanQuestions);
   }, [onChange]);
 
-  const addQuestionFromTemplate = (type: keyof typeof defaultQuestionTemplates) => {
+  const addQuestionFromTemplate = useCallback((type: keyof typeof defaultQuestionTemplates) => {
     const template = defaultQuestionTemplates[type];
     const newQuestion: CreateMissionQuestion & { tempId?: string } = {
       ...template,
@@ -81,61 +81,99 @@ export default function QuestionBuilder({
 
     const newQuestions = [...localQuestions, newQuestion];
     setLocalQuestions(newQuestions);
-    syncToParent(newQuestions);
-  };
+    
+    // Schedule sync to parent after state update
+    setTimeout(() => {
+      syncToParent(newQuestions);
+    }, 0);
+  }, [localQuestions, missionId, syncToParent]);
 
-  const updateQuestion = (index: number, updates: Partial<CreateMissionQuestion>) => {
-    const newQuestions = [...localQuestions];
-    newQuestions[index] = { ...newQuestions[index], ...updates };
-    setLocalQuestions(newQuestions);
-    syncToParent(newQuestions);
-  };
+  const updateQuestion = useCallback((index: number, updates: Partial<CreateMissionQuestion>) => {
+    setLocalQuestions(prevQuestions => {
+      const newQuestions = [...prevQuestions];
+      newQuestions[index] = { ...newQuestions[index], ...updates };
+      
+      // Schedule sync to parent after state update
+      setTimeout(() => {
+        syncToParent(newQuestions);
+      }, 0);
+      
+      return newQuestions;
+    });
+  }, [syncToParent]);
 
-  const deleteQuestion = (index: number) => {
-    const newQuestions = localQuestions.filter((_, i) => i !== index);
-    setLocalQuestions(newQuestions);
-    syncToParent(newQuestions);
-  };
+  const deleteQuestion = useCallback((index: number) => {
+    setLocalQuestions(prevQuestions => {
+      const newQuestions = prevQuestions.filter((_, i) => i !== index);
+      
+      // Schedule sync to parent after state update
+      setTimeout(() => {
+        syncToParent(newQuestions);
+      }, 0);
+      
+      return newQuestions;
+    });
+  }, [syncToParent]);
 
-  const duplicateQuestion = (index: number) => {
-    const questionToDuplicate = localQuestions[index];
-    const duplicatedQuestion: CreateMissionQuestion & { tempId?: string } = {
-      ...questionToDuplicate,
-      question_text: `${questionToDuplicate.question_text} (복사본)`,
-      question_order: localQuestions.length + 1,
-      tempId: `temp-${Date.now()}`,
-    };
+  const duplicateQuestion = useCallback((index: number) => {
+    setLocalQuestions(prevQuestions => {
+      const questionToDuplicate = prevQuestions[index];
+      const duplicatedQuestion: CreateMissionQuestion & { tempId?: string } = {
+        ...questionToDuplicate,
+        question_text: `${questionToDuplicate.question_text} (복사본)`,
+        question_order: prevQuestions.length + 1,
+        tempId: `temp-${Date.now()}`,
+      };
 
-    const newQuestions = [...localQuestions, duplicatedQuestion];
-    setLocalQuestions(newQuestions);
-    syncToParent(newQuestions);
-  };
+      const newQuestions = [...prevQuestions, duplicatedQuestion];
+      
+      // Schedule sync to parent after state update
+      setTimeout(() => {
+        syncToParent(newQuestions);
+      }, 0);
+      
+      return newQuestions;
+    });
+  }, [syncToParent]);
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = localQuestions.findIndex(
-        (question) => question.tempId === active.id
-      );
-      const newIndex = localQuestions.findIndex(
-        (question) => question.tempId === over.id
-      );
+      setLocalQuestions(prevQuestions => {
+        const oldIndex = prevQuestions.findIndex(
+          (question) => question.tempId === active.id
+        );
+        const newIndex = prevQuestions.findIndex(
+          (question) => question.tempId === over.id
+        );
 
-      const newQuestions = arrayMove(localQuestions, oldIndex, newIndex);
-      setLocalQuestions(newQuestions);
-      syncToParent(newQuestions);
+        const newQuestions = arrayMove(prevQuestions, oldIndex, newIndex);
+        
+        // Schedule sync to parent after state update
+        setTimeout(() => {
+          syncToParent(newQuestions);
+        }, 0);
+        
+        return newQuestions;
+      });
     }
-  }, [localQuestions, syncToParent]);
+  }, [syncToParent]);
 
 
-  const getTotalPoints = () => {
+  const getTotalPoints = useCallback(() => {
     return localQuestions.reduce((total, q) => total + (q.points || 0), 0);
-  };
+  }, [localQuestions]);
 
-  const getRequiredQuestionsCount = () => {
+  const getRequiredQuestionsCount = useCallback(() => {
     return localQuestions.filter(q => q.is_required).length;
-  };
+  }, [localQuestions]);
+
+  // Handler functions for add question buttons
+  const handleAddEssay = useCallback(() => addQuestionFromTemplate('essay'), [addQuestionFromTemplate]);
+  const handleAddMultiple = useCallback(() => addQuestionFromTemplate('multiple_choice'), [addQuestionFromTemplate]);
+  const handleAddImage = useCallback(() => addQuestionFromTemplate('image_upload'), [addQuestionFromTemplate]);
+  const handleAddMixed = useCallback(() => addQuestionFromTemplate('mixed'), [addQuestionFromTemplate]);
 
   return (
     <QuestionBuilderContainer>
@@ -205,28 +243,28 @@ export default function QuestionBuilder({
         </div>
         <AddQuestionGrid>
           <AddQuestionButton 
-            onClick={() => addQuestionFromTemplate('essay')}
+            onClick={handleAddEssay}
             variant="outline"
           >
             <FaPlus />
             주관식
           </AddQuestionButton>
           <AddQuestionButton 
-            onClick={() => addQuestionFromTemplate('multiple_choice')}
+            onClick={handleAddMultiple}
             variant="outline"
           >
             <FaPlus />
             객관식
           </AddQuestionButton>
           <AddQuestionButton 
-            onClick={() => addQuestionFromTemplate('image_upload')}
+            onClick={handleAddImage}
             variant="outline"
           >
             <FaPlus />
             이미지
           </AddQuestionButton>
           <AddQuestionButton 
-            onClick={() => addQuestionFromTemplate('mixed')}
+            onClick={handleAddMixed}
             variant="outline"
           >
             <FaPlus />

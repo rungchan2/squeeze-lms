@@ -96,6 +96,7 @@ export async function createMissionWithQuestions(
         max_characters: null,
         placeholder_text: "미션가이드에 따라 미션을 완료해주세요.",
         required_image: null,
+        multiple_select: null,
       };
       questions = [defaultQuestion];
     }
@@ -232,6 +233,7 @@ export async function migrateLegacyMission(missionId: string) {
         max_characters: null,
         placeholder_text: "미션가이드에 따라 미션을 완료해주세요.",
         required_image: null,
+        multiple_select: null,
       };
       
       const { data, error } = await createMissionQuestion(defaultQuestion);

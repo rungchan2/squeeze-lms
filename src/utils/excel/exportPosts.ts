@@ -52,7 +52,7 @@ export const exportPostsToExcel = (data: ExcelExportData) => {
       '주차': week ? `${week.week_number || ''}주차: ${week.name}` : '',
       '미션명': mission?.name || '',
       '제목': post.title,
-      '내용': excludeHtmlTags(post.content),
+      '내용': excludeHtmlTags(post.content || ''),
       '점수': post.score || 0,
       '팀 제출 여부': post.is_team_submission ? '팀 제출' : '개인 제출',
       '팀명': post.teamInfo?.name || '',

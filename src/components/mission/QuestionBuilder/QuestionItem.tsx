@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useMemo, memo, useEffect } from "react";
 import { Input, Textarea } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import { FaGripVertical, FaTrash, FaCopy, FaPlus, FaCheck, FaTimes } from "react-icons/fa";
@@ -26,14 +26,19 @@ interface QuestionItemProps {
   onMove?: (fromIndex: number, toIndex: number) => void;
 }
 
-export default function QuestionItem({
+function QuestionItem({
   question,
   index,
   onUpdate,
   onDelete,
   onDuplicate,
 }: QuestionItemProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [localQuestionText, setLocalQuestionText] = useState(question.question_text);
+  const [localPoints, setLocalPoints] = useState<string>((question.points || 100).toString());
+  const [localMinCharacters, setLocalMinCharacters] = useState<string>((question.min_characters || 0).toString());
+  const [localMaxCharacters, setLocalMaxCharacters] = useState<string>((question.max_characters || 1000).toString());
+  const [localMaxImages, setLocalMaxImages] = useState<string>((question.max_images || 3).toString());
+  const [localPlaceholderText, setLocalPlaceholderText] = useState<string>(question.placeholder_text || "");
 
   const {
     attributes,
@@ -53,7 +58,108 @@ export default function QuestionItem({
     ],
   });
 
-  const handleQuestionTypeChange = (value: string) => {
+
+  // Sync local state with question data when question changes from parent
+  useEffect(() => {
+    setLocalPoints((question.points || 100).toString());
+    setLocalMinCharacters((question.min_characters || 0).toString());
+    setLocalMaxCharacters((question.max_characters || 1000).toString());
+    setLocalMaxImages((question.max_images || 3).toString());
+    setLocalPlaceholderText(question.placeholder_text || "");
+  }, [question.points, question.min_characters, question.max_characters, question.max_images, question.placeholder_text]);
+
+  // Question text 업데이트를 debounce 처리
+  const handleQuestionTextChange = useCallback((value: string) => {
+    setLocalQuestionText(value);
+  }, []);
+
+  const handleQuestionTextBlur = useCallback(() => {
+    if (localQuestionText !== question.question_text) {
+      onUpdate(index, { question_text: localQuestionText });
+    }
+  }, [localQuestionText, question.question_text, index, onUpdate]);
+
+  // Points input handlers
+  const handlePointsChange = useCallback((value: string) => {
+    setLocalPoints(value);
+  }, []);
+
+  const handlePointsBlur = useCallback(() => {
+    const numValue = parseInt(localPoints) || 0;
+    if (numValue !== question.points) {
+      onUpdate(index, { points: numValue });
+    }
+  }, [localPoints, question.points, index, onUpdate]);
+
+  // Character limit handlers
+  const handleMinCharactersChange = useCallback((value: string) => {
+    setLocalMinCharacters(value);
+  }, []);
+
+  const handleMinCharactersBlur = useCallback(() => {
+    const numValue = parseInt(localMinCharacters) || 0;
+    if (numValue !== question.min_characters) {
+      onUpdate(index, { min_characters: numValue });
+    }
+  }, [localMinCharacters, question.min_characters, index, onUpdate]);
+
+  const handleMaxCharactersChange = useCallback((value: string) => {
+    setLocalMaxCharacters(value);
+  }, []);
+
+  const handleMaxCharactersBlur = useCallback(() => {
+    const numValue = parseInt(localMaxCharacters) || 1000;
+    if (numValue !== question.max_characters) {
+      onUpdate(index, { max_characters: numValue });
+    }
+  }, [localMaxCharacters, question.max_characters, index, onUpdate]);
+
+  // Max images handler
+  const handleMaxImagesChange = useCallback((value: string) => {
+    setLocalMaxImages(value);
+  }, []);
+
+  const handleMaxImagesBlur = useCallback(() => {
+    const numValue = parseInt(localMaxImages) || 3;
+    if (numValue !== question.max_images) {
+      onUpdate(index, { max_images: numValue });
+    }
+  }, [localMaxImages, question.max_images, index, onUpdate]);
+
+  // Placeholder text handler
+  const handlePlaceholderTextChange = useCallback((value: string) => {
+    setLocalPlaceholderText(value);
+  }, []);
+
+  const handlePlaceholderTextBlur = useCallback(() => {
+    if (localPlaceholderText !== question.placeholder_text) {
+      onUpdate(index, { placeholder_text: localPlaceholderText });
+    }
+  }, [localPlaceholderText, question.placeholder_text, index, onUpdate]);
+
+  // Option text handler - onBlur only for direct input handling
+  const handleOptionTextBlur = useCallback((optionIndex: number, event: React.FocusEvent<HTMLInputElement>) => {
+    const newText = event.target.value;
+    const currentOptions = (question.options as MultipleChoiceOption[]) || [];
+    
+    if (newText && newText !== currentOptions[optionIndex]?.text) {
+      const newOptions = [...currentOptions];
+      newOptions[optionIndex] = { ...newOptions[optionIndex], text: newText };
+      
+      // Update correct_answer if this option was previously the correct one
+      let newCorrectAnswer = question.correct_answer;
+      if (currentOptions[optionIndex]?.is_correct) {
+        newCorrectAnswer = newText;
+      }
+      
+      onUpdate(index, { 
+        options: newOptions,
+        correct_answer: newCorrectAnswer
+      });
+    }
+  }, [question.options, question.correct_answer, index, onUpdate]);
+
+  const handleQuestionTypeChange = useCallback((value: string) => {
     const newType = value as 'essay' | 'multiple_choice' | 'image_upload' | 'mixed';
     const updates: Partial<CreateMissionQuestion> = {
       question_type: newType,
@@ -63,6 +169,7 @@ export default function QuestionItem({
     switch (newType) {
       case 'essay':
         updates.max_characters = 1000;
+        updates.min_characters = 10;
         updates.placeholder_text = "여기에 답변을 작성해주세요.";
         updates.options = null;
         updates.correct_answer = null;
@@ -77,6 +184,7 @@ export default function QuestionItem({
         ];
         updates.correct_answer = "선택지 2";
         updates.max_characters = null;
+        updates.min_characters = null;
         updates.placeholder_text = null;
         updates.max_images = null;
         updates.required_image = null;
@@ -87,10 +195,12 @@ export default function QuestionItem({
         updates.options = null;
         updates.correct_answer = null;
         updates.max_characters = null;
+        updates.min_characters = null;
         updates.placeholder_text = null;
         break;
       case 'mixed':
         updates.max_characters = 500;
+        updates.min_characters = 10;
         updates.max_images = 2;
         updates.placeholder_text = "설명을 작성하고 이미지를 첨부해주세요.";
         updates.options = null;
@@ -100,47 +210,80 @@ export default function QuestionItem({
     }
 
     onUpdate(index, updates);
-  };
+  }, [index, onUpdate]);
 
-  const handleOptionUpdate = (optionIndex: number, updates: Partial<MultipleChoiceOption>) => {
+  // Separate handler for non-text option updates (like is_correct)
+  const handleOptionUpdate = useCallback((optionIndex: number, updates: Partial<MultipleChoiceOption>) => {
     const currentOptions = (question.options as MultipleChoiceOption[]) || [];
     const newOptions = [...currentOptions];
     newOptions[optionIndex] = { ...newOptions[optionIndex], ...updates };
     
+    // Only update correct_answer when is_correct changes
+    let newCorrectAnswer = question.correct_answer;
+    if (updates.is_correct !== undefined) {
+      if (updates.is_correct) {
+        // If this option is being marked as correct, use its current text
+        newCorrectAnswer = newOptions[optionIndex].text;
+        // Unmark other options as correct
+        newOptions.forEach((option, i) => {
+          if (i !== optionIndex) {
+            option.is_correct = false;
+          }
+        });
+      }
+    }
+    
     onUpdate(index, { 
       options: newOptions,
-      correct_answer: updates.is_correct ? newOptions[optionIndex].text : question.correct_answer
+      correct_answer: newCorrectAnswer
     });
-  };
+  }, [question.options, question.correct_answer, index, onUpdate]);
 
-  const addOption = () => {
+  const addOption = useCallback(() => {
     const currentOptions = (question.options as MultipleChoiceOption[]) || [];
+    const newOptionText = `선택지 ${currentOptions.length + 1}`;
     const newOptions = [
       ...currentOptions,
-      { text: `선택지 ${currentOptions.length + 1}`, is_correct: false }
+      { text: newOptionText, is_correct: false }
     ];
+    
     onUpdate(index, { options: newOptions });
-  };
+  }, [question.options, index, onUpdate]);
 
-  const removeOption = (optionIndex: number) => {
+  const removeOption = useCallback((optionIndex: number) => {
     const currentOptions = (question.options as MultipleChoiceOption[]) || [];
     if (currentOptions.length <= 2) return; // 최소 2개 유지
     
     const newOptions = currentOptions.filter((_, i) => i !== optionIndex);
     onUpdate(index, { options: newOptions });
-  };
+  }, [question.options, index, onUpdate]);
 
-  const renderQuestionTypeSettings = () => {
+
+  const renderQuestionTypeSettings = useMemo(() => {
     switch (question.question_type) {
       case 'essay':
         return (
           <SettingsSection>
             <SettingRow>
+              <Text variant="caption" fontWeight="bold">최소 글자 수</Text>
+              <Input
+                type="number"
+                value={localMinCharacters}
+                onChange={(e) => handleMinCharactersChange(e.target.value)}
+                onBlur={handleMinCharactersBlur}
+                placeholder="0"
+                size="sm"
+                width="120px"
+                min="0"
+              />
+            </SettingRow>
+            <SettingRow>
               <Text variant="caption" fontWeight="bold">최대 글자 수</Text>
               <Input
                 type="number"
-                value={question.max_characters || 1000}
-                onChange={(e) => onUpdate(index, { max_characters: parseInt(e.target.value) })}
+                value={localMaxCharacters}
+                onChange={(e) => handleMaxCharactersChange(e.target.value)}
+                onBlur={handleMaxCharactersBlur}
                 placeholder="1000"
                 size="sm"
                 width="120px"
@@ -149,8 +292,9 @@ export default function QuestionItem({
             <SettingRow>
               <Text variant="caption" fontWeight="bold">플레이스홀더</Text>
               <Input
-                value={question.placeholder_text || ""}
-                onChange={(e) => onUpdate(index, { placeholder_text: e.target.value })}
+                value={localPlaceholderText}
+                onChange={(e) => handlePlaceholderTextChange(e.target.value)}
+                onBlur={handlePlaceholderTextBlur}
                 placeholder="답변 안내 텍스트"
                 size="sm"
               />
@@ -166,8 +310,8 @@ export default function QuestionItem({
             {options.map((option, optionIndex) => (
               <OptionRow key={optionIndex}>
                 <Input
-                  value={option.text}
-                  onChange={(e) => handleOptionUpdate(optionIndex, { text: e.target.value })}
+                  defaultValue={option.text}
+                  onBlur={(e) => handleOptionTextBlur(optionIndex, e)}
                   placeholder={`선택지 ${optionIndex + 1}`}
                   size="sm"
                 />
@@ -204,8 +348,9 @@ export default function QuestionItem({
               <Text variant="caption" fontWeight="bold">최대 이미지 수</Text>
               <Input
                 type="number"
-                value={question.max_images || 3}
-                onChange={(e) => onUpdate(index, { max_images: parseInt(e.target.value) })}
+                value={localMaxImages}
+                onChange={(e) => handleMaxImagesChange(e.target.value)}
+                onBlur={handleMaxImagesBlur}
                 placeholder="3"
                 size="sm"
                 width="120px"
@@ -228,11 +373,25 @@ export default function QuestionItem({
         return (
           <SettingsSection>
             <SettingRow>
+              <Text variant="caption" fontWeight="bold">최소 글자 수</Text>
+              <Input
+                type="number"
+                value={localMinCharacters}
+                onChange={(e) => handleMinCharactersChange(e.target.value)}
+                onBlur={handleMinCharactersBlur}
+                placeholder="0"
+                size="sm"
+                width="120px"
+                min="0"
+              />
+            </SettingRow>
+            <SettingRow>
               <Text variant="caption" fontWeight="bold">최대 글자 수</Text>
               <Input
                 type="number"
-                value={question.max_characters || 500}
-                onChange={(e) => onUpdate(index, { max_characters: parseInt(e.target.value) })}
+                value={localMaxCharacters}
+                onChange={(e) => handleMaxCharactersChange(e.target.value)}
+                onBlur={handleMaxCharactersBlur}
                 placeholder="500"
                 size="sm"
                 width="120px"
@@ -242,8 +401,9 @@ export default function QuestionItem({
               <Text variant="caption" fontWeight="bold">최대 이미지 수</Text>
               <Input
                 type="number"
-                value={question.max_images || 2}
-                onChange={(e) => onUpdate(index, { max_images: parseInt(e.target.value) })}
+                value={localMaxImages}
+                onChange={(e) => handleMaxImagesChange(e.target.value)}
+                onBlur={handleMaxImagesBlur}
                 placeholder="2"
                 size="sm"
                 width="120px"
@@ -254,8 +414,9 @@ export default function QuestionItem({
             <SettingRow>
               <Text variant="caption" fontWeight="bold">플레이스홀더</Text>
               <Input
-                value={question.placeholder_text || ""}
-                onChange={(e) => onUpdate(index, { placeholder_text: e.target.value })}
+                value={localPlaceholderText}
+                onChange={(e) => handlePlaceholderTextChange(e.target.value)}
+                onBlur={handlePlaceholderTextBlur}
                 placeholder="답변 안내 텍스트"
                 size="sm"
               />
@@ -266,7 +427,7 @@ export default function QuestionItem({
       default:
         return null;
     }
-  };
+  }, [question, index, onUpdate, handleOptionUpdate, addOption, removeOption]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -300,8 +461,9 @@ export default function QuestionItem({
         <QuestionBasicSettings>
           <QuestionTextArea>
             <Textarea
-              value={question.question_text}
-              onChange={(e) => onUpdate(index, { question_text: e.target.value })}
+              value={localQuestionText}
+              onChange={(e) => handleQuestionTextChange(e.target.value)}
+              onBlur={handleQuestionTextBlur}
               placeholder="질문을 입력해주세요"
               size="sm"
               resize="vertical"
@@ -342,8 +504,9 @@ export default function QuestionItem({
             <PointsInput>
               <Input
                 type="number"
-                value={question.points || 100}
-                onChange={(e) => onUpdate(index, { points: parseInt(e.target.value) })}
+                value={localPoints}
+                onChange={(e) => handlePointsChange(e.target.value)}
+                onBlur={handlePointsBlur}
                 placeholder="점수"
                 size="sm"
                 width="80px"
@@ -363,18 +526,13 @@ export default function QuestionItem({
           </QuestionMetaRow>
         </QuestionBasicSettings>
 
-        <AdvancedToggle
-          onClick={() => setIsExpanded(!isExpanded)}
-          isExpanded={isExpanded}
-        >
-          {isExpanded ? "간단히 보기" : "세부 설정"}
-        </AdvancedToggle>
-
-        {isExpanded && renderQuestionTypeSettings()}
+        {renderQuestionTypeSettings}
       </QuestionContent>
     </QuestionItemContainer>
   );
 }
+
+export default memo(QuestionItem);
 
 const QuestionItemContainer = styled.div`
   border: 1px solid var(--grey-200);
@@ -461,21 +619,6 @@ const RequiredCheckbox = styled.label`
   cursor: pointer;
 `;
 
-const AdvancedToggle = styled.button<{ isExpanded: boolean }>`
-  margin-top: 12px;
-  padding: 8px 12px;
-  background: none;
-  border: 1px solid var(--grey-300);
-  border-radius: 4px;
-  color: var(--primary-600);
-  font-size: 12px;
-  cursor: pointer;
-  align-self: flex-start;
-  
-  &:hover {
-    background: var(--grey-50);
-  }
-`;
 
 const SettingsSection = styled.div`
   margin-top: 16px;

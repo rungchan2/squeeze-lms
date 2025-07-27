@@ -20,7 +20,7 @@ import {
   FaImage,
 } from "react-icons/fa";
 import { Modal } from "../modal/Modal";
-import FileUpload from "../common/FileUpload";
+import FileUpload from "../FileUpload";
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -160,6 +160,9 @@ const MenuBar = ({ editor }: MenuBarProps) => {
             onUploadComplete={handleImageUpload}
             placeholder="이미지를 드래그하거나 클릭하여 업로드하세요"
             height="250px"
+            acceptedFileTypes={{ "image/*": [".jpeg", ".jpg", ".png", ".webp"] }}
+            maxFiles={1}
+            multiple={false}
           />
         </ModalContent>
       </Modal>
