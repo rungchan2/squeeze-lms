@@ -39,8 +39,10 @@ export const missionWithQuestionsSchema = missionSchema.extend({
     points: z.number().nullable(),
     is_required: z.boolean().nullable(),
     max_characters: z.number().nullable(),
+    min_characters: z.number().nullable(),
     placeholder_text: z.string().nullable(),
     required_image: z.boolean().nullable(),
+    multiple_select: z.boolean().nullable(),
     created_at: z.string().nullable(),
     updated_at: z.string().nullable(),
   })).optional()

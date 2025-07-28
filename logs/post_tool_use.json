@@ -9770,5 +9770,1195 @@
       "interrupted": false,
       "isImage": false
     }
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git add .",
+      "description": "Add all modified files"
+    },
+    "tool_response": {
+      "stdout": "",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git status",
+      "description": "Check git status after adding files"
+    },
+    "tool_response": {
+      "stdout": "On branch dev\nYour branch is ahead of 'origin/dev' by 3 commits.\n  (use \"git push\" to publish your local commits)\n\nChanges to be committed:\n  (use \"git restore --staged <file>...\" to unstage)\n\tnew file:   .claude/hooks/notification.py\n\tnew file:   .claude/hooks/post_tool_use.py\n\tnew file:   .claude/hooks/pre_tool_use.py\n\tnew file:   .claude/hooks/stop.py\n\tnew file:   .claude/hooks/subagent_stop.py\n\tnew file:   .claude/hooks/user_prompt_submit.py\n\tnew file:   .claude/hooks/utils/llm/anth.py\n\tnew file:   .claude/hooks/utils/llm/oai.py\n\tnew file:   .claude/hooks/utils/tts/elevenlabs_tts.py\n\tnew file:   .claude/hooks/utils/tts/openai_tts.py\n\tnew file:   .claude/hooks/utils/tts/pyttsx3_tts.py\n\tmodified:   .gitignore\n\tnew file:   .vscode/setting.json\n\tnew file:   ai_docs/anthropic_quick_start.md\n\tnew file:   ai_docs/cc_hooks_docs.md\n\tnew file:   ai_docs/cc_hooks_v0_repomix.xml\n\tnew file:   ai_docs/openai_quick_start.md\n\tnew file:   ai_docs/user_prompt_submit_hook.md\n\tnew file:   ai_docs/uv-single-file-scripts.md\n\tnew file:   logs/chat.json\n\tnew file:   logs/notification.json\n\tnew file:   logs/post_tool_use.json\n\tnew file:   logs/pre_tool_use.json\n\tnew file:   logs/stop.json\n\tnew file:   logs/user_prompt_submit.json\n\tmodified:   package-lock.json\n\tmodified:   package.json\n\tmodified:   public/sw.js\n\tnew file:   specs/DATABASE_SCHEMA.md\n\tnew file:   specs/bug-resolution-plan.md\n\tnew file:   specs/database-migration.md\n\tnew file:   specs/detailed-modification-plan.md\n\tnew file:   specs/file-system-migration.md\n\tnew file:   specs/frontend-mission-system-roadmap.md\n\tnew file:   specs/problem-to-fix.md\n\tnew file:   \"specs/reference-image/\\354\\212\\244\\355\\201\\254\\353\\246\\260\\354\\203\\267 2025-07-27 \\354\\230\\244\\354\\240\\204 3.02.13.png\"\n\tmodified:   src/app/(comoon)/profile/client.tsx\n\tmodified:   src/app/(home)/HomeTab.tsx\n\tmodified:   src/app/(home)/_class/JourneyCard.tsx\n\tmodified:   src/app/(home)/_class/JourneyTab.tsx\n\tmodified:   src/app/(home)/_mypage/PostCard.tsx\n\tmodified:   src/app/(home)/_notification/NotificationCard.tsx\n\tmodified:   src/app/(home)/_notification/NotificationTab.tsx\n\tmodified:   src/app/create-journey/CreateJourneyFrom.tsx\n\tmodified:   src/app/journey/[slug]/_plan/MissionCard.tsx\n\tmodified:   src/app/journey/[slug]/_plan/MissionComponent.tsx\n\tmodified:   src/app/journey/[slug]/_plan/PlanTab.tsx\n\tmodified:   src/app/journey/[slug]/_plan/WeekCard.tsx\n\tmodified:   src/app/journey/[slug]/client.tsx\n\tmodified:   src/app/mission/create/client.tsx\n\tmodified:   src/app/page.tsx\n\tnew file:   src/components/DatePicker.tsx\n\tnew file:   src/components/common/BackButton.tsx\n\tmodified:   src/hooks/useJourneyMissionInstances.ts\n\nChanges not staged for commit:\n  (use \"git add <file>...\" to update what will be committed)\n  (use \"git restore <file>...\" to discard changes in working directory)\n\tmodified:   logs/post_tool_use.json\n\tmodified:   logs/pre_tool_use.json",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git commit -m \"$(cat <<'EOF'\nfeat: Integrate mission functionality into PlanTab and improve notifications\n\n- Integrate mission functionality into PlanTab with completion status display\n- Add completed mission tracking with visual indicators and click handlers  \n- Improve NotificationTab styling with proper cards, hover effects, and layouts\n- Display question text for all mission answer types in PostCard\n- Add fallback handling for missing question data\n- Enhance user experience with consistent pointer cursors and visual feedback\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\"",
+      "description": "Commit changes with descriptive message"
+    },
+    "tool_response": {
+      "stdout": "[dev a0e7b31] feat: Integrate mission functionality into PlanTab and improve notifications\n 54 files changed, 34541 insertions(+), 315 deletions(-)\n create mode 100644 .claude/hooks/notification.py\n create mode 100644 .claude/hooks/post_tool_use.py\n create mode 100644 .claude/hooks/pre_tool_use.py\n create mode 100644 .claude/hooks/stop.py\n create mode 100644 .claude/hooks/subagent_stop.py\n create mode 100644 .claude/hooks/user_prompt_submit.py\n create mode 100644 .claude/hooks/utils/llm/anth.py\n create mode 100644 .claude/hooks/utils/llm/oai.py\n create mode 100644 .claude/hooks/utils/tts/elevenlabs_tts.py\n create mode 100644 .claude/hooks/utils/tts/openai_tts.py\n create mode 100644 .claude/hooks/utils/tts/pyttsx3_tts.py\n create mode 100644 .vscode/setting.json\n create mode 100644 ai_docs/anthropic_quick_start.md\n create mode 100644 ai_docs/cc_hooks_docs.md\n create mode 100644 ai_docs/cc_hooks_v0_repomix.xml\n create mode 100644 ai_docs/openai_quick_start.md\n create mode 100644 ai_docs/user_prompt_submit_hook.md\n create mode 100644 ai_docs/uv-single-file-scripts.md\n create mode 100644 logs/chat.json\n create mode 100644 logs/notification.json\n create mode 100644 logs/post_tool_use.json\n create mode 100644 logs/pre_tool_use.json\n create mode 100644 logs/stop.json\n create mode 100644 logs/user_prompt_submit.json\n create mode 100644 specs/DATABASE_SCHEMA.md\n create mode 100644 specs/bug-resolution-plan.md\n create mode 100644 specs/database-migration.md\n create mode 100644 specs/detailed-modification-plan.md\n create mode 100644 specs/file-system-migration.md\n create mode 100644 specs/frontend-mission-system-roadmap.md\n create mode 100644 specs/problem-to-fix.md\n create mode 100644 \"specs/reference-image/\\354\\212\\244\\355\\201\\254\\353\\246\\260\\354\\203\\267 2025-07-27 \\354\\230\\244\\354\\240\\204 3.02.13.png\"\n create mode 100644 src/components/DatePicker.tsx\n create mode 100644 src/components/common/BackButton.tsx",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git push origin dev",
+      "description": "Push changes to remote dev branch"
+    },
+    "tool_response": {
+      "stdout": "To https://github.com/rungchan2/squeeze-lms.git\n   cf6914a..a0e7b31  dev -> dev",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "gh pr create --title \"feat: Integrate mission functionality into PlanTab and improve notifications\" --body \"$(cat <<'EOF'\n## Summary\n- Integrated mission functionality into PlanTab with completion status display and click handlers\n- Enhanced NotificationTab styling with proper card layouts, hover effects, and improved user experience  \n- Fixed PostCard to display question text for all mission answer types (not just multiple choice)\n- Added fallback handling for missing question data and improved visual feedback\n\n## Key Changes\n\n### Mission Integration in PlanTab\n- Added completed mission tracking using `useCompletedMissions` hook\n- Implemented visual indicators for completed missions (reduced opacity + completion badge)\n- Added click handlers for incomplete missions to navigate to mission execution page\n- Maintained existing PlanTab functionality while adding mission capabilities\n\n### Notification System Improvements  \n- Enhanced NotificationCard styling with proper backgrounds, borders, and shadows\n- Added hover effects and improved layout structure\n- Improved NotificationTab with better spacing, loading states, and error handling\n- Enhanced empty state and loading spinner positioning\n\n### PostCard Question Display Fix\n- Fixed issue where question text was only shown for multiple choice answers\n- Now displays question text for all answer types (essay, multiple_choice, image_upload, mixed)\n- Added fallback handling when question data is missing\n- Improved summary view to show both questions and answers clearly\n\n## Technical Details\n- Updated data flow: PlanTab \u2192 WeekCard \u2192 MissionComponent \u2192 MissionCard\n- Added new props interfaces for mission completion status\n- Enhanced styling with proper cursor pointers and visual feedback\n- Maintained backward compatibility with existing functionality\n\n## Test Plan\n- [x] Verify completed missions show with reduced opacity and completion badge\n- [x] Verify incomplete missions are clickable and navigate to mission page  \n- [x] Verify notification cards display properly with improved styling\n- [x] Verify question text appears for all mission types in PostCard\n- [x] Verify fallback handling works when question data is missing\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.ai/code)\nEOF\n)\"",
+      "description": "Create pull request"
+    },
+    "tool_response": {
+      "stdout": "https://github.com/rungchan2/squeeze-lms/pull/60\nWarning: 2 uncommitted changes",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missionQuestions.ts"
+    },
+    "tool_response": {
+      "type": "text",
+      "file": {
+        "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missionQuestions.ts",
+        "content": "import { z } from \"zod\";\nimport { missionTypeEnum } from \"./missions\";\n\n// Mission question base schema matching database structure\nexport const missionQuestionSchema = z.object({\n  id: z.string().uuid(),\n  mission_id: z.string().uuid(),\n  question_text: z.string().min(1, \"\uc9c8\ubb38 \ub0b4\uc6a9\uc740 \ud544\uc218\uc785\ub2c8\ub2e4\"),\n  question_type: missionTypeEnum,\n  question_order: z.number().int().min(0),\n  options: z.any().nullable(), // JSONB field for multiple choice options\n  correct_answer: z.string().nullable(),\n  max_images: z.number().int().min(0).nullable(),\n  points: z.number().int().min(0).nullable(),\n  is_required: z.boolean().nullable(),\n  max_characters: z.number().int().min(1).nullable(),\n  min_characters: z.number().int().min(0).nullable(),\n  placeholder_text: z.string().nullable(),\n  required_image: z.boolean().nullable(),\n  multiple_select: z.boolean().nullable(),\n  created_at: z.string().nullable(),\n  updated_at: z.string().nullable(),\n});\n\n// Create mission question schema (without id, timestamps)\nexport const createMissionQuestionSchema = missionQuestionSchema.omit({\n  id: true,\n  created_at: true,\n  updated_at: true,\n});\n\n// Update mission question schema (all fields optional except mission_id)\nexport const updateMissionQuestionSchema = createMissionQuestionSchema.partial().extend({\n  mission_id: z.string().uuid(),\n});\n\n// Multiple choice option schema\nexport const multipleChoiceOptionSchema = z.object({\n  id: z.string().uuid().optional(), // For frontend tracking\n  text: z.string().min(1, \"\uc120\ud0dd\uc9c0 \ub0b4\uc6a9\uc740 \ud544\uc218\uc785\ub2c8\ub2e4\"),\n  is_correct: z.boolean().optional(),\n});\n\n// Essay question specific validation\nexport const essayQuestionSchema = createMissionQuestionSchema.extend({\n  question_type: z.literal('essay'),\n  max_characters: z.number().int().min(1).optional(),\n  min_characters: z.number().int().min(0).optional(),\n  placeholder_text: z.string().optional(),\n}).refine((data) => {\n  if (data.min_characters && data.max_characters) {\n    return data.min_characters <= data.max_characters;\n  }\n  return true;\n}, {\n  message: \"\ucd5c\uc18c \uae00\uc790\uc218\ub294 \ucd5c\ub300 \uae00\uc790\uc218\ubcf4\ub2e4 \uc791\uac70\ub098 \uac19\uc544\uc57c \ud569\ub2c8\ub2e4\",\n  path: [\"min_characters\"],\n});\n\n// Multiple choice question specific validation\nexport const multipleChoiceQuestionSchema = createMissionQuestionSchema.extend({\n  question_type: z.literal('multiple_choice'),\n  options: z.array(multipleChoiceOptionSchema).min(2, \"\ucd5c\uc18c 2\uac1c\uc758 \uc120\ud0dd\uc9c0\uac00 \ud544\uc694\ud569\ub2c8\ub2e4\"),\n  correct_answer: z.string().min(1, \"\uc815\ub2f5\uc744 \uc120\ud0dd\ud574\uc8fc\uc138\uc694\"),\n  min_characters: z.number().int().min(0).nullable(),\n});\n\n// Image upload question specific validation\nexport const imageUploadQuestionSchema = createMissionQuestionSchema.extend({\n  question_type: z.literal('image_upload'),\n  max_images: z.number().int().min(1).max(10),\n  required_image: z.boolean().optional(),\n  min_characters: z.number().int().min(0).nullable(),\n});\n\n// Mixed question specific validation (text + image)\nexport const mixedQuestionSchema = createMissionQuestionSchema.extend({\n  question_type: z.literal('mixed'),\n  max_characters: z.number().int().min(1).optional(),\n  min_characters: z.number().int().min(0).optional(),\n  max_images: z.number().int().min(1).max(10).optional(),\n  placeholder_text: z.string().optional(),\n  required_image: z.boolean().optional(),\n}).refine((data) => {\n  if (data.min_characters && data.max_characters) {\n    return data.min_characters <= data.max_characters;\n  }\n  return true;\n}, {\n  message: \"\ucd5c\uc18c \uae00\uc790\uc218\ub294 \ucd5c\ub300 \uae00\uc790\uc218\ubcf4\ub2e4 \uc791\uac70\ub098 \uac19\uc544\uc57c \ud569\ub2c8\ub2e4\",\n  path: [\"min_characters\"],\n});\n\n// Union schema for all question types\nexport const anyQuestionSchema = z.union([\n  essayQuestionSchema,\n  multipleChoiceQuestionSchema,\n  imageUploadQuestionSchema,\n  mixedQuestionSchema,\n]);\n\n// Answer schemas for structured post data\nexport const essayAnswerSchema = z.object({\n  question_id: z.string().uuid(),\n  question_order: z.number(),\n  answer_type: z.literal('essay'),\n  answer_text: z.string(),\n  selected_option: z.null(),\n  image_urls: z.array(z.string()).default([]),\n  is_correct: z.boolean().nullable(),\n  points_earned: z.number().nullable(),\n});\n\nexport const multipleChoiceAnswerSchema = z.object({\n  question_id: z.string().uuid(),\n  question_order: z.number(),\n  answer_type: z.literal('multiple_choice'),\n  answer_text: z.string().nullable(),\n  selected_option: z.string(),\n  image_urls: z.array(z.string()).default([]),\n  is_correct: z.boolean().nullable(),\n  points_earned: z.number().nullable(),\n});\n\nexport const imageUploadAnswerSchema = z.object({\n  question_id: z.string().uuid(),\n  question_order: z.number(),\n  answer_type: z.literal('image_upload'),\n  answer_text: z.string().nullable(),\n  selected_option: z.null(),\n  image_urls: z.array(z.string()).min(1, \"\ucd5c\uc18c 1\uac1c\uc758 \uc774\ubbf8\uc9c0\uac00 \ud544\uc694\ud569\ub2c8\ub2e4\"),\n  is_correct: z.boolean().nullable(),\n  points_earned: z.number().nullable(),\n});\n\nexport const mixedAnswerSchema = z.object({\n  question_id: z.string().uuid(),\n  question_order: z.number(),\n  answer_type: z.literal('mixed'),\n  answer_text: z.string().optional(),\n  selected_option: z.null(),\n  image_urls: z.array(z.string()).default([]),\n  is_correct: z.boolean().nullable(),\n  points_earned: z.number().nullable(),\n});\n\n// Union schema for all answer types\nexport const anyAnswerSchema = z.discriminatedUnion(\"answer_type\", [\n  essayAnswerSchema,\n  multipleChoiceAnswerSchema,\n  imageUploadAnswerSchema,\n  mixedAnswerSchema,\n]);\n\n// Complete answers data schema for posts.answers_data field\nexport const answersDataSchema = z.object({\n  answers: z.array(anyAnswerSchema),\n  submission_metadata: z.object({\n    total_questions: z.number().int(),\n    answered_questions: z.number().int(),\n    submission_time: z.string(),\n    auto_graded: z.boolean().optional(),\n    manual_review_required: z.boolean().optional(),\n  }),\n});\n\n// Question builder form schemas for UI\nexport const questionBuilderSchema = z.object({\n  questions: z.array(anyQuestionSchema),\n  mission_id: z.string().uuid(),\n});\n\n// Export types\nexport type MissionQuestion = z.infer<typeof missionQuestionSchema>;\nexport type CreateMissionQuestion = z.infer<typeof createMissionQuestionSchema>;\nexport type UpdateMissionQuestion = z.infer<typeof updateMissionQuestionSchema>;\n\nexport type MultipleChoiceOption = z.infer<typeof multipleChoiceOptionSchema>;\n\nexport type EssayQuestion = z.infer<typeof essayQuestionSchema>;\nexport type MultipleChoiceQuestion = z.infer<typeof multipleChoiceQuestionSchema>;\nexport type ImageUploadQuestion = z.infer<typeof imageUploadQuestionSchema>;\nexport type MixedQuestion = z.infer<typeof mixedQuestionSchema>;\nexport type AnyQuestion = z.infer<typeof anyQuestionSchema>;\n\nexport type EssayAnswer = z.infer<typeof essayAnswerSchema>;\nexport type MultipleChoiceAnswer = z.infer<typeof multipleChoiceAnswerSchema>;\nexport type ImageUploadAnswer = z.infer<typeof imageUploadAnswerSchema>;\nexport type MixedAnswer = z.infer<typeof mixedAnswerSchema>;\nexport type AnyAnswer = z.infer<typeof anyAnswerSchema>;\n\nexport type AnswersData = z.infer<typeof answersDataSchema>;\nexport type QuestionBuilder = z.infer<typeof questionBuilderSchema>;\n\n// Utility functions for question validation\nexport const validateQuestionByType = (question: CreateMissionQuestion): boolean => {\n  try {\n    anyQuestionSchema.parse(question);\n    return true;\n  } catch {\n    return false;\n  }\n};\n\nexport const getQuestionSchemaByType = (type: string) => {\n  switch (type) {\n    case 'essay':\n      return essayQuestionSchema;\n    case 'multiple_choice':\n      return multipleChoiceQuestionSchema;\n    case 'image_upload':\n      return imageUploadQuestionSchema;\n    case 'mixed':\n      return mixedQuestionSchema;\n    default:\n      throw new Error(`Unknown question type: ${type}`);\n  }\n};\n\n// Default question templates\nexport const defaultQuestionTemplates = {\n  essay: {\n    mission_id: '',\n    question_text: \"\uc790\uc720\ub86d\uac8c \ub2f5\ubcc0\ud574\uc8fc\uc138\uc694.\",\n    question_type: 'essay' as const,\n    question_order: 1,\n    max_characters: 1000,\n    min_characters: 10,\n    placeholder_text: \"\uc5ec\uae30\uc5d0 \ub2f5\ubcc0\uc744 \uc791\uc131\ud574\uc8fc\uc138\uc694.\",\n    points: 100,\n    is_required: true,\n    correct_answer: null,\n    max_images: null,\n    required_image: null,\n    options: null,\n    multiple_select: null,\n  },\n  multiple_choice: {\n    mission_id: '',\n    question_text: \"\uc62c\ubc14\ub978 \ub2f5\uc744 \uc120\ud0dd\ud574\uc8fc\uc138\uc694.\",\n    question_type: 'multiple_choice' as const,\n    question_order: 1,\n    options: [\n      { text: \"\uc120\ud0dd\uc9c0 1\", is_correct: false },\n      { text: \"\uc120\ud0dd\uc9c0 2\", is_correct: true },\n      { text: \"\uc120\ud0dd\uc9c0 3\", is_correct: false },\n    ],\n    correct_answer: \"\uc120\ud0dd\uc9c0 2\",\n    points: 100,\n    is_required: true,\n    max_characters: null,\n    min_characters: null,\n    max_images: null,\n    required_image: null,\n    placeholder_text: null,\n    multiple_select: false,\n  },\n  image_upload: {\n    mission_id: '',\n    question_text: \"\uc774\ubbf8\uc9c0\ub97c \uc5c5\ub85c\ub4dc\ud574\uc8fc\uc138\uc694.\",\n    question_type: 'image_upload' as const,\n    question_order: 1,\n    max_images: 3,\n    required_image: true,\n    points: 100,\n    is_required: true,\n    correct_answer: null,\n    max_characters: null,\n    min_characters: null,\n    placeholder_text: null,\n    options: null,\n    multiple_select: null,\n  },\n  mixed: {\n    mission_id: '',\n    question_text: \"\ud14d\uc2a4\ud2b8\uc640 \uc774\ubbf8\uc9c0\ub85c \ub2f5\ubcc0\ud574\uc8fc\uc138\uc694.\",\n    question_type: 'mixed' as const,\n    question_order: 1,\n    max_characters: 500,\n    min_characters: 10,\n    max_images: 2,\n    placeholder_text: \"\uc124\uba85\uc744 \uc791\uc131\ud558\uace0 \uc774\ubbf8\uc9c0\ub97c \ucca8\ubd80\ud574\uc8fc\uc138\uc694.\",\n    points: 100,\n    is_required: true,\n    correct_answer: null,\n    required_image: null,\n    options: null,\n    multiple_select: null,\n  },\n} as const;",
+        "numLines": 290,
+        "startLine": 1,
+        "totalLines": 290
+      }
+    }
+  },
+  {
+    "session_id": "2d2a317b-a1e5-42a8-86f2-a32feec5a394",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/2d2a317b-a1e5-42a8-86f2-a32feec5a394.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "TodoWrite",
+    "tool_input": {
+      "todos": [
+        {
+          "content": "Run build to check for compilation errors",
+          "status": "pending",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Run linting to check code quality",
+          "status": "pending",
+          "priority": "high",
+          "id": "2"
+        },
+        {
+          "content": "Run tests to ensure functionality",
+          "status": "pending",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "Commit changes with appropriate message",
+          "status": "pending",
+          "priority": "medium",
+          "id": "4"
+        },
+        {
+          "content": "Push to main branch",
+          "status": "pending",
+          "priority": "medium",
+          "id": "5"
+        }
+      ]
+    },
+    "tool_response": {
+      "oldTodos": [],
+      "newTodos": [
+        {
+          "content": "Run build to check for compilation errors",
+          "status": "pending",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Run linting to check code quality",
+          "status": "pending",
+          "priority": "high",
+          "id": "2"
+        },
+        {
+          "content": "Run tests to ensure functionality",
+          "status": "pending",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "Commit changes with appropriate message",
+          "status": "pending",
+          "priority": "medium",
+          "id": "4"
+        },
+        {
+          "content": "Push to main branch",
+          "status": "pending",
+          "priority": "medium",
+          "id": "5"
+        }
+      ]
+    }
+  },
+  {
+    "session_id": "2d2a317b-a1e5-42a8-86f2-a32feec5a394",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/2d2a317b-a1e5-42a8-86f2-a32feec5a394.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "TodoWrite",
+    "tool_input": {
+      "todos": [
+        {
+          "content": "Run build to check for compilation errors",
+          "status": "in_progress",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Run linting to check code quality",
+          "status": "pending",
+          "priority": "high",
+          "id": "2"
+        },
+        {
+          "content": "Run tests to ensure functionality",
+          "status": "pending",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "Commit changes with appropriate message",
+          "status": "pending",
+          "priority": "medium",
+          "id": "4"
+        },
+        {
+          "content": "Push to main branch",
+          "status": "pending",
+          "priority": "medium",
+          "id": "5"
+        }
+      ]
+    },
+    "tool_response": {
+      "oldTodos": [
+        {
+          "content": "Run build to check for compilation errors",
+          "status": "pending",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Run linting to check code quality",
+          "status": "pending",
+          "priority": "high",
+          "id": "2"
+        },
+        {
+          "content": "Run tests to ensure functionality",
+          "status": "pending",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "Commit changes with appropriate message",
+          "status": "pending",
+          "priority": "medium",
+          "id": "4"
+        },
+        {
+          "content": "Push to main branch",
+          "status": "pending",
+          "priority": "medium",
+          "id": "5"
+        }
+      ],
+      "newTodos": [
+        {
+          "content": "Run build to check for compilation errors",
+          "status": "in_progress",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Run linting to check code quality",
+          "status": "pending",
+          "priority": "high",
+          "id": "2"
+        },
+        {
+          "content": "Run tests to ensure functionality",
+          "status": "pending",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "Commit changes with appropriate message",
+          "status": "pending",
+          "priority": "medium",
+          "id": "4"
+        },
+        {
+          "content": "Push to main branch",
+          "status": "pending",
+          "priority": "medium",
+          "id": "5"
+        }
+      ]
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx",
+      "offset": 40,
+      "limit": 30
+    },
+    "tool_response": {
+      "type": "text",
+      "file": {
+        "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx",
+        "content": "        title: \"\uad8c\ud55c\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.\",\n        type: \"error\",\n      });\n    }\n  }, [role, router]);\n\n  // Load existing questions for edit mode\n  useEffect(() => {\n    const loadExistingQuestions = async () => {\n      if (editMissionData?.id) {\n        setIsLoadingQuestions(true);\n        try {\n          const { data: missionWithQuestions } = await getMissionWithQuestions(editMissionData.id);\n          if (missionWithQuestions?.questions && missionWithQuestions.questions.length > 0) {\n            setQuestions(missionWithQuestions.questions.map(q => ({\n              mission_id: editMissionData.id, // Add mission_id for CreateMissionQuestion type\n              question_text: q.question_text,\n              question_type: q.question_type,\n              question_order: q.question_order,\n              options: q.options,\n              correct_answer: q.correct_answer,\n              max_images: q.max_images,\n              points: q.points,\n              is_required: q.is_required,\n              max_characters: q.max_characters,\n              placeholder_text: q.placeholder_text,\n              required_image: q.required_image,\n              multiple_select: (q as any).multiple_select || false,\n            })));\n            setUseQuestionBuilder(true);",
+        "numLines": 30,
+        "startLine": 40,
+        "totalLines": 566
+      }
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missionQuestions.ts"
+    },
+    "tool_response": {
+      "type": "text",
+      "file": {
+        "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missionQuestions.ts",
+        "content": "import { z } from \"zod\";\nimport { missionTypeEnum } from \"./missions\";\n\n// Mission question base schema matching database structure\nexport const missionQuestionSchema = z.object({\n  id: z.string().uuid(),\n  mission_id: z.string().uuid(),\n  question_text: z.string().min(1, \"\uc9c8\ubb38 \ub0b4\uc6a9\uc740 \ud544\uc218\uc785\ub2c8\ub2e4\"),\n  question_type: missionTypeEnum,\n  question_order: z.number().int().min(0),\n  options: z.any().nullable(), // JSONB field for multiple choice options\n  correct_answer: z.string().nullable(),\n  max_images: z.number().int().min(0).nullable(),\n  points: z.number().int().min(0).nullable(),\n  is_required: z.boolean().nullable(),\n  max_characters: z.number().int().min(1).nullable(),\n  min_characters: z.number().int().min(0).nullable(),\n  placeholder_text: z.string().nullable(),\n  required_image: z.boolean().nullable(),\n  multiple_select: z.boolean().nullable(),\n  created_at: z.string().nullable(),\n  updated_at: z.string().nullable(),\n});\n\n// Create mission question schema (without id, timestamps)\nexport const createMissionQuestionSchema = missionQuestionSchema.omit({\n  id: true,\n  created_at: true,\n  updated_at: true,\n});\n\n// Update mission question schema (all fields optional except mission_id)\nexport const updateMissionQuestionSchema = createMissionQuestionSchema.partial().extend({\n  mission_id: z.string().uuid(),\n});\n\n// Multiple choice option schema\nexport const multipleChoiceOptionSchema = z.object({\n  id: z.string().uuid().optional(), // For frontend tracking\n  text: z.string().min(1, \"\uc120\ud0dd\uc9c0 \ub0b4\uc6a9\uc740 \ud544\uc218\uc785\ub2c8\ub2e4\"),\n  is_correct: z.boolean().optional(),\n});\n\n// Essay question specific validation\nexport const essayQuestionSchema = createMissionQuestionSchema.extend({\n  question_type: z.literal('essay'),\n  max_characters: z.number().int().min(1).optional(),\n  min_characters: z.number().int().min(0).optional(),\n  placeholder_text: z.string().optional(),\n}).refine((data) => {\n  if (data.min_characters && data.max_characters) {\n    return data.min_characters <= data.max_characters;\n  }\n  return true;\n}, {\n  message: \"\ucd5c\uc18c \uae00\uc790\uc218\ub294 \ucd5c\ub300 \uae00\uc790\uc218\ubcf4\ub2e4 \uc791\uac70\ub098 \uac19\uc544\uc57c \ud569\ub2c8\ub2e4\",\n  path: [\"min_characters\"],\n});\n\n// Multiple choice question specific validation\nexport const multipleChoiceQuestionSchema = createMissionQuestionSchema.extend({\n  question_type: z.literal('multiple_choice'),\n  options: z.array(multipleChoiceOptionSchema).min(2, \"\ucd5c\uc18c 2\uac1c\uc758 \uc120\ud0dd\uc9c0\uac00 \ud544\uc694\ud569\ub2c8\ub2e4\"),\n  correct_answer: z.string().min(1, \"\uc815\ub2f5\uc744 \uc120\ud0dd\ud574\uc8fc\uc138\uc694\"),\n  min_characters: z.number().int().min(0).nullable(),\n});\n\n// Image upload question specific validation\nexport const imageUploadQuestionSchema = createMissionQuestionSchema.extend({\n  question_type: z.literal('image_upload'),\n  max_images: z.number().int().min(1).max(10),\n  required_image: z.boolean().optional(),\n  min_characters: z.number().int().min(0).nullable(),\n});\n\n// Mixed question specific validation (text + image)\nexport const mixedQuestionSchema = createMissionQuestionSchema.extend({\n  question_type: z.literal('mixed'),\n  max_characters: z.number().int().min(1).optional(),\n  min_characters: z.number().int().min(0).optional(),\n  max_images: z.number().int().min(1).max(10).optional(),\n  placeholder_text: z.string().optional(),\n  required_image: z.boolean().optional(),\n}).refine((data) => {\n  if (data.min_characters && data.max_characters) {\n    return data.min_characters <= data.max_characters;\n  }\n  return true;\n}, {\n  message: \"\ucd5c\uc18c \uae00\uc790\uc218\ub294 \ucd5c\ub300 \uae00\uc790\uc218\ubcf4\ub2e4 \uc791\uac70\ub098 \uac19\uc544\uc57c \ud569\ub2c8\ub2e4\",\n  path: [\"min_characters\"],\n});\n\n// Union schema for all question types\nexport const anyQuestionSchema = z.union([\n  essayQuestionSchema,\n  multipleChoiceQuestionSchema,\n  imageUploadQuestionSchema,\n  mixedQuestionSchema,\n]);\n\n// Answer schemas for structured post data\nexport const essayAnswerSchema = z.object({\n  question_id: z.string().uuid(),\n  question_order: z.number(),\n  answer_type: z.literal('essay'),\n  answer_text: z.string(),\n  selected_option: z.null(),\n  image_urls: z.array(z.string()).default([]),\n  is_correct: z.boolean().nullable(),\n  points_earned: z.number().nullable(),\n});\n\nexport const multipleChoiceAnswerSchema = z.object({\n  question_id: z.string().uuid(),\n  question_order: z.number(),\n  answer_type: z.literal('multiple_choice'),\n  answer_text: z.string().nullable(),\n  selected_option: z.string(),\n  image_urls: z.array(z.string()).default([]),\n  is_correct: z.boolean().nullable(),\n  points_earned: z.number().nullable(),\n});\n\nexport const imageUploadAnswerSchema = z.object({\n  question_id: z.string().uuid(),\n  question_order: z.number(),\n  answer_type: z.literal('image_upload'),\n  answer_text: z.string().nullable(),\n  selected_option: z.null(),\n  image_urls: z.array(z.string()).min(1, \"\ucd5c\uc18c 1\uac1c\uc758 \uc774\ubbf8\uc9c0\uac00 \ud544\uc694\ud569\ub2c8\ub2e4\"),\n  is_correct: z.boolean().nullable(),\n  points_earned: z.number().nullable(),\n});\n\nexport const mixedAnswerSchema = z.object({\n  question_id: z.string().uuid(),\n  question_order: z.number(),\n  answer_type: z.literal('mixed'),\n  answer_text: z.string().optional(),\n  selected_option: z.null(),\n  image_urls: z.array(z.string()).default([]),\n  is_correct: z.boolean().nullable(),\n  points_earned: z.number().nullable(),\n});\n\n// Union schema for all answer types\nexport const anyAnswerSchema = z.discriminatedUnion(\"answer_type\", [\n  essayAnswerSchema,\n  multipleChoiceAnswerSchema,\n  imageUploadAnswerSchema,\n  mixedAnswerSchema,\n]);\n\n// Complete answers data schema for posts.answers_data field\nexport const answersDataSchema = z.object({\n  answers: z.array(anyAnswerSchema),\n  submission_metadata: z.object({\n    total_questions: z.number().int(),\n    answered_questions: z.number().int(),\n    submission_time: z.string(),\n    auto_graded: z.boolean().optional(),\n    manual_review_required: z.boolean().optional(),\n  }),\n});\n\n// Question builder form schemas for UI\nexport const questionBuilderSchema = z.object({\n  questions: z.array(anyQuestionSchema),\n  mission_id: z.string().uuid(),\n});\n\n// Export types\nexport type MissionQuestion = z.infer<typeof missionQuestionSchema>;\nexport type CreateMissionQuestion = z.infer<typeof createMissionQuestionSchema>;\nexport type UpdateMissionQuestion = z.infer<typeof updateMissionQuestionSchema>;\n\nexport type MultipleChoiceOption = z.infer<typeof multipleChoiceOptionSchema>;\n\nexport type EssayQuestion = z.infer<typeof essayQuestionSchema>;\nexport type MultipleChoiceQuestion = z.infer<typeof multipleChoiceQuestionSchema>;\nexport type ImageUploadQuestion = z.infer<typeof imageUploadQuestionSchema>;\nexport type MixedQuestion = z.infer<typeof mixedQuestionSchema>;\nexport type AnyQuestion = z.infer<typeof anyQuestionSchema>;\n\nexport type EssayAnswer = z.infer<typeof essayAnswerSchema>;\nexport type MultipleChoiceAnswer = z.infer<typeof multipleChoiceAnswerSchema>;\nexport type ImageUploadAnswer = z.infer<typeof imageUploadAnswerSchema>;\nexport type MixedAnswer = z.infer<typeof mixedAnswerSchema>;\nexport type AnyAnswer = z.infer<typeof anyAnswerSchema>;\n\nexport type AnswersData = z.infer<typeof answersDataSchema>;\nexport type QuestionBuilder = z.infer<typeof questionBuilderSchema>;\n\n// Utility functions for question validation\nexport const validateQuestionByType = (question: CreateMissionQuestion): boolean => {\n  try {\n    anyQuestionSchema.parse(question);\n    return true;\n  } catch {\n    return false;\n  }\n};\n\nexport const getQuestionSchemaByType = (type: string) => {\n  switch (type) {\n    case 'essay':\n      return essayQuestionSchema;\n    case 'multiple_choice':\n      return multipleChoiceQuestionSchema;\n    case 'image_upload':\n      return imageUploadQuestionSchema;\n    case 'mixed':\n      return mixedQuestionSchema;\n    default:\n      throw new Error(`Unknown question type: ${type}`);\n  }\n};\n\n// Default question templates\nexport const defaultQuestionTemplates = {\n  essay: {\n    mission_id: '',\n    question_text: \"\uc790\uc720\ub86d\uac8c \ub2f5\ubcc0\ud574\uc8fc\uc138\uc694.\",\n    question_type: 'essay' as const,\n    question_order: 1,\n    max_characters: 1000,\n    min_characters: 10,\n    placeholder_text: \"\uc5ec\uae30\uc5d0 \ub2f5\ubcc0\uc744 \uc791\uc131\ud574\uc8fc\uc138\uc694.\",\n    points: 100,\n    is_required: true,\n    correct_answer: null,\n    max_images: null,\n    required_image: null,\n    options: null,\n    multiple_select: null,\n  },\n  multiple_choice: {\n    mission_id: '',\n    question_text: \"\uc62c\ubc14\ub978 \ub2f5\uc744 \uc120\ud0dd\ud574\uc8fc\uc138\uc694.\",\n    question_type: 'multiple_choice' as const,\n    question_order: 1,\n    options: [\n      { text: \"\uc120\ud0dd\uc9c0 1\", is_correct: false },\n      { text: \"\uc120\ud0dd\uc9c0 2\", is_correct: true },\n      { text: \"\uc120\ud0dd\uc9c0 3\", is_correct: false },\n    ],\n    correct_answer: \"\uc120\ud0dd\uc9c0 2\",\n    points: 100,\n    is_required: true,\n    max_characters: null,\n    min_characters: null,\n    max_images: null,\n    required_image: null,\n    placeholder_text: null,\n    multiple_select: false,\n  },\n  image_upload: {\n    mission_id: '',\n    question_text: \"\uc774\ubbf8\uc9c0\ub97c \uc5c5\ub85c\ub4dc\ud574\uc8fc\uc138\uc694.\",\n    question_type: 'image_upload' as const,\n    question_order: 1,\n    max_images: 3,\n    required_image: true,\n    points: 100,\n    is_required: true,\n    correct_answer: null,\n    max_characters: null,\n    min_characters: null,\n    placeholder_text: null,\n    options: null,\n    multiple_select: null,\n  },\n  mixed: {\n    mission_id: '',\n    question_text: \"\ud14d\uc2a4\ud2b8\uc640 \uc774\ubbf8\uc9c0\ub85c \ub2f5\ubcc0\ud574\uc8fc\uc138\uc694.\",\n    question_type: 'mixed' as const,\n    question_order: 1,\n    max_characters: 500,\n    min_characters: 10,\n    max_images: 2,\n    placeholder_text: \"\uc124\uba85\uc744 \uc791\uc131\ud558\uace0 \uc774\ubbf8\uc9c0\ub97c \ucca8\ubd80\ud574\uc8fc\uc138\uc694.\",\n    points: 100,\n    is_required: true,\n    correct_answer: null,\n    required_image: null,\n    options: null,\n    multiple_select: null,\n  },\n} as const;",
+        "numLines": 290,
+        "startLine": 1,
+        "totalLines": 290
+      }
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx",
+      "old_string": "            setQuestions(missionWithQuestions.questions.map(q => ({\n              mission_id: editMissionData.id, // Add mission_id for CreateMissionQuestion type\n              question_text: q.question_text,\n              question_type: q.question_type,\n              question_order: q.question_order,\n              options: q.options,\n              correct_answer: q.correct_answer,\n              max_images: q.max_images,\n              points: q.points,\n              is_required: q.is_required,\n              max_characters: q.max_characters,\n              placeholder_text: q.placeholder_text,\n              required_image: q.required_image,\n              multiple_select: (q as any).multiple_select || false,\n            })));",
+      "new_string": "            setQuestions(missionWithQuestions.questions.map(q => ({\n              mission_id: editMissionData.id, // Add mission_id for CreateMissionQuestion type\n              question_text: q.question_text,\n              question_type: q.question_type,\n              question_order: q.question_order,\n              options: q.options,\n              correct_answer: q.correct_answer,\n              max_images: q.max_images,\n              points: q.points,\n              is_required: q.is_required,\n              max_characters: q.max_characters,\n              min_characters: q.min_characters || null,\n              placeholder_text: q.placeholder_text,\n              required_image: q.required_image,\n              multiple_select: (q as any).multiple_select || false,\n            })));"
+    },
+    "tool_response": {
+      "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx",
+      "oldString": "            setQuestions(missionWithQuestions.questions.map(q => ({\n              mission_id: editMissionData.id, // Add mission_id for CreateMissionQuestion type\n              question_text: q.question_text,\n              question_type: q.question_type,\n              question_order: q.question_order,\n              options: q.options,\n              correct_answer: q.correct_answer,\n              max_images: q.max_images,\n              points: q.points,\n              is_required: q.is_required,\n              max_characters: q.max_characters,\n              placeholder_text: q.placeholder_text,\n              required_image: q.required_image,\n              multiple_select: (q as any).multiple_select || false,\n            })));",
+      "newString": "            setQuestions(missionWithQuestions.questions.map(q => ({\n              mission_id: editMissionData.id, // Add mission_id for CreateMissionQuestion type\n              question_text: q.question_text,\n              question_type: q.question_type,\n              question_order: q.question_order,\n              options: q.options,\n              correct_answer: q.correct_answer,\n              max_images: q.max_images,\n              points: q.points,\n              is_required: q.is_required,\n              max_characters: q.max_characters,\n              min_characters: q.min_characters || null,\n              placeholder_text: q.placeholder_text,\n              required_image: q.required_image,\n              multiple_select: (q as any).multiple_select || false,\n            })));",
+      "originalFile": "\"use client\";\n\nimport { CreateMission, Mission, missionTypeEnum } from \"@/types\";\nimport { CreateMissionQuestion } from \"@/types/missionQuestions\";\nimport { useForm } from \"react-hook-form\";\nimport { zodResolver } from \"@hookform/resolvers/zod\";\nimport { createMissionSchema } from \"@/types\";\nimport InputAndTitle from \"@/components/InputAndTitle\";\nimport { createListCollection, Input, Portal, Select } from \"@chakra-ui/react\";\nimport Button from \"@/components/common/Button\";\nimport styled from \"@emotion/styled\";\nimport Heading from \"@/components/Text/Heading\";\nimport Text from \"@/components/Text/Text\";\nimport { toaster } from \"@/components/ui/toaster\";\nimport { useRouter } from \"next/navigation\";\nimport { useEffect, useState, useMemo } from \"react\";\nimport { \n  updateMission, \n  createMission, \n  createMissionWithQuestions,\n  getMissionWithQuestions \n} from \"@/utils/data/mission\";\nimport { useSupabaseAuth } from \"@/hooks/useSupabaseAuth\";\nimport QuestionBuilder from \"@/components/mission/QuestionBuilder/QuestionBuilder\";\nimport BackButton from \"@/components/common/BackButton\";\nimport Spinner from \"@/components/common/Spinner\";\n\nexport default function NewMissionPage({ editMissionData }: { editMissionData?: Mission }) {\n  const router = useRouter();\n  const { role } = useSupabaseAuth();\n  const [missionType, setMissionType] = useState<string>(editMissionData?.mission_type || 'essay');\n  const [useQuestionBuilder, setUseQuestionBuilder] = useState<boolean>(false);\n  const [questions, setQuestions] = useState<CreateMissionQuestion[]>([]);\n  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);\n  \n  useEffect(() => {\n    if (role === \"user\") {\n      router.push(\"/\");\n      toaster.create({\n        title: \"\uad8c\ud55c\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.\",\n        type: \"error\",\n      });\n    }\n  }, [role, router]);\n\n  // Load existing questions for edit mode\n  useEffect(() => {\n    const loadExistingQuestions = async () => {\n      if (editMissionData?.id) {\n        setIsLoadingQuestions(true);\n        try {\n          const { data: missionWithQuestions } = await getMissionWithQuestions(editMissionData.id);\n          if (missionWithQuestions?.questions && missionWithQuestions.questions.length > 0) {\n            setQuestions(missionWithQuestions.questions.map(q => ({\n              mission_id: editMissionData.id, // Add mission_id for CreateMissionQuestion type\n              question_text: q.question_text,\n              question_type: q.question_type,\n              question_order: q.question_order,\n              options: q.options,\n              correct_answer: q.correct_answer,\n              max_images: q.max_images,\n              points: q.points,\n              is_required: q.is_required,\n              max_characters: q.max_characters,\n              placeholder_text: q.placeholder_text,\n              required_image: q.required_image,\n              multiple_select: (q as any).multiple_select || false,\n            })));\n            setUseQuestionBuilder(true);\n          }\n        } catch (error) {\n          console.error('Error loading questions:', error);\n        } finally {\n          setIsLoadingQuestions(false);\n        }\n      }\n    };\n\n    loadExistingQuestions();\n  }, [editMissionData?.id]);\n\n  // Helper function to convert mission type for API\n  const convertMissionType = (type: string): string => {\n    // Handle legacy types\n    const legacyTypeMapping: Record<string, string> = {\n      'text': 'essay',\n      'image': 'image_upload',\n      'team': 'essay',\n      'individual': 'essay',\n      '\uacfc\uc81c': 'essay'\n    };\n    \n    return legacyTypeMapping[type] || type;\n  };\n  \n  const {\n    register,\n    setValue,\n    handleSubmit,\n    watch,\n    formState: { errors },\n  } = useForm<CreateMission>({\n    resolver: zodResolver(createMissionSchema),\n    defaultValues: {\n      ...editMissionData,\n      mission_type: editMissionData?.mission_type || 'essay'\n    },\n  });\n\n  console.log(errors);\n\n  // Calculate total points from questions\n  const totalPoints = useMemo(() => {\n    if (!useQuestionBuilder || questions.length === 0) {\n      return editMissionData?.points || 100;\n    }\n    return questions.reduce((sum, question) => sum + (question.points || 0), 0);\n  }, [useQuestionBuilder, questions, editMissionData?.points]);\n\n  // Initialize form with mission type\n  useEffect(() => {\n    const initialType = editMissionData?.mission_type || 'essay';\n    setMissionType(initialType);\n    setValue('mission_type', convertMissionType(initialType) as 'essay' | 'multiple_choice' | 'image_upload' | 'mixed');\n  }, [editMissionData?.mission_type, setValue]);\n\n  // Update points when questions change\n  useEffect(() => {\n    if (useQuestionBuilder) {\n      setValue('points', totalPoints);\n    }\n  }, [totalPoints, useQuestionBuilder, setValue]);\n\n  const onSubmit = async (data: CreateMission) => {\n    console.log('Form submission data:', data);\n    console.log('Current missionType state:', missionType);\n    \n    // Validation\n    if (useQuestionBuilder && questions.length === 0) {\n      toaster.create({\n        title: \"\ucd5c\uc18c 1\uac1c\uc758 \uc9c8\ubb38\uc744 \ucd94\uac00\ud574\uc8fc\uc138\uc694.\",\n        type: \"error\",\n      });\n      return;\n    }\n\n    if (!useQuestionBuilder && (!data.description || data.description.trim() === \"\")) {\n      toaster.create({\n        title: \"\ubbf8\uc158 \uc124\uba85\uc744 \uc785\ub825\ud574\uc8fc\uc138\uc694.\",\n        type: \"error\",\n      });\n      return;\n    }\n\n    if (!data.mission_type) {\n      toaster.create({\n        title: \"\ubbf8\uc158 \ud0c0\uc785\uc744 \uc120\ud0dd\ud574\uc8fc\uc138\uc694.\",\n        type: \"error\",\n      });\n      return;\n    }\n\n    try {\n      const missionData: CreateMission = {\n        ...data,\n      };\n      \n      console.log('Final mission data to submit:', missionData);\n\n      if (editMissionData) {\n        // Update existing mission\n        const { error: updateError } = await updateMission(editMissionData.id, missionData);\n        if (updateError) throw updateError;\n\n        // TODO: Handle question updates for edit mode\n        // This would require additional API endpoints for updating questions\n      } else {\n        // Create new mission\n        if (useQuestionBuilder && questions.length > 0) {\n          const { error: createError } = await createMissionWithQuestions(missionData, questions);\n          if (createError) throw createError;\n        } else {\n          const { error: createError } = await createMission(missionData);\n          if (createError) throw createError;\n        }\n      }\n\n      toaster.create({\n        title: `${editMissionData ? \"\ubbf8\uc158 \uc218\uc815\" : \"\ubbf8\uc158 \uc0dd\uc131\"} \uc131\uacf5`,\n        type: \"success\",\n      });\n\n      router.back();\n    } catch (error: any) {\n      console.error('Mission save error:', error);\n      toaster.create({\n        title: `${editMissionData ? \"\ubbf8\uc158 \uc218\uc815\" : \"\ubbf8\uc158 \uc0dd\uc131\"} \uc2e4\ud328`,\n        description: error.message,\n        type: \"error\",\n      });\n    }\n  };\n\n  const missionTypes = createListCollection({\n    items: [\n      { label: \"\uc8fc\uad00\uc2dd (Essay)\", value: \"essay\" },\n      { label: \"\uac1d\uad00\uc2dd (Multiple Choice)\", value: \"multiple_choice\" },\n      { label: \"\uc774\ubbf8\uc9c0 \uc5c5\ub85c\ub4dc (Image Upload)\", value: \"image_upload\" },\n      { label: \"\ubcf5\ud569\ud615 (Mixed)\", value: \"mixed\" },\n      // Legacy types for backward compatibility\n      { label: \"\ud14d\uc2a4\ud2b8 (Legacy)\", value: \"text\" },\n      { label: \"\uc774\ubbf8\uc9c0 (Legacy)\", value: \"image\" },\n      { label: \"\ud300 \ubbf8\uc158 (Legacy)\", value: \"team\" },\n    ],\n  });\n\n  const handleMissionTypeChange = (value: string) => {\n    setMissionType(value);\n    const convertedType = convertMissionType(value);\n    setValue('mission_type', convertedType as 'essay' | 'multiple_choice' | 'image_upload' | 'mixed');\n    \n    // Auto-enable question builder for new mission types\n    if (['essay', 'multiple_choice', 'image_upload', 'mixed'].includes(value)) {\n      setUseQuestionBuilder(true);\n    }\n  };\n\n  return (\n    <NewMissionPageContainer>\n      <div className=\"page-header\">\n        <BackButton />\n      </div>\n      <div className=\"input-container\">\n        <Heading level={3}>\ubbf8\uc158 {editMissionData ? \"\uc218\uc815\" : \"\uc0dd\uc131\"}</Heading>\n        <InputAndTitle title=\"\ubbf8\uc158 \uc774\ub984\" errorMessage={errors.name?.message}>\n          <Input {...register(\"name\")} placeholder=\"\ubbf8\uc158 \uc774\ub984\uc744 \uc785\ub825\ud574\uc8fc\uc138\uc694.\" />\n        </InputAndTitle>\n        <InputAndTitle title=\"\ubbf8\uc158 \uc810\uc218\" errorMessage={errors.points?.message}>\n          {useQuestionBuilder ? (\n            <PointsDisplayContainer>\n              <PointsDisplay>{totalPoints}\uc810</PointsDisplay>\n              <Text variant=\"caption\" color=\"var(--grey-600)\">\n                (\uc9c8\ubb38\ubcc4 \uc810\uc218\uc758 \ud569\uacc4)\n              </Text>\n            </PointsDisplayContainer>\n          ) : (\n            <Input\n              {...register(\"points\", {\n                valueAsNumber: true,\n              })}\n              placeholder=\"\ubbf8\uc158 \uc810\uc218\ub97c \uc785\ub825\ud574\uc8fc\uc138\uc694.(\uc22b\uc790)\"\n            />\n          )}\n        </InputAndTitle>\n        <InputAndTitle\n          title=\"\ubbf8\uc158 \ud0c0\uc785\"\n          errorMessage={errors.mission_type?.message}\n        >\n          <Select.Root\n            collection={missionTypes}\n            backgroundColor=\"white\"\n            value={[missionType]}\n            onValueChange={(details) => handleMissionTypeChange(details.value[0])}\n          >\n            <Select.HiddenSelect />\n            <Select.Control>\n              <Select.Trigger>\n                <Select.ValueText placeholder=\"\ubbf8\uc158 \ud0c0\uc785\" />\n              </Select.Trigger>\n              <Select.IndicatorGroup>\n                <Select.Indicator />\n              </Select.IndicatorGroup>\n            </Select.Control>\n            <Portal>\n              <Select.Positioner>\n                <Select.Content>\n                  {missionTypes.items.map((type) => (\n                    <Select.Item item={type} key={type.value}>\n                      {type.label}\n                      <Select.ItemIndicator />\n                    </Select.Item>\n                  ))}\n                </Select.Content>\n              </Select.Positioner>\n            </Portal>\n          </Select.Root>\n        </InputAndTitle>\n\n        <MissionCreationModeContainer>\n          <ModeHeaderContainer>\n            <Text variant=\"body\" fontWeight=\"bold\">\ubbf8\uc158 \uc0dd\uc131 \ubc29\uc2dd</Text>\n            <HelpText variant=\"caption\" color=\"var(--grey-600)\">\n              \ubbf8\uc158\uc758 \ubcf5\uc7a1\ub3c4\uc5d0 \ub530\ub77c \uc801\uc808\ud55c \ubc29\uc2dd\uc744 \uc120\ud0dd\ud558\uc138\uc694\n            </HelpText>\n          </ModeHeaderContainer>\n          <ModeToggleContainer>\n            <ModeToggleButton \n              active={!useQuestionBuilder}\n              onClick={() => setUseQuestionBuilder(false)}\n            >\n              <ModeIconContainer>\ud83d\udcdd</ModeIconContainer>\n              <ModeTitle>\uac04\ub2e8 \ubaa8\ub4dc</ModeTitle>\n              <ModeDescription variant=\"caption\">\n                \ud14d\uc2a4\ud2b8 \uc124\uba85\ub9cc\uc73c\ub85c \ubbf8\uc158 \uc0dd\uc131\n              </ModeDescription>\n              <ModeFeatures variant=\"caption\">\n                \u2022 \ube60\ub978 \uc0dd\uc131 \u2022 \uc790\uc720 \ud615\uc2dd\n              </ModeFeatures>\n            </ModeToggleButton>\n            <ModeToggleButton \n              active={useQuestionBuilder}\n              onClick={() => setUseQuestionBuilder(true)}\n            >\n              <ModeIconContainer>\ud83c\udfd7\ufe0f</ModeIconContainer>\n              <ModeTitle>\uace0\uae09 \ubaa8\ub4dc</ModeTitle>\n              <ModeDescription variant=\"caption\">\n                \uad6c\uc870\ud654\ub41c \uc9c8\ubb38\uc73c\ub85c \ubbf8\uc158 \uc0dd\uc131\n              </ModeDescription>\n              <ModeFeatures variant=\"caption\">\n                \u2022 \ub2e4\uc591\ud55c \uc9c8\ubb38 \ud0c0\uc785 \u2022 \uc790\ub3d9 \ucc44\uc810\n              </ModeFeatures>\n            </ModeToggleButton>\n          </ModeToggleContainer>\n        </MissionCreationModeContainer>\n        {!useQuestionBuilder ? (\n          <InputAndTitle\n            title=\"\ubbf8\uc158 \uc124\uba85\"\n            errorMessage={errors.description?.message}\n          >\n            <Input\n              {...register(\"description\")}\n              placeholder=\"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\"\n              as=\"textarea\"\n              minH=\"120px\"\n              resize=\"vertical\"\n            />\n          </InputAndTitle>\n        ) : (\n          <QuestionBuilderSection>\n            <QuestionBuilderHeader>\n              <Text variant=\"body\" fontWeight=\"bold\">\uc9c8\ubb38 \uc124\uc815</Text>\n              <QuestionBuilderHelpContainer>\n                <Text variant=\"caption\" color=\"var(--grey-600)\">\n                  \uc9c8\ubb38\uc744 \ucd94\uac00\ud558\uc5ec \uad6c\uc870\ud654\ub41c \ubbf8\uc158\uc744 \ub9cc\ub4e4\uc5b4\ubcf4\uc138\uc694. \ub2e4\uc591\ud55c \uc720\ud615\uc758 \uc9c8\ubb38\uc744 \uc870\ud569\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.\n                </Text>\n                <QuestionTypeGuide>\n                  <GuideItem>\n                    <GuideIcon>\ud83d\udcdd</GuideIcon>\n                    <Text variant=\"caption\" color=\"var(--grey-700)\">\uc8fc\uad00\uc2dd: \uc790\uc720\ub85c\uc6b4 \ud14d\uc2a4\ud2b8 \ub2f5\ubcc0</Text>\n                  </GuideItem>\n                  <GuideItem>\n                    <GuideIcon>\u2611\ufe0f</GuideIcon>\n                    <Text variant=\"caption\" color=\"var(--grey-700)\">\uac1d\uad00\uc2dd: \uc120\ud0dd\uc9c0 \uc911 \uc815\ub2f5 \uc120\ud0dd</Text>\n                  </GuideItem>\n                  <GuideItem>\n                    <GuideIcon>\ud83d\uddbc\ufe0f</GuideIcon>\n                    <Text variant=\"caption\" color=\"var(--grey-700)\">\uc774\ubbf8\uc9c0: \uc0ac\uc9c4 \uc5c5\ub85c\ub4dc \ub2f5\ubcc0</Text>\n                  </GuideItem>\n                  <GuideItem>\n                    <GuideIcon>\ud83d\udd04</GuideIcon>\n                    <Text variant=\"caption\" color=\"var(--grey-700)\">\ubcf5\ud569\ud615: \ud14d\uc2a4\ud2b8 + \uc774\ubbf8\uc9c0</Text>\n                  </GuideItem>\n                </QuestionTypeGuide>\n              </QuestionBuilderHelpContainer>\n            </QuestionBuilderHeader>\n            {isLoadingQuestions ? (\n              <LoadingContainer>\n                <Spinner />\n                <Text>\uae30\uc874 \uc9c8\ubb38\uc744 \ubd88\ub7ec\uc624\ub294 \uc911...</Text>\n              </LoadingContainer>\n            ) : (\n              <QuestionBuilder\n                questions={questions}\n                onChange={setQuestions}\n                missionId={editMissionData?.id}\n              />\n            )}\n          </QuestionBuilderSection>\n        )}\n      </div>\n      <Button variant=\"flat\" onClick={handleSubmit(onSubmit)}>\n        \ubbf8\uc158 {editMissionData ? \"\uc218\uc815\" : \"\uc0dd\uc131\"}\n      </Button>\n    </NewMissionPageContainer>\n  );\n}\n\nconst NewMissionPageContainer = styled.div`\n  max-width: var(--breakpoint-tablet);\n  margin: 0 auto;\n  display: flex;\n  flex-direction: column;\n  gap: 1rem;\n  width: 100%;\n  justify-content: space-between;\n  min-height: calc(100vh - 100px);\n\n  .page-header {\n    padding: 16px;\n    border-bottom: 1px solid var(--grey-200);\n    \n    @media (max-width: 768px) {\n      padding: 12px;\n    }\n  }\n\n  .input-container {\n    display: flex;\n    flex-direction: column;\n    gap: 1rem;\n    width: 100%;\n    padding: 0 16px;\n    \n    @media (max-width: 768px) {\n      padding: 0 12px;\n    }\n  }\n`;\n\nconst MissionCreationModeContainer = styled.div`\n  display: flex;\n  flex-direction: column;\n  gap: 16px;\n`;\n\nconst ModeHeaderContainer = styled.div`\n  display: flex;\n  flex-direction: column;\n  gap: 4px;\n`;\n\nconst HelpText = styled(Text)`\n  font-style: italic;\n`;\n\nconst ModeToggleContainer = styled.div`\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 12px;\n  \n  @media (max-width: 768px) {\n    grid-template-columns: 1fr;\n    gap: 8px;\n  }\n`;\n\nconst ModeToggleButton = styled.button<{ active: boolean }>`\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 8px;\n  padding: 20px 16px;\n  border: 2px solid ${props => props.active ? 'var(--primary-500)' : 'var(--grey-200)'};\n  border-radius: 12px;\n  cursor: pointer;\n  transition: all 0.2s;\n  background: ${props => props.active ? 'var(--primary-50)' : 'white'};\n  box-shadow: ${props => props.active ? '0 4px 12px rgba(59, 130, 246, 0.15)' : '0 2px 4px rgba(0, 0, 0, 0.05)'};\n  \n  &:hover {\n    border-color: ${props => props.active ? 'var(--primary-600)' : 'var(--primary-300)'};\n    transform: translateY(-2px);\n    box-shadow: ${props => props.active ? '0 6px 16px rgba(59, 130, 246, 0.2)' : '0 4px 8px rgba(0, 0, 0, 0.1)'};\n  }\n`;\n\nconst ModeIconContainer = styled.div`\n  font-size: 32px;\n  margin-bottom: 4px;\n`;\n\nconst ModeTitle = styled(Text)`\n  font-weight: 600;\n  font-size: 16px;\n  color: var(--grey-900);\n  margin-bottom: 4px;\n`;\n\nconst ModeDescription = styled(Text)`\n  color: var(--grey-600);\n  text-align: center;\n  margin-bottom: 8px;\n`;\n\nconst ModeFeatures = styled(Text)`\n  color: var(--grey-500);\n  font-size: 12px;\n  text-align: center;\n`;\n\nconst QuestionBuilderSection = styled.div`\n  display: flex;\n  flex-direction: column;\n  gap: 20px;\n  padding: 20px;\n  border: 2px solid var(--primary-200);\n  border-radius: 12px;\n  background: linear-gradient(135deg, var(--primary-25) 0%, white 100%);\n`;\n\nconst QuestionBuilderHeader = styled.div`\n  display: flex;\n  flex-direction: column;\n  gap: 12px;\n  margin-bottom: 8px;\n`;\n\nconst QuestionBuilderHelpContainer = styled.div`\n  display: flex;\n  flex-direction: column;\n  gap: 12px;\n`;\n\nconst QuestionTypeGuide = styled.div`\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));\n  gap: 8px;\n  \n  @media (max-width: 768px) {\n    grid-template-columns: 1fr;\n  }\n`;\n\nconst GuideItem = styled.div`\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 8px 12px;\n  background: white;\n  border-radius: 8px;\n  border: 1px solid var(--grey-200);\n`;\n\nconst GuideIcon = styled.span`\n  font-size: 16px;\n  min-width: 20px;\n`;\n\nconst LoadingContainer = styled.div`\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  gap: 12px;\n  padding: 40px;\n  background: white;\n  border-radius: 8px;\n  border: 1px solid var(--grey-200);\n`;\n\nconst PointsDisplayContainer = styled.div`\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 12px 16px;\n  background: var(--grey-50);\n  border: 1px solid var(--grey-200);\n  border-radius: 6px;\n`;\n\nconst PointsDisplay = styled.div`\n  font-size: 16px;\n  font-weight: 600;\n  color: var(--primary-600);\n`;\n",
+      "structuredPatch": [
+        {
+          "oldStart": 62,
+          "oldLines": 6,
+          "newStart": 62,
+          "newLines": 7,
+          "lines": [
+            "               points: q.points,",
+            "               is_required: q.is_required,",
+            "               max_characters: q.max_characters,",
+            "+              min_characters: q.min_characters || null,",
+            "               placeholder_text: q.placeholder_text,",
+            "               required_image: q.required_image,",
+            "               multiple_select: (q as any).multiple_select || false,"
+          ]
+        }
+      ],
+      "userModified": false,
+      "replaceAll": false
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "getMissionWithQuestions",
+      "glob": "**/*.ts",
+      "output_mode": "files_with_matches"
+    },
+    "tool_response": {
+      "mode": "files_with_matches",
+      "filenames": [
+        "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts",
+        "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts"
+      ],
+      "numFiles": 2
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts",
+      "offset": 100,
+      "limit": 50
+    },
+    "tool_response": {
+      "type": "text",
+      "file": {
+        "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts",
+        "content": "      };\n      questions = [defaultQuestion];\n    }\n    \n    // Create questions if provided\n    if (questions.length > 0) {\n      const questionsWithMissionId = questions.map((q, index) => ({\n        ...q,\n        mission_id: missionData.id,\n        question_order: q.question_order || index + 1,\n      }));\n      \n      const { error: questionsError } = await supabase\n        .from(\"mission_questions\")\n        .insert(questionsWithMissionId);\n      \n      if (questionsError) {\n        // Cleanup: delete the mission if questions creation failed\n        await supabase.from(\"missions\").delete().eq(\"id\", missionData.id);\n        throw questionsError;\n      }\n    }\n    \n    return { data: missionData, error: null };\n  } catch (error: any) {\n    return { data: null, error };\n  }\n}\n\n// Mission Questions CRUD Operations\n\nexport async function getMissionQuestions(missionId: string) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"mission_questions\")\n    .select(\"*\")\n    .eq(\"mission_id\", missionId)\n    .order(\"question_order\", { ascending: true });\n  \n  return { data, error };\n}\n\nexport async function createMissionQuestion(question: CreateMissionQuestion) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"mission_questions\")\n    .insert(question)\n    .select()\n    .single();\n  ",
+        "numLines": 50,
+        "startLine": 100,
+        "totalLines": 253
+      }
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "getMissionWithQuestions",
+      "glob": "**/*.ts",
+      "output_mode": "content",
+      "-B": 5,
+      "-A": 20
+    },
+    "tool_response": {
+      "mode": "content",
+      "numFiles": 0,
+      "filenames": [],
+      "content": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-import useSWR from 'swr';\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-import { createClient } from \"@/utils/supabase/client\";\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-import { Mission, CreateMission, UpdateMission } from '@/types';\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-import { CreateMissionQuestion } from '@/types/missionQuestions';\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-import { \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts:  getMissionWithQuestions as getMissionWithQuestionsAPI,\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-  createMissionWithQuestions as createMissionWithQuestionsAPI,\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-  migrateLegacyMission \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-} from '@/utils/data/mission';\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-import { useCallback } from 'react';\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-/**\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts- * \ubbf8\uc158 \ub370\uc774\ud130\ub97c \uad00\ub9ac\ud558\ub294 \ud6c5\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts- * @param weekId \uc8fc\ucc28 ID (0\uc774\uba74 \ubaa8\ub4e0 \ubbf8\uc158 \uac00\uc838\uc624\uae30)\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts- * @returns \ubbf8\uc158 \ub370\uc774\ud130\uc640 CRUD \ud568\uc218\ub4e4\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts- */\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-export function useMission() {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-  // \ub370\uc774\ud130 \uac00\uc838\uc624\uae30 \ud568\uc218\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-  const fetcher = useCallback(async () => {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    const supabase = createClient();\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    // \ubaa8\ub4e0 \ubbf8\uc158 \uac00\uc838\uc624\uae30\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    const { data, error } = await supabase\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-      .from(\"missions\")\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-      .select(\"*\");\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    \n--\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-  /**\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-   * \uc9c8\ubb38\uacfc \ud568\uaed8 \ubbf8\uc158 \uc870\ud68c \ud568\uc218 (Enhanced)\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-   * @param id \uc870\ud68c\ud560 \ubbf8\uc158 ID\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-   * @returns \ubbf8\uc158 \ub370\uc774\ud130 (\uc9c8\ubb38 \ud3ec\ud568)\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-   */\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts:  const getMissionWithQuestionsById = useCallback(async (id: string) => {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts:    const { data, error } = await getMissionWithQuestionsAPI(id);\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    if (error) {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-      throw new Error(error.message);\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    }\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    return data;\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-  }, []);\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-  /**\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-   * \ub808\uac70\uc2dc \ubbf8\uc158\uc744 \uc0c8 \ud615\uc2dd\uc73c\ub85c \ub9c8\uc774\uadf8\ub808\uc774\uc158\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-   * @param id \ub9c8\uc774\uadf8\ub808\uc774\uc158\ud560 \ubbf8\uc158 ID\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-   * @returns \ub9c8\uc774\uadf8\ub808\uc774\uc158 \uacb0\uacfc\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-   */\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-  const migrateMissionToQuestions = useCallback(async (id: string) => {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    const { data, error } = await migrateLegacyMission(id);\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    if (error) {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-      throw new Error(error.message);\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    }\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    \n--\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    getMissionById,\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    mutate, // \uc218\ub3d9\uc73c\ub85c \ub370\uc774\ud130\ub97c \ub2e4\uc2dc \uac00\uc838\uc624\uae30 \uc704\ud55c \ud568\uc218\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    // Enhanced functions for missions with questions\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    createMissionWithQuestions,\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts:    getMissionWithQuestionsById,\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-    migrateMissionToQuestions,\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-  };\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMission.ts-} \n--\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  );\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  return { data, error };\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-}\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-// Get mission with questions\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts:export async function getMissionWithQuestions(id: string) {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  const supabase = createClient();\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  const { data, error } = await supabase\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-    .from(\"missions\")\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-    .select(`\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-      *,\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-      questions:mission_questions(*)\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-    `)\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-    .eq(\"id\", id)\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-    .single();\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  if (error) return { data: null, error };\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  // Sort questions by order\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  const mission = data as MissionWithQuestions;\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  if (mission.questions) {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-    mission.questions.sort((a, b) => a.question_order - b.question_order);\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  }\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-  return { data: mission, error: null };\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts-}",
+      "numLines": 91
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "mission_questions.*\\{",
+      "glob": "src/types/database.types.ts",
+      "output_mode": "content",
+      "-A": 20
+    },
+    "tool_response": {
+      "mode": "content",
+      "numFiles": 0,
+      "filenames": [],
+      "content": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts:      mission_questions: {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-        Row: {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          correct_answer: string | null\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          created_at: string | null\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          id: string\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          is_required: boolean | null\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          max_characters: number | null\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          max_images: number | null\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          min_characters: number | null\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          mission_id: string\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          multiple_select: boolean | null\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          options: Json | null\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          placeholder_text: string | null\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          points: number | null\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          question_order: number\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          question_text: string\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          question_type: Database[\"public\"][\"Enums\"][\"mission_type\"]\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          required_image: boolean | null\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-          updated_at: string | null\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-        }\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/database.types.ts-        Insert: {",
+      "numLines": 21
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx",
+      "offset": 1,
+      "limit": 20
+    },
+    "tool_response": {
+      "type": "text",
+      "file": {
+        "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx",
+        "content": "\"use client\";\n\nimport { CreateMission, Mission, missionTypeEnum } from \"@/types\";\nimport { CreateMissionQuestion } from \"@/types/missionQuestions\";\nimport { useForm } from \"react-hook-form\";\nimport { zodResolver } from \"@hookform/resolvers/zod\";\nimport { createMissionSchema } from \"@/types\";\nimport InputAndTitle from \"@/components/InputAndTitle\";\nimport { createListCollection, Input, Portal, Select } from \"@chakra-ui/react\";\nimport Button from \"@/components/common/Button\";\nimport styled from \"@emotion/styled\";\nimport Heading from \"@/components/Text/Heading\";\nimport Text from \"@/components/Text/Text\";\nimport { toaster } from \"@/components/ui/toaster\";\nimport { useRouter } from \"next/navigation\";\nimport { useEffect, useState, useMemo } from \"react\";\nimport { \n  updateMission, \n  createMission, \n  createMissionWithQuestions,",
+        "numLines": 20,
+        "startLine": 1,
+        "totalLines": 567
+      }
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "getMissionWithQuestions",
+      "glob": "src/app/mission/create/client.tsx",
+      "output_mode": "content",
+      "-B": 5,
+      "-A": 5
+    },
+    "tool_response": {
+      "mode": "content",
+      "numFiles": 0,
+      "filenames": [],
+      "content": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-import { useEffect, useState, useMemo } from \"react\";\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-import { \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-  updateMission, \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-  createMission, \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-  createMissionWithQuestions,\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx:  getMissionWithQuestions \n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-} from \"@/utils/data/mission\";\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-import { useSupabaseAuth } from \"@/hooks/useSupabaseAuth\";\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-import QuestionBuilder from \"@/components/mission/QuestionBuilder/QuestionBuilder\";\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-import BackButton from \"@/components/common/BackButton\";\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-import Spinner from \"@/components/common/Spinner\";\n--\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-  useEffect(() => {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-    const loadExistingQuestions = async () => {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-      if (editMissionData?.id) {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-        setIsLoadingQuestions(true);\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-        try {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx:          const { data: missionWithQuestions } = await getMissionWithQuestions(editMissionData.id);\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-          if (missionWithQuestions?.questions && missionWithQuestions.questions.length > 0) {\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-            setQuestions(missionWithQuestions.questions.map(q => ({\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-              mission_id: editMissionData.id, // Add mission_id for CreateMissionQuestion type\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-              question_text: q.question_text,\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx-              question_type: q.question_type,",
+      "numLines": 23
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "type MissionWithQuestions",
+      "glob": "**/*.ts",
+      "output_mode": "content",
+      "-A": 5
+    },
+    "tool_response": {
+      "mode": "content",
+      "numFiles": 0,
+      "filenames": [],
+      "content": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts:export type MissionWithQuestions = z.infer<typeof missionWithQuestionsSchema>;",
+      "numLines": 1
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "missionWithQuestionsSchema",
+      "glob": "src/types/missions.ts",
+      "output_mode": "content",
+      "-B": 5,
+      "-A": 10
+    },
+    "tool_response": {
+      "mode": "content",
+      "numFiles": 0,
+      "filenames": [],
+      "content": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-})\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-export const updateMissionSchema = createMissionSchema.partial()\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-// Mission with questions schema for enhanced missions\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts:export const missionWithQuestionsSchema = missionSchema.extend({\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-  questions: z.array(z.object({\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-    id: z.string().uuid(),\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-    question_text: z.string(),\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-    question_type: missionTypeEnum,\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-    question_order: z.number(),\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-    options: z.any().nullable(), // JSONB field for multiple choice options\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-    correct_answer: z.string().nullable(),\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-    max_images: z.number().nullable(),\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-    points: z.number().nullable(),\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-    is_required: z.boolean().nullable(),\n--\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-export type MissionType = z.infer<typeof missionTypeEnum>;\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-export type Mission = z.infer<typeof missionSchema>;\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-export type CreateMission = z.infer<typeof createMissionSchema>;\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts-export type UpdateMission = z.infer<typeof updateMissionSchema>;\n/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts:export type MissionWithQuestions = z.infer<typeof missionWithQuestionsSchema>;",
+      "numLines": 23
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "TodoWrite",
+    "tool_input": {
+      "todos": [
+        {
+          "content": "PostCard.tsx\uc5d0\uc11c \ubaa8\ub4e0 \ub2f5\ubcc0 \ud0c0\uc785\uc5d0 \ub300\ud574 \uc9c8\ubb38 \ud14d\uc2a4\ud2b8 \ud45c\uc2dc\ud558\ub3c4\ub85d \uc218\uc815",
+          "status": "completed",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "\uc9c8\ubb38 \ud14d\uc2a4\ud2b8\uac00 \uc5c6\uc744 \uacbd\uc6b0\uc758 fallback \ucc98\ub9ac \ucd94\uac00",
+          "status": "completed",
+          "priority": "medium",
+          "id": "2"
+        },
+        {
+          "content": "Fix type error in mission/create/client.tsx - add min_characters to missionWithQuestionsSchema",
+          "status": "in_progress",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "Run build test and verify no type errors",
+          "status": "pending",
+          "priority": "high",
+          "id": "4"
+        },
+        {
+          "content": "Commit the fix and push to dev branch",
+          "status": "pending",
+          "priority": "high",
+          "id": "5"
+        }
+      ]
+    },
+    "tool_response": {
+      "oldTodos": [
+        {
+          "content": "PostCard.tsx\uc5d0\uc11c \ubaa8\ub4e0 \ub2f5\ubcc0 \ud0c0\uc785\uc5d0 \ub300\ud574 \uc9c8\ubb38 \ud14d\uc2a4\ud2b8 \ud45c\uc2dc\ud558\ub3c4\ub85d \uc218\uc815",
+          "status": "completed",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "\uc9c8\ubb38 \ud14d\uc2a4\ud2b8\uac00 \uc5c6\uc744 \uacbd\uc6b0\uc758 fallback \ucc98\ub9ac \ucd94\uac00",
+          "status": "completed",
+          "priority": "medium",
+          "id": "2"
+        }
+      ],
+      "newTodos": [
+        {
+          "content": "PostCard.tsx\uc5d0\uc11c \ubaa8\ub4e0 \ub2f5\ubcc0 \ud0c0\uc785\uc5d0 \ub300\ud574 \uc9c8\ubb38 \ud14d\uc2a4\ud2b8 \ud45c\uc2dc\ud558\ub3c4\ub85d \uc218\uc815",
+          "status": "completed",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "\uc9c8\ubb38 \ud14d\uc2a4\ud2b8\uac00 \uc5c6\uc744 \uacbd\uc6b0\uc758 fallback \ucc98\ub9ac \ucd94\uac00",
+          "status": "completed",
+          "priority": "medium",
+          "id": "2"
+        },
+        {
+          "content": "Fix type error in mission/create/client.tsx - add min_characters to missionWithQuestionsSchema",
+          "status": "in_progress",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "Run build test and verify no type errors",
+          "status": "pending",
+          "priority": "high",
+          "id": "4"
+        },
+        {
+          "content": "Commit the fix and push to dev branch",
+          "status": "pending",
+          "priority": "high",
+          "id": "5"
+        }
+      ]
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts"
+    },
+    "tool_response": {
+      "type": "text",
+      "file": {
+        "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts",
+        "content": "import { z } from \"zod\";\n\n// Mission type ENUM values from database\nexport const missionTypeEnum = z.enum([\n  'essay',\n  'multiple_choice', \n  'image_upload',\n  'mixed'\n]);\n\nexport const missionSchema = z.object({\n  id: z.string().uuid(),\n  name: z.string(),\n  description: z.string().nullable(),\n  mission_type: missionTypeEnum.nullable(),\n  points: z.number().nullable(),\n  created_at: z.string().nullable(),\n  updated_at: z.string().nullable(),\n})\n\nexport const createMissionSchema = missionSchema.omit({\n  id: true,\n  created_at: true,\n  updated_at: true,\n})\n\nexport const updateMissionSchema = createMissionSchema.partial()\n\n// Mission with questions schema for enhanced missions\nexport const missionWithQuestionsSchema = missionSchema.extend({\n  questions: z.array(z.object({\n    id: z.string().uuid(),\n    question_text: z.string(),\n    question_type: missionTypeEnum,\n    question_order: z.number(),\n    options: z.any().nullable(), // JSONB field for multiple choice options\n    correct_answer: z.string().nullable(),\n    max_images: z.number().nullable(),\n    points: z.number().nullable(),\n    is_required: z.boolean().nullable(),\n    max_characters: z.number().nullable(),\n    placeholder_text: z.string().nullable(),\n    required_image: z.boolean().nullable(),\n    created_at: z.string().nullable(),\n    updated_at: z.string().nullable(),\n  })).optional()\n});\n\n// Legacy mission type values for backward compatibility\nexport const legacyMissionTypes = {\n  text: 'essay',\n  image: 'image_upload', \n  team: 'essay', // team missions are essentially essay type\n  individual: 'essay',\n  '\uacfc\uc81c': 'essay'\n} as const;\n\nexport type MissionType = z.infer<typeof missionTypeEnum>;\nexport type Mission = z.infer<typeof missionSchema>;\nexport type CreateMission = z.infer<typeof createMissionSchema>;\nexport type UpdateMission = z.infer<typeof updateMissionSchema>;\nexport type MissionWithQuestions = z.infer<typeof missionWithQuestionsSchema>;\n",
+        "numLines": 63,
+        "startLine": 1,
+        "totalLines": 63
+      }
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts",
+      "old_string": "export const missionWithQuestionsSchema = missionSchema.extend({\n  questions: z.array(z.object({\n    id: z.string().uuid(),\n    question_text: z.string(),\n    question_type: missionTypeEnum,\n    question_order: z.number(),\n    options: z.any().nullable(), // JSONB field for multiple choice options\n    correct_answer: z.string().nullable(),\n    max_images: z.number().nullable(),\n    points: z.number().nullable(),\n    is_required: z.boolean().nullable(),\n    max_characters: z.number().nullable(),\n    placeholder_text: z.string().nullable(),\n    required_image: z.boolean().nullable(),\n    created_at: z.string().nullable(),\n    updated_at: z.string().nullable(),\n  })).optional()\n});",
+      "new_string": "export const missionWithQuestionsSchema = missionSchema.extend({\n  questions: z.array(z.object({\n    id: z.string().uuid(),\n    question_text: z.string(),\n    question_type: missionTypeEnum,\n    question_order: z.number(),\n    options: z.any().nullable(), // JSONB field for multiple choice options\n    correct_answer: z.string().nullable(),\n    max_images: z.number().nullable(),\n    points: z.number().nullable(),\n    is_required: z.boolean().nullable(),\n    max_characters: z.number().nullable(),\n    min_characters: z.number().nullable(),\n    placeholder_text: z.string().nullable(),\n    required_image: z.boolean().nullable(),\n    multiple_select: z.boolean().nullable(),\n    created_at: z.string().nullable(),\n    updated_at: z.string().nullable(),\n  })).optional()\n});"
+    },
+    "tool_response": {
+      "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/types/missions.ts",
+      "oldString": "export const missionWithQuestionsSchema = missionSchema.extend({\n  questions: z.array(z.object({\n    id: z.string().uuid(),\n    question_text: z.string(),\n    question_type: missionTypeEnum,\n    question_order: z.number(),\n    options: z.any().nullable(), // JSONB field for multiple choice options\n    correct_answer: z.string().nullable(),\n    max_images: z.number().nullable(),\n    points: z.number().nullable(),\n    is_required: z.boolean().nullable(),\n    max_characters: z.number().nullable(),\n    placeholder_text: z.string().nullable(),\n    required_image: z.boolean().nullable(),\n    created_at: z.string().nullable(),\n    updated_at: z.string().nullable(),\n  })).optional()\n});",
+      "newString": "export const missionWithQuestionsSchema = missionSchema.extend({\n  questions: z.array(z.object({\n    id: z.string().uuid(),\n    question_text: z.string(),\n    question_type: missionTypeEnum,\n    question_order: z.number(),\n    options: z.any().nullable(), // JSONB field for multiple choice options\n    correct_answer: z.string().nullable(),\n    max_images: z.number().nullable(),\n    points: z.number().nullable(),\n    is_required: z.boolean().nullable(),\n    max_characters: z.number().nullable(),\n    min_characters: z.number().nullable(),\n    placeholder_text: z.string().nullable(),\n    required_image: z.boolean().nullable(),\n    multiple_select: z.boolean().nullable(),\n    created_at: z.string().nullable(),\n    updated_at: z.string().nullable(),\n  })).optional()\n});",
+      "originalFile": "import { z } from \"zod\";\n\n// Mission type ENUM values from database\nexport const missionTypeEnum = z.enum([\n  'essay',\n  'multiple_choice', \n  'image_upload',\n  'mixed'\n]);\n\nexport const missionSchema = z.object({\n  id: z.string().uuid(),\n  name: z.string(),\n  description: z.string().nullable(),\n  mission_type: missionTypeEnum.nullable(),\n  points: z.number().nullable(),\n  created_at: z.string().nullable(),\n  updated_at: z.string().nullable(),\n})\n\nexport const createMissionSchema = missionSchema.omit({\n  id: true,\n  created_at: true,\n  updated_at: true,\n})\n\nexport const updateMissionSchema = createMissionSchema.partial()\n\n// Mission with questions schema for enhanced missions\nexport const missionWithQuestionsSchema = missionSchema.extend({\n  questions: z.array(z.object({\n    id: z.string().uuid(),\n    question_text: z.string(),\n    question_type: missionTypeEnum,\n    question_order: z.number(),\n    options: z.any().nullable(), // JSONB field for multiple choice options\n    correct_answer: z.string().nullable(),\n    max_images: z.number().nullable(),\n    points: z.number().nullable(),\n    is_required: z.boolean().nullable(),\n    max_characters: z.number().nullable(),\n    placeholder_text: z.string().nullable(),\n    required_image: z.boolean().nullable(),\n    created_at: z.string().nullable(),\n    updated_at: z.string().nullable(),\n  })).optional()\n});\n\n// Legacy mission type values for backward compatibility\nexport const legacyMissionTypes = {\n  text: 'essay',\n  image: 'image_upload', \n  team: 'essay', // team missions are essentially essay type\n  individual: 'essay',\n  '\uacfc\uc81c': 'essay'\n} as const;\n\nexport type MissionType = z.infer<typeof missionTypeEnum>;\nexport type Mission = z.infer<typeof missionSchema>;\nexport type CreateMission = z.infer<typeof createMissionSchema>;\nexport type UpdateMission = z.infer<typeof updateMissionSchema>;\nexport type MissionWithQuestions = z.infer<typeof missionWithQuestionsSchema>;\n",
+      "structuredPatch": [
+        {
+          "oldStart": 39,
+          "oldLines": 8,
+          "newStart": 39,
+          "newLines": 10,
+          "lines": [
+            "     points: z.number().nullable(),",
+            "     is_required: z.boolean().nullable(),",
+            "     max_characters: z.number().nullable(),",
+            "+    min_characters: z.number().nullable(),",
+            "     placeholder_text: z.string().nullable(),",
+            "     required_image: z.boolean().nullable(),",
+            "+    multiple_select: z.boolean().nullable(),",
+            "     created_at: z.string().nullable(),",
+            "     updated_at: z.string().nullable(),",
+            "   })).optional()"
+          ]
+        }
+      ],
+      "userModified": false,
+      "replaceAll": false
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx",
+      "old_string": "              multiple_select: (q as any).multiple_select || false,",
+      "new_string": "              multiple_select: q.multiple_select || false,"
+    },
+    "tool_response": {
+      "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/mission/create/client.tsx",
+      "oldString": "              multiple_select: (q as any).multiple_select || false,",
+      "newString": "              multiple_select: q.multiple_select || false,",
+      "originalFile": "\"use client\";\n\nimport { CreateMission, Mission, missionTypeEnum } from \"@/types\";\nimport { CreateMissionQuestion } from \"@/types/missionQuestions\";\nimport { useForm } from \"react-hook-form\";\nimport { zodResolver } from \"@hookform/resolvers/zod\";\nimport { createMissionSchema } from \"@/types\";\nimport InputAndTitle from \"@/components/InputAndTitle\";\nimport { createListCollection, Input, Portal, Select } from \"@chakra-ui/react\";\nimport Button from \"@/components/common/Button\";\nimport styled from \"@emotion/styled\";\nimport Heading from \"@/components/Text/Heading\";\nimport Text from \"@/components/Text/Text\";\nimport { toaster } from \"@/components/ui/toaster\";\nimport { useRouter } from \"next/navigation\";\nimport { useEffect, useState, useMemo } from \"react\";\nimport { \n  updateMission, \n  createMission, \n  createMissionWithQuestions,\n  getMissionWithQuestions \n} from \"@/utils/data/mission\";\nimport { useSupabaseAuth } from \"@/hooks/useSupabaseAuth\";\nimport QuestionBuilder from \"@/components/mission/QuestionBuilder/QuestionBuilder\";\nimport BackButton from \"@/components/common/BackButton\";\nimport Spinner from \"@/components/common/Spinner\";\n\nexport default function NewMissionPage({ editMissionData }: { editMissionData?: Mission }) {\n  const router = useRouter();\n  const { role } = useSupabaseAuth();\n  const [missionType, setMissionType] = useState<string>(editMissionData?.mission_type || 'essay');\n  const [useQuestionBuilder, setUseQuestionBuilder] = useState<boolean>(false);\n  const [questions, setQuestions] = useState<CreateMissionQuestion[]>([]);\n  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);\n  \n  useEffect(() => {\n    if (role === \"user\") {\n      router.push(\"/\");\n      toaster.create({\n        title: \"\uad8c\ud55c\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.\",\n        type: \"error\",\n      });\n    }\n  }, [role, router]);\n\n  // Load existing questions for edit mode\n  useEffect(() => {\n    const loadExistingQuestions = async () => {\n      if (editMissionData?.id) {\n        setIsLoadingQuestions(true);\n        try {\n          const { data: missionWithQuestions } = await getMissionWithQuestions(editMissionData.id);\n          if (missionWithQuestions?.questions && missionWithQuestions.questions.length > 0) {\n            setQuestions(missionWithQuestions.questions.map(q => ({\n              mission_id: editMissionData.id, // Add mission_id for CreateMissionQuestion type\n              question_text: q.question_text,\n              question_type: q.question_type,\n              question_order: q.question_order,\n              options: q.options,\n              correct_answer: q.correct_answer,\n              max_images: q.max_images,\n              points: q.points,\n              is_required: q.is_required,\n              max_characters: q.max_characters,\n              min_characters: q.min_characters || null,\n              placeholder_text: q.placeholder_text,\n              required_image: q.required_image,\n              multiple_select: (q as any).multiple_select || false,\n            })));\n            setUseQuestionBuilder(true);\n          }\n        } catch (error) {\n          console.error('Error loading questions:', error);\n        } finally {\n          setIsLoadingQuestions(false);\n        }\n      }\n    };\n\n    loadExistingQuestions();\n  }, [editMissionData?.id]);\n\n  // Helper function to convert mission type for API\n  const convertMissionType = (type: string): string => {\n    // Handle legacy types\n    const legacyTypeMapping: Record<string, string> = {\n      'text': 'essay',\n      'image': 'image_upload',\n      'team': 'essay',\n      'individual': 'essay',\n      '\uacfc\uc81c': 'essay'\n    };\n    \n    return legacyTypeMapping[type] || type;\n  };\n  \n  const {\n    register,\n    setValue,\n    handleSubmit,\n    watch,\n    formState: { errors },\n  } = useForm<CreateMission>({\n    resolver: zodResolver(createMissionSchema),\n    defaultValues: {\n      ...editMissionData,\n      mission_type: editMissionData?.mission_type || 'essay'\n    },\n  });\n\n  console.log(errors);\n\n  // Calculate total points from questions\n  const totalPoints = useMemo(() => {\n    if (!useQuestionBuilder || questions.length === 0) {\n      return editMissionData?.points || 100;\n    }\n    return questions.reduce((sum, question) => sum + (question.points || 0), 0);\n  }, [useQuestionBuilder, questions, editMissionData?.points]);\n\n  // Initialize form with mission type\n  useEffect(() => {\n    const initialType = editMissionData?.mission_type || 'essay';\n    setMissionType(initialType);\n    setValue('mission_type', convertMissionType(initialType) as 'essay' | 'multiple_choice' | 'image_upload' | 'mixed');\n  }, [editMissionData?.mission_type, setValue]);\n\n  // Update points when questions change\n  useEffect(() => {\n    if (useQuestionBuilder) {\n      setValue('points', totalPoints);\n    }\n  }, [totalPoints, useQuestionBuilder, setValue]);\n\n  const onSubmit = async (data: CreateMission) => {\n    console.log('Form submission data:', data);\n    console.log('Current missionType state:', missionType);\n    \n    // Validation\n    if (useQuestionBuilder && questions.length === 0) {\n      toaster.create({\n        title: \"\ucd5c\uc18c 1\uac1c\uc758 \uc9c8\ubb38\uc744 \ucd94\uac00\ud574\uc8fc\uc138\uc694.\",\n        type: \"error\",\n      });\n      return;\n    }\n\n    if (!useQuestionBuilder && (!data.description || data.description.trim() === \"\")) {\n      toaster.create({\n        title: \"\ubbf8\uc158 \uc124\uba85\uc744 \uc785\ub825\ud574\uc8fc\uc138\uc694.\",\n        type: \"error\",\n      });\n      return;\n    }\n\n    if (!data.mission_type) {\n      toaster.create({\n        title: \"\ubbf8\uc158 \ud0c0\uc785\uc744 \uc120\ud0dd\ud574\uc8fc\uc138\uc694.\",\n        type: \"error\",\n      });\n      return;\n    }\n\n    try {\n      const missionData: CreateMission = {\n        ...data,\n      };\n      \n      console.log('Final mission data to submit:', missionData);\n\n      if (editMissionData) {\n        // Update existing mission\n        const { error: updateError } = await updateMission(editMissionData.id, missionData);\n        if (updateError) throw updateError;\n\n        // TODO: Handle question updates for edit mode\n        // This would require additional API endpoints for updating questions\n      } else {\n        // Create new mission\n        if (useQuestionBuilder && questions.length > 0) {\n          const { error: createError } = await createMissionWithQuestions(missionData, questions);\n          if (createError) throw createError;\n        } else {\n          const { error: createError } = await createMission(missionData);\n          if (createError) throw createError;\n        }\n      }\n\n      toaster.create({\n        title: `${editMissionData ? \"\ubbf8\uc158 \uc218\uc815\" : \"\ubbf8\uc158 \uc0dd\uc131\"} \uc131\uacf5`,\n        type: \"success\",\n      });\n\n      router.back();\n    } catch (error: any) {\n      console.error('Mission save error:', error);\n      toaster.create({\n        title: `${editMissionData ? \"\ubbf8\uc158 \uc218\uc815\" : \"\ubbf8\uc158 \uc0dd\uc131\"} \uc2e4\ud328`,\n        description: error.message,\n        type: \"error\",\n      });\n    }\n  };\n\n  const missionTypes = createListCollection({\n    items: [\n      { label: \"\uc8fc\uad00\uc2dd (Essay)\", value: \"essay\" },\n      { label: \"\uac1d\uad00\uc2dd (Multiple Choice)\", value: \"multiple_choice\" },\n      { label: \"\uc774\ubbf8\uc9c0 \uc5c5\ub85c\ub4dc (Image Upload)\", value: \"image_upload\" },\n      { label: \"\ubcf5\ud569\ud615 (Mixed)\", value: \"mixed\" },\n      // Legacy types for backward compatibility\n      { label: \"\ud14d\uc2a4\ud2b8 (Legacy)\", value: \"text\" },\n      { label: \"\uc774\ubbf8\uc9c0 (Legacy)\", value: \"image\" },\n      { label: \"\ud300 \ubbf8\uc158 (Legacy)\", value: \"team\" },\n    ],\n  });\n\n  const handleMissionTypeChange = (value: string) => {\n    setMissionType(value);\n    const convertedType = convertMissionType(value);\n    setValue('mission_type', convertedType as 'essay' | 'multiple_choice' | 'image_upload' | 'mixed');\n    \n    // Auto-enable question builder for new mission types\n    if (['essay', 'multiple_choice', 'image_upload', 'mixed'].includes(value)) {\n      setUseQuestionBuilder(true);\n    }\n  };\n\n  return (\n    <NewMissionPageContainer>\n      <div className=\"page-header\">\n        <BackButton />\n      </div>\n      <div className=\"input-container\">\n        <Heading level={3}>\ubbf8\uc158 {editMissionData ? \"\uc218\uc815\" : \"\uc0dd\uc131\"}</Heading>\n        <InputAndTitle title=\"\ubbf8\uc158 \uc774\ub984\" errorMessage={errors.name?.message}>\n          <Input {...register(\"name\")} placeholder=\"\ubbf8\uc158 \uc774\ub984\uc744 \uc785\ub825\ud574\uc8fc\uc138\uc694.\" />\n        </InputAndTitle>\n        <InputAndTitle title=\"\ubbf8\uc158 \uc810\uc218\" errorMessage={errors.points?.message}>\n          {useQuestionBuilder ? (\n            <PointsDisplayContainer>\n              <PointsDisplay>{totalPoints}\uc810</PointsDisplay>\n              <Text variant=\"caption\" color=\"var(--grey-600)\">\n                (\uc9c8\ubb38\ubcc4 \uc810\uc218\uc758 \ud569\uacc4)\n              </Text>\n            </PointsDisplayContainer>\n          ) : (\n            <Input\n              {...register(\"points\", {\n                valueAsNumber: true,\n              })}\n              placeholder=\"\ubbf8\uc158 \uc810\uc218\ub97c \uc785\ub825\ud574\uc8fc\uc138\uc694.(\uc22b\uc790)\"\n            />\n          )}\n        </InputAndTitle>\n        <InputAndTitle\n          title=\"\ubbf8\uc158 \ud0c0\uc785\"\n          errorMessage={errors.mission_type?.message}\n        >\n          <Select.Root\n            collection={missionTypes}\n            backgroundColor=\"white\"\n            value={[missionType]}\n            onValueChange={(details) => handleMissionTypeChange(details.value[0])}\n          >\n            <Select.HiddenSelect />\n            <Select.Control>\n              <Select.Trigger>\n                <Select.ValueText placeholder=\"\ubbf8\uc158 \ud0c0\uc785\" />\n              </Select.Trigger>\n              <Select.IndicatorGroup>\n                <Select.Indicator />\n              </Select.IndicatorGroup>\n            </Select.Control>\n            <Portal>\n              <Select.Positioner>\n                <Select.Content>\n                  {missionTypes.items.map((type) => (\n                    <Select.Item item={type} key={type.value}>\n                      {type.label}\n                      <Select.ItemIndicator />\n                    </Select.Item>\n                  ))}\n                </Select.Content>\n              </Select.Positioner>\n            </Portal>\n          </Select.Root>\n        </InputAndTitle>\n\n        <MissionCreationModeContainer>\n          <ModeHeaderContainer>\n            <Text variant=\"body\" fontWeight=\"bold\">\ubbf8\uc158 \uc0dd\uc131 \ubc29\uc2dd</Text>\n            <HelpText variant=\"caption\" color=\"var(--grey-600)\">\n              \ubbf8\uc158\uc758 \ubcf5\uc7a1\ub3c4\uc5d0 \ub530\ub77c \uc801\uc808\ud55c \ubc29\uc2dd\uc744 \uc120\ud0dd\ud558\uc138\uc694\n            </HelpText>\n          </ModeHeaderContainer>\n          <ModeToggleContainer>\n            <ModeToggleButton \n              active={!useQuestionBuilder}\n              onClick={() => setUseQuestionBuilder(false)}\n            >\n              <ModeIconContainer>\ud83d\udcdd</ModeIconContainer>\n              <ModeTitle>\uac04\ub2e8 \ubaa8\ub4dc</ModeTitle>\n              <ModeDescription variant=\"caption\">\n                \ud14d\uc2a4\ud2b8 \uc124\uba85\ub9cc\uc73c\ub85c \ubbf8\uc158 \uc0dd\uc131\n              </ModeDescription>\n              <ModeFeatures variant=\"caption\">\n                \u2022 \ube60\ub978 \uc0dd\uc131 \u2022 \uc790\uc720 \ud615\uc2dd\n              </ModeFeatures>\n            </ModeToggleButton>\n            <ModeToggleButton \n              active={useQuestionBuilder}\n              onClick={() => setUseQuestionBuilder(true)}\n            >\n              <ModeIconContainer>\ud83c\udfd7\ufe0f</ModeIconContainer>\n              <ModeTitle>\uace0\uae09 \ubaa8\ub4dc</ModeTitle>\n              <ModeDescription variant=\"caption\">\n                \uad6c\uc870\ud654\ub41c \uc9c8\ubb38\uc73c\ub85c \ubbf8\uc158 \uc0dd\uc131\n              </ModeDescription>\n              <ModeFeatures variant=\"caption\">\n                \u2022 \ub2e4\uc591\ud55c \uc9c8\ubb38 \ud0c0\uc785 \u2022 \uc790\ub3d9 \ucc44\uc810\n              </ModeFeatures>\n            </ModeToggleButton>\n          </ModeToggleContainer>\n        </MissionCreationModeContainer>\n        {!useQuestionBuilder ? (\n          <InputAndTitle\n            title=\"\ubbf8\uc158 \uc124\uba85\"\n            errorMessage={errors.description?.message}\n          >\n            <Input\n              {...register(\"description\")}\n              placeholder=\"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\"\n              as=\"textarea\"\n              minH=\"120px\"\n              resize=\"vertical\"\n            />\n          </InputAndTitle>\n        ) : (\n          <QuestionBuilderSection>\n            <QuestionBuilderHeader>\n              <Text variant=\"body\" fontWeight=\"bold\">\uc9c8\ubb38 \uc124\uc815</Text>\n              <QuestionBuilderHelpContainer>\n                <Text variant=\"caption\" color=\"var(--grey-600)\">\n                  \uc9c8\ubb38\uc744 \ucd94\uac00\ud558\uc5ec \uad6c\uc870\ud654\ub41c \ubbf8\uc158\uc744 \ub9cc\ub4e4\uc5b4\ubcf4\uc138\uc694. \ub2e4\uc591\ud55c \uc720\ud615\uc758 \uc9c8\ubb38\uc744 \uc870\ud569\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.\n                </Text>\n                <QuestionTypeGuide>\n                  <GuideItem>\n                    <GuideIcon>\ud83d\udcdd</GuideIcon>\n                    <Text variant=\"caption\" color=\"var(--grey-700)\">\uc8fc\uad00\uc2dd: \uc790\uc720\ub85c\uc6b4 \ud14d\uc2a4\ud2b8 \ub2f5\ubcc0</Text>\n                  </GuideItem>\n                  <GuideItem>\n                    <GuideIcon>\u2611\ufe0f</GuideIcon>\n                    <Text variant=\"caption\" color=\"var(--grey-700)\">\uac1d\uad00\uc2dd: \uc120\ud0dd\uc9c0 \uc911 \uc815\ub2f5 \uc120\ud0dd</Text>\n                  </GuideItem>\n                  <GuideItem>\n                    <GuideIcon>\ud83d\uddbc\ufe0f</GuideIcon>\n                    <Text variant=\"caption\" color=\"var(--grey-700)\">\uc774\ubbf8\uc9c0: \uc0ac\uc9c4 \uc5c5\ub85c\ub4dc \ub2f5\ubcc0</Text>\n                  </GuideItem>\n                  <GuideItem>\n                    <GuideIcon>\ud83d\udd04</GuideIcon>\n                    <Text variant=\"caption\" color=\"var(--grey-700)\">\ubcf5\ud569\ud615: \ud14d\uc2a4\ud2b8 + \uc774\ubbf8\uc9c0</Text>\n                  </GuideItem>\n                </QuestionTypeGuide>\n              </QuestionBuilderHelpContainer>\n            </QuestionBuilderHeader>\n            {isLoadingQuestions ? (\n              <LoadingContainer>\n                <Spinner />\n                <Text>\uae30\uc874 \uc9c8\ubb38\uc744 \ubd88\ub7ec\uc624\ub294 \uc911...</Text>\n              </LoadingContainer>\n            ) : (\n              <QuestionBuilder\n                questions={questions}\n                onChange={setQuestions}\n                missionId={editMissionData?.id}\n              />\n            )}\n          </QuestionBuilderSection>\n        )}\n      </div>\n      <Button variant=\"flat\" onClick={handleSubmit(onSubmit)}>\n        \ubbf8\uc158 {editMissionData ? \"\uc218\uc815\" : \"\uc0dd\uc131\"}\n      </Button>\n    </NewMissionPageContainer>\n  );\n}\n\nconst NewMissionPageContainer = styled.div`\n  max-width: var(--breakpoint-tablet);\n  margin: 0 auto;\n  display: flex;\n  flex-direction: column;\n  gap: 1rem;\n  width: 100%;\n  justify-content: space-between;\n  min-height: calc(100vh - 100px);\n\n  .page-header {\n    padding: 16px;\n    border-bottom: 1px solid var(--grey-200);\n    \n    @media (max-width: 768px) {\n      padding: 12px;\n    }\n  }\n\n  .input-container {\n    display: flex;\n    flex-direction: column;\n    gap: 1rem;\n    width: 100%;\n    padding: 0 16px;\n    \n    @media (max-width: 768px) {\n      padding: 0 12px;\n    }\n  }\n`;\n\nconst MissionCreationModeContainer = styled.div`\n  display: flex;\n  flex-direction: column;\n  gap: 16px;\n`;\n\nconst ModeHeaderContainer = styled.div`\n  display: flex;\n  flex-direction: column;\n  gap: 4px;\n`;\n\nconst HelpText = styled(Text)`\n  font-style: italic;\n`;\n\nconst ModeToggleContainer = styled.div`\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 12px;\n  \n  @media (max-width: 768px) {\n    grid-template-columns: 1fr;\n    gap: 8px;\n  }\n`;\n\nconst ModeToggleButton = styled.button<{ active: boolean }>`\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 8px;\n  padding: 20px 16px;\n  border: 2px solid ${props => props.active ? 'var(--primary-500)' : 'var(--grey-200)'};\n  border-radius: 12px;\n  cursor: pointer;\n  transition: all 0.2s;\n  background: ${props => props.active ? 'var(--primary-50)' : 'white'};\n  box-shadow: ${props => props.active ? '0 4px 12px rgba(59, 130, 246, 0.15)' : '0 2px 4px rgba(0, 0, 0, 0.05)'};\n  \n  &:hover {\n    border-color: ${props => props.active ? 'var(--primary-600)' : 'var(--primary-300)'};\n    transform: translateY(-2px);\n    box-shadow: ${props => props.active ? '0 6px 16px rgba(59, 130, 246, 0.2)' : '0 4px 8px rgba(0, 0, 0, 0.1)'};\n  }\n`;\n\nconst ModeIconContainer = styled.div`\n  font-size: 32px;\n  margin-bottom: 4px;\n`;\n\nconst ModeTitle = styled(Text)`\n  font-weight: 600;\n  font-size: 16px;\n  color: var(--grey-900);\n  margin-bottom: 4px;\n`;\n\nconst ModeDescription = styled(Text)`\n  color: var(--grey-600);\n  text-align: center;\n  margin-bottom: 8px;\n`;\n\nconst ModeFeatures = styled(Text)`\n  color: var(--grey-500);\n  font-size: 12px;\n  text-align: center;\n`;\n\nconst QuestionBuilderSection = styled.div`\n  display: flex;\n  flex-direction: column;\n  gap: 20px;\n  padding: 20px;\n  border: 2px solid var(--primary-200);\n  border-radius: 12px;\n  background: linear-gradient(135deg, var(--primary-25) 0%, white 100%);\n`;\n\nconst QuestionBuilderHeader = styled.div`\n  display: flex;\n  flex-direction: column;\n  gap: 12px;\n  margin-bottom: 8px;\n`;\n\nconst QuestionBuilderHelpContainer = styled.div`\n  display: flex;\n  flex-direction: column;\n  gap: 12px;\n`;\n\nconst QuestionTypeGuide = styled.div`\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));\n  gap: 8px;\n  \n  @media (max-width: 768px) {\n    grid-template-columns: 1fr;\n  }\n`;\n\nconst GuideItem = styled.div`\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 8px 12px;\n  background: white;\n  border-radius: 8px;\n  border: 1px solid var(--grey-200);\n`;\n\nconst GuideIcon = styled.span`\n  font-size: 16px;\n  min-width: 20px;\n`;\n\nconst LoadingContainer = styled.div`\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  gap: 12px;\n  padding: 40px;\n  background: white;\n  border-radius: 8px;\n  border: 1px solid var(--grey-200);\n`;\n\nconst PointsDisplayContainer = styled.div`\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 12px 16px;\n  background: var(--grey-50);\n  border: 1px solid var(--grey-200);\n  border-radius: 6px;\n`;\n\nconst PointsDisplay = styled.div`\n  font-size: 16px;\n  font-weight: 600;\n  color: var(--primary-600);\n`;\n",
+      "structuredPatch": [
+        {
+          "oldStart": 65,
+          "oldLines": 7,
+          "newStart": 65,
+          "newLines": 7,
+          "lines": [
+            "               min_characters: q.min_characters || null,",
+            "               placeholder_text: q.placeholder_text,",
+            "               required_image: q.required_image,",
+            "-              multiple_select: (q as any).multiple_select || false,",
+            "+              multiple_select: q.multiple_select || false,",
+            "             })));",
+            "             setUseQuestionBuilder(true);",
+            "           }"
+          ]
+        }
+      ],
+      "userModified": false,
+      "replaceAll": false
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "TodoWrite",
+    "tool_input": {
+      "todos": [
+        {
+          "content": "PostCard.tsx\uc5d0\uc11c \ubaa8\ub4e0 \ub2f5\ubcc0 \ud0c0\uc785\uc5d0 \ub300\ud574 \uc9c8\ubb38 \ud14d\uc2a4\ud2b8 \ud45c\uc2dc\ud558\ub3c4\ub85d \uc218\uc815",
+          "status": "completed",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Fix type error in mission/create/client.tsx - add min_characters to missionWithQuestionsSchema",
+          "status": "completed",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "\uc9c8\ubb38 \ud14d\uc2a4\ud2b8\uac00 \uc5c6\uc744 \uacbd\uc6b0\uc758 fallback \ucc98\ub9ac \ucd94\uac00",
+          "status": "completed",
+          "priority": "medium",
+          "id": "2"
+        },
+        {
+          "content": "Run build test and verify no type errors",
+          "status": "in_progress",
+          "priority": "high",
+          "id": "4"
+        },
+        {
+          "content": "Commit the fix and push to dev branch",
+          "status": "pending",
+          "priority": "high",
+          "id": "5"
+        }
+      ]
+    },
+    "tool_response": {
+      "oldTodos": [
+        {
+          "content": "PostCard.tsx\uc5d0\uc11c \ubaa8\ub4e0 \ub2f5\ubcc0 \ud0c0\uc785\uc5d0 \ub300\ud574 \uc9c8\ubb38 \ud14d\uc2a4\ud2b8 \ud45c\uc2dc\ud558\ub3c4\ub85d \uc218\uc815",
+          "status": "completed",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "\uc9c8\ubb38 \ud14d\uc2a4\ud2b8\uac00 \uc5c6\uc744 \uacbd\uc6b0\uc758 fallback \ucc98\ub9ac \ucd94\uac00",
+          "status": "completed",
+          "priority": "medium",
+          "id": "2"
+        },
+        {
+          "content": "Fix type error in mission/create/client.tsx - add min_characters to missionWithQuestionsSchema",
+          "status": "in_progress",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "Run build test and verify no type errors",
+          "status": "pending",
+          "priority": "high",
+          "id": "4"
+        },
+        {
+          "content": "Commit the fix and push to dev branch",
+          "status": "pending",
+          "priority": "high",
+          "id": "5"
+        }
+      ],
+      "newTodos": [
+        {
+          "content": "PostCard.tsx\uc5d0\uc11c \ubaa8\ub4e0 \ub2f5\ubcc0 \ud0c0\uc785\uc5d0 \ub300\ud574 \uc9c8\ubb38 \ud14d\uc2a4\ud2b8 \ud45c\uc2dc\ud558\ub3c4\ub85d \uc218\uc815",
+          "status": "completed",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Fix type error in mission/create/client.tsx - add min_characters to missionWithQuestionsSchema",
+          "status": "completed",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "\uc9c8\ubb38 \ud14d\uc2a4\ud2b8\uac00 \uc5c6\uc744 \uacbd\uc6b0\uc758 fallback \ucc98\ub9ac \ucd94\uac00",
+          "status": "completed",
+          "priority": "medium",
+          "id": "2"
+        },
+        {
+          "content": "Run build test and verify no type errors",
+          "status": "in_progress",
+          "priority": "high",
+          "id": "4"
+        },
+        {
+          "content": "Commit the fix and push to dev branch",
+          "status": "pending",
+          "priority": "high",
+          "id": "5"
+        }
+      ]
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/components/common/BackButton.tsx",
+      "offset": 40,
+      "limit": 20
+    },
+    "tool_response": {
+      "type": "text",
+      "file": {
+        "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/components/common/BackButton.tsx",
+        "content": "\n  // \uc870\uac74\ubd80 \ub80c\ub354\ub9c1\n  if (!show) {\n    return null;\n  }\n\n  return (\n    <BackButtonContainer onClick={handleClick} className={className}>\n      <IoArrowBack size={16} />\n      <Text variant=\"body\" fontWeight=\"500\">\n        {text}\n      </Text>\n    </BackButtonContainer>\n  );\n}\n\nconst BackButtonContainer = styled.button`\n  display: flex;\n  align-items: center;\n  gap: 8px;",
+        "numLines": 20,
+        "startLine": 40,
+        "totalLines": 83
+      }
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/components/common/BackButton.tsx",
+      "old_string": "      <Text variant=\"body\" fontWeight=\"500\">",
+      "new_string": "      <Text variant=\"body\" fontWeight=\"medium\">"
+    },
+    "tool_response": {
+      "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/components/common/BackButton.tsx",
+      "oldString": "      <Text variant=\"body\" fontWeight=\"500\">",
+      "newString": "      <Text variant=\"body\" fontWeight=\"medium\">",
+      "originalFile": "\"use client\";\n\nimport { useRouter } from \"next/navigation\";\nimport { useCallback } from \"react\";\nimport styled from \"@emotion/styled\";\nimport { IoArrowBack } from \"react-icons/io5\";\nimport Text from \"@/components/Text/Text\";\n\ninterface BackButtonProps {\n  /** \ubc84\ud2bc\uc5d0 \ud45c\uc2dc\ud560 \ud14d\uc2a4\ud2b8 (\uae30\ubcf8\uac12: \"\ub4a4\ub85c\uac00\uae30\") */\n  text?: string;\n  /** \ud074\ub9ad \uc2dc \uc2e4\ud589\ud560 \ucee4\uc2a4\ud140 \ud568\uc218 (\uae30\ubcf8\uac12: router.back()) */\n  onClick?: () => void;\n  /** \uc870\uac74\ubd80 \ub80c\ub354\ub9c1\uc744 \uc704\ud55c \ud45c\uc2dc \uc5ec\ubd80 */\n  show?: boolean;\n  /** \ucd94\uac00 CSS \ud074\ub798\uc2a4\uba85 */\n  className?: string;\n}\n\nexport default function BackButton({ \n  text = \"\ub4a4\ub85c\uac00\uae30\", \n  onClick, \n  show = true,\n  className \n}: BackButtonProps) {\n  const router = useRouter();\n\n  const handleClick = useCallback(() => {\n    if (onClick) {\n      onClick();\n    } else {\n      // \ud788\uc2a4\ud1a0\ub9ac\uac00 \uc788\ub294\uc9c0 \ud655\uc778\ud558\uace0 \ub4a4\ub85c\uac00\uae30 \ub610\ub294 \ud648\uc73c\ub85c \uc774\ub3d9\n      if (typeof window !== \"undefined\" && window.history.length > 1) {\n        router.back();\n      } else {\n        router.push(\"/\");\n      }\n    }\n  }, [onClick, router]);\n\n  // \uc870\uac74\ubd80 \ub80c\ub354\ub9c1\n  if (!show) {\n    return null;\n  }\n\n  return (\n    <BackButtonContainer onClick={handleClick} className={className}>\n      <IoArrowBack size={16} />\n      <Text variant=\"body\" fontWeight=\"500\">\n        {text}\n      </Text>\n    </BackButtonContainer>\n  );\n}\n\nconst BackButtonContainer = styled.button`\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 8px 12px;\n  background: transparent;\n  border: 1px solid var(--grey-300);\n  border-radius: 8px;\n  cursor: pointer;\n  transition: all 0.2s ease;\n  color: var(--grey-700);\n\n  &:hover {\n    background: var(--grey-100);\n    border-color: var(--grey-400);\n    color: var(--grey-800);\n  }\n\n  &:active {\n    transform: translateY(1px);\n  }\n\n  /* \ubaa8\ubc14\uc77c \ucd5c\uc801\ud654 */\n  @media (max-width: 768px) {\n    padding: 10px 14px;\n    gap: 6px;\n  }\n`;",
+      "structuredPatch": [
+        {
+          "oldStart": 46,
+          "oldLines": 7,
+          "newStart": 46,
+          "newLines": 7,
+          "lines": [
+            "   return (",
+            "     <BackButtonContainer onClick={handleClick} className={className}>",
+            "       <IoArrowBack size={16} />",
+            "-      <Text variant=\"body\" fontWeight=\"500\">",
+            "+      <Text variant=\"body\" fontWeight=\"medium\">",
+            "         {text}",
+            "       </Text>",
+            "     </BackButtonContainer>"
+          ]
+        }
+      ],
+      "userModified": false,
+      "replaceAll": false
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMissionQuestions.ts",
+      "offset": 165,
+      "limit": 20
+    },
+    "tool_response": {
+      "type": "text",
+      "file": {
+        "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMissionQuestions.ts",
+        "content": "    if (!question) {\n      throw new Error('Question not found');\n    }\n\n    const nextOrder = (questions?.length || 0) + 1;\n    \n    const duplicatedData: CreateMissionQuestion = {\n      mission_id: question.mission_id,\n      question_text: `${question.question_text} (\ubcf5\uc0ac\ubcf8)`,\n      question_type: question.question_type,\n      question_order: nextOrder,\n      options: question.options,\n      correct_answer: question.correct_answer,\n      max_images: question.max_images,\n      points: question.points,\n      is_required: question.is_required,\n      max_characters: question.max_characters,\n      placeholder_text: question.placeholder_text,\n      required_image: question.required_image,\n      multiple_select: question.multiple_select,",
+        "numLines": 20,
+        "startLine": 165,
+        "totalLines": 287
+      }
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMissionQuestions.ts",
+      "old_string": "    const duplicatedData: CreateMissionQuestion = {\n      mission_id: question.mission_id,\n      question_text: `${question.question_text} (\ubcf5\uc0ac\ubcf8)`,\n      question_type: question.question_type,\n      question_order: nextOrder,\n      options: question.options,\n      correct_answer: question.correct_answer,\n      max_images: question.max_images,\n      points: question.points,\n      is_required: question.is_required,\n      max_characters: question.max_characters,\n      placeholder_text: question.placeholder_text,\n      required_image: question.required_image,\n      multiple_select: question.multiple_select,",
+      "new_string": "    const duplicatedData: CreateMissionQuestion = {\n      mission_id: question.mission_id,\n      question_text: `${question.question_text} (\ubcf5\uc0ac\ubcf8)`,\n      question_type: question.question_type,\n      question_order: nextOrder,\n      options: question.options,\n      correct_answer: question.correct_answer,\n      max_images: question.max_images,\n      points: question.points,\n      is_required: question.is_required,\n      max_characters: question.max_characters,\n      min_characters: question.min_characters,\n      placeholder_text: question.placeholder_text,\n      required_image: question.required_image,\n      multiple_select: question.multiple_select,"
+    },
+    "tool_response": {
+      "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/hooks/useMissionQuestions.ts",
+      "oldString": "    const duplicatedData: CreateMissionQuestion = {\n      mission_id: question.mission_id,\n      question_text: `${question.question_text} (\ubcf5\uc0ac\ubcf8)`,\n      question_type: question.question_type,\n      question_order: nextOrder,\n      options: question.options,\n      correct_answer: question.correct_answer,\n      max_images: question.max_images,\n      points: question.points,\n      is_required: question.is_required,\n      max_characters: question.max_characters,\n      placeholder_text: question.placeholder_text,\n      required_image: question.required_image,\n      multiple_select: question.multiple_select,",
+      "newString": "    const duplicatedData: CreateMissionQuestion = {\n      mission_id: question.mission_id,\n      question_text: `${question.question_text} (\ubcf5\uc0ac\ubcf8)`,\n      question_type: question.question_type,\n      question_order: nextOrder,\n      options: question.options,\n      correct_answer: question.correct_answer,\n      max_images: question.max_images,\n      points: question.points,\n      is_required: question.is_required,\n      max_characters: question.max_characters,\n      min_characters: question.min_characters,\n      placeholder_text: question.placeholder_text,\n      required_image: question.required_image,\n      multiple_select: question.multiple_select,",
+      "originalFile": "import useSWR from 'swr';\nimport { useCallback } from 'react';\nimport { \n  CreateMissionQuestion, \n  UpdateMissionQuestion, \n  MissionQuestion,\n  defaultQuestionTemplates \n} from '@/types/missionQuestions';\nimport { \n  getMissionQuestions,\n  createMissionQuestion,\n  updateMissionQuestion,\n  deleteMissionQuestion,\n  reorderMissionQuestions \n} from '@/utils/data/mission';\n\n/**\n * \ubbf8\uc158 \uc9c8\ubb38 \uad00\ub9ac \ud6c5\n * @param missionId \ubbf8\uc158 ID\n * @returns \uc9c8\ubb38 \ub370\uc774\ud130\uc640 CRUD \ud568\uc218\ub4e4\n */\nexport function useMissionQuestions(missionId: string | null) {\n  // \ub370\uc774\ud130 \uac00\uc838\uc624\uae30 \ud568\uc218\n  const fetcher = useCallback(async () => {\n    if (!missionId) return [];\n    \n    const { data, error } = await getMissionQuestions(missionId);\n    \n    if (error) {\n      throw new Error(error.message);\n    }\n    \n    // Ensure all questions have the multiple_select field for backward compatibility\n    const questionsWithDefaults = (data || []).map(question => ({\n      ...question,\n      multiple_select: question.multiple_select ?? false, // Default to false if null/undefined\n    }));\n    \n    return questionsWithDefaults;\n  }, [missionId]);\n\n  // SWR \ud6c5 \uc0ac\uc6a9\n  const {\n    data: questions,\n    error,\n    isLoading,\n    mutate\n  } = useSWR<MissionQuestion[]>(\n    missionId ? `mission-questions-${missionId}` : null,\n    fetcher,\n    {\n      revalidateOnFocus: false,\n      dedupingInterval: 30000, // 30\ucd08 \ub3d9\uc548 \uc911\ubcf5 \uc694\uccad \ubc29\uc9c0\n    }\n  );\n\n  /**\n   * \uc9c8\ubb38 \uc0dd\uc131 \ud568\uc218\n   * @param questionData \uc0dd\uc131\ud560 \uc9c8\ubb38 \ub370\uc774\ud130\n   * @returns \uc0dd\uc131\ub41c \uc9c8\ubb38 \ub370\uc774\ud130\n   */\n  const createQuestion = useCallback(async (questionData: CreateMissionQuestion) => {\n    const { data, error } = await createMissionQuestion(questionData);\n    \n    if (error) {\n      throw new Error(error.message);\n    }\n    \n    // \uce90\uc2dc \uc5c5\ub370\uc774\ud2b8\n    mutate();\n    \n    return data;\n  }, [mutate]);\n\n  /**\n   * \uc9c8\ubb38 \uc5c5\ub370\uc774\ud2b8 \ud568\uc218\n   * @param id \uc5c5\ub370\uc774\ud2b8\ud560 \uc9c8\ubb38 ID\n   * @param questionData \uc5c5\ub370\uc774\ud2b8\ud560 \uc9c8\ubb38 \ub370\uc774\ud130\n   * @returns \uc5c5\ub370\uc774\ud2b8\ub41c \uc9c8\ubb38 \ub370\uc774\ud130\n   */\n  const updateQuestion = useCallback(async (id: string, questionData: UpdateMissionQuestion) => {\n    const { data, error } = await updateMissionQuestion(id, questionData);\n    \n    if (error) {\n      throw new Error(error.message);\n    }\n    \n    // \uce90\uc2dc \uc5c5\ub370\uc774\ud2b8\n    mutate();\n    \n    return data;\n  }, [mutate]);\n\n  /**\n   * \uc9c8\ubb38 \uc0ad\uc81c \ud568\uc218\n   * @param id \uc0ad\uc81c\ud560 \uc9c8\ubb38 ID\n   * @returns \uc0ad\uc81c \uc131\uacf5 \uc5ec\ubd80\n   */\n  const deleteQuestion = useCallback(async (id: string) => {\n    const { error } = await deleteMissionQuestion(id);\n    \n    if (error) {\n      throw new Error(error.message);\n    }\n    \n    // \uce90\uc2dc \uc5c5\ub370\uc774\ud2b8\n    mutate();\n    \n    return true;\n  }, [mutate]);\n\n  /**\n   * \uc9c8\ubb38 \uc21c\uc11c \ubcc0\uacbd \ud568\uc218\n   * @param questionUpdates \uc21c\uc11c \uc5c5\ub370\uc774\ud2b8 \ubc30\uc5f4\n   * @returns \uc5c5\ub370\uc774\ud2b8 \uc131\uacf5 \uc5ec\ubd80\n   */\n  const reorderQuestions = useCallback(async (\n    questionUpdates: { id: string; question_order: number }[]\n  ) => {\n    const { error } = await reorderMissionQuestions(questionUpdates);\n    \n    if (error) {\n      throw new Error(error.message);\n    }\n    \n    // \uce90\uc2dc \uc5c5\ub370\uc774\ud2b8\n    mutate();\n    \n    return true;\n  }, [mutate]);\n\n  /**\n   * \uc0c8 \uc9c8\ubb38 \ucd94\uac00 (\ud15c\ud50c\ub9bf \uae30\ubc18)\n   * @param questionType \uc9c8\ubb38 \ud0c0\uc785\n   * @param missionId \ubbf8\uc158 ID\n   * @returns \uc0dd\uc131\ub41c \uc9c8\ubb38 \ub370\uc774\ud130\n   */\n  const addQuestionFromTemplate = useCallback(async (\n    questionType: 'essay' | 'multiple_choice' | 'image_upload' | 'mixed',\n    targetMissionId: string\n  ) => {\n    if (!targetMissionId) {\n      throw new Error('Mission ID is required');\n    }\n\n    const template = defaultQuestionTemplates[questionType];\n    const nextOrder = (questions?.length || 0) + 1;\n    \n    const questionData: CreateMissionQuestion = {\n      ...template,\n      mission_id: targetMissionId,\n      question_order: nextOrder,\n    };\n    \n    return await createQuestion(questionData);\n  }, [questions, createQuestion]);\n\n  /**\n   * \uc9c8\ubb38 \ubcf5\uc81c \ud568\uc218\n   * @param questionId \ubcf5\uc81c\ud560 \uc9c8\ubb38 ID\n   * @returns \ubcf5\uc81c\ub41c \uc9c8\ubb38 \ub370\uc774\ud130\n   */\n  const duplicateQuestion = useCallback(async (questionId: string) => {\n    const question = questions?.find(q => q.id === questionId);\n    if (!question) {\n      throw new Error('Question not found');\n    }\n\n    const nextOrder = (questions?.length || 0) + 1;\n    \n    const duplicatedData: CreateMissionQuestion = {\n      mission_id: question.mission_id,\n      question_text: `${question.question_text} (\ubcf5\uc0ac\ubcf8)`,\n      question_type: question.question_type,\n      question_order: nextOrder,\n      options: question.options,\n      correct_answer: question.correct_answer,\n      max_images: question.max_images,\n      points: question.points,\n      is_required: question.is_required,\n      max_characters: question.max_characters,\n      placeholder_text: question.placeholder_text,\n      required_image: question.required_image,\n      multiple_select: question.multiple_select,\n    };\n    \n    return await createQuestion(duplicatedData);\n  }, [questions, createQuestion]);\n\n  /**\n   * \uc9c8\ubb38 \uc704\uce58 \uc774\ub3d9 \ud568\uc218\n   * @param questionId \uc774\ub3d9\ud560 \uc9c8\ubb38 ID\n   * @param newOrder \uc0c8\ub85c\uc6b4 \uc21c\uc11c\n   * @returns \uc5c5\ub370\uc774\ud2b8 \uc131\uacf5 \uc5ec\ubd80\n   */\n  const moveQuestion = useCallback(async (questionId: string, newOrder: number) => {\n    if (!questions) return false;\n\n    const currentQuestion = questions.find(q => q.id === questionId);\n    if (!currentQuestion) return false;\n\n    const currentOrder = currentQuestion.question_order;\n    if (currentOrder === newOrder) return true;\n\n    // \ub2e4\ub978 \uc9c8\ubb38\ub4e4\uc758 \uc21c\uc11c \uc870\uc815\n    const updates = questions\n      .filter(q => q.id !== questionId)\n      .map(q => {\n        let adjustedOrder = q.question_order;\n        \n        if (currentOrder < newOrder) {\n          // \uc544\ub798\ub85c \uc774\ub3d9: \uc0ac\uc774\uc5d0 \uc788\ub294 \uc9c8\ubb38\ub4e4\uc744 \uc704\ub85c\n          if (q.question_order > currentOrder && q.question_order <= newOrder) {\n            adjustedOrder = q.question_order - 1;\n          }\n        } else {\n          // \uc704\ub85c \uc774\ub3d9: \uc0ac\uc774\uc5d0 \uc788\ub294 \uc9c8\ubb38\ub4e4\uc744 \uc544\ub798\ub85c\n          if (q.question_order >= newOrder && q.question_order < currentOrder) {\n            adjustedOrder = q.question_order + 1;\n          }\n        }\n        \n        return { id: q.id, question_order: adjustedOrder };\n      })\n      .concat([{ id: questionId, question_order: newOrder }]);\n\n    return await reorderQuestions(updates);\n  }, [questions, reorderQuestions]);\n\n  /**\n   * \uc9c8\ubb38\ubcc4 \ucd1d \uc810\uc218 \uacc4\uc0b0\n   * @returns \ucd1d \uc810\uc218\n   */\n  const getTotalPoints = useCallback(() => {\n    return questions?.reduce((total, q) => total + (q.points || 0), 0) || 0;\n  }, [questions]);\n\n  /**\n   * \ud544\uc218 \uc9c8\ubb38 \uac1c\uc218 \uc870\ud68c\n   * @returns \ud544\uc218 \uc9c8\ubb38 \uac1c\uc218\n   */\n  const getRequiredQuestionsCount = useCallback(() => {\n    return questions?.filter(q => q.is_required).length || 0;\n  }, [questions]);\n\n  /**\n   * \uc9c8\ubb38 \ud0c0\uc785\ubcc4 \uac1c\uc218 \uc870\ud68c\n   * @returns \ud0c0\uc785\ubcc4 \uac1c\uc218 \uac1d\uccb4\n   */\n  const getQuestionTypeStats = useCallback(() => {\n    const stats = {\n      essay: 0,\n      multiple_choice: 0,\n      image_upload: 0,\n      mixed: 0,\n    };\n\n    questions?.forEach(q => {\n      stats[q.question_type]++;\n    });\n\n    return stats;\n  }, [questions]);\n\n  return {\n    questions: questions || [],\n    isLoading,\n    error,\n    mutate,\n    \n    // CRUD operations\n    createQuestion,\n    updateQuestion,\n    deleteQuestion,\n    reorderQuestions,\n    \n    // Helper functions\n    addQuestionFromTemplate,\n    duplicateQuestion,\n    moveQuestion,\n    \n    // Statistics\n    getTotalPoints,\n    getRequiredQuestionsCount,\n    getQuestionTypeStats,\n  };\n}",
+      "structuredPatch": [
+        {
+          "oldStart": 179,
+          "oldLines": 6,
+          "newStart": 179,
+          "newLines": 7,
+          "lines": [
+            "       points: question.points,",
+            "       is_required: question.is_required,",
+            "       max_characters: question.max_characters,",
+            "+      min_characters: question.min_characters,",
+            "       placeholder_text: question.placeholder_text,",
+            "       required_image: question.required_image,",
+            "       multiple_select: question.multiple_select,"
+          ]
+        }
+      ],
+      "userModified": false,
+      "replaceAll": false
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts",
+      "offset": 80,
+      "limit": 20
+    },
+    "tool_response": {
+      "type": "text",
+      "file": {
+        "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts",
+        "content": "      .single();\n    \n    if (missionError) throw missionError;\n    \n    // If no questions provided, create a default question for backward compatibility\n    if (questions.length === 0 && mission.description) {\n      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionData.id,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,",
+        "numLines": 20,
+        "startLine": 80,
+        "totalLines": 253
+      }
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts",
+      "old_string": "      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionData.id,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,",
+      "new_string": "      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionData.id,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        min_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,"
+    },
+    "tool_response": {
+      "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts",
+      "oldString": "      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionData.id,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,",
+      "newString": "      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionData.id,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        min_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,",
+      "originalFile": "import { createClient } from \"@/utils/supabase/client\";\nimport { CreateMission, MissionWithQuestions, legacyMissionTypes } from \"@/types\";\nimport { \n  CreateMissionQuestion, \n  UpdateMissionQuestion \n} from \"@/types/missionQuestions\";\n\nexport async function getMissionById(id: string) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"missions\")\n    .select(\"*\")\n    .eq(\"id\", id)\n    .single();\n  return { data, error };\n}\n\nexport async function createMission(mission: CreateMission) {\n  const supabase = createClient();\n  const { data, error } = await supabase.from(\"missions\").insert(mission);\n  return { data, error };\n}\n\nexport async function updateMission(id: string, mission: CreateMission) {\n  const supabase = createClient();\n  const { data, error } = await supabase.from(\"missions\").update(mission).eq(\"id\", id);\n  return { data, error };\n}\n\nexport async function deleteMission(id: string) {\n  const supabase = createClient();\n  const { data, error } = await supabase.from(\"missions\").delete().eq(\"id\", id);\n  return { data, error };\n}\n\nexport async function getMissionTypes() {\n  const supabase = createClient();\n  const { data, error } = await supabase.rpc(\n    \"get_distinct_mission_types\" as any\n  );\n  return { data, error };\n}\n\n// Get mission with questions\nexport async function getMissionWithQuestions(id: string) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"missions\")\n    .select(`\n      *,\n      questions:mission_questions(*)\n    `)\n    .eq(\"id\", id)\n    .single();\n  \n  if (error) return { data: null, error };\n  \n  // Sort questions by order\n  const mission = data as MissionWithQuestions;\n  if (mission.questions) {\n    mission.questions.sort((a, b) => a.question_order - b.question_order);\n  }\n  \n  return { data: mission, error: null };\n}\n\n// Create mission with questions\nexport async function createMissionWithQuestions(\n  mission: CreateMission, \n  questions: CreateMissionQuestion[] = []\n) {\n  const supabase = createClient();\n  \n  try {\n    // Start transaction by creating mission first\n    const { data: missionData, error: missionError } = await supabase\n      .from(\"missions\")\n      .insert(mission)\n      .select()\n      .single();\n    \n    if (missionError) throw missionError;\n    \n    // If no questions provided, create a default question for backward compatibility\n    if (questions.length === 0 && mission.description) {\n      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionData.id,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,\n      };\n      questions = [defaultQuestion];\n    }\n    \n    // Create questions if provided\n    if (questions.length > 0) {\n      const questionsWithMissionId = questions.map((q, index) => ({\n        ...q,\n        mission_id: missionData.id,\n        question_order: q.question_order || index + 1,\n      }));\n      \n      const { error: questionsError } = await supabase\n        .from(\"mission_questions\")\n        .insert(questionsWithMissionId);\n      \n      if (questionsError) {\n        // Cleanup: delete the mission if questions creation failed\n        await supabase.from(\"missions\").delete().eq(\"id\", missionData.id);\n        throw questionsError;\n      }\n    }\n    \n    return { data: missionData, error: null };\n  } catch (error: any) {\n    return { data: null, error };\n  }\n}\n\n// Mission Questions CRUD Operations\n\nexport async function getMissionQuestions(missionId: string) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"mission_questions\")\n    .select(\"*\")\n    .eq(\"mission_id\", missionId)\n    .order(\"question_order\", { ascending: true });\n  \n  return { data, error };\n}\n\nexport async function createMissionQuestion(question: CreateMissionQuestion) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"mission_questions\")\n    .insert(question)\n    .select()\n    .single();\n  \n  return { data, error };\n}\n\nexport async function updateMissionQuestion(id: string, question: UpdateMissionQuestion) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"mission_questions\")\n    .update(question)\n    .eq(\"id\", id)\n    .select()\n    .single();\n  \n  return { data, error };\n}\n\nexport async function deleteMissionQuestion(id: string) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"mission_questions\")\n    .delete()\n    .eq(\"id\", id);\n  \n  return { data, error };\n}\n\nexport async function reorderMissionQuestions(\n  questionUpdates: { id: string; question_order: number }[]\n) {\n  const supabase = createClient();\n  \n  try {\n    const promises = questionUpdates.map(({ id, question_order }) =>\n      supabase\n        .from(\"mission_questions\")\n        .update({ question_order })\n        .eq(\"id\", id)\n    );\n    \n    await Promise.all(promises);\n    return { data: null, error: null };\n  } catch (error: any) {\n    return { data: null, error };\n  }\n}\n\n// Utility functions for backward compatibility\n\nexport async function migrateLegacyMission(missionId: string) {\n  const supabase = createClient();\n  \n  try {\n    // Get mission data\n    const { data: mission, error: missionError } = await supabase\n      .from(\"missions\")\n      .select(\"*\")\n      .eq(\"id\", missionId)\n      .single();\n    \n    if (missionError) throw missionError;\n    \n    // Check if already has questions\n    const { data: existingQuestions } = await supabase\n      .from(\"mission_questions\")\n      .select(\"id\")\n      .eq(\"mission_id\", missionId)\n      .limit(1);\n    \n    if (existingQuestions && existingQuestions.length > 0) {\n      return { data: null, error: new Error(\"Mission already has questions\") };\n    }\n    \n    // Create default question from mission description\n    if (mission.description) {\n      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionId,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,\n      };\n      \n      const { data, error } = await createMissionQuestion(defaultQuestion);\n      return { data, error };\n    }\n    \n    return { data: null, error: new Error(\"No description to migrate\") };\n  } catch (error: any) {\n    return { data: null, error };\n  }\n}\n\nexport function mapLegacyMissionType(legacyType: string): string {\n  const mappedType = legacyMissionTypes[legacyType as keyof typeof legacyMissionTypes];\n  return mappedType || 'essay';\n}\n",
+      "structuredPatch": [
+        {
+          "oldStart": 94,
+          "oldLines": 6,
+          "newStart": 94,
+          "newLines": 7,
+          "lines": [
+            "         correct_answer: null,",
+            "         max_images: null,",
+            "         max_characters: null,",
+            "+        min_characters: null,",
+            "         placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",",
+            "         required_image: null,",
+            "         multiple_select: null,"
+          ]
+        }
+      ],
+      "userModified": false,
+      "replaceAll": false
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts",
+      "offset": 220,
+      "limit": 20
+    },
+    "tool_response": {
+      "type": "text",
+      "file": {
+        "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts",
+        "content": "    }\n    \n    // Create default question from mission description\n    if (mission.description) {\n      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionId,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,\n      };\n      ",
+        "numLines": 20,
+        "startLine": 220,
+        "totalLines": 254
+      }
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts",
+      "old_string": "      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionId,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,",
+      "new_string": "      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionId,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        min_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,"
+    },
+    "tool_response": {
+      "filePath": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/utils/data/mission.ts",
+      "oldString": "      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionId,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,",
+      "newString": "      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionId,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        min_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,",
+      "originalFile": "import { createClient } from \"@/utils/supabase/client\";\nimport { CreateMission, MissionWithQuestions, legacyMissionTypes } from \"@/types\";\nimport { \n  CreateMissionQuestion, \n  UpdateMissionQuestion \n} from \"@/types/missionQuestions\";\n\nexport async function getMissionById(id: string) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"missions\")\n    .select(\"*\")\n    .eq(\"id\", id)\n    .single();\n  return { data, error };\n}\n\nexport async function createMission(mission: CreateMission) {\n  const supabase = createClient();\n  const { data, error } = await supabase.from(\"missions\").insert(mission);\n  return { data, error };\n}\n\nexport async function updateMission(id: string, mission: CreateMission) {\n  const supabase = createClient();\n  const { data, error } = await supabase.from(\"missions\").update(mission).eq(\"id\", id);\n  return { data, error };\n}\n\nexport async function deleteMission(id: string) {\n  const supabase = createClient();\n  const { data, error } = await supabase.from(\"missions\").delete().eq(\"id\", id);\n  return { data, error };\n}\n\nexport async function getMissionTypes() {\n  const supabase = createClient();\n  const { data, error } = await supabase.rpc(\n    \"get_distinct_mission_types\" as any\n  );\n  return { data, error };\n}\n\n// Get mission with questions\nexport async function getMissionWithQuestions(id: string) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"missions\")\n    .select(`\n      *,\n      questions:mission_questions(*)\n    `)\n    .eq(\"id\", id)\n    .single();\n  \n  if (error) return { data: null, error };\n  \n  // Sort questions by order\n  const mission = data as MissionWithQuestions;\n  if (mission.questions) {\n    mission.questions.sort((a, b) => a.question_order - b.question_order);\n  }\n  \n  return { data: mission, error: null };\n}\n\n// Create mission with questions\nexport async function createMissionWithQuestions(\n  mission: CreateMission, \n  questions: CreateMissionQuestion[] = []\n) {\n  const supabase = createClient();\n  \n  try {\n    // Start transaction by creating mission first\n    const { data: missionData, error: missionError } = await supabase\n      .from(\"missions\")\n      .insert(mission)\n      .select()\n      .single();\n    \n    if (missionError) throw missionError;\n    \n    // If no questions provided, create a default question for backward compatibility\n    if (questions.length === 0 && mission.description) {\n      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionData.id,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        min_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,\n      };\n      questions = [defaultQuestion];\n    }\n    \n    // Create questions if provided\n    if (questions.length > 0) {\n      const questionsWithMissionId = questions.map((q, index) => ({\n        ...q,\n        mission_id: missionData.id,\n        question_order: q.question_order || index + 1,\n      }));\n      \n      const { error: questionsError } = await supabase\n        .from(\"mission_questions\")\n        .insert(questionsWithMissionId);\n      \n      if (questionsError) {\n        // Cleanup: delete the mission if questions creation failed\n        await supabase.from(\"missions\").delete().eq(\"id\", missionData.id);\n        throw questionsError;\n      }\n    }\n    \n    return { data: missionData, error: null };\n  } catch (error: any) {\n    return { data: null, error };\n  }\n}\n\n// Mission Questions CRUD Operations\n\nexport async function getMissionQuestions(missionId: string) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"mission_questions\")\n    .select(\"*\")\n    .eq(\"mission_id\", missionId)\n    .order(\"question_order\", { ascending: true });\n  \n  return { data, error };\n}\n\nexport async function createMissionQuestion(question: CreateMissionQuestion) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"mission_questions\")\n    .insert(question)\n    .select()\n    .single();\n  \n  return { data, error };\n}\n\nexport async function updateMissionQuestion(id: string, question: UpdateMissionQuestion) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"mission_questions\")\n    .update(question)\n    .eq(\"id\", id)\n    .select()\n    .single();\n  \n  return { data, error };\n}\n\nexport async function deleteMissionQuestion(id: string) {\n  const supabase = createClient();\n  const { data, error } = await supabase\n    .from(\"mission_questions\")\n    .delete()\n    .eq(\"id\", id);\n  \n  return { data, error };\n}\n\nexport async function reorderMissionQuestions(\n  questionUpdates: { id: string; question_order: number }[]\n) {\n  const supabase = createClient();\n  \n  try {\n    const promises = questionUpdates.map(({ id, question_order }) =>\n      supabase\n        .from(\"mission_questions\")\n        .update({ question_order })\n        .eq(\"id\", id)\n    );\n    \n    await Promise.all(promises);\n    return { data: null, error: null };\n  } catch (error: any) {\n    return { data: null, error };\n  }\n}\n\n// Utility functions for backward compatibility\n\nexport async function migrateLegacyMission(missionId: string) {\n  const supabase = createClient();\n  \n  try {\n    // Get mission data\n    const { data: mission, error: missionError } = await supabase\n      .from(\"missions\")\n      .select(\"*\")\n      .eq(\"id\", missionId)\n      .single();\n    \n    if (missionError) throw missionError;\n    \n    // Check if already has questions\n    const { data: existingQuestions } = await supabase\n      .from(\"mission_questions\")\n      .select(\"id\")\n      .eq(\"mission_id\", missionId)\n      .limit(1);\n    \n    if (existingQuestions && existingQuestions.length > 0) {\n      return { data: null, error: new Error(\"Mission already has questions\") };\n    }\n    \n    // Create default question from mission description\n    if (mission.description) {\n      const defaultQuestion: CreateMissionQuestion = {\n        mission_id: missionId,\n        question_text: mission.description,\n        question_type: 'essay',\n        question_order: 1,\n        points: mission.points || 100,\n        is_required: true,\n        options: null,\n        correct_answer: null,\n        max_images: null,\n        max_characters: null,\n        placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",\n        required_image: null,\n        multiple_select: null,\n      };\n      \n      const { data, error } = await createMissionQuestion(defaultQuestion);\n      return { data, error };\n    }\n    \n    return { data: null, error: new Error(\"No description to migrate\") };\n  } catch (error: any) {\n    return { data: null, error };\n  }\n}\n\nexport function mapLegacyMissionType(legacyType: string): string {\n  const mappedType = legacyMissionTypes[legacyType as keyof typeof legacyMissionTypes];\n  return mappedType || 'essay';\n}\n",
+      "structuredPatch": [
+        {
+          "oldStart": 232,
+          "oldLines": 6,
+          "newStart": 232,
+          "newLines": 7,
+          "lines": [
+            "         correct_answer: null,",
+            "         max_images: null,",
+            "         max_characters: null,",
+            "+        min_characters: null,",
+            "         placeholder_text: \"\ubbf8\uc158\uac00\uc774\ub4dc\uc5d0 \ub530\ub77c \ubbf8\uc158\uc744 \uc644\ub8cc\ud574\uc8fc\uc138\uc694.\",",
+            "         required_image: null,",
+            "         multiple_select: null,"
+          ]
+        }
+      ],
+      "userModified": false,
+      "replaceAll": false
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "npm run build",
+      "timeout": 180000,
+      "description": "Running final build test after fixing all type errors"
+    },
+    "tool_response": {
+      "stdout": "> sqeeze-lms@0.1.0 build\n> next build\n\n   \u25b2 Next.js 15.1.7\n   - Environments: .env.local, .env\n\n   Creating an optimized production build ...\n> [PWA] Compile server\n> [PWA] Compile server\n> [PWA] Compile client (static)\n> [PWA] Auto register service worker is disabled, please call following code in componentDidMount callback or useEffect hook\n> [PWA]   window.workbox.register()\n> [PWA] Service worker: /Users/heechan/Desktop/Sqeeze/sqeeze-lms/public/sw.js\n> [PWA]   url: /sw.js\n> [PWA]   scope: /\n \u2713 Compiled successfully\n   Linting and checking validity of types ...\n\n./src/app/(admin)/admin/MissionManagement.tsx\n7:10  Warning: 'useSupabaseAuth' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/(admin)/admin/UserManagement.tsx\n34:40  Warning: The ref value 'observerRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'observerRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps\n\n./src/app/(admin)/admin/page.tsx\n19:9  Warning: 'organizationOptions' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/(comoon)/image-upload/client.tsx\n121:6  Warning: React Hook useEffect has an unnecessary dependency: 'acceptedFilesRef.current'. Either exclude it or remove the dependency array. Mutable values like 'acceptedFilesRef.current' aren't valid dependencies because mutating them doesn't re-render the component.  react-hooks/exhaustive-deps\n189:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars\n251:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/(home)/_mypage/PostCard.tsx\n546:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element\n815:7  Warning: 'ImageCount' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/api/journey-weekly-stats/route.ts\n10:14  Warning: 'parseError' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/api/journeys/route.ts\n4:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/api/users/bulk-create/route.ts\n36:11  Warning: 'ProgressUpdate' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/examples/chips/page.tsx\n11:10  Warning: 'recommendationOption' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n11:32  Warning: 'setRecommendationOption' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/journey/[slug]/[id]/CreatePostFrom.tsx\n30:21  Warning: 'AnswersData' is defined but never used.  @typescript-eslint/no-unused-vars\n66:33  Warning: 'isLoadingQuestions' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n239:6  Warning: React Hook useEffect has a missing dependency: 'autoSave'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps\n328:61  Warning: 'index' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/journey/[slug]/_dashboard/DashboardTab.tsx\n18:7  Warning: 'leaderboardUserSchema' is assigned a value but only used as a type.  @typescript-eslint/no-unused-vars\n713:7  Warning: 'ErrorContainer' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/journey/[slug]/_plan/MissionCard.tsx\n46:3  Warning: 'journeySlug' is defined but never used.  @typescript-eslint/no-unused-vars\n53:33  Warning: 'isLoadingQuestions' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/journey/[slug]/_plan/MissionComponent.tsx\n52:10  Warning: 'weekMissions' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/journey/[slug]/_plan/PlanTab.tsx\n28:43  Warning: 'isLoadingCompletedMissions' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n48:5  Warning: 'updateWeek' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/journey/[slug]/client.tsx\n172:7  Warning: 'VerticalTaab' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/journey/[slug]/edit/layout.tsx\n61:48  Warning: 'params' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/journey/[slug]/invite/page.tsx\n3:10  Warning: 'Table' is defined but never used.  @typescript-eslint/no-unused-vars\n4:8  Warning: 'Select' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/journey/[slug]/layout.tsx\n62:51  Warning: 'params' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/journey/[slug]/page.tsx\n2:38  Warning: 'Flex' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/journey/[slug]/teacher/users/page.tsx\n144:6  Warning: React Hook useEffect has a missing dependency: 'localMemberIds'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps\n300:15  Warning: 'data' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/journey/[slug]/teams/client.tsx\n17:25  Warning: 'FaTrash' is defined but never used.  @typescript-eslint/no-unused-vars\n43:5  Warning: 'updateTeamMembers' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n48:5  Warning: 'checkUserTeam' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n\n./src/app/mission/create/client.tsx\n3:34  Warning: 'missionTypeEnum' is defined but never used.  @typescript-eslint/no-unused-vars\n101:5  Warning: 'watch' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n\n./src/components/FileUpload.tsx\n359:5  Warning: React Hook useCallback has a missing dependency: 'filePreviews'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps\n\n./src/components/MentionInput/MentionInput.tsx\n45:22  Warning: 'options' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/components/MentionInput/index.tsx\n2:10  Warning: 'Editor' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/components/NotificationTest.tsx\n80:10  Warning: 'subscription' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n174:6  Warning: React Hook useEffect has a missing dependency: 'saveSubscription'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps\n\n./src/components/auth/LoginSignup.tsx\n9:27  Warning: 'signUpWithEmail' is defined but never used.  @typescript-eslint/no-unused-vars\n20:7  Warning: 'loginSchema' is assigned a value but only used as a type.  @typescript-eslint/no-unused-vars\n\n./src/components/common/FileUpload.tsx\n1:33  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/components/mission/QuestionBuilder/QuestionItem.tsx\n430:6  Warning: React Hook useMemo has missing dependencies: 'handleMaxCharactersBlur', 'handleMaxCharactersChange', 'handleMaxImagesBlur', 'handleMaxImagesChange', 'handleMinCharactersBlur', 'handleMinCharactersChange', 'handleOptionTextBlur', 'handlePlaceholderTextBlur', 'handlePlaceholderTextChange', 'localMaxCharacters', 'localMaxImages', 'localMinCharacters', and 'localPlaceholderText'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps\n\n./src/components/modal/Modal.tsx\n27:9  Warning: The 'handleKeyDown' function makes the dependencies of useEffect Hook (at line 46) change on every render. Move it inside the useEffect callback. Alternatively, wrap the definition of 'handleKeyDown' in its own useCallback() Hook.  react-hooks/exhaustive-deps\n\n./src/components/richTextInput/RichTextEditor.tsx\n17:3  Warning: 'FaItalic' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/hooks/useJourneyWeeklyStats.ts\n1:23  Warning: 'useState' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/hooks/useLikes.ts\n12:9  Warning: The 'getUserLikeKey' function makes the dependencies of useCallback Hook (at line 74) change on every render. To fix this, wrap the definition of 'getUserLikeKey' in its own useCallback() Hook.  react-hooks/exhaustive-deps\n40:13  Warning: 'currentLikesData' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n122:6  Warning: React Hook useCallback has missing dependencies: 'getUserLikeKey' and 'likesCountKey'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps\n\n./src/hooks/useNotification.ts\n89:7  Warning: '_' is defined but never used.  @typescript-eslint/no-unused-vars\n130:37  Warning: 'key' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/hooks/usePosts.ts\n6:10  Warning: 'getTeamMembers' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/hooks/usePosts2.ts\n66:7  Warning: '_' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/hooks/useSupabaseAuth.ts\n290:7  Warning: React Hook useMemo has a missing dependency: 'authState'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps\n308:6  Warning: React Hook useEffect has missing dependencies: 'authState.loading', 'authState.profileImage', and 'authState.user.id'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps\n\n./src/hooks/useTeams.ts\n302:5  Warning: React Hook useCallback has a missing dependency: 'joinTeam'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps\n368:5  Warning: React Hook useCallback has a missing dependency: 'mutateAllTeams'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps\n\n./src/hooks/useUsers.ts\n151:20  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars\n\n./src/types/teams.ts\n17:7  Warning: 'ProfileSchema' is assigned a value but never used.  @typescript-eslint/no-unused-vars\n40:7  Warning: 'TeamPostSchema' is assigned a value but only used as a type.  @typescript-eslint/no-unused-vars\n80:7  Warning: 'TeamDataSchema' is assigned a value but only used as a type.  @typescript-eslint/no-unused-vars\n85:7  Warning: 'AllTeamDataSchema' is assigned a value but only used as a type.  @typescript-eslint/no-unused-vars\n90:7  Warning: 'TeamWithPointsSchema' is assigned a value but only used as a type.  @typescript-eslint/no-unused-vars\n94:7  Warning: 'TeamWithMembersSchema' is assigned a value but only used as a type.  @typescript-eslint/no-unused-vars\n98:7  Warning: 'TeamCompleteSchema' is assigned a value but only used as a type.  @typescript-eslint/no-unused-vars\n\n./src/utils/data/user.ts\n2:10  Warning: 'CreateUser' is defined but never used.  @typescript-eslint/no-unused-vars\n5:10  Warning: 'nullToUndefined' is defined but never used.  @typescript-eslint/no-unused-vars\n\ninfo  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules\n   Collecting page data ...\n   Generating static pages (0/36) ...\n   Generating static pages (9/36) \r\n   Generating static pages (18/36) \r\n   Generating static pages (27/36) \r\n \u2713 Generating static pages (36/36)\n   Finalizing page optimization ...\n   Collecting build traces ...\n\nRoute (app)                              Size     First Load JS\n\u250c \u25cb /                                    4.57 kB         228 kB\n\u251c \u25cb /_not-found                          210 B           106 kB\n\u251c \u25cb /admin                               22.3 kB         371 kB\n\u251c \u0192 /api/auth/rolecheck                  210 B           106 kB\n\u251c \u0192 /api/check-subscription              210 B           106 kB\n\u251c \u0192 /api/github/create-issue             210 B           106 kB\n\u251c \u0192 /api/journey                         210 B           106 kB\n\u251c \u0192 /api/journey-mission-instances       210 B           106 kB\n\u251c \u0192 /api/journey-weekly-stats            210 B           106 kB\n\u251c \u0192 /api/journeys                        210 B           106 kB\n\u251c \u0192 /api/og                              210 B           106 kB\n\u251c \u0192 /api/regenerate-sitemap              210 B           106 kB\n\u251c \u0192 /api/role-access-code                210 B           106 kB\n\u251c \u0192 /api/save-subscription               210 B           106 kB\n\u251c \u0192 /api/user-points                     210 B           106 kB\n\u251c \u0192 /api/users/bulk-create               210 B           106 kB\n\u251c \u0192 /api/users/bulk-create-stream        210 B           106 kB\n\u251c \u25cb /auth/auth-code-error                2.88 kB         157 kB\n\u251c \u0192 /auth/callback                       210 B           106 kB\n\u251c \u25cb /bug-report                          4.33 kB         267 kB\n\u251c \u25cb /create-journey                      3.42 kB         315 kB\n\u251c \u25cb /error                               4.31 kB         155 kB\n\u251c \u25cb /examples/chips                      3.52 kB         117 kB\n\u251c \u25cb /forgot-password                     4.59 kB         184 kB\n\u251c \u25cb /icon.svg                            0 B                0 B\n\u251c \u25cb /image-upload                        12.9 kB         221 kB\n\u251c \u0192 /journey/[slug]                      89.4 kB         491 kB\n\u251c \u0192 /journey/[slug]/[id]                 207 B           412 kB\n\u251c \u0192 /journey/[slug]/edit                 3.23 kB         314 kB\n\u251c \u0192 /journey/[slug]/invite               248 B           106 kB\n\u251c \u0192 /journey/[slug]/redirect/invite      210 B           106 kB\n\u251c \u0192 /journey/[slug]/teacher/posts        215 kB          526 kB\n\u251c \u0192 /journey/[slug]/teacher/users        10.1 kB         242 kB\n\u251c \u0192 /journey/[slug]/teams                12.2 kB         244 kB\n\u251c \u25cb /login                               9.18 kB         221 kB\n\u251c \u25cb /login/info                          110 kB          382 kB\n\u251c \u25cb /manifest.webmanifest                0 B                0 B\n\u251c \u25cb /mission/create                      183 B           265 kB\n\u251c \u0192 /mission/edit/[id]                   184 B           265 kB\n\u251c \u25cb /notification-test                   6.9 kB          158 kB\n\u251c \u0192 /post/[id]                           33.7 kB         383 kB\n\u251c \u0192 /post/[id]/edit                      209 B           412 kB\n\u251c \u25cb /profile                             13.1 kB         273 kB\n\u251c \u0192 /profile/[id]                        12.9 kB         183 kB\n\u251c \u25cb /robots.txt                          0 B                0 B\n\u251c \u25cb /signup                              14.1 kB         264 kB\n\u2514 \u0192 /sitemap.xml                         0 B                0 B\n+ First Load JS shared by all            106 kB\n  \u251c chunks/1517-5830aa7041529de5.js      50.7 kB\n  \u251c chunks/4bd1b696-98a5443750a4b3d4.js  53 kB\n  \u2514 other shared chunks (total)          2.01 kB\n\n\n\u25cb  (Static)   prerendered as static content\n\u0192  (Dynamic)  server-rendered on demand\n<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (127kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)\n<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (127kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)\n<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (127kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)\n<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (127kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)\n<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (127kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)\n<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (127kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)\n<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (127kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)\n<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (127kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)\n(node:61064) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:61065) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:61069) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:61068) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:61066) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:61067) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:61061) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:61062) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:61063) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n \u26a0 Using edge runtime on a page currently disables static generation for that page\n(node:61060) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:61123) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\nJourney \ub85c\ub4dc \uc911 \uc608\uc678 \ubc1c\uc0dd: Error: Dynamic server usage: Route /sitemap.xml couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error\n    at m (.next/server/chunks/638.js:1:41158)\n    at h (.next/server/chunks/4512.js:1:3888)\n    at i (.next/server/app/(auth)/auth/callback/route.js:1:5319)\n    at d (.next/server/app/sitemap.xml/route.js:1:1282)\n    at f (.next/server/app/sitemap.xml/route.js:1:1966)\n    at y (.next/server/app/sitemap.xml/route.js:1:2618) {\n  description: \"Route /sitemap.xml couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error\",\n  digest: 'DYNAMIC_SERVER_USAGE'\n}\nPost \ub85c\ub4dc \uc911 \uc608\uc678 \ubc1c\uc0dd: Error: Dynamic server usage: Route /sitemap.xml couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error\n    at m (.next/server/chunks/638.js:1:41158)\n    at h (.next/server/chunks/4512.js:1:3888)\n    at i (.next/server/app/(auth)/auth/callback/route.js:1:5319)\n    at p (.next/server/app/sitemap.xml/route.js:1:1516)\n    at f (.next/server/app/sitemap.xml/route.js:1:2117)\n    at async y (.next/server/app/sitemap.xml/route.js:1:2612) {\n  description: \"Route /sitemap.xml couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error\",\n  digest: 'DYNAMIC_SERVER_USAGE'\n}\n(node:61124) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n \u26a0 metadataBase property in metadata export is not set for resolving social open graph or twitter images, using \"http://localhost:3000\". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "TodoWrite",
+    "tool_input": {
+      "todos": [
+        {
+          "content": "PostCard.tsx\uc5d0\uc11c \ubaa8\ub4e0 \ub2f5\ubcc0 \ud0c0\uc785\uc5d0 \ub300\ud574 \uc9c8\ubb38 \ud14d\uc2a4\ud2b8 \ud45c\uc2dc\ud558\ub3c4\ub85d \uc218\uc815",
+          "status": "completed",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Fix type error in mission/create/client.tsx - add min_characters to missionWithQuestionsSchema",
+          "status": "completed",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "Run build test and verify no type errors",
+          "status": "completed",
+          "priority": "high",
+          "id": "4"
+        },
+        {
+          "content": "\uc9c8\ubb38 \ud14d\uc2a4\ud2b8\uac00 \uc5c6\uc744 \uacbd\uc6b0\uc758 fallback \ucc98\ub9ac \ucd94\uac00",
+          "status": "completed",
+          "priority": "medium",
+          "id": "2"
+        },
+        {
+          "content": "Commit the fix and push to dev branch",
+          "status": "in_progress",
+          "priority": "high",
+          "id": "5"
+        }
+      ]
+    },
+    "tool_response": {
+      "oldTodos": [
+        {
+          "content": "PostCard.tsx\uc5d0\uc11c \ubaa8\ub4e0 \ub2f5\ubcc0 \ud0c0\uc785\uc5d0 \ub300\ud574 \uc9c8\ubb38 \ud14d\uc2a4\ud2b8 \ud45c\uc2dc\ud558\ub3c4\ub85d \uc218\uc815",
+          "status": "completed",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "\uc9c8\ubb38 \ud14d\uc2a4\ud2b8\uac00 \uc5c6\uc744 \uacbd\uc6b0\uc758 fallback \ucc98\ub9ac \ucd94\uac00",
+          "status": "completed",
+          "priority": "medium",
+          "id": "2"
+        },
+        {
+          "content": "Fix type error in mission/create/client.tsx - add min_characters to missionWithQuestionsSchema",
+          "status": "completed",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "Run build test and verify no type errors",
+          "status": "in_progress",
+          "priority": "high",
+          "id": "4"
+        },
+        {
+          "content": "Commit the fix and push to dev branch",
+          "status": "pending",
+          "priority": "high",
+          "id": "5"
+        }
+      ],
+      "newTodos": [
+        {
+          "content": "PostCard.tsx\uc5d0\uc11c \ubaa8\ub4e0 \ub2f5\ubcc0 \ud0c0\uc785\uc5d0 \ub300\ud574 \uc9c8\ubb38 \ud14d\uc2a4\ud2b8 \ud45c\uc2dc\ud558\ub3c4\ub85d \uc218\uc815",
+          "status": "completed",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Fix type error in mission/create/client.tsx - add min_characters to missionWithQuestionsSchema",
+          "status": "completed",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "Run build test and verify no type errors",
+          "status": "completed",
+          "priority": "high",
+          "id": "4"
+        },
+        {
+          "content": "\uc9c8\ubb38 \ud14d\uc2a4\ud2b8\uac00 \uc5c6\uc744 \uacbd\uc6b0\uc758 fallback \ucc98\ub9ac \ucd94\uac00",
+          "status": "completed",
+          "priority": "medium",
+          "id": "2"
+        },
+        {
+          "content": "Commit the fix and push to dev branch",
+          "status": "in_progress",
+          "priority": "high",
+          "id": "5"
+        }
+      ]
+    }
   }
 ]

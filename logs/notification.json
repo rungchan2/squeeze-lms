@@ -75,5 +75,12 @@
     "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
     "hook_event_name": "Notification",
     "message": "Claude needs your permission to use supabase-monster - list_projects (MCP)"
+  },
+  {
+    "session_id": "2d2a317b-a1e5-42a8-86f2-a32feec5a394",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/2d2a317b-a1e5-42a8-86f2-a32feec5a394.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "Notification",
+    "message": "Claude Code login successful"
   }
 ]

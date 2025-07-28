@@ -62,9 +62,10 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
               points: q.points,
               is_required: q.is_required,
               max_characters: q.max_characters,
+              min_characters: q.min_characters || null,
               placeholder_text: q.placeholder_text,
               required_image: q.required_image,
-              multiple_select: (q as any).multiple_select || false,
+              multiple_select: q.multiple_select || false,
             })));
             setUseQuestionBuilder(true);
           }

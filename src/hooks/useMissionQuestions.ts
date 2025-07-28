@@ -179,6 +179,7 @@ export function useMissionQuestions(missionId: string | null) {
       points: question.points,
       is_required: question.is_required,
       max_characters: question.max_characters,
+      min_characters: question.min_characters,
       placeholder_text: question.placeholder_text,
       required_image: question.required_image,
       multiple_select: question.multiple_select,

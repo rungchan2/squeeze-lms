@@ -46,7 +46,7 @@ export default function BackButton({
   return (
     <BackButtonContainer onClick={handleClick} className={className}>
       <IoArrowBack size={16} />
-      <Text variant="body" fontWeight="500">
+      <Text variant="body" fontWeight="medium">
         {text}
       </Text>
     </BackButtonContainer>

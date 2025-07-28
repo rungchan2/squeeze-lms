@@ -75,5 +75,19 @@
     "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
     "hook_event_name": "Stop",
     "stop_hook_active": false
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "Stop",
+    "stop_hook_active": false
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "Stop",
+    "stop_hook_active": false
   }
 ]
