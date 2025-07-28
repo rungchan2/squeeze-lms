@@ -9,7 +9,7 @@ import styled from "@emotion/styled";
 import WeekCard from "./WeekCard";
 import { TeacherOnly } from "@/components/auth/AdminOnly";
 import { FloatingButton } from "@/components/common/FloatingButton";
-import { FaWandMagicSparkles } from "react-icons/fa6";
+import { FaWandMagicSparkles, FaPlus } from "react-icons/fa6";
 import { useSearchParams } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
 import Footer from "@/components/common/Footer";
@@ -18,6 +18,7 @@ import { Modal } from "@/components/modal/Modal";
 import { CreateJourneyWeek } from "@/types";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useCompletedMissions } from "@/hooks/usePosts";
+import BottomSpacing from "@/components/common/BottomSpacing";
 const MemoizedWeekCard = memo(WeekCard);
 
 export default function PlanTab({ slug }: { slug: string }) {
@@ -126,12 +127,20 @@ export default function PlanTab({ slug }: { slug: string }) {
         )}
       </Suspense>
       <TeacherOnly>
-        <FloatingButton onClick={openModal}>
-          <FaWandMagicSparkles />
-          <Text variant="body" fontWeight="bold" color="var(--white)">
-            새 주차
-          </Text>
-        </FloatingButton>
+        <FloatingButtonContainer>
+          <FloatingButton onClick={openModal} bottom={70}>
+            <FaWandMagicSparkles />
+            <Text variant="body" fontWeight="bold" color="var(--white)">
+              새 주차
+            </Text>
+          </FloatingButton>
+          <FloatingButton onClick={() => router.push('/mission/create')}>
+            <FaPlus />
+            <Text variant="body" fontWeight="bold" color="var(--white)">
+              미션 생성
+            </Text>
+          </FloatingButton>
+        </FloatingButtonContainer>
         
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <div style={{ width: '100%' }}>
@@ -165,6 +174,7 @@ export default function PlanTab({ slug }: { slug: string }) {
         </Modal>
       </TeacherOnly>
       <Footer />
+      <BottomSpacing />
     </PlanContainer>
   );
 }
@@ -201,5 +211,20 @@ const PlanContainer = styled.div`
     text-align: center;
     padding: 2rem 0;
     color: var(--grey-500);
+  }
+`;
+
+const FloatingButtonContainer = styled.div`
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 999;
+
+  @media (max-width: 768px) {
+    bottom: 16px;
+    right: 16px;
   }
 `;

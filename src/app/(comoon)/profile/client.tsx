@@ -14,7 +14,6 @@ import Button from "@/components/common/Button";
 import { toaster } from "@/components/ui/toaster";
 import FileUpload from "@/components/FileUpload";
 import { redirect } from "next/navigation";
-import { Separator } from "@chakra-ui/react";
 import { getUserById } from "@/utils/data/user";
 import { userLogout } from "@/utils/data/auth";
 import { MdLockOpen } from "react-icons/md";
@@ -25,6 +24,7 @@ import { updateProfile, deleteUser, updatePassword } from "@/utils/data/user";
 import { Loading } from "@/components/common/Loading";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import BackButton from "@/components/common/BackButton";
+import BottomSpacing from "@/components/common/BottomSpacing";
 
 
 
@@ -188,91 +188,110 @@ export default function ProfilePage() {
       <div className="page-header">
         <BackButton />
       </div>
-      <Form onSubmit={handleSubmit(onSubmit)}>
-        <div className="horizontal-container">
-          <Heading level={4}>사용자 정보</Heading>
-          <Button
-            variant="outline"
-            type="submit"
-            isLoading={isSubmitting}
-            disabled={isSubmitting}
-            style={{ maxWidth: "100px" }}
-          >
-            저장
-          </Button>
-        </div>
-        <InputAndTitle title="프로필 이미지">
-          <FileUpload
-            placeholder="프로필 이미지를 업로드하세요"
-            width="100px"
-            height="100px"
-            initialFileUrl={getValues("profileImage") || ""}
-            initialFileId={getValues("profileImageFileId")}
-            acceptedFileTypes={{ "image/*": [".jpeg", ".jpg", ".png", ".webp"] }}
-            maxFiles={1}
-            multiple={false}
-            onUploadComplete={async (fileUrl, fileId) => {
-              setValue("profileImage", fileUrl);
-              if (fileId) {
-                setValue("profileImageFileId", fileId);
-              }
-            }}
-          />
-        </InputAndTitle>
-        <div className="horizontal-container">
-          <InputAndTitle title="이름" errorMessage={errors.first_name?.message}>
-            <Input type="text" {...register("first_name")} />
-          </InputAndTitle>
-          <InputAndTitle title="성" errorMessage={errors.last_name?.message}>
-            <Input type="text" {...register("last_name")} />
-          </InputAndTitle>
-        </div>
-        <InputAndTitle title="전화번호" errorMessage={errors.phone?.message}>
-          <Input type="text" {...register("phone")} />
-        </InputAndTitle>
-        <InputAndTitle
-          title="알림 수신"
-          errorMessage={errors.marketing_opt_in?.message}
-        >
-          <Controller
-            name="marketing_opt_in"
-            control={control}
-            render={({ field }) => (
-              <Field.Root invalid={!!errors.marketing_opt_in}>
-                <Switch.Root
-                  name={field.name}
-                  checked={field.value}
-                  onCheckedChange={({ checked }) => field.onChange(checked)}
-                >
-                  <Switch.HiddenInput onBlur={field.onBlur} />
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch.Root>
-              </Field.Root>
-            )}
-          />
-        </InputAndTitle>
-        <InputAndTitle title="이메일" errorMessage={errors.email?.message}>
-          <Input
-            type="email"
-            {...register("email")}
-            disabled // 이메일은 수정 불가능하게 설정
-          />
-        </InputAndTitle>
-      </Form>
-      <Separator size="lg" />
-      <Heading level={4}>보안</Heading>
-      <div className="button-container">
-        <div className="menu-item" onClick={() => setOpendModal("password")}>
-          <MdLockOpen />
-          비밀번호 초기화
-        </div>
-        <div className="menu-item" onClick={() => setOpendModal("delete")}>
-          <FaRegTrashAlt />
-          회원 탈퇴
-        </div>
-      </div>
+      <ContentWrapper>
+        <ProfileSection>
+          <ProfileHeader>
+            <FileUpload
+              placeholder="프로필 이미지를 업로드하세요"
+              width="120px"
+              height="120px"
+              initialFileUrl={getValues("profileImage") || ""}
+              initialFileId={getValues("profileImageFileId")}
+              acceptedFileTypes={{ "image/*": [".jpeg", ".jpg", ".png", ".webp"] }}
+              maxFiles={1}
+              multiple={false}
+              onUploadComplete={async (fileUrl, fileId) => {
+                setValue("profileImage", fileUrl);
+                if (fileId) {
+                  setValue("profileImageFileId", fileId);
+                }
+              }}
+            />
+            <ProfileInfo>
+              <Heading level={3}>{getValues("first_name")} {getValues("last_name")}</Heading>
+              <Text variant="caption" color="var(--grey-600)">{getValues("email")}</Text>
+            </ProfileInfo>
+          </ProfileHeader>
+        </ProfileSection>
+
+        <SectionCard>
+          <SectionHeader>
+            <Heading level={4}>사용자 정보</Heading>
+            <Button
+              variant="outline"
+              type="submit"
+              isLoading={isSubmitting}
+              disabled={isSubmitting}
+              onClick={handleSubmit(onSubmit)}
+            >
+              저장
+            </Button>
+          </SectionHeader>
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <FormGrid>
+              <InputAndTitle title="이름" errorMessage={errors.first_name?.message}>
+                <StyledInput type="text" {...register("first_name")} />
+              </InputAndTitle>
+              <InputAndTitle title="성" errorMessage={errors.last_name?.message}>
+                <StyledInput type="text" {...register("last_name")} />
+              </InputAndTitle>
+            </FormGrid>
+            <InputAndTitle title="전화번호" errorMessage={errors.phone?.message}>
+              <StyledInput type="text" {...register("phone")} />
+            </InputAndTitle>
+            <InputAndTitle title="이메일" errorMessage={errors.email?.message}>
+              <StyledInput
+                type="email"
+                {...register("email")}
+                disabled
+              />
+            </InputAndTitle>
+            <SwitchContainer>
+              <div className="switch-label">
+                <Text variant="body" fontWeight="medium">알림 수신</Text>
+                <Text variant="caption" color="var(--grey-600)">마케팅 및 프로모션 알림을 받습니다</Text>
+              </div>
+              <Controller
+                name="marketing_opt_in"
+                control={control}
+                render={({ field }) => (
+                  <Field.Root invalid={!!errors.marketing_opt_in}>
+                    <Switch.Root
+                      name={field.name}
+                      checked={field.value}
+                      onCheckedChange={({ checked }) => field.onChange(checked)}
+                    >
+                      <Switch.HiddenInput onBlur={field.onBlur} />
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                    </Switch.Root>
+                  </Field.Root>
+                )}
+              />
+            </SwitchContainer>
+          </Form>
+        </SectionCard>
+
+        <SectionCard>
+          <Heading level={4}>보안</Heading>
+          <SecurityOptions>
+            <SecurityOption onClick={() => setOpendModal("password")}>
+              <MdLockOpen size={20} />
+              <div>
+                <Text variant="body" fontWeight="medium">비밀번호 변경</Text>
+                <Text variant="caption" color="var(--grey-600)">보안을 위해 정기적으로 변경하세요</Text>
+              </div>
+            </SecurityOption>
+            <SecurityOption onClick={() => setOpendModal("delete")} className="danger">
+              <FaRegTrashAlt size={20} />
+              <div>
+                <Text variant="body" fontWeight="medium" color="var(--negative-500)">회원 탈퇴</Text>
+                <Text variant="caption" color="var(--grey-600)">모든 데이터가 삭제됩니다</Text>
+              </div>
+            </SecurityOption>
+          </SecurityOptions>
+        </SectionCard>
       <Modal
         isOpen={opendModal === "password"}
         onClose={() => setOpendModal(null)}
@@ -317,6 +336,8 @@ export default function ProfilePage() {
           </Button>
         </ModalContainer>
       </Modal>
+      </ContentWrapper>
+      <BottomSpacing />
     </Container>
   );
 }
@@ -324,16 +345,20 @@ export default function ProfilePage() {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  max-width: var(--breakpoint-tablet);
-  margin: 0 auto;
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--grey-50);
 
   .page-header {
-    padding: 16px;
+    background-color: var(--white);
     border-bottom: 1px solid var(--grey-200);
+    padding: 16px 24px;
+    position: sticky;
+    top: 70px;
+    z-index: 100;
     
     @media (max-width: 768px) {
-      padding: 12px;
+      padding: 12px 16px;
     }
   }
 
@@ -341,39 +366,150 @@ const Container = styled.div`
     text-align: center;
     padding: 2rem;
   }
+`;
 
-  .container-modal {
+const ContentWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 600px;
+  width: 100%;
+  margin: 32px auto 0;
+  padding: 0 24px;
+
+  @media (max-width: 768px) {
+    padding: 0 16px;
+    margin-top: 24px;
+    gap: 16px;
+  }
+`;
+
+const ProfileSection = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 32px 0;
+`;
+
+const ProfileHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+  }
+`;
+
+const ProfileInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const SectionCard = styled.div`
+  background-color: var(--white);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    padding: 24px;
+    border-radius: 12px;
+  }
+`;
+
+const SectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
+
+const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const StyledInput = styled(Input)`
+  border-radius: 8px;
+  border: 1px solid var(--grey-300);
+  padding: 12px 16px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--blue-500);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  }
+
+  &:disabled {
+    background-color: var(--grey-100);
+    cursor: not-allowed;
+  }
+`;
+
+const SwitchContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: var(--grey-50);
+  border-radius: 8px;
+
+  .switch-label {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    align-items: center;
-    justify-content: center;
+    gap: 4px;
+  }
+`;
+
+const SecurityOptions = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+`;
+
+const SecurityOption = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--grey-200);
+
+  &:hover {
+    background-color: var(--grey-50);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 
-  .horizontal-container {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    justify-content: space-between;
+  &.danger:hover {
+    background-color: rgba(239, 68, 68, 0.05);
+    border-color: var(--negative-300);
   }
 
-  .button-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  svg {
+    color: var(--grey-600);
   }
 
-  .menu-item {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 8px;
-
-    &:hover {
-      background-color: var(--grey-200);
-    }
+  &.danger svg {
+    color: var(--negative-500);
   }
 `;
 
@@ -383,10 +519,4 @@ const ModalContainer = styled.div`
   gap: 2rem;
   align-items: center;
   justify-content: center;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
 `;

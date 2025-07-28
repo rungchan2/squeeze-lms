@@ -2,11 +2,12 @@ import styled from "@emotion/styled";
 type FloatingButtonProps = {
   onClick: () => void;
   children?: React.ReactNode;
+  bottom?: number;
 };
 
-export function FloatingButton({ onClick, children }: FloatingButtonProps) {
+export function FloatingButton({ onClick, children, bottom = 20 }: FloatingButtonProps) {
   return (
-    <FloatingButtonContainer>
+    <FloatingButtonContainer bottom={bottom}>
       <Button onClick={onClick}>
         {children}
       </Button>
@@ -14,10 +15,10 @@ export function FloatingButton({ onClick, children }: FloatingButtonProps) {
   );
 }
 
-const FloatingButtonContainer = styled.div`
+const FloatingButtonContainer = styled.div<{ bottom: number }>`
   z-index: 990;
   position: fixed;
-  bottom: 20px;
+  bottom: ${({ bottom }) => bottom}px;
   right: 20px;
 `;
 
