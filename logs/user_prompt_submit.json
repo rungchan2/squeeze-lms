@@ -124,5 +124,33 @@
     "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
     "hook_event_name": "UserPromptSubmit",
     "prompt": "/commit-and-pr "
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": " @src/components/mission/QuestionBuilder/  \uc5ec\uae30\uc5d0\uc11c \uc9c0\uae08 mission \uc744 \ub9cc\ub4dc\ub294\ub370, \ucd5c\uc18c \uae00\uc790 \uc218, \ucd5c\ub300 \uae00\uc790 \uc218, \ucd5c\ub300 \uc774\ubbf8\uc9c0 \uc218, \ud50c\ub808\uc774\uc2a4\ud640\ub354\ub97c \ud3b8\uc9d1\ud558\ub294\ub370 \uc774\uac70 value\ub791 onchange \ub97c \uc0ac\uc6a9\ud558\uc9c0 \ub9d0\uace0, onblur \ub97c \uc0ac\uc6a9\ud574\uc918. \uadf8\ub9ac\uace0 \ud55c\uac00\uc9c0 \ubb38\uc81c\uac00 \uc788\ub294 npm start production \ubaa8\ub4dc\uc5d0\uc11c \uc218\uc815\ud558\uba74 \uacc4\uc18d \uc704\ub85c \uc2a4\ud06c\ub864 \ub418\ub294 \ubb38\uc81c\uac00 \uc788\uc5b4\uc11c, state \uad00\ub9ac\ub97c \ub354 \ucca0\uc800\ud558\uac8c \ud574\uc8fc\uace0, focus\uac00 \ud480\ub9ac\uc9c0 \uc54a\ub3c4\ub85d \ud574\uc918. think hard"
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "next todo:\\\n\\\n1. \uc6b0\uc120 \uc9c0\uae08 \ubc84\ud2bc\ub4e4\uc774 \ub108\ubb34 \ub2e4 \uc544\ub798\uc5d0 \ubd99\uc5b4 \uc788\uc5b4. @src/components/common/FloatingButton.tsx \uc774\uac70 \uc0ac\uc6a9\ud574\uc11c \ubbf8\uc158 \uc0dd\uc131 \ubc84\ud2bc \ub744\uc6cc\uc8fc\uace0, \ubbf8\uc158 \uc0dd\uc131 \ud654\uba74\uc5d0\uc11c @src/app/mission/create/client.tsx \uc81c\uc77c \ud558\ub2e8\uc5d0 \uc5ec\ubc31 300px \uc815\ub3c4 \ucd94\uac00\ud574\uc918. Spacing \uc774\ub77c\ub294 \ucef4\ud3ec\ub10c\ud2b8 \ub9cc\ub4e4\uc5b4\uc11c \uc544\ub798\uc5d0 \ucd94\uac00\ud574\uc918.\\\n"
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "@src/components/common/FloatingButton.tsx \uc774\uac70 \uae30\ubcf8\uc740 \uc9c0\uae08 \uadf8\ub300\ub85c \ub450\uace0 props\ub85c \uc704\uce58\ub97c \uc9c0\uc815\ud560 \uc218\uc788\ub3c4\ub85d \ud574\uc918. \uc544\ub798 \uc788\ub294 \uac83\uc740 \ub9de\ub294\ub370, \uac00\uc6b4\ub370 \uc788\ub0d0, \uc624\ub978\ucabd\uc5d0 \uc788\ub0d0 \uc67c\ucabd\uc5d0 \uc788\ub0d0 \uc120\ud0dd\ud560 \uc218 \uc788\uace0, \uae30\ubcf8\uc740 \uc624\ub978\ucabd\uc73c\ub85c \ud574\uc918. \uadf8\ub9ac\uace0, \uac00\uc6b4\ub370 \uc77c\uacbd\uc6b0, width 100%, max width\ub97c  \uc774 \uc11c\ube44\uc2a4 \uc804\uccb4\uc5d0 \uc801\uc6a9\ub418\uc5b4\uc788\ub294 --breakpoint-tablet \uc73c\ub85c \ud574\uc918. \uadf8\ub9ac\uace0 \ubc29\uae08 \uc218\uc815\ud55c \ubbf8\uc158 \uc0dd\uc131 \ubc84\ud2bc\uc740 center \ub85c \ud574\uc918."
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "\uc9c0\uae08 \uc774 \ud504\ub85c\uc81d\ud2b8\uc5d0\uc11c \uc0ac\uc6a9\ub418\ub294 type date Input \ub4e4\uc744 \uc804\ubd80 \uad50\uccb4\ud574\uc918. @src/components/DatePicker.tsx \uc774 \ubbf8\ub9ac \ub9cc\ub4e4\uc5b4\ub454 \ucef4\ud3ec\ub10c\ud2b8\ub85c \ub300\uccb4\ud574\uc918. "
   }
 ]

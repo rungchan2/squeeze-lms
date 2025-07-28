@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import dayjs from "@/utils/dayjs/dayjs";
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
@@ -47,6 +47,8 @@ const createIssueBody = (
     ip: string;
     language: string;
     referer: string;
+    userId: string;
+    userEmail: string;
   }
 ): string => {
   const bugSeverity = {
@@ -66,6 +68,10 @@ ${description}
 ## 심각도
 ${bugSeverity}
 
+## 사용자 정보
+- 사용자 ID: ${userInfo.userId}
+- 이메일: ${userInfo.userEmail}
+
 ## 사용자 환경 정보
 - 브라우저: ${browser}
 - 운영체제: ${os}
@@ -81,20 +87,40 @@ ${bugSeverity}
 `;
 };
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     // 요청 본문 파싱
-    const { title, body, bugType } = await request.json();
+    let body, title, bugType;
     
+    try {
+      const requestBody = await request.json();
+      ({ title, body, bugType } = requestBody);
+    } catch (parseError) {
+      return NextResponse.json(
+        { error: "Invalid JSON body" },
+        { status: 400 }
+      );
+    }
+
+    // 필수 필드 검증
+    if (!title || !body || !bugType) {
+      return NextResponse.json(
+        { error: "Title, body, and bugType are required" },
+        { status: 400 }
+      );
+    }
+
     // 요청 헤더에서 사용자 정보 추출
     const headersList = headers();
     
-    // 사용자 정보 수집
+    // 사용자 정보 수집 (임시로 기본값 사용)
     const userInfo = {
       userAgent: (await headersList).get('user-agent') || '알 수 없음',
       ip: (await headersList).get('x-forwarded-for')?.split(',')[0].trim() || '알 수 없음',
       language: (await headersList).get('accept-language')?.split(',')[0] || '알 수 없음',
-      referer: (await headersList).get('referer') || '알 수 없음'
+      referer: (await headersList).get('referer') || '알 수 없음',
+      userId: 'anonymous',
+      userEmail: 'anonymous@example.com'
     };
     
     // 서버 측에서 안전하게 GitHub 토큰 접근
@@ -102,10 +128,10 @@ export async function POST(request: Request) {
     
     if (!TOKEN) {
       console.error("GitHub 토큰이 설정되지 않았습니다. 환경 변수 GITHUB_TOKEN을 확인하세요.");
-      return NextResponse.json({ 
-        success: false, 
-        error: 'GitHub 토큰이 설정되지 않았습니다.' 
-      }, { status: 500 });
+      return NextResponse.json(
+        { error: 'GitHub 토큰이 설정되지 않았습니다.' },
+        { status: 500 }
+      );
     }
     
     // 이슈 생성 API 엔드포인트
@@ -136,20 +162,19 @@ export async function POST(request: Request) {
     
     if (response.ok) {
       console.log(`이슈가 생성되었습니다: ${data.html_url}`);
-      return NextResponse.json({ success: true, data });
+      return NextResponse.json({ data });
     } else {
-      console.error(`API 오류: ${response.status}`, data);
-      return NextResponse.json({ 
-        success: false, 
-        error: data.message, 
-        status: response.status 
-      }, { status: response.status });
+      console.error(`GitHub API 오류: ${response.status}`, data);
+      return NextResponse.json(
+        { error: data.message || 'GitHub API 오류가 발생했습니다' },
+        { status: response.status === 422 ? 400 : 500 }
+      );
     }
   } catch (error: any) {
     console.error('이슈 생성 중 오류 발생:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message 
-    }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || '이슈 생성 중 오류가 발생했습니다' },
+      { status: 500 }
+    );
   }
 } 

@@ -10,7 +10,7 @@ export const missionTypeEnum = z.enum([
 
 export const missionSchema = z.object({
   id: z.string().uuid(),
-  name: z.string(),
+  name: z.string().min(1, { message: "미션 이름을 입력해주세요." }),
   description: z.string().nullable(),
   mission_type: missionTypeEnum.nullable(),
   points: z.number().nullable(),

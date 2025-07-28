@@ -113,7 +113,6 @@ export default function NotificationTab() {
     flex-direction: column;
     gap: 12px;
     width: 100%;
-    padding: 16px;
   
     .notification-list {
       width: 100%;

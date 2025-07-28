@@ -1,36 +1,76 @@
 import styled from "@emotion/styled";
+
+type FloatingButtonPosition = "left" | "center" | "right";
+
 type FloatingButtonProps = {
   onClick: () => void;
   children?: React.ReactNode;
   bottom?: number;
+  position?: FloatingButtonPosition;
 };
 
-export function FloatingButton({ onClick, children, bottom = 20 }: FloatingButtonProps) {
+export function FloatingButton({ 
+  onClick, 
+  children, 
+  bottom = 20, 
+  position = "right" 
+}: FloatingButtonProps) {
   return (
-    <FloatingButtonContainer bottom={bottom}>
-      <Button onClick={onClick}>
+    <FloatingButtonContainer bottom={bottom} position={position}>
+      <Button onClick={onClick} position={position}>
         {children}
       </Button>
     </FloatingButtonContainer>
   );
 }
 
-const FloatingButtonContainer = styled.div<{ bottom: number }>`
+const FloatingButtonContainer = styled.div<{ 
+  bottom: number; 
+  position: FloatingButtonPosition;
+}>`
   z-index: 990;
   position: fixed;
   bottom: ${({ bottom }) => bottom}px;
-  right: 20px;
+  
+  ${({ position }) => {
+    switch (position) {
+      case "left":
+        return `
+          left: 20px;
+        `;
+      case "center":
+        return `
+          left: 50%;
+          transform: translateX(-50%);
+          width: 100%;
+          max-width: var(--breakpoint-tablet);
+          padding: 0;
+        `;
+      case "right":
+      default:
+        return `
+          right: 20px;
+        `;
+    }
+  }}
 `;
 
-const Button = styled.button`
+const Button = styled.button<{ position: FloatingButtonPosition }>`
   cursor: pointer;
   background-color: var(--primary-700);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
+  width: 100%;
+  color: var(--white);
+  font-weight: 500;
   gap: 8px;
-  border-radius: 30px;
+  border-radius: 12px;
+  ${({ position }) => position === "center" && `
+    width: 100%;
+  `}
+  
   & > * {
     color: var(--white);
   }

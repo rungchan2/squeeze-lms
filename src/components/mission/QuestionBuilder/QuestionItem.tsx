@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, memo, useEffect } from "react";
+import { useState, useCallback, useMemo, memo, useRef } from "react";
 import { Input, Textarea } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import { FaGripVertical, FaTrash, FaCopy, FaPlus, FaCheck, FaTimes } from "react-icons/fa";
@@ -35,10 +35,12 @@ function QuestionItem({
 }: QuestionItemProps) {
   const [localQuestionText, setLocalQuestionText] = useState(question.question_text);
   const [localPoints, setLocalPoints] = useState<string>((question.points || 100).toString());
-  const [localMinCharacters, setLocalMinCharacters] = useState<string>((question.min_characters || 0).toString());
-  const [localMaxCharacters, setLocalMaxCharacters] = useState<string>((question.max_characters || 1000).toString());
-  const [localMaxImages, setLocalMaxImages] = useState<string>((question.max_images || 3).toString());
-  const [localPlaceholderText, setLocalPlaceholderText] = useState<string>(question.placeholder_text || "");
+  
+  // Use refs to store the input values without causing re-renders
+  const minCharactersRef = useRef<HTMLInputElement>(null);
+  const maxCharactersRef = useRef<HTMLInputElement>(null);
+  const maxImagesRef = useRef<HTMLInputElement>(null);
+  const placeholderTextRef = useRef<HTMLInputElement>(null);
 
   const {
     attributes,
@@ -57,16 +59,6 @@ function QuestionItem({
       { label: "복합형 (텍스트+이미지)", value: "mixed" },
     ],
   });
-
-
-  // Sync local state with question data when question changes from parent
-  useEffect(() => {
-    setLocalPoints((question.points || 100).toString());
-    setLocalMinCharacters((question.min_characters || 0).toString());
-    setLocalMaxCharacters((question.max_characters || 1000).toString());
-    setLocalMaxImages((question.max_images || 3).toString());
-    setLocalPlaceholderText(question.placeholder_text || "");
-  }, [question.points, question.min_characters, question.max_characters, question.max_images, question.placeholder_text]);
 
   // Question text 업데이트를 debounce 처리
   const handleQuestionTextChange = useCallback((value: string) => {
@@ -91,51 +83,36 @@ function QuestionItem({
     }
   }, [localPoints, question.points, index, onUpdate]);
 
-  // Character limit handlers
-  const handleMinCharactersChange = useCallback((value: string) => {
-    setLocalMinCharacters(value);
-  }, []);
-
-  const handleMinCharactersBlur = useCallback(() => {
-    const numValue = parseInt(localMinCharacters) || 0;
+  // Character limit handlers - onBlur only
+  const handleMinCharactersBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    const numValue = parseInt(e.target.value) || 0;
     if (numValue !== question.min_characters) {
       onUpdate(index, { min_characters: numValue });
     }
-  }, [localMinCharacters, question.min_characters, index, onUpdate]);
+  }, [question.min_characters, index, onUpdate]);
 
-  const handleMaxCharactersChange = useCallback((value: string) => {
-    setLocalMaxCharacters(value);
-  }, []);
-
-  const handleMaxCharactersBlur = useCallback(() => {
-    const numValue = parseInt(localMaxCharacters) || 1000;
+  const handleMaxCharactersBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    const numValue = parseInt(e.target.value) || 1000;
     if (numValue !== question.max_characters) {
       onUpdate(index, { max_characters: numValue });
     }
-  }, [localMaxCharacters, question.max_characters, index, onUpdate]);
+  }, [question.max_characters, index, onUpdate]);
 
-  // Max images handler
-  const handleMaxImagesChange = useCallback((value: string) => {
-    setLocalMaxImages(value);
-  }, []);
-
-  const handleMaxImagesBlur = useCallback(() => {
-    const numValue = parseInt(localMaxImages) || 3;
+  // Max images handler - onBlur only
+  const handleMaxImagesBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    const numValue = parseInt(e.target.value) || 3;
     if (numValue !== question.max_images) {
       onUpdate(index, { max_images: numValue });
     }
-  }, [localMaxImages, question.max_images, index, onUpdate]);
+  }, [question.max_images, index, onUpdate]);
 
-  // Placeholder text handler
-  const handlePlaceholderTextChange = useCallback((value: string) => {
-    setLocalPlaceholderText(value);
-  }, []);
-
-  const handlePlaceholderTextBlur = useCallback(() => {
-    if (localPlaceholderText !== question.placeholder_text) {
-      onUpdate(index, { placeholder_text: localPlaceholderText });
+  // Placeholder text handler - onBlur only
+  const handlePlaceholderTextBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value !== question.placeholder_text) {
+      onUpdate(index, { placeholder_text: value });
     }
-  }, [localPlaceholderText, question.placeholder_text, index, onUpdate]);
+  }, [question.placeholder_text, index, onUpdate]);
 
   // Option text handler - onBlur only for direct input handling
   const handleOptionTextBlur = useCallback((optionIndex: number, event: React.FocusEvent<HTMLInputElement>) => {
@@ -267,9 +244,10 @@ function QuestionItem({
             <SettingRow>
               <Text variant="caption" fontWeight="bold">최소 글자 수</Text>
               <Input
+                key={`min-char-${question.tempId}-${question.question_type}`}
+                ref={minCharactersRef}
                 type="number"
-                value={localMinCharacters}
-                onChange={(e) => handleMinCharactersChange(e.target.value)}
+                defaultValue={question.min_characters || 0}
                 onBlur={handleMinCharactersBlur}
                 placeholder="0"
                 size="sm"
@@ -280,9 +258,10 @@ function QuestionItem({
             <SettingRow>
               <Text variant="caption" fontWeight="bold">최대 글자 수</Text>
               <Input
+                key={`max-char-${question.tempId}-${question.question_type}`}
+                ref={maxCharactersRef}
                 type="number"
-                value={localMaxCharacters}
-                onChange={(e) => handleMaxCharactersChange(e.target.value)}
+                defaultValue={question.max_characters || 1000}
                 onBlur={handleMaxCharactersBlur}
                 placeholder="1000"
                 size="sm"
@@ -292,8 +271,9 @@ function QuestionItem({
             <SettingRow>
               <Text variant="caption" fontWeight="bold">플레이스홀더</Text>
               <Input
-                value={localPlaceholderText}
-                onChange={(e) => handlePlaceholderTextChange(e.target.value)}
+                key={`placeholder-${question.tempId}-${question.question_type}`}
+                ref={placeholderTextRef}
+                defaultValue={question.placeholder_text || ""}
                 onBlur={handlePlaceholderTextBlur}
                 placeholder="답변 안내 텍스트"
                 size="sm"
@@ -347,9 +327,10 @@ function QuestionItem({
             <SettingRow>
               <Text variant="caption" fontWeight="bold">최대 이미지 수</Text>
               <Input
+                key={`max-img-${question.tempId}-${question.question_type}`}
+                ref={maxImagesRef}
                 type="number"
-                value={localMaxImages}
-                onChange={(e) => handleMaxImagesChange(e.target.value)}
+                defaultValue={question.max_images || 3}
                 onBlur={handleMaxImagesBlur}
                 placeholder="3"
                 size="sm"
@@ -375,9 +356,9 @@ function QuestionItem({
             <SettingRow>
               <Text variant="caption" fontWeight="bold">최소 글자 수</Text>
               <Input
+                key={`min-char-mixed-${question.tempId}-${question.question_type}`}
                 type="number"
-                value={localMinCharacters}
-                onChange={(e) => handleMinCharactersChange(e.target.value)}
+                defaultValue={question.min_characters || 0}
                 onBlur={handleMinCharactersBlur}
                 placeholder="0"
                 size="sm"
@@ -388,9 +369,9 @@ function QuestionItem({
             <SettingRow>
               <Text variant="caption" fontWeight="bold">최대 글자 수</Text>
               <Input
+                key={`max-char-mixed-${question.tempId}-${question.question_type}`}
                 type="number"
-                value={localMaxCharacters}
-                onChange={(e) => handleMaxCharactersChange(e.target.value)}
+                defaultValue={question.max_characters || 500}
                 onBlur={handleMaxCharactersBlur}
                 placeholder="500"
                 size="sm"
@@ -400,9 +381,9 @@ function QuestionItem({
             <SettingRow>
               <Text variant="caption" fontWeight="bold">최대 이미지 수</Text>
               <Input
+                key={`max-img-mixed-${question.tempId}-${question.question_type}`}
                 type="number"
-                value={localMaxImages}
-                onChange={(e) => handleMaxImagesChange(e.target.value)}
+                defaultValue={question.max_images || 2}
                 onBlur={handleMaxImagesBlur}
                 placeholder="2"
                 size="sm"
@@ -414,8 +395,8 @@ function QuestionItem({
             <SettingRow>
               <Text variant="caption" fontWeight="bold">플레이스홀더</Text>
               <Input
-                value={localPlaceholderText}
-                onChange={(e) => handlePlaceholderTextChange(e.target.value)}
+                key={`placeholder-mixed-${question.tempId}-${question.question_type}`}
+                defaultValue={question.placeholder_text || ""}
                 onBlur={handlePlaceholderTextBlur}
                 placeholder="답변 안내 텍스트"
                 size="sm"
@@ -427,7 +408,7 @@ function QuestionItem({
       default:
         return null;
     }
-  }, [question, index, onUpdate, handleOptionUpdate, addOption, removeOption]);
+  }, [question, index, onUpdate, handleOptionUpdate, addOption, removeOption, handleMinCharactersBlur, handleMaxCharactersBlur, handleMaxImagesBlur, handlePlaceholderTextBlur, handleOptionTextBlur]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
