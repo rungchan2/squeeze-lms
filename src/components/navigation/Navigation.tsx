@@ -16,6 +16,7 @@ import { toaster } from "@/components/ui/toaster";
 import { userLogout } from "@/utils/data/auth";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import NotificationRequest from "../Notification";
+import { AdminOnly } from "@/components/auth/AdminOnly";
 
 function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
   const {
@@ -152,6 +153,15 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
                   >
                     내 프로필
                   </Menu.Item>
+                  <AdminOnly>
+                    <Menu.Item
+                      value="admin"
+                      onClick={() => router.push("/admin")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      관리자 페이지
+                    </Menu.Item>
+                  </AdminOnly>
                   <Menu.Item
                     value="bug-report"
                     onClick={() => router.push("/bug-report")}
