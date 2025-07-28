@@ -378,7 +378,7 @@ export default function TeacherPostsPage() {
                               </Dialog.Title>
                             </Dialog.Header>
                             <Dialog.Body >
-                              <RichTextViewer content={post.content} />
+                              <RichTextViewer content={post.content || ""} />
                             </Dialog.Body>
                             <Dialog.CloseTrigger asChild>
                               <CloseButton size="sm" />

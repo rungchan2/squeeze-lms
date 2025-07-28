@@ -3,7 +3,7 @@
 import Text from "@/components/Text/Text";
 import Heading from "@/components/Text/Heading";
 import styled from "@emotion/styled";
-import { FaRegComment, FaShare, FaHeart } from "react-icons/fa";
+import { FaRegComment, FaShare, FaHeart, FaList, FaCheckSquare, FaImage, FaMix, FaQuestionCircle } from "react-icons/fa";
 import { MdAutoGraph } from "react-icons/md";
 
 import { LuDot } from "react-icons/lu";
@@ -14,7 +14,7 @@ import dayjs from "@/utils/dayjs/dayjs";
 import { PostWithRelations } from "@/types";
 import { useLikes } from "@/hooks/useLikes";
 import RichTextViewer from "@/components/richTextInput/RichTextViewer";
-import { useCallback, useMemo, memo } from "react";
+import { useCallback, useMemo, memo, useState } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { Menu, Portal } from "@chakra-ui/react";
 import { FaEllipsis } from "react-icons/fa6";
@@ -22,6 +22,8 @@ import { hidePost, deletePost } from "@/utils/data/posts";
 import useSWR from "swr";
 import { getCommentsNumber } from "@/utils/data/comment";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { Modal } from "@/components/modal/Modal";
+import { useMissionQuestions } from "@/hooks/useMissionQuestions";
 
 interface PostCardProps {
   post: PostWithRelations;
@@ -61,6 +63,8 @@ export default memo(function PostCard({
   const { id } = useSupabaseAuth();
   const { onLike, onUnlike, likesCount, useUserLike } = useLikes(post.id);
   const { count } = useCommentsCount(post.id);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const { data: userLike } = useUserLike(id);
   const isUserLike = Boolean(userLike);
@@ -175,12 +179,90 @@ export default memo(function PostCard({
     }
   }, [post.id, router, showDetails]);
 
+  const handleImageClick = useCallback((imageUrl: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedImage(imageUrl);
+    setIsImageModalOpen(true);
+  }, []);
+
+  const closeImageModal = useCallback(() => {
+    setIsImageModalOpen(false);
+    setSelectedImage(null);
+  }, []);
+
   function OnlyMyPost({ children }: { children: React.ReactNode }) {
     if (post.profiles?.id === id) {
       return children;
     }
     return null;
   }
+
+  // Helper function to get mission type icon
+  const getMissionTypeIcon = (missionType: string | null) => {
+    // Legacy type mapping
+    if (missionType === 'text' || missionType === 'individual' || missionType === '과제') {
+      return <FaList />;
+    }
+    if (missionType === 'image') {
+      return <FaImage />;
+    }
+    if (missionType === 'team') {
+      return <FaMix />;
+    }
+    // New ENUM types
+    switch (missionType) {
+      case 'essay':
+        return <FaList />;
+      case 'multiple_choice':
+        return <FaCheckSquare />;
+      case 'image_upload':
+        return <FaImage />;
+      case 'mixed':
+        return <FaMix />;
+      default:
+        return <FaQuestionCircle />;
+    }
+  };
+
+  // Helper function to get mission type label
+  const getMissionTypeLabel = (missionType: string | null) => {
+    // Legacy type mapping
+    if (missionType === 'text' || missionType === 'individual' || missionType === '과제') {
+      return '주관식';
+    }
+    if (missionType === 'image') {
+      return '이미지';
+    }
+    if (missionType === 'team') {
+      return '팀 미션';
+    }
+    // New ENUM types
+    switch (missionType) {
+      case 'essay':
+        return '주관식';
+      case 'multiple_choice':
+        return '객관식';
+      case 'image_upload':
+        return '이미지';
+      case 'mixed':
+        return '복합형';
+      default:
+        return '기타';
+    }
+  };
+
+  // Check if post has structured answers (modern mission)
+  const hasStructuredAnswers = (post as any).answers_data && 
+    typeof (post as any).answers_data === 'object' && 
+    'answers' in (post as any).answers_data;
+
+  // Parse structured answers
+  const structuredAnswers = hasStructuredAnswers ? 
+    ((post as any).answers_data as any).answers : null;
+  
+  // Get mission questions for displaying question text
+  const missionId = (post as any).mission_instance?.mission?.id;
+  const { questions } = useMissionQuestions(missionId);
   //[ ] 팀 포스팅 시 팀원 이름 전부 표시 및 팀 미션이라는 표시가능.
   return (
     <PostCardContainer showDetails={showDetails} onClick={handlePostClick}>
@@ -201,6 +283,13 @@ export default memo(function PostCard({
                 <Text variant="caption" fontWeight="bold">
                   {post.teamInfo?.name ? "(팀 미션)" : "의 미션"}
                 </Text>
+                {/* Mission Type Indicator */}
+                <MissionTypeIndicator>
+                  {getMissionTypeIcon((post as any).mission_instance?.mission?.mission_type)}
+                  <Text variant="caption" color="var(--primary-600)">
+                    {getMissionTypeLabel((post as any).mission_instance?.mission?.mission_type)}
+                  </Text>
+                </MissionTypeIndicator>
               </UserNameWrapper>
               <UserDetailsWrapper>
                 <Text variant="small" fontWeight="bold">
@@ -295,20 +384,131 @@ export default memo(function PostCard({
 
         <PostContentContainer showDetails={showDetails}>
           <Heading level={3}>{post?.title}</Heading>
-          {showDetails ? (
-            <div>
-              <RichTextViewer content={post.content || ""} />
-            </div>
+          
+          {/* Display structured answers if available */}
+          {hasStructuredAnswers && structuredAnswers ? (
+            <StructuredAnswersContainer>
+              {showDetails ? (
+                /* Detailed view for structured answers */
+                <div>
+                  {structuredAnswers.map((answer: any, index: number) => (
+                    <AnswerItem key={answer.question_id || index}>
+                      <AnswerHeader>
+                        <AnswerNumber>Q{index + 1}</AnswerNumber>
+                        <AnswerTypeIcon>
+                          {getMissionTypeIcon(answer.answer_type)}
+                        </AnswerTypeIcon>
+                      </AnswerHeader>
+                      
+                      {/* Display question text for all answer types */}
+                      {questions && (
+                        <QuestionText>
+                          {(() => {
+                            const question = questions.find(q => q.id === answer.question_id);
+                            return question ? (
+                              <Text variant="body" color="var(--grey-700)" fontWeight="medium">
+                                {question.question_text}
+                              </Text>
+                            ) : (
+                              <Text variant="body" color="var(--grey-500)" fontWeight="medium">
+                                질문 {answer.question_order || index + 1}
+                              </Text>
+                            );
+                          })()} 
+                        </QuestionText>
+                      )}
+                      
+                      <AnswerContent>
+                        {answer.answer_text && (
+                          <RichTextViewer content={answer.answer_text} />
+                        )}
+                        {answer.selected_option && (
+                          <SelectedOption>
+                            <Text variant="body" color="var(--primary-600)">
+                              선택: {answer.selected_option}
+                            </Text>
+                          </SelectedOption>
+                        )}
+                        {answer.image_urls && answer.image_urls.length > 0 && (
+                          <ImageGallery showDetails={showDetails}>
+                            {answer.image_urls.map((url: string, imgIndex: number) => (
+                              <AnswerImage 
+                                key={imgIndex} 
+                                src={url} 
+                                alt={`답변 이미지 ${imgIndex + 1}`}
+                                showDetails={showDetails}
+                                onClick={(e) => handleImageClick(url, e)}
+                              />
+                            ))}
+                          </ImageGallery>
+                        )}
+                      </AnswerContent>
+                    </AnswerItem>
+                  ))}
+                </div>
+              ) : (
+                /* Summary view for structured answers */
+                <AnswersSummary>
+                  <Text variant="body" color="var(--grey-600)">
+                    {structuredAnswers.length}개 질문에 답변
+                  </Text>
+                  {structuredAnswers.slice(0, 2).map((answer: any, index: number) => {
+                    const question = questions?.find(q => q.id === answer.question_id);
+                    return (
+                      <SummaryItem key={answer.question_id || index}>
+                        {/* Show question text */}
+                        {question ? (
+                          <Text variant="caption" color="var(--grey-600)" fontWeight="medium">
+                            Q{index + 1}: {question.question_text.length > 40 
+                              ? `${question.question_text.substring(0, 40)}...` 
+                              : question.question_text}
+                          </Text>
+                        ) : (
+                          <Text variant="caption" color="var(--grey-500)" fontWeight="medium">
+                            질문 {answer.question_order || index + 1}
+                          </Text>
+                        )}
+                        
+                        {/* Show answer */}
+                        {answer.answer_text && (
+                          <Text variant="caption" color="var(--grey-700)">
+                            답변: {answer.answer_text.replace(/<[^>]*>/g, '').substring(0, 30)}
+                            {answer.answer_text.length > 30 ? '...' : ''}
+                          </Text>
+                        )}
+                        {answer.selected_option && (
+                          <Text variant="caption" color="var(--primary-600)">
+                            선택: {answer.selected_option}
+                          </Text>
+                        )}
+                      </SummaryItem>
+                    );
+                  })}
+                  {structuredAnswers.length > 2 && (
+                    <Text variant="caption" color="var(--grey-500)">
+                      +{structuredAnswers.length - 2}개 더...
+                    </Text>
+                  )}
+                </AnswersSummary>
+              )}
+            </StructuredAnswersContainer>
           ) : (
-            <div
-              className="not-details-content"
-              dangerouslySetInnerHTML={{
-                __html:
-                  post.content?.length && post.content?.length > 100
-                    ? post.content?.slice(0, 100) + "..."
-                    : post.content || "",
-              }}
-            />
+            /* Legacy content display */
+            showDetails ? (
+              <div>
+                <RichTextViewer content={post.content || ""} />
+              </div>
+            ) : (
+              <div
+                className="not-details-content"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    post.content?.length && post.content?.length > 100
+                      ? post.content?.slice(0, 100) + "..."
+                      : post.content || "",
+                }}
+              />
+            )
           )}
         </PostContentContainer>
         <InteractionContainer>
@@ -335,6 +535,18 @@ export default memo(function PostCard({
           </InteractionItem>
         </InteractionContainer>
       </ContentWrapper>
+      
+      <Modal 
+        isOpen={isImageModalOpen} 
+        onClose={closeImageModal}
+        title="이미지 상세보기"
+      >
+        {selectedImage && (
+          <ImageModalContent>
+            <img src={selectedImage} alt="상세 이미지" />
+          </ImageModalContent>
+        )}
+      </Modal>
     </PostCardContainer>
   );
 });
@@ -505,4 +717,148 @@ const InteractionItem = styled.div`
     -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
   }
+`;
+
+const MissionTypeIndicator = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  background: var(--primary-100);
+  border-radius: 8px;
+  margin-left: 8px;
+  
+  svg {
+    width: 12px;
+    height: 12px;
+    color: var(--primary-500);
+  }
+`;
+
+const StructuredAnswersContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+`;
+
+const AnswerItem = styled.div`
+  border: 1px solid var(--grey-200);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--grey-50);
+  margin-bottom: 8px;
+`;
+
+const AnswerHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+`;
+
+const AnswerNumber = styled.div`
+  background: var(--primary-600);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+`;
+
+const AnswerTypeIcon = styled.div`
+  display: flex;
+  align-items: center;
+  color: var(--primary-500);
+  
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
+const AnswerContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const SelectedOption = styled.div`
+  padding: 8px;
+  background: var(--primary-50);
+  border-left: 3px solid var(--primary-400);
+  border-radius: 4px;
+`;
+
+const ImageGallery = styled.div<{ showDetails?: boolean }>`
+  display: flex;
+  gap: ${({ showDetails }) => showDetails ? '12px' : '8px'};
+  flex-wrap: wrap;
+  align-items: center;
+`;
+
+const AnswerImage = styled.img<{ showDetails?: boolean }>`
+  width: ${({ showDetails }) => showDetails ? '120px' : '60px'};
+  height: ${({ showDetails }) => showDetails ? '120px' : '60px'};
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--grey-200);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const ImageCount = styled.div`
+  padding: 4px 8px;
+  background: var(--grey-200);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--grey-600);
+`;
+
+const AnswersSummary = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--grey-50);
+  border-radius: 6px;
+  border: 1px solid var(--grey-200);
+`;
+
+const SummaryItem = styled.div`
+  padding: 8px 0;
+  border-bottom: 1px solid var(--grey-200);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const ImageModalContent = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  img {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+`;
+
+const QuestionText = styled.div`
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: var(--grey-50);
+  border-left: 3px solid var(--primary-300);
+  border-radius: 4px;
 `;

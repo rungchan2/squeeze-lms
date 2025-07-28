@@ -1,0 +1,114 @@
+[
+  {
+    "session_id": "274b5689-eabb-4e4f-9039-c86754c0c398",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/274b5689-eabb-4e4f-9039-c86754c0c398.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "@src/app/create-journey/ \uc774 \ud398\uc774\ubbf8 \ub808\uc774\uc544\uc6c3 \ub2e4\uc2dc \uc7a1\uc544\uc918. \uc77c\ub2e8 \uc2dc\uc791\uc77c \uc885\ub8cc\uc77c \uc778\ud48b\uc744 \uac00\ub85c\ub85c \ubc30\uce58\ud558\uace0,  datebpicker \ub294react-datepicker \uc0ac\uc6a9\ud574\uc11c \ubc1b\uc544\uc918."
+  },
+  {
+    "session_id": "274b5689-eabb-4e4f-9039-c86754c0c398",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/274b5689-eabb-4e4f-9039-c86754c0c398.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "datepicker \ucef4\ud3ec\ub10c\ud2b8\ub97c \ud558\ub098 \ub530\ub85c \ub9cc\ub4e4\uc5b4\uc11c \uc55e\uc73c\ub85c \ub2e4\uc591\ud55c \uacf3\uc5d0 import \ud574\uc11c \uc4f8\uac70\uc57c. datepicker \ucef4\ud3ec\ub10c\ud2b8\ub97c @src/components/ \ub514\ub809\ud1a0\ub9ac\uc5d0 \ub9cc\ub4e4\uc5b4\uc8fc\uace0, \ub514\uc790\uc778\uc744 modern, simple \ub514\uc790\uc778\uc73c\ub85c \ub514\uc790\uc778 \ud574\uc918."
+  },
+  {
+    "session_id": "ce24e16a-6518-482f-8336-0e1092ad493f",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/ce24e16a-6518-482f-8336-0e1092ad493f.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "\uc88b\uc544 \uc774\uc81c @specs/bug-resolution-plan.md \uc774\uac70 \ucc38\uace0\ud574\uc11c \ubc84\uadf8\ub97c \ud558\ub098\uc529 \uc218\uc815\ud574\uc918. "
+  },
+  {
+    "session_id": "ce24e16a-6518-482f-8336-0e1092ad493f",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/ce24e16a-6518-482f-8336-0e1092ad493f.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "\uc544\uc9c1 \ubbf8\uc158 \ucd94\uac00 \ub85c\uc9c1\uc774 \ubc84\uadf8\uac00 \uc0dd\uaca8. \uc774\ub7f0 \uc5d0\ub7ec\uac00 \ub098\uba74\uc11c \uc0c8\ub85c\uace0\uce68 \ub418\ub294\ub370, \ucd94\uac00\ub418\uc9c0\ub294 \uc54a\uc544. \uadf8\ub0e5 \uc9c0\uae08 \ubc29\uc2dd\ub9d0\uace0 \uc9c0\uc6b0\uace0 \ub2e4\uc2dc \uc774 \uae30\ub2a5\uc744 \uad6c\ud604\ud55c\ub2e4\uace0 \ud588\uc744 \ub54c \uc218\uc815\ud574\uc918.\\\n\\\nTypeError: releaseMoment.isSameOrAfter is not a function\nNext.js (15.1.7) out of date (learn more) (Turbopack) X\nSource\n197|\n198|\n2 199 1\n200|\nsrc/app/journey/[slugl/_plan/MissionComponent.tsx (199:25) @ handleConfirmAddMission\n// \uacf5\uac1c\uc77c\uc790\uac00 \ub9c8\uac10\uc77c\uc790\ubcf4\ub2e4 \ub2a6\uac70\ub098 \uac19\uc740 \uacbd\uc6b0\nif (releaseMoment. isSame0rAfter(expiryMoment)) {\ntoaster. create(f\ntitle:\"\ub0a0\uc9dc \uc624\ub958\",\ndescription: \"\uacf5\uac1c \uc77c\uc790\ub294 \ub9c8\uac10 \uc77c\uc790\ubcf4\ub2e4 \uc774\uc804\uc774\uc5b4\uc57c \ud569\ub2c8\ub2e4.\","
+  },
+  {
+    "session_id": "ce24e16a-6518-482f-8336-0e1092ad493f",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/ce24e16a-6518-482f-8336-0e1092ad493f.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "@src/hooks/useJourneyMissionInstances.ts \uc774\uac8c \uadfc\ubcf8\uc801\uc73c\ub85c \ubb38\uc81c\uac19\uc740\ub370, \uc774 \ud6c5\uc5d0\uc11c api route \ub294 \ucd5c\ub300\ud55c \uc0ac\uc6a9\ud558\uc9c0 \uc54a\uace0 \uc774 \ud6c5 \ud30c\uc77c\uc5d0\uc11c \ud574\uacb0\ud574\uc918. \ub610\ud55c \ud6c5\uc744 \ub9ac\ud399\ud1a0\ub9c1 \ucd5c\uc801\ud654 \ud574\uc918. \ub610\ud55c \uc218\uc815\uc804\uc5d0 supabase mcp \ub97c \uc0ac\uc6a9\ud574\uc11c journey_mission_instance \ud14c\uc774\ube14 \uc815\ubcf4\ub97c \ud55c\ubc88 \ud655\uc778\ud558\uace0 \uc218\uc815\ud574\uc918."
+  },
+  {
+    "session_id": "ce24e16a-6518-482f-8336-0e1092ad493f",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/ce24e16a-6518-482f-8336-0e1092ad493f.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "\uc544\ub0d0 ID \ub294 egptutozdfchliouephl \uc774\uace0, monster-supabase mcp \ub97c \uc0ac\uc6a9\ud574\uc57c\ud574"
+  },
+  {
+    "session_id": "ce24e16a-6518-482f-8336-0e1092ad493f",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/ce24e16a-6518-482f-8336-0e1092ad493f.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "\uc88b\uc544 \uc798 \ub41c\ub2e4. \uadf8\ub9ac\uace0 \uc544\uae4c \uc644\ub8cc\ud558\uc9c0 \ubabb\ud55c \uac83\ub4e4\ub3c4 \uc644\ub8cc \ud574\uc918."
+  },
+  {
+    "session_id": "ce24e16a-6518-482f-8336-0e1092ad493f",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/ce24e16a-6518-482f-8336-0e1092ad493f.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "@src/app/journey/[slug]/client.tsx \uc9c0\uae08 \uc5ec\uae30 \uc54c\ub9bc \ud0ed\uc774\ub791 \uc740 \ucd94\uac00 \ub410\ub294\ub370 \uc774\uc804\uc5d0 \ud65c\uc6a9\ud558\ub358 \uc54c\ub9bc \ud0ed\uc744 \uadf8\ub300\ub85c \uac00\uc838\ub2e4 \uc4f0\uba74 \ub3fc, \uc0c8\ub85c \ub9cc\ub4e0\uac70 \uac19\uc740\ub370 \uc774\uc804 \uc54c\ub9bc \ud0ed\uc744 \ud65c\uc6a9\ud574\uc8fc\uace0, \uc9c0\uae08 \uc774 \ud0ed \uc804\ud658\uc740 \ud30c\ub77c\ubbf8\ud130\ub85c \uc804\ud658\uc774 \uc548\ub3fc. \uc774 \ud0ed \ud30c\ub77c\ubbf8\ud130 \uae30\ubc18\uc73c\ub85c \uc791\ub3d9\ub418\ub85d \uc218\uc815\ud574\uc918."
+  },
+  {
+    "session_id": "ce24e16a-6518-482f-8336-0e1092ad493f",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/ce24e16a-6518-482f-8336-0e1092ad493f.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "\uc9c0\uae08 \ud30c\ub77c\ubbf8\ud130 \uc798\ubabb\ub098\uc624\uace0 \uc788\uc5b4 http://localhost:3000/journey/ff61597e-d3ca-4ff2-88f0-6ba27c93a627?tab=%5Bobject+Object%5D \uc774\ub7f0\uc2dc\uae0d\ub85c \ub098\uc624\uac70\ub4e0."
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "\uae30\ub2a5 \uc218\uc815\uc774 \ud558\ub098 \uc788\uc5b4. @src/app/journey/[slug]/client.tsx \uc774 \ud398\uc774\uc9c0\ub97c \ubcf4\uba74 \ud604\uc7ac \ubbf8\uc158 \ud0ed\uc740 @src/app/journey/[slug]/_mission/MissionTab.tsx \ub85c\uadf8\uc778\ud55c \uc720\uc800\uac00 \ud574\uc57c\ud560 \ubbf8\uc158\uc744 \uc21c\uc11c\ub300\ub85c \ubcf4\uc5ec\uc8fc\uace0 \uc788\uace0, \ud074\ub9ad\ud558\uba74 \ubbf8\uc158\uc744 \uc218\ud589\ud560 \uc218 \uc788\ub3c4\ub85d \ud558\uace0 \uc788\uc5b4. \uadfc\ub370 \uc774 \uc5ed\ud560\uc744 \uc606\uc5d0 \uc77c\uc815\ud0ed\uc5d0\uc11c \ud560 \uc218 \uc788\ub3c4\ub85d \ud1b5\ud569\ud558\uace0 \uc2f6\uc5b4. \uadf8\ub798\uc11c @src/app/journey/[slug]/_plan/PlanTab.tsx \uc774\uac70 \ub808\uc774\uc544\uc6c3\uacfc \ub2e4\ub978 \uae30\ub2a5\uc740 \uc804\ubd80 \ub450\ub418, \uae30\ub2a5\uc744 \ucd94\uac00 \ud574\uc918. \uc774\ubbf8 \uc9c4\ud589\ud55c \ubbf8\uc158\uce74\ub4dc\ub294 opcity\ub97c \ub0ae\ucd94\uace0, \uc644\ub8cc\ud55c \ubbf8\uc158\uc774\ub77c\uace0 \uc54c\ub824\uc8fc\uace0, \uc644\ub8cc\ud558\uc9c0 \uc54a\uc740 \ubbf8\uc158\uc744 \ud074\ub9ad\ud588\uc744 \ub54c\ub294 \ubbf8\uc158\uc744 \uc218\ud589\ud560 \uc218\uc788\ub294 \ud0ed\uc73c\ub85c \uc774\ub3d9\ud558\ub294 \uac70\uc9c0. think hard."
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "@src/app/journey/[slug]/_plan/PlanTab.tsx  \uc88b\uc544 \ubbf8\uc158 \uc218\ud589\ud560\ub54c \uc774\uac70 \ud074\ub9ad\ud560\ub54c \ub9c8\uc6b0\uc2a4 pointer cursor \ub85c \ub9cc\ub4e4\uc5b4\uc8fc\uace0, @src/app/(home)/_notification/NotificationTab.tsx \uc774\uac70 notification \uc2a4\ud0c0\uc77c\ub9c1\uc774 \uc548\ub418\uc5b4\uc788\uc5b4\uc11c \uc774\uac70 \uc2a4\ud0c0\uc77c \uc218\uc815\ud574\uc918.'"
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "\uc88b\uc544 \uadf8\ub9ac\uace0 \uc9c0\uae08 \ubb38\uc81c\uac00 \ud558\ub098 \uc788\ub294\ub370 \uac1d\uad00\uc2dd mission \uc744 \uc218\ud589\ud588\uc744 \ub54c @src/app/(home)/_mypage/PostCard.tsx \uc5d0\uc11c \ub2f5\ubcc0\uc740 \ubcfc \uc218 \uc788\ub294\ub370 \uc9c8\ubb38\uc744 \ubcfc\uc218\uac00 \uc5c6\uc5b4. \uc544\uc9c1 \uc548\ub098\uc640. \uadf8\ub798\uc11c \uc9c1\uc811 supabase-monster \ub85c lms-new \ud504\ub85c\uc81d\ud2b8\uc5d0\uc11c \uc2a4\ud0a4\ub9c8 \ud655\uc778 \ud6c4 \uc9c8\ubb38\ub3c4 \ub098\uc624\ub3c4\ub85d \uc218\uc815\ud574\uc918."
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "/commit-and-pr "
+  },
+  {
+    "session_id": "a81d8e42-102a-4833-88d6-f2ec6861104a",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/a81d8e42-102a-4833-88d6-f2ec6861104a.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "@src/app/mission/create/client.tsx \uc5ec\uae30\uc11c type \uc5d0\ub7ec\uac00 \ub098\\\n\\\nType '{ mission_id: string; question_text: string; question_type: \"essay\" | \"multiple_choice\" | \"image_upload\" | \"mixed\"; question_order: number; options: any; correct_answer: string | null; ... 6 more ...; multiple_select: any; }[]' is not assignable to type '{ mission_id: string; correct_answer: string | null; is_required: boolean | null; max_characters: number | null; max_images: number | null; min_characters: number | null; multiple_select: boolean | null; ... 6 more ...; options?: any; }[]'.\n    Property 'min_characters' is missing in type '{ mission_id: string; question_text: string; question_type: \"essay\" | \"multiple_choice\" | \"image_upload\" | \"mixed\"; question_order: number; options: any; correct_answer: string | null; ... 6 more ...; multiple_select: any; }' but required in type '{ mission_id: string; correct_answer: string | null; is_required: boolean | null; max_characters: number | null; max_images: number | null; min_characters: number | null; multiple_select: boolean | null; ... 6 more ...; options?: any; }'.ts(2345)\nmissionQuestions.ts(17, 3): 'min_characters' is declared here.\\\n\\\n\ube4c\ub4dc \ud14c\uc2a4\ud2b8 \ub2e4\uc2dc \ud574\uc8fc\uace0 \ucee4\ubc0b \ub2e4\uc2dc\ud574\uc918."
+  },
+  {
+    "session_id": "2d2a317b-a1e5-42a8-86f2-a32feec5a394",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/2d2a317b-a1e5-42a8-86f2-a32feec5a394.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "do build test and commit and push to main branch"
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "resume"
+  }
+]

@@ -46,13 +46,30 @@ export default function NotificationTab() {
     };
   
     if (error) {
-      return <div>Error: {error.message}</div>;
+      return (
+        <NotificationsContainer>
+          <EmptyState style={{ 
+            color: 'var(--negative-500)',
+            borderColor: 'var(--negative-200)',
+            backgroundColor: 'var(--negative-50)'
+          }}>
+            오류가 발생했습니다: {error.message}
+          </EmptyState>
+        </NotificationsContainer>
+      );
     }
     if (isLoading) {
       return (
-        <div>
-          <Spinner size="32px" style={{ marginTop: "12px" }} />
-        </div>
+        <NotificationsContainer>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            minHeight: '200px' 
+          }}>
+            <Spinner size="32px" />
+          </div>
+        </NotificationsContainer>
       );
     }
   
@@ -75,8 +92,13 @@ export default function NotificationTab() {
             })}
   
             {isFetchingNextPage && (
-              <div>
-                <Spinner size="24px" style={{ marginTop: "12px" }} />
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                padding: '16px' 
+              }}>
+                <Spinner size="24px" />
               </div>
             )}
           </div>
@@ -89,15 +111,15 @@ export default function NotificationTab() {
   const NotificationsContainer = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    align-items: center;
+    gap: 12px;
     width: 100%;
+    padding: 16px;
   
     .notification-list {
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 12px;
     }
   `;
   
@@ -105,11 +127,13 @@ export default function NotificationTab() {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100px;
+    min-height: 200px;
     width: 100%;
-    background-color: var(--grey-100);
+    background-color: var(--grey-50);
+    border: 1px dashed var(--grey-300);
     border-radius: 8px;
-    margin-top: 16px;
-    padding: 16px;
-    color: var(--grey-600);
+    padding: 32px 16px;
+    color: var(--grey-500);
+    font-size: 14px;
+    text-align: center;
   `;

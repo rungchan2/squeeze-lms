@@ -17,31 +17,24 @@ import { IoSearch } from "react-icons/io5";
 import ChipGroup from "@/components/common/ChipGroup";
 import { useWeeks } from "@/hooks/useWeeks";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
-import { getMissionTypes } from "@/utils/data/mission";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IconContainer } from "@/components/common/IconContainer";
 import { JourneyMissionInstanceWithMission } from "@/types";
 import { toaster } from "@/components/ui/toaster";
 import { CreateJourneyMissionInstance } from "@/types";
+import { useRouter } from "next/navigation";
 interface MissionComponentProps {
   weekId: string;
   weekName: string;
   journeyId: string;
   deleteWeek: (weekId: string) => void;
   onTotalMissionCountChange: (count: number) => void;
+  completedMissionIds: string[];
 }
 
 export type MissionOption = string;
 
-// 서버 컴포넌트에서 데이터 가져오기
-const { data: missionTypesData } = await getMissionTypes();
-// mission_type 값만 추출
-const missionTypeValues = missionTypesData
-  ? missionTypesData
-      .map((item: { mission_type: string }) => item.mission_type)
-      .filter(Boolean)
-  : [];
-const missionOptions: MissionOption[] = ["전체", ...missionTypeValues];
+const missionOptions: MissionOption[] = ["전체", "essay", "multiple_choice", "image_upload", "mixed"];
 
 export default function MissionComponent({
   weekId,
@@ -49,7 +42,9 @@ export default function MissionComponent({
   journeyId,
   deleteWeek,
   onTotalMissionCountChange,
+  completedMissionIds,
 }: MissionComponentProps) {
+  const router = useRouter();
   const [showSearch, setShowSearch] = useState(false);
   const [selectedOption, setSelectedOption] = useState<MissionOption>(
     missionOptions[0]
@@ -170,8 +165,16 @@ export default function MissionComponent({
     } else {
       // 새 미션 추가를 위해 날짜 입력 모달 표시
       setSelectedMissionId(missionId);
-      setReleaseDate("");
-      setExpiryDate("");
+      // 기본값 설정: 공개일자는 오늘, 마감일자는 일주일 후
+      const today = new Date();
+      const nextWeek = new Date();
+      nextWeek.setDate(today.getDate() + 7);
+      
+      const todayString = today.toISOString().split('T')[0];
+      const nextWeekString = nextWeek.toISOString().split('T')[0];
+      
+      setReleaseDate(todayString);
+      setExpiryDate(nextWeekString);
       setShowDateModal(true);
       // 카운트 업데이트는 useEffect에서 처리됨
     }
@@ -182,6 +185,39 @@ export default function MissionComponent({
   //날짜 입력 후 미션 추가 확인
   const handleConfirmAddMission = async () => {
     if (!selectedMissionId) return;
+
+    // 날짜 유효성 검사 (JavaScript Date 사용)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 시간을 00:00:00으로 설정
+
+    // 공개일자와 마감일자가 모두 입력된 경우
+    if (releaseDate && expiryDate) {
+      const releaseDateTime = new Date(releaseDate);
+      const expiryDateTime = new Date(expiryDate);
+      
+      // 공개일자가 마감일자보다 늦거나 같은 경우
+      if (releaseDateTime >= expiryDateTime) {
+        toaster.create({
+          title: "날짜 오류",
+          description: "공개 일자는 마감 일자보다 이전이어야 합니다.",
+          type: "error",
+        });
+        return;
+      }
+    }
+
+    // 마감일자가 과거인 경우 경고 (허용은 하되 경고 표시)
+    if (expiryDate) {
+      const expiryDateTime = new Date(expiryDate);
+      if (expiryDateTime < today) {
+        toaster.create({
+          title: "날짜 확인",
+          description: "마감 일자가 오늘보다 과거입니다.",
+          type: "warning",
+        });
+        // 경고는 표시하되 진행은 허용
+      }
+    }
 
     try {
       setIsLoadingMissions(true);
@@ -200,15 +236,32 @@ export default function MissionComponent({
 
       // UI 즉시 업데이트
       await mutateMissionInstances();
-      // 카운트 업데이트는 useEffect에서 처리됨
+
+      toaster.create({
+        title: "미션이 추가되었습니다.",
+        type: "success",
+      });
 
       // 모달 닫기
       setShowDateModal(false);
       setShowSearch(false);
     } catch (error) {
       console.error("Error adding mission:", error);
+      toaster.create({
+        title: "미션 추가 실패",
+        description: "미션을 추가하는 중 오류가 발생했습니다.",
+        type: "error",
+      });
     } finally {
       setIsLoadingMissions(false);
+    }
+  };
+
+  // 미션 클릭 핸들러 (미완료 미션만)
+  const handleMissionClick = (missionInstance: JourneyMissionInstanceWithMission) => {
+    const isCompleted = completedMissionIds.includes(missionInstance.id);
+    if (!isCompleted) {
+      router.push(`/journey/${journeyId}/${missionInstance.id}`);
     }
   };
 
@@ -248,11 +301,16 @@ export default function MissionComponent({
 
       {missionInstances.length > 0 ? (
         <div className="mission-list">
-          {missionInstances.map((instance) => (
-            <MissionCard
-              key={instance.id}
-              mission={instance.mission}
-              onEdit={handleEditMission}
+          {missionInstances.map((instance) => {
+            const isCompleted = completedMissionIds.includes(instance.id);
+            return (
+              <MissionCard
+                key={instance.id}
+                mission={instance.mission}
+                onEdit={handleEditMission}
+                isCompleted={isCompleted}
+                onMissionClick={() => handleMissionClick(instance)}
+                journeySlug={journeyId}
               onDelete={async () => {
                 try {
                   setIsLoadingMissions(true);
@@ -281,11 +339,12 @@ export default function MissionComponent({
                   setIsLoadingMissions(false);
                 }
               }}
-              missionInstance={
-                instance as unknown as JourneyMissionInstanceWithMission
-              }
-            />
-          ))}
+                missionInstance={
+                  instance as unknown as JourneyMissionInstanceWithMission
+                }
+              />
+            );
+          })}
         </div>
       ) : (
         <div className="empty-state">
@@ -398,7 +457,6 @@ export default function MissionComponent({
                 type="date"
                 value={releaseDate}
                 onChange={(e) => setReleaseDate(e.target.value)}
-                required
               />
             </div>
             <div className="input-group">
@@ -408,7 +466,6 @@ export default function MissionComponent({
                 type="date"
                 value={expiryDate}
                 onChange={(e) => setExpiryDate(e.target.value)}
-                required
               />
             </div>
           </div>

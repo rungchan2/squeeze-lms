@@ -9,6 +9,7 @@ export const bugReportSchema = z.object({
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
   file_url: z.string().nullable(),
+  attachment_file_id: z.number().nullable(),
 })
 
 export const createBugReportSchema = bugReportSchema.omit({

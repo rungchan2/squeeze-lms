@@ -17,6 +17,7 @@ interface JourneyWeekCardProps {
   index: number;
   deleteWeek: (id: string) => void;
   journeyId: string;
+  completedMissionIds: string[];
 }
 
 export default function WeekCard({
@@ -24,6 +25,7 @@ export default function WeekCard({
   deleteWeek,
   index,
   journeyId,
+  completedMissionIds,
 }: JourneyWeekCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [missionCount, setMissionCount] = useState(0);
@@ -98,6 +100,7 @@ export default function WeekCard({
             journeyId={journeyId}
             deleteWeek={deleteWeek}
             onTotalMissionCountChange={setMissionCount}
+            completedMissionIds={completedMissionIds}
           />
         )}
       </StyledWeekCard>

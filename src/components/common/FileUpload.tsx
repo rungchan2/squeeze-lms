@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { uploadFile } from "@/utils/data/storage";
+import { uploadFile } from "@/utils/file/upload";
 import { useDropzone } from "react-dropzone";
 import imageCompression from "browser-image-compression";
 import { createClient } from "@/utils/supabase/client";
@@ -10,7 +10,6 @@ import { FaUpload } from "react-icons/fa";
 import Spinner from "./Spinner";
 import Text from "../Text/Text";
 import { sanitizeFileName } from "@/utils/file";
-import { getImageUrl } from "@/utils/data/storage";
 
 
 interface FileWithPreview extends File {
@@ -19,10 +18,11 @@ interface FileWithPreview extends File {
 }
 
 interface FileUploadProps {
-  onUploadComplete?: (fileUrl: string) => void;
+  onUploadComplete?: (fileUrl: string, fileId?: number) => void;
   icon?: React.ReactNode;
   placeholder?: string;
   initialFileUrl?: string;
+  initialFileId?: number;
   height?: string;
   width?: string;
 }
@@ -32,6 +32,7 @@ export default function FileUpload({
   icon = <FaUpload />,
   placeholder = "이미지를 드래그하거나 클릭하여 업로드하세요",
   initialFileUrl,
+  initialFileId,
   height = "200px",
   width = "100%",
 }: FileUploadProps) {
@@ -42,42 +43,11 @@ export default function FileUpload({
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(
     initialFileUrl || null
   );
-
-  useEffect(() => {
-    checkExistingUpload(id);
-  }, [id]);
+  const [uploadedFileId, setUploadedFileId] = useState<number | null>(
+    initialFileId || null
+  );
 
   const booledIsAuthenticated = Boolean(isAuthenticated);
-
-  // 이미 업로드된 이미지가 있는지 확인
-  const checkExistingUpload = async (userId: string) => {
-    try {
-      const supabase = createClient();
-      const { data, error } = await supabase.storage
-        .from("images")
-        .list(`${userId}`, {
-          sortBy: { column: "created_at", order: "desc" },
-          limit: 1,
-        });
-
-      if (error) {
-        console.error("이미지 확인 오류:", error);
-        return;
-      }
-
-      if (data && data.length > 0) {
-        const { data: urlData } = await supabase.storage
-          .from("images")
-          .createSignedUrl(`${userId}/${data[0].name}`, 60 * 60 * 24);
-
-        if (urlData?.signedUrl) {
-          setUploadedFileUrl(urlData.signedUrl);
-        }
-      }
-    } catch (error) {
-      console.error("이미지 확인 중 오류 발생:", error);
-    }
-  };
 
   // 이미지 압축
   const compressImage = async (file: File): Promise<File> => {
@@ -141,39 +111,34 @@ export default function FileUpload({
   const deleteUploadedFile = async () => {
     if (initialFileUrl) {
       setUploadedFileUrl(null);
+      setUploadedFileId(null);
       return;
     }
-    if (!uploadedFileUrl) return;
+    if (!uploadedFileUrl || !uploadedFileId) return;
 
     setUploading(true);
 
     try {
       const supabase = createClient();
-      const { data, error } = await supabase.storage
-        .from("images")
-        .list(`public/${id}`);
+      
+      // Mark file as inactive in database (soft delete)
+      const { error: dbError } = await supabase
+        .from("files")
+        .update({ is_active: false })
+        .eq("id", uploadedFileId);
 
-      if (error) {
-        throw new Error(`파일 목록 조회 실패: ${error.message}`);
+      if (dbError) {
+        throw new Error(`파일 삭제 실패: ${dbError.message}`);
       }
 
-      if (data && data.length > 0) {
-        const { error: deleteError } = await supabase.storage
-          .from("images")
-          .remove([`${id}/${data[0].name}`]);
-
-        if (deleteError) {
-          throw new Error(`삭제 실패: ${deleteError.message}`);
-        }
-
-        setUploadedFileUrl(null);
-      }
+      setUploadedFileUrl(null);
+      setUploadedFileId(null);
     } catch (error) {
-      console.error("이미지 삭제 오류:", error);
+      console.error("파일 삭제 오류:", error);
       setUploadError(
         error instanceof Error
           ? error.message
-          : "이미지 삭제 중 오류가 발생했습니다."
+          : "파일 삭제 중 오류가 발생했습니다."
       );
     } finally {
       setUploading(false);
@@ -182,7 +147,7 @@ export default function FileUpload({
 
   // 파일 업로드 처리
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file || !id) return;
 
     setUploading(true);
     setUploadError(null);
@@ -198,24 +163,11 @@ export default function FileUpload({
         id: file.id,
       });
 
-      const { data, error } = await uploadFile(renamedFile);
+      // Use new upload system
+      const result = await uploadFile(renamedFile, id);
 
-      if (error) {
-        if (
-          error.message.includes("인증") ||
-          error.message.includes("auth") ||
-          error.message.includes("security policy") ||
-          error.message.includes("permission")
-        ) {
-          throw new Error(
-            "인증 오류: 로그인이 필요하거나 파일 업로드 권한이 없습니다." + `\n${error.message}`
-          );
-        }
-        throw new Error(`업로드 실패: ${error.message}`);
-      }
-
-      if (onUploadComplete && data?.path) {
-        onUploadComplete(await getImageUrl(data.path));
+      if (onUploadComplete) {
+        onUploadComplete(result.url, result.fileId);
       }
 
       if (file.preview) {
@@ -224,18 +176,8 @@ export default function FileUpload({
 
       // 업로드 성공 후 상태 업데이트
       setFile(null);
-
-      // 업로드된 파일의 URL 가져오기
-      if (data?.path) {
-        const supabase = createClient();
-        const { data: urlData } = await supabase.storage
-          .from("images")
-          .createSignedUrl(data.path, 60 * 60 * 24);
-
-        if (urlData?.signedUrl) {
-          setUploadedFileUrl(urlData.signedUrl);
-        }
-      }
+      setUploadedFileUrl(result.url);
+      setUploadedFileId(result.fileId);
     } catch (error) {
       setUploadError(
         error instanceof Error

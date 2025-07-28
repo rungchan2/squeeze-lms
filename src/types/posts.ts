@@ -3,6 +3,7 @@ import { organizationSchema } from "./organizations";
 import { userSchema } from "./users";
 import { missionSchema } from "./missions";
 import { journeyMissionInstanceSchema } from "./journeyMissionInstances";
+import { answersDataSchema } from "./missionQuestions";
 
 const pickedUserSchema = userSchema.pick({
   id: true,
@@ -30,11 +31,11 @@ const pickedMissionSchema = missionSchema.pick({
 export const postSchema = z.object({
   id: z.string().uuid(),
   title: z.string(),
-  content: z.string(),
+  content: z.string().nullable(),
   user_id: z.string().uuid(),
   mission_instance_id: z.string().uuid(),
   journey_id: z.string().uuid(),
-  score: z.number(),
+  score: z.number().nullable(),
   created_at: z.string(),
   updated_at: z.string(),
   view_count: z.number(),
@@ -44,6 +45,13 @@ export const postSchema = z.object({
   file_url: z.string().nullable().optional(),
   achievement_status: z.string().nullable().optional(),
   team_points: z.number().nullable().optional(),
+  // New fields from database migration
+  answers_data: answersDataSchema.nullable().optional(),
+  auto_score: z.number().nullable().optional(),
+  manual_score: z.number().nullable().optional(),
+  total_questions: z.number().nullable().optional(),
+  answered_questions: z.number().nullable().optional(),
+  completion_rate: z.number().nullable().optional(),
 });
 
 

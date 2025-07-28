@@ -13,7 +13,7 @@ import { CreateBugReport, createBugReportSchema } from "@/types";
 import { useRouter } from "next/navigation";
 import { toaster } from "@/components/ui/toaster";
 import { createBugReport } from "@/utils/data/bugReport";
-import FileUpload from "@/components/common/FileUpload";
+import FileUpload from "@/components/FileUpload";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { createIssue } from "@/utils/github/createIssue";
 
@@ -40,6 +40,7 @@ export default function BugReport() {
     defaultValues: {
       user_id: id || "",
       file_url: "",
+      attachment_file_id: null,
     },
   });
 
@@ -54,6 +55,7 @@ export default function BugReport() {
       description: data.description,
       status: data.status,
       file_url: data.file_url,
+      attachment_file_id: data.attachment_file_id,
     };
     const { error } = await createBugReport(insertData);
 
@@ -141,8 +143,18 @@ export default function BugReport() {
           </InputAndTitle>
           <InputAndTitle title="스크린샷">
             <FileUpload
-              onUploadComplete={(fileUrl) => {
+              placeholder="스크린샷을 업로드하세요"
+              acceptedFileTypes={{ 
+                "image/*": [".jpeg", ".jpg", ".png", ".webp"],
+                "application/*": [".pdf"]
+              }}
+              maxFiles={1}
+              multiple={false}
+              onUploadComplete={(fileUrl, fileId) => {
                 setValue("file_url", fileUrl);
+                if (fileId) {
+                  setValue("attachment_file_id", fileId);
+                }
               }}
             />
           </InputAndTitle>

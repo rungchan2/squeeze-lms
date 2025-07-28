@@ -37,6 +37,7 @@ This document provides a comprehensive overview of the Sqeeze LMS database schem
 - **Team Points**: Team-based points
 
 ### System Features
+- **Files**: Centralized file management system
 - **Bug Reports**: User-submitted bug reports
 - **Email Queue**: Email notification queue
 - **Subscriptions**: Push notification subscriptions
@@ -83,6 +84,7 @@ CREATE TABLE profiles (
     email TEXT NOT NULL UNIQUE,
     phone TEXT,
     profile_image TEXT,
+    profile_image_file_id BIGINT,
     marketing_opt_in BOOLEAN NOT NULL DEFAULT false,
     privacy_agreed BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT now(),
@@ -91,7 +93,8 @@ CREATE TABLE profiles (
     push_subscription TEXT,
     
     FOREIGN KEY (organization_id) REFERENCES organizations(id),
-    FOREIGN KEY (id) REFERENCES auth.users(id)
+    FOREIGN KEY (id) REFERENCES auth.users(id),
+    FOREIGN KEY (profile_image_file_id) REFERENCES files(id)
 );
 ```
 
@@ -100,7 +103,8 @@ CREATE TABLE profiles (
 - Primary Key: `id` (UUID, linked to auth.users)
 - Role Hierarchy: user(1) → teacher(2) → admin(3)
 - Organization-based data isolation
-- Profile image storage via Supabase Storage
+- Profile image storage via Supabase Storage and centralized file system
+- Dual support for legacy `profile_image` URL and new `profile_image_file_id`
 - Estimated Records: 349
 
 **Role Enum Values:**
@@ -143,8 +147,11 @@ CREATE TABLE journeys (
     date_start DATE,
     date_end DATE,
     image_url TEXT,
+    image_file_id BIGINT,
     created_at TIMESTAMPTZ DEFAULT now(),
-    updated_at TIMESTAMPTZ DEFAULT now()
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    
+    FOREIGN KEY (image_file_id) REFERENCES files(id)
 );
 ```
 
@@ -152,7 +159,8 @@ CREATE TABLE journeys (
 - RLS Enabled: ✅
 - Course/learning path management
 - Optional date ranges for course scheduling
-- Image support for course branding
+- Image support for course branding via centralized file system
+- Dual support for legacy `image_url` and new `image_file_id`
 - Estimated Records: 16
 
 ---
@@ -503,7 +511,88 @@ CREATE TABLE team_points (
 
 ---
 
-### 17. Bug Reports
+### 17. Files
+
+Centralized file management system for all file uploads with metadata tracking.
+
+```sql
+CREATE TYPE file_type AS ENUM ('image', 'document', 'video', 'audio', 'other');
+
+CREATE TABLE files (
+    id BIGSERIAL PRIMARY KEY,
+    user_id UUID NOT NULL,
+    file_name TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    file_size BIGINT NOT NULL,
+    mime_type TEXT NOT NULL,
+    file_type file_type NOT NULL,
+    bucket_name TEXT NOT NULL DEFAULT 'images',
+    is_deleted BOOLEAN NOT NULL DEFAULT false,
+    metadata JSONB,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    deleted_at TIMESTAMPTZ,
+    
+    FOREIGN KEY (user_id) REFERENCES profiles(id)
+);
+```
+
+**Key Features:**
+- RLS Enabled: ✅
+- Centralized file storage with metadata
+- Soft deletion support with `is_deleted` flag
+- File type classification system
+- Bucket-based organization
+- JSON metadata for additional file information
+- File size and MIME type tracking
+- Estimated Records: Growing with usage
+
+**File Type Values:**
+- `image`: Image files (JPEG, PNG, WebP, etc.)
+- `document`: Document files (PDF, DOC, etc.)
+- `video`: Video files
+- `audio`: Audio files
+- `other`: Miscellaneous file types
+
+**Bucket Organization:**
+- `images`: Primary bucket for image uploads
+- Additional buckets can be configured as needed
+
+**Helper Functions & Views:**
+```sql
+-- Function to upload files with automatic metadata extraction
+CREATE OR REPLACE FUNCTION upload_file(
+    p_user_id UUID,
+    p_file_name TEXT,
+    p_file_path TEXT,
+    p_file_size BIGINT,
+    p_mime_type TEXT,
+    p_file_type file_type DEFAULT 'other',
+    p_bucket_name TEXT DEFAULT 'images',
+    p_metadata JSONB DEFAULT '{}'::jsonb
+)
+RETURNS TABLE(file_id BIGINT, file_url TEXT);
+
+-- View for active (non-deleted) files
+CREATE VIEW active_files AS
+SELECT * FROM files 
+WHERE is_deleted = false;
+
+-- View for file statistics
+CREATE VIEW file_stats AS
+SELECT 
+    file_type,
+    bucket_name,
+    COUNT(*) as file_count,
+    SUM(file_size) as total_size,
+    AVG(file_size) as avg_size
+FROM active_files
+GROUP BY file_type, bucket_name;
+```
+
+---
+
+### 18. Bug Reports
 
 User-submitted bug reports with status tracking.
 
@@ -514,17 +603,20 @@ CREATE TABLE bug_reports (
     title TEXT NOT NULL,
     description TEXT,
     file_url TEXT,
+    attachment_file_id BIGINT,
     status TEXT DEFAULT 'open',
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now(),
     
-    FOREIGN KEY (user_id) REFERENCES profiles(id)
+    FOREIGN KEY (user_id) REFERENCES profiles(id),
+    FOREIGN KEY (attachment_file_id) REFERENCES files(id)
 );
 ```
 
 **Key Features:**
 - RLS Enabled: ✅
-- File attachment support for screenshots
+- File attachment support for screenshots via centralized file system
+- Dual support for legacy `file_url` and new `attachment_file_id`
 - Status tracking for resolution
 - Estimated Records: 6
 
@@ -655,6 +747,14 @@ CREATE TABLE inquiry (
 7. **Teams → Team Members**: One-to-many (team membership)
 8. **Posts → Comments**: One-to-many (discussion threads)
 9. **Posts → Likes**: One-to-many (engagement tracking)
+10. **Users → Files**: One-to-many (file ownership and management)
+
+### File System Relationships
+
+- **Profiles → Files**: One-to-many via `profile_image_file_id` (profile images)
+- **Journeys → Files**: One-to-many via `image_file_id` (journey cover images)  
+- **Bug Reports → Files**: One-to-many via `attachment_file_id` (bug report attachments)
+- **Files → Users**: Many-to-one via `user_id` (file ownership tracking)
 
 ### Points System Relationships
 
@@ -685,6 +785,7 @@ The following tables have RLS enabled for security:
 - comments
 - likes
 - notifications
+- files
 - bug_reports
 - email_queue
 - subscriptions
@@ -742,6 +843,9 @@ The following tables have RLS enabled for security:
 - Email queue for background processing
 
 ### 9. Content Management
+- Centralized file management system with metadata tracking
+- File type classification and bucket organization
+- Soft deletion with audit trails
 - File attachments for posts and bug reports
 - Blog system for announcements
 - Content moderation capabilities

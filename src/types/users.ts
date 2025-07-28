@@ -9,6 +9,7 @@ export const userSchema = z.object({
   last_name: z.string().nullable(),
   phone: z.string().nonempty("전화번호를 입력해주세요"),
   profile_image: z.string().nullable(),
+  profile_image_file_id: z.number().nullable(),
   role: roleSchema.nullable(),
   organization_id: z.string().uuid().nullable(),
   marketing_opt_in: z.boolean(),

@@ -16,12 +16,16 @@ import Footer from "@/components/common/Footer";
 import Button from "@/components/common/Button";
 import { Modal } from "@/components/modal/Modal";
 import { CreateJourneyWeek } from "@/types";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { useCompletedMissions } from "@/hooks/usePosts";
 const MemoizedWeekCard = memo(WeekCard);
 
 export default function PlanTab({ slug }: { slug: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const status = searchParams.get("status");
+  const { id: userId } = useSupabaseAuth();
+  const { completedMissionIds, isLoading: isLoadingCompletedMissions } = useCompletedMissions(userId || "", slug);
 
   const [weekName, setWeekName] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -105,12 +109,13 @@ export default function PlanTab({ slug }: { slug: string }) {
             {weeks
               .sort((a, b) => (a.week_number ?? 0) - (b.week_number ?? 0))
               .map((week, index) => (
-                <MemoizedWeekCard
+                <MemoizedWeekCard 
                   key={week.id}
                   week={week}
                   deleteWeek={deleteWeek}
                   index={index}
                   journeyId={slug}
+                  completedMissionIds={completedMissionIds}
                 />
               ))}
           </div>
