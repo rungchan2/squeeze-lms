@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const userId = url.searchParams.get("userId");
@@ -32,7 +32,10 @@ export async function GET(request: Request) {
     }
 
     if (!data) {
-      return NextResponse.json({ exists: false, message: "구독 정보가 없습니다." });
+      return NextResponse.json({ 
+        exists: false, 
+        message: "구독 정보가 없습니다." 
+      });
     }
 
     return NextResponse.json({
@@ -45,10 +48,13 @@ export async function GET(request: Request) {
         created_at: data.created_at
       },
     });
+    
   } catch (error) {
     console.error("구독 정보 확인 오류:", error);
+    const errorMessage = error instanceof Error ? error.message : "서버 오류가 발생했습니다.";
+    
     return NextResponse.json(
-      { error: "서버 오류가 발생했습니다." },
+      { error: errorMessage },
       { status: 500 }
     );
   }
