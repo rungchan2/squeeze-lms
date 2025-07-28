@@ -44,7 +44,7 @@ const FloatingButtonContainer = styled.div<{
           transform: translateX(-50%);
           width: 100%;
           max-width: var(--breakpoint-tablet);
-          padding: 0 20px;
+          padding: 0;
         `;
       case "right":
       default:
@@ -62,8 +62,11 @@ const Button = styled.button<{ position: FloatingButtonPosition }>`
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
+  width: 100%;
+  color: var(--white);
+  font-weight: 500;
   gap: 8px;
-  border-radius: 30px;
+  border-radius: 12px;
   ${({ position }) => position === "center" && `
     width: 100%;
   `}

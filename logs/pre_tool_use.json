@@ -4902,5 +4902,322 @@
       "command": "git add -A && git commit -m \"feat: Add position props to FloatingButton component\n\n- Added position prop with 'left', 'center', 'right' options (default: 'right')\n- Center position uses full width with max-width of --breakpoint-tablet\n- Updated mission create page to use center position for submit button\n- Button width adjusts based on position (100% for center, auto for left/right)\"",
       "description": "Commit the changes"
     }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "type=\"date\"",
+      "path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src",
+      "output_mode": "files_with_matches"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "type=.date.",
+      "path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src",
+      "output_mode": "files_with_matches"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "type.*date|date.*input|Input.*type.*date",
+      "path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src",
+      "output_mode": "files_with_matches",
+      "-i": true
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/journey/[slug]/_plan/MissionComponent.tsx"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "TodoWrite",
+    "tool_input": {
+      "todos": [
+        {
+          "content": "Replace date inputs with DatePicker in MissionComponent.tsx",
+          "status": "pending",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Search for other date input fields in the codebase",
+          "status": "pending",
+          "priority": "medium",
+          "id": "2"
+        },
+        {
+          "content": "Test the date picker implementation",
+          "status": "pending",
+          "priority": "medium",
+          "id": "3"
+        }
+      ]
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/journey/[slug]/_plan/MissionComponent.tsx",
+      "old_string": "import { useRouter } from \"next/navigation\";",
+      "new_string": "import { useRouter } from \"next/navigation\";\nimport DatePicker from \"@/components/DatePicker\";"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/journey/[slug]/_plan/MissionComponent.tsx",
+      "old_string": "  // \ub0a0\uc9dc \uc785\ub825 \ubaa8\ub2ec \uc0c1\ud0dc\n  const [showDateModal, setShowDateModal] = useState(false);\n  const [selectedMissionId, setSelectedMissionId] = useState<string | null>(\n    null\n  );\n  const [releaseDate, setReleaseDate] = useState<string>(\"\");\n  const [expiryDate, setExpiryDate] = useState<string>(\"\");",
+      "new_string": "  // \ub0a0\uc9dc \uc785\ub825 \ubaa8\ub2ec \uc0c1\ud0dc\n  const [showDateModal, setShowDateModal] = useState(false);\n  const [selectedMissionId, setSelectedMissionId] = useState<string | null>(\n    null\n  );\n  const [releaseDate, setReleaseDate] = useState<Date | null>(null);\n  const [expiryDate, setExpiryDate] = useState<Date | null>(null);"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/journey/[slug]/_plan/MissionComponent.tsx",
+      "old_string": "      // \uc0c8 \ubbf8\uc158 \ucd94\uac00\ub97c \uc704\ud574 \ub0a0\uc9dc \uc785\ub825 \ubaa8\ub2ec \ud45c\uc2dc\n      setSelectedMissionId(missionId);\n      // \uae30\ubcf8\uac12 \uc124\uc815: \uacf5\uac1c\uc77c\uc790\ub294 \uc624\ub298, \ub9c8\uac10\uc77c\uc790\ub294 \uc77c\uc8fc\uc77c \ud6c4\n      const today = new Date();\n      const nextWeek = new Date();\n      nextWeek.setDate(today.getDate() + 7);\n      \n      const todayString = today.toISOString().split('T')[0];\n      const nextWeekString = nextWeek.toISOString().split('T')[0];\n      \n      setReleaseDate(todayString);\n      setExpiryDate(nextWeekString);\n      setShowDateModal(true);",
+      "new_string": "      // \uc0c8 \ubbf8\uc158 \ucd94\uac00\ub97c \uc704\ud574 \ub0a0\uc9dc \uc785\ub825 \ubaa8\ub2ec \ud45c\uc2dc\n      setSelectedMissionId(missionId);\n      // \uae30\ubcf8\uac12 \uc124\uc815: \uacf5\uac1c\uc77c\uc790\ub294 \uc624\ub298, \ub9c8\uac10\uc77c\uc790\ub294 \uc77c\uc8fc\uc77c \ud6c4\n      const today = new Date();\n      const nextWeek = new Date();\n      nextWeek.setDate(today.getDate() + 7);\n      \n      setReleaseDate(today);\n      setExpiryDate(nextWeek);\n      setShowDateModal(true);"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/journey/[slug]/_plan/MissionComponent.tsx",
+      "old_string": "    // \uacf5\uac1c\uc77c\uc790\uc640 \ub9c8\uac10\uc77c\uc790\uac00 \ubaa8\ub450 \uc785\ub825\ub41c \uacbd\uc6b0\n    if (releaseDate && expiryDate) {\n      const releaseDateTime = new Date(releaseDate);\n      const expiryDateTime = new Date(expiryDate);\n      \n      // \uacf5\uac1c\uc77c\uc790\uac00 \ub9c8\uac10\uc77c\uc790\ubcf4\ub2e4 \ub2a6\uac70\ub098 \uac19\uc740 \uacbd\uc6b0\n      if (releaseDateTime >= expiryDateTime) {\n        toaster.create({\n          title: \"\ub0a0\uc9dc \uc624\ub958\",\n          description: \"\uacf5\uac1c \uc77c\uc790\ub294 \ub9c8\uac10 \uc77c\uc790\ubcf4\ub2e4 \uc774\uc804\uc774\uc5b4\uc57c \ud569\ub2c8\ub2e4.\",\n          type: \"error\",\n        });\n        return;\n      }\n    }\n\n    // \ub9c8\uac10\uc77c\uc790\uac00 \uacfc\uac70\uc778 \uacbd\uc6b0 \uacbd\uace0 (\ud5c8\uc6a9\uc740 \ud558\ub418 \uacbd\uace0 \ud45c\uc2dc)\n    if (expiryDate) {\n      const expiryDateTime = new Date(expiryDate);\n      if (expiryDateTime < today) {\n        toaster.create({\n          title: \"\ub0a0\uc9dc \ud655\uc778\",\n          description: \"\ub9c8\uac10 \uc77c\uc790\uac00 \uc624\ub298\ubcf4\ub2e4 \uacfc\uac70\uc785\ub2c8\ub2e4.\",\n          type: \"warning\",\n        });\n        // \uacbd\uace0\ub294 \ud45c\uc2dc\ud558\ub418 \uc9c4\ud589\uc740 \ud5c8\uc6a9\n      }\n    }",
+      "new_string": "    // \uacf5\uac1c\uc77c\uc790\uc640 \ub9c8\uac10\uc77c\uc790\uac00 \ubaa8\ub450 \uc785\ub825\ub41c \uacbd\uc6b0\n    if (releaseDate && expiryDate) {\n      // \uacf5\uac1c\uc77c\uc790\uac00 \ub9c8\uac10\uc77c\uc790\ubcf4\ub2e4 \ub2a6\uac70\ub098 \uac19\uc740 \uacbd\uc6b0\n      if (releaseDate >= expiryDate) {\n        toaster.create({\n          title: \"\ub0a0\uc9dc \uc624\ub958\",\n          description: \"\uacf5\uac1c \uc77c\uc790\ub294 \ub9c8\uac10 \uc77c\uc790\ubcf4\ub2e4 \uc774\uc804\uc774\uc5b4\uc57c \ud569\ub2c8\ub2e4.\",\n          type: \"error\",\n        });\n        return;\n      }\n    }\n\n    // \ub9c8\uac10\uc77c\uc790\uac00 \uacfc\uac70\uc778 \uacbd\uc6b0 \uacbd\uace0 (\ud5c8\uc6a9\uc740 \ud558\ub418 \uacbd\uace0 \ud45c\uc2dc)\n    if (expiryDate) {\n      if (expiryDate < today) {\n        toaster.create({\n          title: \"\ub0a0\uc9dc \ud655\uc778\",\n          description: \"\ub9c8\uac10 \uc77c\uc790\uac00 \uc624\ub298\ubcf4\ub2e4 \uacfc\uac70\uc785\ub2c8\ub2e4.\",\n          type: \"warning\",\n        });\n        // \uacbd\uace0\ub294 \ud45c\uc2dc\ud558\ub418 \uc9c4\ud589\uc740 \ud5c8\uc6a9\n      }\n    }"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/journey/[slug]/_plan/MissionComponent.tsx",
+      "old_string": "      // \ubbf8\uc158 \uc778\uc2a4\ud134\uc2a4 \uc0dd\uc131\n      const newInstance: CreateJourneyMissionInstance = {\n        journey_week_id: weekId,\n        mission_id: selectedMissionId,\n        status: \"not_started\" as MissionStatus,\n        release_date: releaseDate || null,\n        expiry_date: expiryDate || null,\n        journey_id: journeyId,\n      };",
+      "new_string": "      // \ubbf8\uc158 \uc778\uc2a4\ud134\uc2a4 \uc0dd\uc131\n      const newInstance: CreateJourneyMissionInstance = {\n        journey_week_id: weekId,\n        mission_id: selectedMissionId,\n        status: \"not_started\" as MissionStatus,\n        release_date: releaseDate ? releaseDate.toISOString().split('T')[0] : null,\n        expiry_date: expiryDate ? expiryDate.toISOString().split('T')[0] : null,\n        journey_id: journeyId,\n      };"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/journey/[slug]/_plan/MissionComponent.tsx",
+      "old_string": "          <div className=\"date-inputs\">\n            <div className=\"input-group\">\n              <label htmlFor=\"release-date\">\uacf5\uac1c \uc77c\uc790</label>\n              <Input\n                id=\"release-date\"\n                type=\"date\"\n                value={releaseDate}\n                onChange={(e) => setReleaseDate(e.target.value)}\n              />\n            </div>\n            <div className=\"input-group\">\n              <label htmlFor=\"expiry-date\">\ub9c8\uac10 \uc77c\uc790</label>\n              <Input\n                id=\"expiry-date\"\n                type=\"date\"\n                value={expiryDate}\n                onChange={(e) => setExpiryDate(e.target.value)}\n              />\n            </div>\n          </div>",
+      "new_string": "          <div className=\"date-inputs\">\n            <div className=\"input-group\">\n              <label htmlFor=\"release-date\">\uacf5\uac1c \uc77c\uc790</label>\n              <DatePicker\n                selected={releaseDate}\n                onChange={(date) => setReleaseDate(date)}\n                placeholder=\"\uacf5\uac1c \uc77c\uc790\ub97c \uc120\ud0dd\ud558\uc138\uc694\"\n                dateFormat=\"yyyy-MM-dd\"\n              />\n            </div>\n            <div className=\"input-group\">\n              <label htmlFor=\"expiry-date\">\ub9c8\uac10 \uc77c\uc790</label>\n              <DatePicker\n                selected={expiryDate}\n                onChange={(date) => setExpiryDate(date)}\n                placeholder=\"\ub9c8\uac10 \uc77c\uc790\ub97c \uc120\ud0dd\ud558\uc138\uc694\"\n                dateFormat=\"yyyy-MM-dd\"\n                minDate={releaseDate || undefined}\n              />\n            </div>\n          </div>"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "TodoWrite",
+    "tool_input": {
+      "todos": [
+        {
+          "content": "Replace date inputs with DatePicker in MissionComponent.tsx",
+          "status": "completed",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Search for other date input fields in the codebase",
+          "status": "in_progress",
+          "priority": "medium",
+          "id": "2"
+        },
+        {
+          "content": "Test the date picker implementation",
+          "status": "pending",
+          "priority": "medium",
+          "id": "3"
+        }
+      ]
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "Input.*date|date.*Input|input.*date",
+      "path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src",
+      "output_mode": "files_with_matches",
+      "-i": true
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src/app/create-journey/CreateJourneyFrom.tsx"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "type.*=.*[\\\"']date[\\\"']",
+      "path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src",
+      "output_mode": "files_with_matches"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "<input.*type=.date",
+      "path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src",
+      "output_mode": "files_with_matches"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Grep",
+    "tool_input": {
+      "pattern": "datetime-local|time|month|week",
+      "path": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms/src",
+      "output_mode": "files_with_matches"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "TodoWrite",
+    "tool_input": {
+      "todos": [
+        {
+          "content": "Replace date inputs with DatePicker in MissionComponent.tsx",
+          "status": "completed",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Search for other date input fields in the codebase",
+          "status": "completed",
+          "priority": "medium",
+          "id": "2"
+        },
+        {
+          "content": "Test the date picker implementation",
+          "status": "in_progress",
+          "priority": "medium",
+          "id": "3"
+        }
+      ]
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "npm run build",
+      "timeout": 300000,
+      "description": "Run build test to verify DatePicker replacement"
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "TodoWrite",
+    "tool_input": {
+      "todos": [
+        {
+          "content": "Replace date inputs with DatePicker in MissionComponent.tsx",
+          "status": "completed",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Search for other date input fields in the codebase",
+          "status": "completed",
+          "priority": "medium",
+          "id": "2"
+        },
+        {
+          "content": "Test the date picker implementation",
+          "status": "completed",
+          "priority": "medium",
+          "id": "3"
+        }
+      ]
+    }
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "git add -A && git commit -m \"feat: Replace HTML date inputs with DatePicker component\n\n- Updated MissionComponent.tsx to use DatePicker instead of HTML date inputs\n- Changed state management from string to Date objects for better type safety\n- Added proper date validation and format conversion\n- Enhanced UX with proper date picker styling and behavior\n- Maintained backward compatibility with existing data format\"",
+      "description": "Commit the DatePicker changes"
+    }
   }
 ]

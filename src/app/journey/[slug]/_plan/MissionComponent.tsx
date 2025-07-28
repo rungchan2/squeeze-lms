@@ -23,6 +23,7 @@ import { JourneyMissionInstanceWithMission } from "@/types";
 import { toaster } from "@/components/ui/toaster";
 import { CreateJourneyMissionInstance } from "@/types";
 import { useRouter } from "next/navigation";
+import DatePicker from "@/components/DatePicker";
 interface MissionComponentProps {
   weekId: string;
   weekName: string;
@@ -58,8 +59,8 @@ export default function MissionComponent({
   const [selectedMissionId, setSelectedMissionId] = useState<string | null>(
     null
   );
-  const [releaseDate, setReleaseDate] = useState<string>("");
-  const [expiryDate, setExpiryDate] = useState<string>("");
+  const [releaseDate, setReleaseDate] = useState<Date | null>(null);
+  const [expiryDate, setExpiryDate] = useState<Date | null>(null);
 
   //useWeeks 훅 사용
   const {
@@ -170,11 +171,8 @@ export default function MissionComponent({
       const nextWeek = new Date();
       nextWeek.setDate(today.getDate() + 7);
       
-      const todayString = today.toISOString().split('T')[0];
-      const nextWeekString = nextWeek.toISOString().split('T')[0];
-      
-      setReleaseDate(todayString);
-      setExpiryDate(nextWeekString);
+      setReleaseDate(today);
+      setExpiryDate(nextWeek);
       setShowDateModal(true);
       // 카운트 업데이트는 useEffect에서 처리됨
     }
@@ -192,11 +190,8 @@ export default function MissionComponent({
 
     // 공개일자와 마감일자가 모두 입력된 경우
     if (releaseDate && expiryDate) {
-      const releaseDateTime = new Date(releaseDate);
-      const expiryDateTime = new Date(expiryDate);
-      
       // 공개일자가 마감일자보다 늦거나 같은 경우
-      if (releaseDateTime >= expiryDateTime) {
+      if (releaseDate >= expiryDate) {
         toaster.create({
           title: "날짜 오류",
           description: "공개 일자는 마감 일자보다 이전이어야 합니다.",
@@ -208,8 +203,7 @@ export default function MissionComponent({
 
     // 마감일자가 과거인 경우 경고 (허용은 하되 경고 표시)
     if (expiryDate) {
-      const expiryDateTime = new Date(expiryDate);
-      if (expiryDateTime < today) {
+      if (expiryDate < today) {
         toaster.create({
           title: "날짜 확인",
           description: "마감 일자가 오늘보다 과거입니다.",
@@ -227,8 +221,8 @@ export default function MissionComponent({
         journey_week_id: weekId,
         mission_id: selectedMissionId,
         status: "not_started" as MissionStatus,
-        release_date: releaseDate || null,
-        expiry_date: expiryDate || null,
+        release_date: releaseDate ? releaseDate.toISOString().split('T')[0] : null,
+        expiry_date: expiryDate ? expiryDate.toISOString().split('T')[0] : null,
         journey_id: journeyId,
       };
 
@@ -452,20 +446,21 @@ export default function MissionComponent({
           <div className="date-inputs">
             <div className="input-group">
               <label htmlFor="release-date">공개 일자</label>
-              <Input
-                id="release-date"
-                type="date"
-                value={releaseDate}
-                onChange={(e) => setReleaseDate(e.target.value)}
+              <DatePicker
+                selected={releaseDate}
+                onChange={(date) => setReleaseDate(date)}
+                placeholder="공개 일자를 선택하세요"
+                dateFormat="yyyy-MM-dd"
               />
             </div>
             <div className="input-group">
               <label htmlFor="expiry-date">마감 일자</label>
-              <Input
-                id="expiry-date"
-                type="date"
-                value={expiryDate}
-                onChange={(e) => setExpiryDate(e.target.value)}
+              <DatePicker
+                selected={expiryDate}
+                onChange={(date) => setExpiryDate(date)}
+                placeholder="마감 일자를 선택하세요"
+                dateFormat="yyyy-MM-dd"
+                minDate={releaseDate || undefined}
               />
             </div>
           </div>
