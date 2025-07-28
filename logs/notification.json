@@ -96,5 +96,19 @@
     "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
     "hook_event_name": "Notification",
     "message": "Claude is waiting for your input"
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "Notification",
+    "message": "Claude is waiting for your input"
+  },
+  {
+    "session_id": "cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1",
+    "transcript_path": "/Users/heechan/.claude/projects/-Users-heechan-Desktop-Sqeeze-sqeeze-lms/cd457d8d-fc8d-4d4b-8b4c-55f6755a2cd1.jsonl",
+    "cwd": "/Users/heechan/Desktop/Sqeeze/sqeeze-lms",
+    "hook_event_name": "Notification",
+    "message": "Claude is waiting for your input"
   }
 ]

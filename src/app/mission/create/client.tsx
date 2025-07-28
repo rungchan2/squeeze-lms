@@ -24,6 +24,9 @@ import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import QuestionBuilder from "@/components/mission/QuestionBuilder/QuestionBuilder";
 import BackButton from "@/components/common/BackButton";
 import Spinner from "@/components/common/Spinner";
+import { Stack, Flex } from "@chakra-ui/react";
+import { FloatingButton } from "@/components/common/FloatingButton";
+import { Spacing } from "@/components/common/Spacing";
 
 export default function NewMissionPage({ editMissionData }: { editMissionData?: Mission }) {
   const router = useRouter();
@@ -229,10 +232,11 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
   return (
     <NewMissionPageContainer>
       <div className="page-header">
-        <BackButton />
+        <BackButton text="" />
+        <Heading level={3}>미션 {editMissionData ? "수정" : "생성"}</Heading>
       </div>
       <div className="input-container">
-        <Heading level={3}>미션 {editMissionData ? "수정" : "생성"}</Heading>
+        <Stack direction="row" gap={4} width="100%">
         <InputAndTitle title="미션 이름" errorMessage={errors.name?.message}>
           <Input {...register("name")} placeholder="미션 이름을 입력해주세요." />
         </InputAndTitle>
@@ -250,9 +254,14 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
                 valueAsNumber: true,
               })}
               placeholder="미션 점수를 입력해주세요.(숫자)"
+              type="number"
+              min={1}
+              max={1000}
             />
           )}
         </InputAndTitle>
+        </Stack>
+        
         <InputAndTitle
           title="미션 타입"
           errorMessage={errors.mission_type?.message}
@@ -379,9 +388,10 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
           </QuestionBuilderSection>
         )}
       </div>
-      <Button variant="flat" onClick={handleSubmit(onSubmit)}>
+      <Spacing />
+      <FloatingButton onClick={handleSubmit(onSubmit)}>
         미션 {editMissionData ? "수정" : "생성"}
-      </Button>
+      </FloatingButton>
     </NewMissionPageContainer>
   );
 }
@@ -393,12 +403,16 @@ const NewMissionPageContainer = styled.div`
   flex-direction: column;
   gap: 1rem;
   width: 100%;
-  justify-content: space-between;
   min-height: calc(100vh - 100px);
 
   .page-header {
-    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 16px 0 16px 0;
+    gap: 16px;
     border-bottom: 1px solid var(--grey-200);
+    width: 100%;
     
     @media (max-width: 768px) {
       padding: 12px;
@@ -410,11 +424,6 @@ const NewMissionPageContainer = styled.div`
     flex-direction: column;
     gap: 1rem;
     width: 100%;
-    padding: 0 16px;
-    
-    @media (max-width: 768px) {
-      padding: 0 12px;
-    }
   }
 `;
 
@@ -493,7 +502,6 @@ const QuestionBuilderSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 20px;
   border: 2px solid var(--primary-200);
   border-radius: 12px;
   background: linear-gradient(135deg, var(--primary-25) 0%, white 100%);

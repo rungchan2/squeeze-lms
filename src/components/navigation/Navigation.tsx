@@ -164,7 +164,7 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
                   </AdminOnly>
                   <Menu.Item
                     value="bug-report"
-                    onClick={() => router.push("/bug-report")}
+                    onClick={() => router.push("/comoon/bug-report")}
                     style={{ cursor: "pointer" }}
                   >
                     버그 신고

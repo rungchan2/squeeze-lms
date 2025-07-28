@@ -5,6 +5,8 @@ import { useCallback } from "react";
 import styled from "@emotion/styled";
 import { IoArrowBack } from "react-icons/io5";
 import Text from "@/components/Text/Text";
+import { BiChevronLeft } from "react-icons/bi";
+import { CgChevronLeft } from "react-icons/cg";
 
 interface BackButtonProps {
   /** 버튼에 표시할 텍스트 (기본값: "뒤로가기") */
@@ -45,7 +47,7 @@ export default function BackButton({
 
   return (
     <BackButtonContainer onClick={handleClick} className={className}>
-      <IoArrowBack size={16} />
+      <CgChevronLeft size={24} />
       <Text variant="body" fontWeight="medium">
         {text}
       </Text>
@@ -56,8 +58,7 @@ export default function BackButton({
 const BackButtonContainer = styled.button`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  padding: 8px;
   background: transparent;
   border: 1px solid var(--grey-300);
   border-radius: 8px;

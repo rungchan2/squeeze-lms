@@ -91,7 +91,7 @@ export default function MyPage() {
                   <Text>개인정보처리방침</Text>
                 </MenuItem>
               </Link>
-              <Link href="/bug-report">
+              <Link href="/comoon/bug-report">
                 <MenuItem title="" icon={<MdFeedback />}>
                   <Text>피드백</Text>
                 </MenuItem>

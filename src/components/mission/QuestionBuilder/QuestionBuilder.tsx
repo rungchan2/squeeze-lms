@@ -54,12 +54,22 @@ export default function QuestionBuilder({
 
   // Initialize questions with temporary IDs for UI management
   useEffect(() => {
-    const questionsWithTempIds = questions.map((q, index) => ({
-      ...q,
-      tempId: `temp-${index}-${Date.now()}`,
-    }));
-    setLocalQuestions(questionsWithTempIds);
-  }, [questions]);
+    // Only update if the questions actually changed
+    if (questions.length !== localQuestions.length || 
+        questions.some((q, i) => {
+          const localQ = localQuestions[i];
+          return !localQ || 
+                 q.question_text !== localQ.question_text || 
+                 q.question_type !== localQ.question_type ||
+                 q.question_order !== localQ.question_order;
+        })) {
+      const questionsWithTempIds = questions.map((q, index) => ({
+        ...q,
+        tempId: localQuestions[index]?.tempId || `temp-${index}-${Date.now()}`,
+      }));
+      setLocalQuestions(questionsWithTempIds);
+    }
+  }, [questions, localQuestions]);
 
   // Sync local changes back to parent
   const syncToParent = useCallback((newQuestions: (CreateMissionQuestion & { tempId?: string })[]) => {
@@ -323,7 +333,7 @@ const EmptyState = styled.div`
 `;
 
 const AddQuestionSection = styled.div`
-  margin-top: 16px;
+  margin-top: 4px;
 `;
 
 const AddQuestionGrid = styled.div`
