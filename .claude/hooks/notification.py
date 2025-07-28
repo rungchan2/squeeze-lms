@@ -58,13 +58,13 @@ def announce_notification():
             return  # No TTS scripts available
         
         # Get engineer name if available
-        engineer_name = os.getenv('ENGINEER_NAME', '').strip()
+        engineer_name = os.getenv('ENGINEER_NAME', '').strip() or "희찬"
         
         # Create notification message with 30% chance to include name
         if engineer_name and random.random() < 0.3:
-            notification_message = f"{engineer_name}, your agent needs your input"
+            notification_message = f"{engineer_name}, 승인이 필요한 작업이 있습니다!"
         else:
-            notification_message = "Your agent needs your input"
+            notification_message = "승인이 필요한 작업이 있습니다!"
         
         # Call the TTS script with the notification message
         subprocess.run([

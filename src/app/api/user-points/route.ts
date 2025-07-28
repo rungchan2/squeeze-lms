@@ -1,16 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getUserPointsByJourneyId } from "@/app/journey/[slug]/actions";
+import { apiGuards, createApiSuccessResponse, createApiErrorResponse, API_ERROR_CODES } from "@/utils/api";
 
-export async function GET(request: Request) {
+export const GET = apiGuards.authenticated(async (request: NextRequest, { user }) => {
   try {
     const { searchParams } = new URL(request.url);
     const journeyId = searchParams.get("journey_id");
     
-    
     if (!journeyId) {
-      return NextResponse.json(
-        { error: "Journey ID is required" },
-        { status: 400 }
+      return createApiErrorResponse(
+        API_ERROR_CODES.MISSING_PARAMETERS,
+        "Journey ID is required",
+        400
       );
     }
     
@@ -21,34 +22,35 @@ export async function GET(request: Request) {
       const errorMessage = typeof error === 'object' && error !== null 
         ? (error as any).message || JSON.stringify(error)
         : String(error);
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: 500 }
+      
+      return createApiErrorResponse(
+        API_ERROR_CODES.SERVER_ERROR,
+        errorMessage,
+        500
       );
     }
     
-    
-    return NextResponse.json(data, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'Surrogate-Control': 'no-store'
-      }
+    return createApiSuccessResponse({ data }, {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'Surrogate-Control': 'no-store'
     });
+    
   } catch (err) {
-    console.error("Error in user-points API:", err);
+    console.error("Error in user-points GET API:", err);
     const errorMessage = err instanceof Error ? err.message : "Internal server error";
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
+    
+    return createApiErrorResponse(
+      API_ERROR_CODES.SERVER_ERROR,
+      errorMessage,
+      500
     );
   }
-}
+});
 
-export async function POST(request: Request) {
+export const POST = apiGuards.authenticated(async (request: NextRequest, { user }) => {
   try {
-    // 요청 본문에서 journeyId 가져오기
     let body;
     let journeyId;
     
@@ -57,16 +59,18 @@ export async function POST(request: Request) {
       journeyId = body.journeyId;
     } catch (parseError) {
       console.error("POST user-points JSON 파싱 오류:", parseError);
-      return NextResponse.json(
-        { error: "Invalid JSON body" },
-        { status: 400 }
+      return createApiErrorResponse(
+        API_ERROR_CODES.INVALID_REQUEST,
+        "Invalid JSON body",
+        400
       );
     }
     
     if (!journeyId) {
-      return NextResponse.json(
-        { error: "Journey ID is required" },
-        { status: 400 }
+      return createApiErrorResponse(
+        API_ERROR_CODES.MISSING_PARAMETERS,
+        "Journey ID is required",
+        400
       );
     }
     
@@ -78,34 +82,39 @@ export async function POST(request: Request) {
         const errorMessage = typeof error === 'object' && error !== null 
           ? (error as any).message || JSON.stringify(error)
           : String(error);
-        return NextResponse.json(
-          { error: errorMessage },
-          { status: 500 }
+        
+        return createApiErrorResponse(
+          API_ERROR_CODES.SERVER_ERROR,
+          errorMessage,
+          500
         );
       }
       
-      return NextResponse.json(data, {
-        headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-          'Surrogate-Control': 'no-store'
-        }
+      return createApiSuccessResponse({ data }, {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
       });
+      
     } catch (serviceError) {
       console.error("POST user-points 서비스 호출 오류:", serviceError);
       const errorMessage = serviceError instanceof Error ? serviceError.message : "Service error";
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: 500 }
+      
+      return createApiErrorResponse(
+        API_ERROR_CODES.SERVER_ERROR,
+        errorMessage,
+        500
       );
     }
   } catch (err) {
     console.error("Error in user-points POST API:", err);
     const errorMessage = err instanceof Error ? err.message : "Internal server error";
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
+    
+    return createApiErrorResponse(
+      API_ERROR_CODES.SERVER_ERROR,
+      errorMessage,
+      500
     );
   }
-} 
+}); 

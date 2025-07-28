@@ -46,11 +46,11 @@ def main():
         else:
             # Default completion messages
             completion_messages = [
-                "Work complete!",
-                "All done!",
-                "Task finished!",
-                "Job complete!",
-                "Ready for next task!"
+                "작업이 완료되었습니다!",
+                "모든 작업이 완료되었습니다!",
+                "작업이 완료되었습니다!",
+                "작업이 완료되었습니다!",
+                "작업이 완료되었습니다!"
             ]
             text = random.choice(completion_messages)
         

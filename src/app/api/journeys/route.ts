@@ -1,59 +1,65 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { apiGuards, createApiSuccessResponse, createApiErrorResponse, API_ERROR_CODES } from '@/utils/api';
 
-export async function GET(request: NextRequest) {
+export const GET = apiGuards.getOnly(async (request: NextRequest, { user }) => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase.from("journeys").select("*");
     
     if (error) {
       console.error("[API] journeys 오류:", error);
-      return NextResponse.json({ 
-        error: error.message,
-        details: error.details
-      }, { 
-        status: 500,
-        headers: {
-          'Cache-Control': 'no-store, max-age=0'
-        } 
-      });
+      return createApiErrorResponse(
+        API_ERROR_CODES.SERVER_ERROR,
+        error.message,
+        500,
+        { details: error.details }
+      );
     }
     
-    return NextResponse.json({ 
-      data,
-      timestamp: new Date().toISOString() 
-    }, {
-      headers: {
-        'Cache-Control': 'no-store, max-age=0'
-      }
-    });
+    return createApiSuccessResponse(
+      { 
+        data,
+        timestamp: new Date().toISOString() 
+      },
+      { 'Cache-Control': 'no-store, max-age=0' }
+    );
+    
   } catch (error) {
     console.error("[API] journeys 예외:", error);
-    return NextResponse.json(
-      { 
-        error: "요청 처리 중 오류가 발생했습니다",
-        details: error instanceof Error ? error.message : String(error)
-      },
-      { 
-        status: 500,
-        headers: {
-          'Cache-Control': 'no-store, max-age=0'
-        }
-      }
+    const errorMessage = error instanceof Error ? error.message : "요청 처리 중 오류가 발생했습니다";
+    
+    return createApiErrorResponse(
+      API_ERROR_CODES.SERVER_ERROR,
+      errorMessage,
+      500,
+      { details: error instanceof Error ? error.message : String(error) }
     );
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = apiGuards.postOnly(async (request: NextRequest, { user }) => {
   try {
-    const body = await request.json();
+    let body;
+    
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return createApiErrorResponse(
+        API_ERROR_CODES.INVALID_REQUEST,
+        "Invalid JSON body",
+        400
+      );
+    }
+    
     const { uuid } = body;
     
     if (!uuid) {
       console.error("[API] journeys/by-uuid 파라미터 누락:", body);
-      return NextResponse.json(
-        { error: "UUID가 필요합니다" },
-        { status: 400 }
+      return createApiErrorResponse(
+        API_ERROR_CODES.MISSING_PARAMETERS,
+        "UUID가 필요합니다",
+        400
       );
     }
     
@@ -66,38 +72,31 @@ export async function POST(request: NextRequest) {
     
     if (error) {
       console.error("[API] journeys/by-uuid 오류:", error);
-      return NextResponse.json({ 
-        error: error.message,
-        details: error.details
-      }, { 
-        status: 500,
-        headers: {
-          'Cache-Control': 'no-store, max-age=0'
-        }
-      });
+      return createApiErrorResponse(
+        API_ERROR_CODES.SERVER_ERROR,
+        error.message,
+        500,
+        { details: error.details }
+      );
     }
     
-    return NextResponse.json({ 
-      data,
-      timestamp: new Date().toISOString()
-    }, {
-      headers: {
-        'Cache-Control': 'no-store, max-age=0'
-      }
-    });
+    return createApiSuccessResponse(
+      { 
+        data,
+        timestamp: new Date().toISOString()
+      },
+      { 'Cache-Control': 'no-store, max-age=0' }
+    );
+    
   } catch (error) {
     console.error("[API] journeys/by-uuid 예외:", error);
-    return NextResponse.json(
-      { 
-        error: "요청 처리 중 오류가 발생했습니다",
-        details: error instanceof Error ? error.message : String(error) 
-      },
-      { 
-        status: 500,
-        headers: {
-          'Cache-Control': 'no-store, max-age=0'
-        }
-      }
+    const errorMessage = error instanceof Error ? error.message : "요청 처리 중 오류가 발생했습니다";
+    
+    return createApiErrorResponse(
+      API_ERROR_CODES.SERVER_ERROR,
+      errorMessage,
+      500,
+      { details: error instanceof Error ? error.message : String(error) }
     );
   }
-} 
+}); 
