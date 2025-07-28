@@ -389,7 +389,7 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
         )}
       </div>
       <Spacing />
-      <FloatingButton onClick={handleSubmit(onSubmit)}>
+      <FloatingButton onClick={handleSubmit(onSubmit)} position="center">
         미션 {editMissionData ? "수정" : "생성"}
       </FloatingButton>
     </NewMissionPageContainer>

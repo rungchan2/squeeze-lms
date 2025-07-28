@@ -163,20 +163,3 @@ const PageContainer = styled.div`
 const PageHeader = styled.div`
   
 `;
-
-const VerticalTaab = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "6px",
-        width: "100%",
-      }}
-    >
-      {children}
-    </div>
-  );
-};
