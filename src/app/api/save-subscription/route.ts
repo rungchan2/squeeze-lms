@@ -1,14 +1,37 @@
 import { createClient } from "@/utils/supabase/server";
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { apiGuards, createApiSuccessResponse, createApiErrorResponse, API_ERROR_CODES } from "@/utils/api";
 
-export async function POST(request: Request) {
+export const POST = apiGuards.postOnly(async (request: NextRequest, { user }) => {
   try {
-    const { subscription, userId } = await request.json();
+    let body;
+    
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return createApiErrorResponse(
+        API_ERROR_CODES.INVALID_REQUEST,
+        "Invalid JSON body",
+        400
+      );
+    }
+
+    const { subscription, userId } = body;
 
     if (!subscription || !userId) {
-      return NextResponse.json(
-        { error: "구독 정보 또는 사용자 ID가 없습니다." },
-        { status: 400 }
+      return createApiErrorResponse(
+        API_ERROR_CODES.MISSING_PARAMETERS,
+        "구독 정보 또는 사용자 ID가 없습니다.",
+        400
+      );
+    }
+
+    // Security check: users can only save their own subscriptions unless admin
+    if (userId !== user.id && user.role !== 'admin') {
+      return createApiErrorResponse(
+        API_ERROR_CODES.FORBIDDEN,
+        "본인의 구독 정보만 저장할 수 있습니다.",
+        403
       );
     }
 
@@ -27,9 +50,10 @@ export async function POST(request: Request) {
 
     if (selectError) {
       console.error("구독 정보 조회 오류:", selectError);
-      return NextResponse.json(
-        { error: "구독 정보 조회 중 오류가 발생했습니다." },
-        { status: 500 }
+      return createApiErrorResponse(
+        API_ERROR_CODES.SERVER_ERROR,
+        "구독 정보 조회 중 오류가 발생했습니다.",
+        500
       );
     }
 
@@ -47,9 +71,10 @@ export async function POST(request: Request) {
 
       if (updateError) {
         console.error("구독 정보 업데이트 오류:", updateError);
-        return NextResponse.json(
-          { error: "구독 정보 업데이트 중 오류가 발생했습니다." },
-          { status: 500 }
+        return createApiErrorResponse(
+          API_ERROR_CODES.SERVER_ERROR,
+          "구독 정보 업데이트 중 오류가 발생했습니다.",
+          500
         );
       }
       
@@ -67,21 +92,26 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("구독 정보 저장 오류:", insertError);
-        return NextResponse.json(
-          { error: "구독 정보 저장 중 오류가 발생했습니다." },
-          { status: 500 }
+        return createApiErrorResponse(
+          API_ERROR_CODES.SERVER_ERROR,
+          "구독 정보 저장 중 오류가 발생했습니다.",
+          500
         );
       }
       
       result = { message: "구독 정보가 저장되었습니다.", created: true };
     }
 
-    return NextResponse.json(result);
+    return createApiSuccessResponse(result);
+    
   } catch (error) {
     console.error("구독 처리 오류:", error);
-    return NextResponse.json(
-      { error: "서버 오류가 발생했습니다." },
-      { status: 500 }
+    const errorMessage = error instanceof Error ? error.message : "서버 오류가 발생했습니다.";
+    
+    return createApiErrorResponse(
+      API_ERROR_CODES.SERVER_ERROR,
+      errorMessage,
+      500
     );
   }
-} 
+}); 

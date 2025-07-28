@@ -1,22 +1,20 @@
 "use client";
 
-// TODO: 1. 제출된 과제 통계 확인할 수 있게 하기
-
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
-import { Table } from "@chakra-ui/react";
+import { Table, Input, Stack } from "@chakra-ui/react";
 import { Tabs } from "@chakra-ui/react";
 import styled from "@emotion/styled";
-import { useParams, useRouter } from "next/navigation";
-import { FaRegTrashAlt } from "react-icons/fa";
-import { IconContainer } from "@/components/common/IconContainer";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { FaRegTrashAlt, FaSearch, FaEye, FaFileAlt, FaUsers, FaChartBar } from "react-icons/fa";
+import { LuRefreshCw } from "react-icons/lu";
+import { HiOutlineDocumentDownload } from "react-icons/hi";
+import { ImBooks } from "react-icons/im";
+import { MdOutlineCalendarViewWeek } from "react-icons/md";
 import { deletePost, hidePost, unhidePost } from "@/utils/data/posts";
 import dayjs from "@/utils/dayjs/dayjs";
 import { toaster } from "@/components/ui/toaster";
 import { Loading } from "@/components/common/Loading";
 import { Error } from "@/components/common/Error";
-import { ImBooks } from "react-icons/im";
-import { MdOutlineCalendarViewWeek } from "react-icons/md";
-import Heading from "@/components/Text/Heading";
 import WeeklySubmissionChart from "./WeeklySubmissionChart";
 import Text from "@/components/Text/Text";
 import { usePosts } from "@/hooks/usePosts";
@@ -24,19 +22,36 @@ import { useWeeks } from "@/hooks/useWeeks";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
 import { useJourneyBySlug } from "@/hooks/useJourneyBySlug";
 import { PostWithRelations } from "@/types";
-import RichTextViewer from "@/components/richTextInput/RichTextViewer";
+import AnswersViewer from "@/components/common/AnswersViewer";
 import { exportPostsToExcel } from "@/utils/excel/exportPosts";
-
-
 import Button from "@/components/common/Button";
 import { Dialog, CloseButton, Portal } from "@chakra-ui/react";
-import { HiOutlineDocumentDownload } from "react-icons/hi";
 
 export default function TeacherPostsPage() {
   const { slug } = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  // URL 파라미터로부터 현재 탭 값 결정 (JourneyClient와 동일한 로직)
+  const getCurrentTab = () => {
+    const tab = searchParams.get("postsTab");
+    if (tab && ["week", "all"].includes(tab)) {
+      return tab;
+    }
+    return "week";
+  };
+
+  const currentTab = getCurrentTab();
+
+  // 탭 변경 핸들러 (JourneyClient와 동일한 로직)
+  const handleTabChange = useCallback((details: any) => {
+    const newTab = typeof details === 'string' ? details : details.value;
+    const params = new URLSearchParams(searchParams);
+    params.set("postsTab", newTab);
+    router.push(`/journey/${slug}/teacher/posts?${params.toString()}`, { scroll: false });
+  }, [router, searchParams, slug]);
 
   // 필터 상태 관리
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
@@ -131,6 +146,16 @@ export default function TeacherPostsPage() {
     return filtered;
   }, [allPosts, selectedStudentId, selectedWeekId, searchTitle, missionInstances]);
 
+  // 통계 데이터 계산
+  const postsStats = useMemo(() => {
+    return {
+      total: totalPosts || 0,
+      filtered: filteredPosts.length,
+      students: studentOptions.length,
+      hidden: allPosts.filter(post => post.is_hidden).length
+    };
+  }, [totalPosts, filteredPosts.length, studentOptions.length, allPosts]);
+
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
@@ -219,8 +244,12 @@ export default function TeacherPostsPage() {
   if (error) return <Error message={(error as Error).message} />;
 
   return (
-    <TeacherPostsPageContainer>
-      <Tabs.Root defaultValue="week" variant="line">
+    <AdminContainer>
+      <Tabs.Root 
+        value={currentTab} 
+        onValueChange={handleTabChange}
+        variant="line"
+      >
         <Tabs.List bg="bg.muted" rounded="l3" p="1">
           <Tabs.Trigger value="week">
             <MdOutlineCalendarViewWeek />
@@ -238,44 +267,83 @@ export default function TeacherPostsPage() {
         </Tabs.Content>
 
         <Tabs.Content value="all">
-          <div className="posts-container">
-            <Heading level={3}>제출된 미션</Heading>
+          {/* 헤더 영역 */}
+          <HeaderSection>
+            <HeaderInfo>
+              <Stack direction="row" alignItems="center" gap={2}>
+                <FaFileAlt size={20} color="var(--primary-600)" />
+                <Text variant="body" fontWeight="bold" style={{ fontSize: "18px" }}>제출된 미션</Text>
+              </Stack>
+              <StatsGrid>
+                <StatCard>
+                  <StatValue>{postsStats.total}</StatValue>
+                  <StatLabel>전체 제출</StatLabel>
+                </StatCard>
+                <StatCard>
+                  <StatValue>{postsStats.filtered}</StatValue>
+                  <StatLabel>검색 결과</StatLabel>
+                </StatCard>
+                <StatCard>
+                  <StatValue>{postsStats.students}</StatValue>
+                  <StatLabel>참여 학생</StatLabel>
+                </StatCard>
+                <StatCard>
+                  <StatValue>{postsStats.hidden}</StatValue>
+                  <StatLabel>숨김 처리</StatLabel>
+                </StatCard>
+              </StatsGrid>
+            </HeaderInfo>
+            
+            <ActionButtons>
+              <Button
+                variant="outline"
+                onClick={() => refetch()}
+                disabled={isLoading}
+                style={{ width: "fit-content" }}
+              >
+                <LuRefreshCw />
+                새로고침
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleExportToExcel}
+                disabled={journeyLoading || !journey || filteredPosts.length === 0}
+                style={{ width: "fit-content" }}
+              >
+                <HiOutlineDocumentDownload />
+                Excel 내보내기
+              </Button>
+            </ActionButtons>
+          </HeaderSection>
 
-            <Text variant="body" color="var(--grey-600)" className="data-count">
-              전체 {totalPosts}개 중 {filteredPosts.length}개 표시 중
-            </Text>
-
-            {/* 필터 영역 */}
-            <div className="filter-container">
-              <div className="filter-group">
-                <Button
-                  onClick={handleExportToExcel}
-                  variant="outline"
-                  disabled={journeyLoading || !journey || filteredPosts.length === 0}
-                >
-                  <HiOutlineDocumentDownload style={{ marginRight: '8px' }} />
-                  Excel로 내보내기
-                </Button>
-              </div>
-              <div className="filter-group">
-                <label htmlFor="search-title">제목 검색:</label>
-                <input
-                  id="search-title"
-                  type="text"
+          {/* 검색 및 필터 영역 */}
+          <FilterSection>
+            <SearchBar>
+              <SearchInput>
+                <FaSearch color="var(--grey-400)" />
+                <Input
+                  placeholder="제목으로 검색..."
                   value={searchTitle}
                   onChange={(e) => setSearchTitle(e.target.value)}
-                  placeholder="제목으로 검색..."
-                  className="filter-input"
+                  variant="subtle"
+                  style={{ border: 'none', boxShadow: 'none' }}
                 />
-              </div>
-
-              <div className="filter-group">
-                <label htmlFor="student-filter">학생 선택:</label>
+              </SearchInput>
+            </SearchBar>
+            
+            <FilterControls>
+              <FilterGroup>
+                <FilterLabel>학생 선택</FilterLabel>
                 <select
-                  id="student-filter"
                   value={selectedStudentId}
                   onChange={(e) => setSelectedStudentId(e.target.value)}
-                  className="filter-select"
+                  style={{
+                    padding: '8px',
+                    borderRadius: '4px',
+                    border: '1px solid var(--grey-300)',
+                    fontSize: '14px',
+                    minWidth: '150px'
+                  }}
                 >
                   <option value="">전체 학생</option>
                   {studentOptions.map((student) => (
@@ -284,16 +352,21 @@ export default function TeacherPostsPage() {
                     </option>
                   ))}
                 </select>
-              </div>
+              </FilterGroup>
 
-              <div className="filter-group">
-                <label htmlFor="week-filter">주차 선택:</label>
+              <FilterGroup>
+                <FilterLabel>주차 선택</FilterLabel>
                 <select
-                  id="week-filter"
                   value={selectedWeekId}
                   onChange={(e) => setSelectedWeekId(e.target.value)}
-                  className="filter-select"
                   disabled={weeksLoading || missionInstancesLoading}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '4px',
+                    border: '1px solid var(--grey-300)',
+                    fontSize: '14px',
+                    minWidth: '150px'
+                  }}
                 >
                   <option value="">전체 주차</option>
                   {weekOptions.map((week) => (
@@ -302,106 +375,136 @@ export default function TeacherPostsPage() {
                     </option>
                   ))}
                 </select>
-              </div>
-            </div>
+              </FilterGroup>
+            </FilterControls>
+          </FilterSection>
 
-            <Table.Root
-              key="outline"
-              size="sm"
-              variant="outline"
-              interactive
-              backgroundColor="var(--white)"
-            >
+          {/* 테이블 영역 */}
+          <TableContainer>
+            <Table.Root size="sm" variant="outline" backgroundColor="var(--white)">
+              <Table.ColumnGroup>
+                <Table.Column htmlWidth="30%" />
+                <Table.Column htmlWidth="15%" />
+                <Table.Column htmlWidth="10%" />
+                <Table.Column htmlWidth="15%" />
+                <Table.Column htmlWidth="15%" />
+                <Table.Column htmlWidth="15%" />
+              </Table.ColumnGroup>
               <Table.Header>
-                <Table.Row>
+                <Table.Row backgroundColor="var(--grey-50)">
                   <Table.ColumnHeader>제목</Table.ColumnHeader>
                   <Table.ColumnHeader>작성자</Table.ColumnHeader>
-                  <Table.ColumnHeader>숨김</Table.ColumnHeader>
+                  <Table.ColumnHeader>상태</Table.ColumnHeader>
                   <Table.ColumnHeader>제출날짜</Table.ColumnHeader>
-                  <Table.ColumnHeader>제출내용</Table.ColumnHeader>
-                  <Table.ColumnHeader></Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="center">제출내용</Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="center">관리</Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
                 {filteredPosts.map((post: PostWithRelations, index: number) => (
                   <Table.Row
                     key={`post-${post.id}-${index}`}
+                    _hover={{ backgroundColor: "var(--grey-50)", cursor: "pointer" }}
                     onClick={() => router.push(`/post/${post.id}`)}
-                    style={{ cursor: "pointer" }}
                   >
-                    <Table.Cell>{post.title}</Table.Cell>
                     <Table.Cell>
-                      {post.profiles?.first_name} {post.profiles?.last_name}
+                      <PostTitleCell>
+                        <div style={{ fontWeight: 500, marginBottom: '4px' }}>{post.title}</div>
+                        {post.journey_mission_instances?.missions && (
+                          <Text variant="caption" color="var(--grey-500)">
+                            {post.journey_mission_instances.missions.name}
+                          </Text>
+                        )}
+                      </PostTitleCell>
                     </Table.Cell>
-                    <Table.Cell
-                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                    >
-                      <select
+                    <Table.Cell>
+                      <StudentCell>
+                        {post.profiles?.last_name}{post.profiles?.first_name}
+                      </StudentCell>
+                    </Table.Cell>
+                    <Table.Cell onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                      <StatusSelect
                         defaultValue={post.is_hidden ? "hide" : "show"}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                           handleHide(post.id, e.target.value)
                         }
-                        className="select-box"
                       >
                         <option value="show">보임</option>
                         <option value="hide">숨김</option>
-                      </select>
+                      </StatusSelect>
                     </Table.Cell>
                     <Table.Cell>
-                      {dayjs(post.created_at).format("YYYY-MM-DD")}
+                      <DateCell>
+                        {dayjs(post.created_at).format("YYYY-MM-DD")}
+                      </DateCell>
                     </Table.Cell>
-                    <Table.Cell>
-                    
-                    <Dialog.Root
-                      key="center"
-                      placement="center"
-                      motionPreset="slide-in-bottom"
-                    >
-                      <Dialog.Trigger asChild>
-                      <Button
-                        maxWidth={100}
-                        variant="plain"
-                        onClick={(e: React.MouseEvent) => {
-                          e.stopPropagation();
-                        }}
-                      >
-                        제출내용 보기
-                      </Button>
-                      </Dialog.Trigger>
-                      <Portal>
-                        <Dialog.Backdrop />
-                        <Dialog.Positioner>
-                          <Dialog.Content onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                            <Dialog.Header>
-                              <Dialog.Title>
-                                {post.title} / {post.profiles?.last_name}{post.profiles?.first_name}
-                              </Dialog.Title>
-                            </Dialog.Header>
-                            <Dialog.Body >
-                              <RichTextViewer content={post.content || ""} />
-                            </Dialog.Body>
-                            <Dialog.CloseTrigger asChild>
-                              <CloseButton size="sm" />
-                            </Dialog.CloseTrigger>
-                          </Dialog.Content>
-                        </Dialog.Positioner>
-                      </Portal>
-                    </Dialog.Root>
+                    <Table.Cell textAlign="center">
+                      <Dialog.Root placement="center" motionPreset="slide-in-bottom">
+                        <Dialog.Trigger asChild>
+                          <Button
+                            variant="plain"
+                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                          >
+                            <FaEye />
+                          </Button>
+                        </Dialog.Trigger>
+                        <Portal>
+                          <Dialog.Backdrop />
+                          <Dialog.Positioner>
+                            <Dialog.Content 
+                              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                              style={{ maxWidth: '90vw', width: '800px' }}
+                            >
+                              <Dialog.Header>
+                                <Dialog.Title>
+                                  {post.title} - {post.profiles?.last_name}{post.profiles?.first_name}
+                                </Dialog.Title>
+                              </Dialog.Header>
+                              <Dialog.Body>
+                                <AnswersViewer 
+                                  answersData={post.answers_data || null} 
+                                  legacyContent={post.content}
+                                />
+                              </Dialog.Body>
+                              <Dialog.CloseTrigger asChild>
+                                <CloseButton size="sm" />
+                              </Dialog.CloseTrigger>
+                            </Dialog.Content>
+                          </Dialog.Positioner>
+                        </Portal>
+                      </Dialog.Root>
                     </Table.Cell>
-                    <Table.Cell textAlign="right">
-                      <IconContainer
-                        onClick={(e: React.MouseEvent) => {
-                          e.stopPropagation();
-                          handleDelete(post.id);
-                        }}
-                        hoverColor="var(--negative-600)"
-                        iconColor="var(--negative-600)"
-                      >
-                        <FaRegTrashAlt />
-                      </IconContainer>
+                    <Table.Cell textAlign="center">
+                      <ActionButtonGroup>
+                        <Button
+                          variant="plain"
+                          onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            handleDelete(post.id);
+                          }}
+                        >
+                          <FaRegTrashAlt />
+                        </Button>
+                      </ActionButtonGroup>
                     </Table.Cell>
                   </Table.Row>
                 ))}
+                
+                {filteredPosts.length === 0 && (
+                  <Table.Row>
+                    <Table.Cell colSpan={6} textAlign="center">
+                      <EmptyState>
+                        <FaFileAlt size={32} color="var(--grey-400)" />
+                        <Text variant="body" color="var(--grey-500)">
+                          {searchTitle || selectedStudentId || selectedWeekId
+                            ? '검색 조건에 맞는 제출이 없습니다'
+                            : '제출된 미션이 없습니다'
+                          }
+                        </Text>
+                      </EmptyState>
+                    </Table.Cell>
+                  </Table.Row>
+                )}
               </Table.Body>
             </Table.Root>
 
@@ -411,44 +514,26 @@ export default function TeacherPostsPage() {
                 <Text
                   variant="caption"
                   color="var(--grey-500)"
-                  className="no-more"
+                  style={{ textAlign: 'center', padding: '1rem' }}
                 >
                   모든 데이터를 불러왔습니다.
                 </Text>
               )}
             </div>
-          </div>
+          </TableContainer>
         </Tabs.Content>
       </Tabs.Root>
-    </TeacherPostsPageContainer>
+    </AdminContainer>
   );
 }
 
-const TeacherPostsPageContainer = styled.div`
-  max-width: var(--breakpoint-tablet);
+// Modern Admin-Style Styled Components
+const AdminContainer = styled.div`
+  padding: 24px;
+  max-width: 1200px;
   margin: 0 auto;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-
-  .select-box {
-    border: none;
-    background-color: var(--white);
-    color: var(--grey-700);
-    font-size: 12px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    border: 1px solid var(--grey-200);
-    cursor: pointer;
-    &:hover {
-      background-color: var(--grey-100);
-    }
-  }
-
-  .data-count {
-    margin-bottom: 1rem;
-  }
+  background-color: var(--grey-25);
+  min-height: 100vh;
 
   .load-more {
     padding: 1rem 0;
@@ -456,88 +541,173 @@ const TeacherPostsPageContainer = styled.div`
     justify-content: center;
     min-height: 60px;
   }
+`;
 
-  .no-more {
-    padding: 1rem;
-  }
-
-  .filter-container {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    padding: 1rem;
-    background-color: var(--grey-50);
-    border-radius: 8px;
-    border: 1px solid var(--grey-200);
-    flex-wrap: wrap;
-  }
-
-  .filter-group {
-    display: flex;
+const HeaderSection = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  
+  @media (max-width: 768px) {
     flex-direction: column;
-    gap: 0.5rem;
-    min-width: 200px;
-    flex: 1;
-    
-    &:first-child {
-      flex: 0 0 auto;
-      min-width: auto;
-      align-items: flex-start;
-      justify-content: flex-end;
-    }
+    gap: 16px;
   }
+`;
 
-  .filter-group label {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--grey-700);
-  }
+const HeaderInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+`;
 
-  .filter-select,
-  .filter-input {
-    border: 1px solid var(--grey-300);
-    background-color: var(--white);
-    color: var(--grey-700);
-    font-size: 14px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    transition: border-color 0.2s ease;
-
-    &:hover {
-      border-color: var(--grey-400);
-    }
-
-    &:focus {
-      outline: none;
-      border-color: var(--primary-500);
-      box-shadow: 0 0 0 2px var(--primary-100);
-    }
-
-    &:disabled {
-      background-color: var(--grey-100);
-      color: var(--grey-500);
-      cursor: not-allowed;
-    }
-  }
-
-  .filter-select {
-    cursor: pointer;
-  }
-
-  .filter-input {
-    &::placeholder {
-      color: var(--grey-500);
-    }
-  }
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 8px;
 
   @media (max-width: 768px) {
-    .filter-container {
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .filter-group {
-      min-width: unset;
-    }
+    grid-template-columns: repeat(2, 1fr);
   }
+`;
+
+const StatCard = styled.div`
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--grey-200);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+`;
+
+const StatValue = styled.div`
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--primary-600);
+  margin-bottom: 4px;
+`;
+
+const StatLabel = styled.div`
+  font-size: 14px;
+  color: var(--grey-600);
+`;
+
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  justify-content: flex-end;
+`;
+
+const FilterSection = styled.div`
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--grey-200);
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+`;
+
+const SearchBar = styled.div`
+  margin-bottom: 20px;
+`;
+
+const SearchInput = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--grey-50);
+  border-radius: 8px;
+  border: 1px solid var(--grey-200);
+  
+  &:focus-within {
+    border-color: var(--primary-300);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+`;
+
+const FilterControls = styled.div`
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+`;
+
+const FilterGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
+const FilterLabel = styled.label`
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--grey-600);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const TableContainer = styled.div`
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--grey-200);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+`;
+
+const PostTitleCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const StudentCell = styled.div`
+  color: var(--grey-700);
+  font-size: 14px;
+  font-weight: 500;
+`;
+
+const StatusSelect = styled.select`
+  border: none;
+  background-color: var(--white);
+  color: var(--grey-700);
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--grey-200);
+  cursor: pointer;
+  
+  &:hover {
+    background-color: var(--grey-100);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-500);
+  }
+`;
+
+const DateCell = styled.div`
+  color: var(--grey-600);
+  font-size: 14px;
+`;
+
+const ActionButtonGroup = styled.div`
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
 `;

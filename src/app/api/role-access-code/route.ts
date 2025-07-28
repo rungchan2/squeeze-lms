@@ -1,7 +1,8 @@
 import { createClient } from "@/utils/supabase/server";
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { apiGuards, createApiSuccessResponse, createApiErrorResponse, API_ERROR_CODES } from "@/utils/api";
 
-export async function GET() {
+export const GET = apiGuards.adminOnly(async (request: NextRequest, { user }) => {
   try {
     const supabase = await createClient();
     
@@ -9,16 +10,25 @@ export async function GET() {
     const { data, error } = await supabase.from("role_access_code").select("*");
     
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Error fetching role access codes:", error);
+      return createApiErrorResponse(
+        API_ERROR_CODES.SERVER_ERROR,
+        error.message,
+        500
+      );
     }
     
     // 테이블 데이터 반환
-    return NextResponse.json({ 
-      data,
-      success: true 
-    });
+    return createApiSuccessResponse({ data });
+    
   } catch (e) {
     console.error("Error in role-access-code API route:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    const errorMessage = e instanceof Error ? e.message : "Internal server error";
+    
+    return createApiErrorResponse(
+      API_ERROR_CODES.SERVER_ERROR,
+      errorMessage,
+      500
+    );
   }
-} 
+}); 
