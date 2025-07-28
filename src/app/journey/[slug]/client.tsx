@@ -1,19 +1,21 @@
 "use client";
 
-import { FaSchool, FaCalendarAlt } from "react-icons/fa";
+import { FaSchool, FaBell } from "react-icons/fa";
 import { VscGraphLine } from "react-icons/vsc";
 import { TbMessages } from "react-icons/tb";
 import { FiMenu } from "react-icons/fi";
 import PlanTab from "./_plan/PlanTab";
-import MissionTab from "./_mission/MissionTab";
 import FeedTab from "./_feed/FeedTab";
 import DashboardTab from "./_dashboard/DashboardTab";
 import SettingTab from "./_setting/SettingTab";
-import { useEffect, useState } from "react";
+import NotificationTab from "@/app/(home)/_notification/NotificationTab";
+import { useEffect, useState, useCallback } from "react";
 import { Suspense } from "react";
 import Spinner from "@/components/common/Spinner";
 import { getJourneyByUuidRetrieveId } from "@/utils/data/journey";
 import { Tabs } from "@chakra-ui/react";
+import styled from "@emotion/styled";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface JourneyClientProps {
   slug: string;
@@ -24,7 +26,29 @@ export default function JourneyClient({
   slug,
   initialData,
 }: JourneyClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // URL 파라미터로부터 현재 탭 값 결정
+  const getCurrentTab = () => {
+    const tab = searchParams.get("tab");
+    if (tab && ["plan", "mission", "dashboard", "notifications", "feed", "settings"].includes(tab)) {
+      return tab;
+    }
+    return "plan";
+  };
+
+  const currentTab = getCurrentTab();
+
+  // 탭 변경 핸들러
+  const handleTabChange = useCallback((details: any) => {
+    // Chakra UI Tabs의 onValueChange는 details 객체를 전달하므로 value를 추출
+    const newTab = typeof details === 'string' ? details : details.value;
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", newTab);
+    router.push(`/journey/${slug}?${params.toString()}`, { scroll: false });
+  }, [router, searchParams, slug]);
 
   // 페이지 진입 시 slug 설정 - 한 번만 실행
   useEffect(() => {
@@ -68,20 +92,29 @@ export default function JourneyClient({
   };
 
   return (
-    <div style={{ maxWidth: "var(--breakpoint-tablet)", margin: "0 auto" }}>
-      <Tabs.Root defaultValue="plan" key={slug} variant="line" width="100%">
+    <PageContainer>
+      <PageHeader>
+      </PageHeader>
+      
+      <Tabs.Root 
+        value={currentTab} 
+        onValueChange={handleTabChange}
+        key={slug} 
+        variant="line" 
+        width="100%"
+      >
         <Tabs.List width="100%" justifyContent="center">
           <Tabs.Trigger value="plan" {...triggerStyle}>
             <FaSchool />
             일정
           </Tabs.Trigger>
-          <Tabs.Trigger value="mission" {...triggerStyle}>
-            <FaCalendarAlt />
-            미션
-          </Tabs.Trigger>
           <Tabs.Trigger value="dashboard" {...triggerStyle}>
             <VscGraphLine />
             순위
+          </Tabs.Trigger>
+          <Tabs.Trigger value="notifications" {...triggerStyle}>
+            <FaBell />
+            알림
           </Tabs.Trigger>
           <Tabs.Trigger value="feed" {...triggerStyle}>
             <TbMessages />
@@ -97,14 +130,14 @@ export default function JourneyClient({
             <PlanTab slug={slug} key={`plan-${slug}`} />
           </Suspense>
         </Tabs.Content>
-        <Tabs.Content value="mission">
-          <Suspense fallback={<Spinner />}>
-            <MissionTab slug={slug} key={`mission-${slug}`} />
-          </Suspense>
-        </Tabs.Content>
         <Tabs.Content value="dashboard">
           <Suspense fallback={<Spinner />}>
             <DashboardTab slug={slug} key={`dashboard-${slug}`} />
+          </Suspense>
+        </Tabs.Content>
+        <Tabs.Content value="notifications">
+          <Suspense fallback={<Spinner />}>
+            <NotificationTab key={`notifications-${slug}`} />
           </Suspense>
         </Tabs.Content>
         <Tabs.Content value="feed">
@@ -118,9 +151,23 @@ export default function JourneyClient({
           </Suspense>
         </Tabs.Content>
       </Tabs.Root>
-    </div>
+    </PageContainer>
   );
 }
+
+const PageContainer = styled.div`
+  max-width: var(--breakpoint-tablet);
+  margin: 0 auto;
+`;
+
+const PageHeader = styled.div`
+  padding: 16px;
+  border-bottom: 1px solid var(--grey-200);
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
+`;
 
 const VerticalTaab = ({ children }: { children: React.ReactNode }) => {
   return (

@@ -142,6 +142,90 @@ const Container = styled.div`
   justify-content: space-between;
   align-items: center;
 
+  .notificationCard {
+    width: 100%;
+    padding: 16px;
+    background: var(--white);
+    border: 1px solid var(--grey-200);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+      border-color: var(--primary-200);
+    }
+  }
+
+  .contentContainer {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .textContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .dateContainer {
+    margin-top: 4px;
+  }
+
+  .dotsContainer {
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--grey-100);
+    }
+
+    .dots {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .buttonContainer {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--grey-100);
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .modalContent {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+
+    .link {
+      cursor: pointer;
+      text-decoration: underline;
+
+      &:hover {
+        color: var(--primary-600);
+      }
+    }
+
+    .typeContainer {
+      padding: 4px 8px;
+      background-color: var(--grey-100);
+      border-radius: 12px;
+      align-self: flex-start;
+    }
+  }
+
   .read {
     color: var(--grey-400);
   }
@@ -153,7 +237,11 @@ const Container = styled.div`
     overflow: hidden;
     max-width: 100%;
     display: -webkit-box;
-    -webkit-line-clamp: 1;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+
+    &.read {
+      color: var(--grey-600);
+    }
   }
 `;

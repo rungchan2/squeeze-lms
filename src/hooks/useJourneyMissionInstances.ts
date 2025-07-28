@@ -1,67 +1,64 @@
 import useSWR from "swr";
 import { JourneyMissionInstance, Mission, CreateJourneyMissionInstance, UpdateJourneyMissionInstance } from "@/types";
 import { useCallback } from "react";
+import { createClient } from "@/utils/supabase/client";
 import {
   createMissionInstance,
   updateMissionInstance,
   deleteMissionInstance,
   getMissionInstanceById,
 } from "@/utils/data/journeyMissionInstance";
+
 export function useJourneyMissionInstances(
   journeyUuid: string,
   weekId?: string | null
 ) {
-  // 데이터 가져오기 함수
-  const fetcher = useCallback(async () => {
+  // Supabase 클라이언트를 사용한 직접 데이터 가져오기
+  const fetcher = useCallback(async (): Promise<(JourneyMissionInstance & { mission: Mission })[]> => {
     if (!journeyUuid) {
       return [];
     }
 
     try {
-      // API 라우트를 통해 데이터 가져오기
-      const response = await fetch("/api/journey-mission-instances", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          journeyUuid,
-          weekId: weekId || undefined,
-        }),
-      });
+      const supabase = createClient();
+      
+      // 쿼리 빌더 시작
+      let query = supabase
+        .from("journey_mission_instances")
+        .select(`
+          *,
+          mission:missions(*)
+        `)
+        .eq("journey_id", journeyUuid);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API 에러 (${response.status}): ${errorText}`);
+      // weekId가 있으면 해당 주차로 필터링
+      if (weekId) {
+        query = query.eq("journey_week_id", weekId);
       }
 
-      const result = await response.json();
+      // 정렬: 생성일 기준 오름차순
+      query = query.order("created_at", { ascending: true });
 
-      if (result.error) {
-        console.error(
-          "useJourneyMissionInstances: API 에러 응답",
-          result.error
-        );
-        throw new Error(`API 에러: ${result.error}`);
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("useJourneyMissionInstances: Supabase 에러", error);
+        throw new Error(`데이터베이스 에러: ${error.message}`);
       }
 
-      const instances = result.data || [];
-
-      return instances;
+      return data || [];
     } catch (err) {
       console.error("useJourneyMissionInstances: 예외 발생", err);
       throw err;
     }
-  }, [weekId, journeyUuid]);
+  }, [journeyUuid, weekId]);
 
-  // SWR 키 생성 (로그 추가)
+  // 최적화된 SWR 키 생성
   const swrKey = journeyUuid
-    ? weekId
-      ? `mission-instances-${weekId}-${journeyUuid}`
-      : `all-mission-instances-${journeyUuid}`
+    ? `journey-mission-instances:${journeyUuid}${weekId ? `:${weekId}` : ":all"}`
     : null;
 
-  // SWR 훅 사용
+  // 최적화된 SWR 설정
   const {
     data: missionInstances,
     error,
@@ -71,13 +68,14 @@ export function useJourneyMissionInstances(
     swrKey,
     fetcher,
     {
-      revalidateOnFocus: true,
-      dedupingInterval: 60000, // 1분 동안 중복 요청 방지
-      fallbackData: [], // 기본값 제공하여 에러 방지
-      revalidateOnMount: true, // 마운트 시 항상 재검증
-      shouldRetryOnError: true, // 에러 발생 시 재시도
-      errorRetryCount: 3, // 에러 재시도 횟수
-      errorRetryInterval: 1000, // 에러 재시도 간격
+      revalidateOnFocus: false, // 포커스 시 재검증 비활성화 (성능 개선)
+      dedupingInterval: 30000, // 30초로 단축 (더 신선한 데이터)
+      fallbackData: [], // 기본값 제공
+      revalidateOnMount: true, // 마운트 시 재검증
+      shouldRetryOnError: true,
+      errorRetryCount: 2, // 재시도 횟수 감소
+      errorRetryInterval: 500, // 재시도 간격 단축
+      keepPreviousData: true, // 이전 데이터 유지 (로딩 상태 개선)
       onError: (err) => {
         console.error("[useJourneyMissionInstances] 데이터 로딩 중 오류:", err);
       },

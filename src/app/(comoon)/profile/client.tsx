@@ -24,6 +24,7 @@ import Text from "@/components/Text/Text";
 import { updateProfile, deleteUser, updatePassword } from "@/utils/data/user";
 import { Loading } from "@/components/common/Loading";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import BackButton from "@/components/common/BackButton";
 
 
 
@@ -184,6 +185,9 @@ export default function ProfilePage() {
   };
   return (
     <Container>
+      <div className="page-header">
+        <BackButton />
+      </div>
       <Form onSubmit={handleSubmit(onSubmit)}>
         <div className="horizontal-container">
           <Heading level={4}>사용자 정보</Heading>
@@ -323,6 +327,15 @@ const Container = styled.div`
   gap: 1rem;
   max-width: var(--breakpoint-tablet);
   margin: 0 auto;
+
+  .page-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--grey-200);
+    
+    @media (max-width: 768px) {
+      padding: 12px;
+    }
+  }
 
   .modal-text {
     text-align: center;

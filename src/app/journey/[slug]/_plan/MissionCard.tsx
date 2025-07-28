@@ -8,7 +8,7 @@ import { IconContainer } from "@/components/common/IconContainer";
 import dayjs from "@/utils/dayjs/dayjs";
 import { TeacherOnly } from "@/components/auth/AdminOnly";
 import { calcDifference } from "@/utils/dayjs/calcDifference";
-import { FaEdit, FaQuestionCircle, FaList, FaCheckSquare, FaImage, FaMix } from "react-icons/fa";
+import { FaEdit, FaQuestionCircle, FaList, FaCheckSquare, FaImage, FaMix, FaCheck } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { BiGridVertical } from "react-icons/bi";
@@ -28,6 +28,9 @@ interface MissionCardProps {
   missionInstance?: JourneyMissionInstanceWithMission;
   showDetails?: boolean;
   style?: React.CSSProperties;
+  isCompleted?: boolean;
+  onMissionClick?: () => void;
+  journeySlug?: string;
 }
 
 export default function MissionCard({
@@ -38,6 +41,9 @@ export default function MissionCard({
   missionInstance,
   showDetails = false,
   style,
+  isCompleted = false,
+  onMissionClick,
+  journeySlug,
 }: MissionCardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -169,6 +175,9 @@ export default function MissionCard({
       showDetails={showDetails}
       isTabMission={isTabMission}
       style={style}
+      isCompleted={isCompleted}
+      onClick={!isModal && onMissionClick ? onMissionClick : undefined}
+      clickable={!isModal && !isCompleted && !!onMissionClick}
     >
       <div className="left-container">
         {!isModal && (
@@ -202,6 +211,14 @@ export default function MissionCard({
               >
                 {mission.name}
               </Text>
+              {isCompleted && (
+                <CompletionBadge>
+                  <FaCheck size="12px" />
+                  <Text variant="caption" color="var(--primary-600)" fontWeight="bold">
+                    완료
+                  </Text>
+                </CompletionBadge>
+              )}
             </div>
             <Text
               variant="caption"
@@ -304,6 +321,8 @@ interface StyledMissionCardProps {
   maxWidth: string;
   showDetails: boolean;
   isTabMission: boolean;
+  isCompleted?: boolean;
+  clickable?: boolean;
 }
 
 const StyledMissionCard = styled.div<StyledMissionCardProps>`
@@ -316,11 +335,13 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
   border: 1px solid var(--grey-200);
   background-color: var(--white);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, opacity 0.2s;
   justify-content: space-between;
   border-radius: ${(props) => (props.isModal ? "4px 0 0 4px" : "4px")};
   flex: 1;
   max-width: ${(props) => props.maxWidth};
+  opacity: ${(props) => (props.isCompleted ? 0.6 : 1)};
+  cursor: ${(props) => (props.clickable ? "pointer" : "default")};
 
   .mission-name-container {
     display: flex;
@@ -352,7 +373,7 @@ const StyledMissionCard = styled.div<StyledMissionCardProps>`
 
   &:hover {
     box-shadow: ${(props) =>
-      props.isModal ? "none" : "0 4px 6px rgba(0, 0, 0, 0.1)"};
+      props.isModal || props.isCompleted ? "none" : props.clickable ? "0 4px 6px rgba(0, 0, 0, 0.1)" : "none"};
   }
 
   .mission-item-header {
@@ -472,4 +493,19 @@ const MissionTypeIcon = styled.div`
   color: var(--primary-500);
   margin-right: 6px;
   flex-shrink: 0;
+`;
+
+const CompletionBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background-color: var(--primary-100);
+  border-radius: 12px;
+  margin-left: 8px;
+  flex-shrink: 0;
+  
+  svg {
+    color: var(--primary-600);
+  }
 `;

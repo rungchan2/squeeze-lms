@@ -400,8 +400,8 @@ export default memo(function PostCard({
                         </AnswerTypeIcon>
                       </AnswerHeader>
                       
-                      {/* Display question text for multiple choice questions */}
-                      {answer.answer_type === 'multiple_choice' && questions && (
+                      {/* Display question text for all answer types */}
+                      {questions && (
                         <QuestionText>
                           {(() => {
                             const question = questions.find(q => q.id === answer.question_id);
@@ -409,7 +409,11 @@ export default memo(function PostCard({
                               <Text variant="body" color="var(--grey-700)" fontWeight="medium">
                                 {question.question_text}
                               </Text>
-                            ) : null;
+                            ) : (
+                              <Text variant="body" color="var(--grey-500)" fontWeight="medium">
+                                질문 {answer.question_order || index + 1}
+                              </Text>
+                            );
                           })()} 
                         </QuestionText>
                       )}
@@ -448,21 +452,38 @@ export default memo(function PostCard({
                   <Text variant="body" color="var(--grey-600)">
                     {structuredAnswers.length}개 질문에 답변
                   </Text>
-                  {structuredAnswers.slice(0, 2).map((answer: any, index: number) => (
-                    <SummaryItem key={answer.question_id || index}>
-                      {answer.answer_text && (
-                        <Text variant="caption" color="var(--grey-700)">
-                          {answer.answer_text.replace(/<[^>]*>/g, '').substring(0, 50)}
-                          {answer.answer_text.length > 50 ? '...' : ''}
-                        </Text>
-                      )}
-                      {answer.selected_option && (
-                        <Text variant="caption" color="var(--primary-600)">
-                          선택: {answer.selected_option}
-                        </Text>
-                      )}
-                    </SummaryItem>
-                  ))}
+                  {structuredAnswers.slice(0, 2).map((answer: any, index: number) => {
+                    const question = questions?.find(q => q.id === answer.question_id);
+                    return (
+                      <SummaryItem key={answer.question_id || index}>
+                        {/* Show question text */}
+                        {question ? (
+                          <Text variant="caption" color="var(--grey-600)" fontWeight="medium">
+                            Q{index + 1}: {question.question_text.length > 40 
+                              ? `${question.question_text.substring(0, 40)}...` 
+                              : question.question_text}
+                          </Text>
+                        ) : (
+                          <Text variant="caption" color="var(--grey-500)" fontWeight="medium">
+                            질문 {answer.question_order || index + 1}
+                          </Text>
+                        )}
+                        
+                        {/* Show answer */}
+                        {answer.answer_text && (
+                          <Text variant="caption" color="var(--grey-700)">
+                            답변: {answer.answer_text.replace(/<[^>]*>/g, '').substring(0, 30)}
+                            {answer.answer_text.length > 30 ? '...' : ''}
+                          </Text>
+                        )}
+                        {answer.selected_option && (
+                          <Text variant="caption" color="var(--primary-600)">
+                            선택: {answer.selected_option}
+                          </Text>
+                        )}
+                      </SummaryItem>
+                    );
+                  })}
                   {structuredAnswers.length > 2 && (
                     <Text variant="caption" color="var(--grey-500)">
                       +{structuredAnswers.length - 2}개 더...
@@ -810,8 +831,11 @@ const AnswersSummary = styled.div`
 `;
 
 const SummaryItem = styled.div`
-  padding: 4px 0;
+  padding: 8px 0;
   border-bottom: 1px solid var(--grey-200);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   
   &:last-child {
     border-bottom: none;

@@ -113,29 +113,39 @@ export default function JourneyCard({ journey }: { journey: Journey }) {
 
 const Container = styled.div`
   width: 100%;
-  padding: 14px;
+  min-height: 120px;
+  padding: 16px;
   gap: 16px;
   justify-content: space-between;
-  border: 1px solid var(--grey-500);
+  border: 1px solid var(--grey-300);
   background: var(--white);
-  border-radius: 10px;
+  border-radius: 12px;
   align-items: center;
   display: flex;
   cursor: pointer;
-  transition: background 0.3s ease;
-  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
   &:hover {
-    background: var(--gray-100);
+    background: var(--grey-50);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border-color: var(--grey-400);
+    transform: translateY(-2px);
   }
 
   .menu-trigger {
     cursor: pointer;
-    padding: 6px;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--grey-500);
+    transition: all 0.2s ease;
 
     &:hover {
       background: var(--grey-200);
-      border-radius: 50%;
+      color: var(--grey-700);
     }
   }
 `;
@@ -143,20 +153,23 @@ const Container = styled.div`
 const InnerContainer = styled.div`
   justify-content: flex-start;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   display: flex;
+  flex: 1;
+  min-width: 0; /* 텍스트 overflow를 위해 필요 */
 `;
 
 const TextContainer = styled.div`
   flex-direction: column;
   justify-content: space-between;
   display: flex;
-  gap: 4px;
+  gap: 6px;
+  flex: 1;
+  min-width: 0; /* 텍스트 overflow를 위해 필요 */
 `;
 
 const DateContainer = styled.div`
-  height: 100%;
-  justify-content: space-between;
+  justify-content: flex-start;
   display: flex;
   flex-direction: column;
   gap: 4px;

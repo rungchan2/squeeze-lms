@@ -22,6 +22,9 @@ import {
 } from "@/utils/data/mission";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import QuestionBuilder from "@/components/mission/QuestionBuilder/QuestionBuilder";
+import BackButton from "@/components/common/BackButton";
+import Spinner from "@/components/common/Spinner";
+
 export default function NewMissionPage({ editMissionData }: { editMissionData?: Mission }) {
   const router = useRouter();
   const { role } = useSupabaseAuth();
@@ -224,6 +227,9 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
 
   return (
     <NewMissionPageContainer>
+      <div className="page-header">
+        <BackButton />
+      </div>
       <div className="input-container">
         <Heading level={3}>미션 {editMissionData ? "수정" : "생성"}</Heading>
         <InputAndTitle title="미션 이름" errorMessage={errors.name?.message}>
@@ -281,25 +287,38 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
         </InputAndTitle>
 
         <MissionCreationModeContainer>
-          <Text variant="body" fontWeight="bold">미션 생성 방식</Text>
+          <ModeHeaderContainer>
+            <Text variant="body" fontWeight="bold">미션 생성 방식</Text>
+            <HelpText variant="caption" color="var(--grey-600)">
+              미션의 복잡도에 따라 적절한 방식을 선택하세요
+            </HelpText>
+          </ModeHeaderContainer>
           <ModeToggleContainer>
             <ModeToggleButton 
               active={!useQuestionBuilder}
               onClick={() => setUseQuestionBuilder(false)}
             >
-              간단 모드
-              <Text variant="caption" color="var(--grey-600)">
-                기존 방식 (설명만)
-              </Text>
+              <ModeIconContainer>📝</ModeIconContainer>
+              <ModeTitle>간단 모드</ModeTitle>
+              <ModeDescription variant="caption">
+                텍스트 설명만으로 미션 생성
+              </ModeDescription>
+              <ModeFeatures variant="caption">
+                • 빠른 생성 • 자유 형식
+              </ModeFeatures>
             </ModeToggleButton>
             <ModeToggleButton 
               active={useQuestionBuilder}
               onClick={() => setUseQuestionBuilder(true)}
             >
-              고급 모드
-              <Text variant="caption" color="var(--grey-600)">
-                질문 빌더 사용
-              </Text>
+              <ModeIconContainer>🏗️</ModeIconContainer>
+              <ModeTitle>고급 모드</ModeTitle>
+              <ModeDescription variant="caption">
+                구조화된 질문으로 미션 생성
+              </ModeDescription>
+              <ModeFeatures variant="caption">
+                • 다양한 질문 타입 • 자동 채점
+              </ModeFeatures>
             </ModeToggleButton>
           </ModeToggleContainer>
         </MissionCreationModeContainer>
@@ -318,14 +337,35 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
           </InputAndTitle>
         ) : (
           <QuestionBuilderSection>
-            <Text variant="body" fontWeight="bold">질문 설정</Text>
-            <div style={{ marginBottom: '12px' }}>
-              <Text variant="caption" color="var(--grey-600)">
-                질문을 추가하여 구조화된 미션을 만들어보세요. 다양한 유형의 질문을 조합할 수 있습니다.
-              </Text>
-            </div>
+            <QuestionBuilderHeader>
+              <Text variant="body" fontWeight="bold">질문 설정</Text>
+              <QuestionBuilderHelpContainer>
+                <Text variant="caption" color="var(--grey-600)">
+                  질문을 추가하여 구조화된 미션을 만들어보세요. 다양한 유형의 질문을 조합할 수 있습니다.
+                </Text>
+                <QuestionTypeGuide>
+                  <GuideItem>
+                    <GuideIcon>📝</GuideIcon>
+                    <Text variant="caption" color="var(--grey-700)">주관식: 자유로운 텍스트 답변</Text>
+                  </GuideItem>
+                  <GuideItem>
+                    <GuideIcon>☑️</GuideIcon>
+                    <Text variant="caption" color="var(--grey-700)">객관식: 선택지 중 정답 선택</Text>
+                  </GuideItem>
+                  <GuideItem>
+                    <GuideIcon>🖼️</GuideIcon>
+                    <Text variant="caption" color="var(--grey-700)">이미지: 사진 업로드 답변</Text>
+                  </GuideItem>
+                  <GuideItem>
+                    <GuideIcon>🔄</GuideIcon>
+                    <Text variant="caption" color="var(--grey-700)">복합형: 텍스트 + 이미지</Text>
+                  </GuideItem>
+                </QuestionTypeGuide>
+              </QuestionBuilderHelpContainer>
+            </QuestionBuilderHeader>
             {isLoadingQuestions ? (
               <LoadingContainer>
+                <Spinner />
                 <Text>기존 질문을 불러오는 중...</Text>
               </LoadingContainer>
             ) : (
@@ -355,66 +395,153 @@ const NewMissionPageContainer = styled.div`
   justify-content: space-between;
   min-height: calc(100vh - 100px);
 
+  .page-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--grey-200);
+    
+    @media (max-width: 768px) {
+      padding: 12px;
+    }
+  }
+
   .input-container {
     display: flex;
     flex-direction: column;
     gap: 1rem;
     width: 100%;
+    padding: 0 16px;
+    
+    @media (max-width: 768px) {
+      padding: 0 12px;
+    }
   }
 `;
 
 const MissionCreationModeContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+`;
+
+const ModeHeaderContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const HelpText = styled(Text)`
+  font-style: italic;
 `;
 
 const ModeToggleContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  border: 1px solid var(--grey-200);
-  border-radius: 8px;
-  padding: 4px;
-  background: var(--grey-50);
+  gap: 12px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
 `;
 
 const ModeToggleButton = styled.button<{ active: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 12px 8px;
-  border: none;
-  border-radius: 6px;
+  gap: 8px;
+  padding: 20px 16px;
+  border: 2px solid ${props => props.active ? 'var(--primary-500)' : 'var(--grey-200)'};
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
-  background: ${props => props.active ? 'var(--primary-500)' : 'transparent'};
-  color: ${props => props.active ? 'white' : 'var(--grey-700)'};
+  background: ${props => props.active ? 'var(--primary-50)' : 'white'};
+  box-shadow: ${props => props.active ? '0 4px 12px rgba(59, 130, 246, 0.15)' : '0 2px 4px rgba(0, 0, 0, 0.05)'};
   
   &:hover {
-    background: ${props => props.active ? 'var(--primary-600)' : 'var(--grey-100)'};
+    border-color: ${props => props.active ? 'var(--primary-600)' : 'var(--primary-300)'};
+    transform: translateY(-2px);
+    box-shadow: ${props => props.active ? '0 6px 16px rgba(59, 130, 246, 0.2)' : '0 4px 8px rgba(0, 0, 0, 0.1)'};
   }
-  
-  > div:last-child {
-    color: ${props => props.active ? 'rgba(255,255,255,0.8)' : 'var(--grey-600)'};
-  }
+`;
+
+const ModeIconContainer = styled.div`
+  font-size: 32px;
+  margin-bottom: 4px;
+`;
+
+const ModeTitle = styled(Text)`
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--grey-900);
+  margin-bottom: 4px;
+`;
+
+const ModeDescription = styled(Text)`
+  color: var(--grey-600);
+  text-align: center;
+  margin-bottom: 8px;
+`;
+
+const ModeFeatures = styled(Text)`
+  color: var(--grey-500);
+  font-size: 12px;
+  text-align: center;
 `;
 
 const QuestionBuilderSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
-  border: 1px solid var(--grey-200);
+  gap: 20px;
+  padding: 20px;
+  border: 2px solid var(--primary-200);
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary-25) 0%, white 100%);
+`;
+
+const QuestionBuilderHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 8px;
+`;
+
+const QuestionBuilderHelpContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const QuestionTypeGuide = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const GuideItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: white;
   border-radius: 8px;
-  background: var(--grey-50);
+  border: 1px solid var(--grey-200);
+`;
+
+const GuideIcon = styled.span`
+  font-size: 16px;
+  min-width: 20px;
 `;
 
 const LoadingContainer = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 12px;
   padding: 40px;
   background: white;
   border-radius: 8px;

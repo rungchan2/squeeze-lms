@@ -4,7 +4,7 @@ import FileUpload from "@/components/FileUpload";
 import styled from "@emotion/styled";
 import { CreateJourney, createJourneySchema, Journey } from "@/types";
 import { deleteJourney, updateJourney, createJourney } from "@/utils/data/journey";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@chakra-ui/react";
 import InputAndTitle from "@/components/InputAndTitle";
@@ -14,6 +14,7 @@ import { toaster } from "@/components/ui/toaster";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import DatePicker from "@/components/DatePicker";
 
 interface CreateJourneyPageProps {
   initialData?: Journey;
@@ -27,6 +28,7 @@ export default function CreateJourneyPage({
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CreateJourney>({
     mode: "onChange",
@@ -115,10 +117,10 @@ export default function CreateJourneyPage({
           errorMessage={errors.image_url?.message}
         >
           <FileUpload
-            placeholder="클라스 이미지를 업로드하세요"
+            placeholder="클라스 이미지"
             initialFileUrl={watch("image_url")}
             initialFileId={watch("image_file_id")}
-            width="150px"
+            width="200px"
             height="150px"
             acceptedFileTypes={{ "image/*": [".jpeg", ".jpg", ".png", ".webp"] }}
             maxFiles={1}
@@ -134,12 +136,41 @@ export default function CreateJourneyPage({
         <InputAndTitle title="클라스 이름" errorMessage={errors.name?.message}>
           <Input {...register("name")} />
         </InputAndTitle>
-        <InputAndTitle title="시작일" errorMessage={errors.date_start?.message}>
-          <Input type="date" {...register("date_start")} />
-        </InputAndTitle>
-        <InputAndTitle title="종료일" errorMessage={errors.date_end?.message}>
-          <Input type="date" {...register("date_end")} />
-        </InputAndTitle>
+        <div className="date-container">
+          <InputAndTitle title="시작일" errorMessage={errors.date_start?.message}>
+            <Controller
+              name="date_start"
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  selected={field.value ? new Date(field.value) : null}
+                  onChange={(date) => {
+                    field.onChange(date ? date.toISOString().split('T')[0] : '');
+                  }}
+                  placeholder="시작일을 선택하세요"
+                  error={!!errors.date_start}
+                />
+              )}
+            />
+          </InputAndTitle>
+          <InputAndTitle title="종료일" errorMessage={errors.date_end?.message}>
+            <Controller
+              name="date_end"
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  selected={field.value ? new Date(field.value) : null}
+                  onChange={(date) => {
+                    field.onChange(date ? date.toISOString().split('T')[0] : '');
+                  }}
+                  placeholder="종료일을 선택하세요"
+                  minDate={watch("date_start") ? new Date(watch("date_start")) : undefined}
+                  error={!!errors.date_end}
+                />
+              )}
+            />
+          </InputAndTitle>
+        </div>
       </div>
       <Button
         type="submit"
@@ -177,5 +208,15 @@ const StyledContainer = styled.form`
     display: flex;
     flex-direction: column;
     gap: 20px;
+  }
+
+  .date-container {
+    display: flex;
+    gap: 16px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 20px;
+    }
   }
 `;
