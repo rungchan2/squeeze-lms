@@ -187,7 +187,6 @@ const ComponentsContainer = styled.div`
 
 const ComponentSection = styled.div`
   border-left: 3px solid var(--primary-200);
-  padding-left: 16px;
 `;
 
 const SectionTitle = styled.div`

@@ -84,8 +84,11 @@ export function useWeeks(journeyId: string) {
     () => fetcher(validJourneyId),
     {
       revalidateOnFocus: false,
-      dedupingInterval: 60000, // 1분 동안 중복 요청 방지
-      errorRetryCount: 3, // 최대 3번 재시도
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+      dedupingInterval: 300000, // 5분 동안 중복 요청 방지
+      errorRetryCount: 1, // 최대 1번 재시도
+      keepPreviousData: true,
       onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
         // 메시지 로깅
         

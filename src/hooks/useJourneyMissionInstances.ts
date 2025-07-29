@@ -68,13 +68,15 @@ export function useJourneyMissionInstances(
     swrKey,
     fetcher,
     {
-      revalidateOnFocus: false, // 포커스 시 재검증 비활성화 (성능 개선)
-      dedupingInterval: 30000, // 30초로 단축 (더 신선한 데이터)
+      revalidateOnFocus: false, // 포커스 시 재검증 비활성화
+      revalidateOnReconnect: false, // 재연결 시 재검증 비활성화
+      revalidateIfStale: false, // stale 데이터 재검증 비활성화
+      dedupingInterval: 300000, // 5분 동안 중복 요청 방지
       fallbackData: [], // 기본값 제공
-      revalidateOnMount: true, // 마운트 시 재검증
-      shouldRetryOnError: true,
-      errorRetryCount: 2, // 재시도 횟수 감소
-      errorRetryInterval: 500, // 재시도 간격 단축
+      revalidateOnMount: false, // 마운트 시 재검증 비활성화
+      shouldRetryOnError: false, // 에러 시 재시도 비활성화
+      errorRetryCount: 1, // 재시도 횟수 최소화
+      errorRetryInterval: 5000, // 재시도 간격
       keepPreviousData: true, // 이전 데이터 유지 (로딩 상태 개선)
       onError: (err) => {
         console.error("[useJourneyMissionInstances] 데이터 로딩 중 오류:", err);

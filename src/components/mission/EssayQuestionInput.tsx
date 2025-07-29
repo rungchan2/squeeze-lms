@@ -5,6 +5,7 @@ import styled from "@emotion/styled";
 import Tiptap from "@/components/richTextInput/RichTextEditor";
 import Text from "@/components/Text/Text";
 import { MissionQuestion } from "@/types";
+import RichTextViewer from "@/components/richTextInput/RichTextViewer";
 
 interface EssayQuestionInputProps {
   question: MissionQuestion;
@@ -41,9 +42,7 @@ export default function EssayQuestionInput({
       <QuestionHeader>
         <QuestionNumber>질문 {questionIndex + 1}</QuestionNumber>
         <QuestionText>
-          <Text variant="body" fontWeight="bold">
-            {question.question_text}
-          </Text>
+          <RichTextViewer content={question.question_text} />
         </QuestionText>
         {question.is_required && (
           <RequiredMark>
