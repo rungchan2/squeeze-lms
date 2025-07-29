@@ -9,7 +9,7 @@ import FeedTab from "./_feed/FeedTab";
 import DashboardTab from "./_dashboard/DashboardTab";
 import SettingTab from "./_setting/SettingTab";
 import NotificationTab from "@/app/(home)/_notification/NotificationTab";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { Suspense } from "react";
 import Spinner from "@/components/common/Spinner";
 import { getJourneyByUuidRetrieveId } from "@/utils/data/journey";
@@ -21,6 +21,19 @@ interface JourneyClientProps {
   slug: string;
   initialData?: any; // 서버에서 받은 여정 데이터
 }
+
+// Memoized Tab Content Wrapper
+const TabContentWrapper = memo(({ value, children }: { value: string; children: React.ReactNode }) => {
+  return (
+    <Tabs.Content value={value}>
+      <Suspense fallback={<Spinner />}>
+        {children}
+      </Suspense>
+    </Tabs.Content>
+  );
+});
+
+TabContentWrapper.displayName = 'TabContentWrapper';
 
 export default function JourneyClient({
   slug,
@@ -41,13 +54,14 @@ export default function JourneyClient({
 
   const currentTab = getCurrentTab();
 
-  // 탭 변경 핸들러
+  // 탭 변경 핸들러 - replace 사용으로 히스토리 스택 최적화
   const handleTabChange = useCallback((details: any) => {
     // Chakra UI Tabs의 onValueChange는 details 객체를 전달하므로 value를 추출
     const newTab = typeof details === 'string' ? details : details.value;
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.set("tab", newTab);
-    router.push(`/journey/${slug}?${params.toString()}`, { scroll: false });
+    // replace를 사용해서 히스토리 스택이 쌓이지 않도록 함
+    router.replace(`/journey/${slug}?${params.toString()}`, { scroll: false });
   }, [router, searchParams, slug]);
 
   // 페이지 진입 시 slug 설정 - 한 번만 실행
@@ -99,9 +113,10 @@ export default function JourneyClient({
       <Tabs.Root 
         value={currentTab} 
         onValueChange={handleTabChange}
-        key={slug} 
         variant="line" 
         width="100%"
+        lazyMount
+        unmountOnExit={false}
       >
         <Tabs.List width="100%" justifyContent="center">
           <Tabs.Trigger value="plan" {...triggerStyle}>
@@ -125,31 +140,21 @@ export default function JourneyClient({
             설정
           </Tabs.Trigger>
         </Tabs.List>
-        <Tabs.Content value="plan">
-          <Suspense fallback={<Spinner />}>
-            <PlanTab slug={slug} key={`plan-${slug}`} />
-          </Suspense>
-        </Tabs.Content>
-        <Tabs.Content value="dashboard">
-          <Suspense fallback={<Spinner />}>
-            <DashboardTab slug={slug} key={`dashboard-${slug}`} />
-          </Suspense>
-        </Tabs.Content>
-        <Tabs.Content value="notifications">
-          <Suspense fallback={<Spinner />}>
-            <NotificationTab key={`notifications-${slug}`} />
-          </Suspense>
-        </Tabs.Content>
-        <Tabs.Content value="feed">
-          <Suspense fallback={<Spinner />}>
-            <FeedTab slug={slug} key={`feed-${slug}`} />
-          </Suspense>
-        </Tabs.Content>
-        <Tabs.Content value="settings">
-          <Suspense fallback={<Spinner />}>
-            <SettingTab slug={slug} key={`settings-${slug}`} />
-          </Suspense>
-        </Tabs.Content>
+        <TabContentWrapper value="plan" key="plan-content">
+          <PlanTab slug={slug} />
+        </TabContentWrapper>
+        <TabContentWrapper value="dashboard" key="dashboard-content">
+          <DashboardTab slug={slug} />
+        </TabContentWrapper>
+        <TabContentWrapper value="notifications" key="notifications-content">
+          <NotificationTab />
+        </TabContentWrapper>
+        <TabContentWrapper value="feed" key="feed-content">
+          <FeedTab slug={slug} />
+        </TabContentWrapper>
+        <TabContentWrapper value="settings" key="settings-content">
+          <SettingTab slug={slug} />
+        </TabContentWrapper>
       </Tabs.Root>
     </PageContainer>
   );

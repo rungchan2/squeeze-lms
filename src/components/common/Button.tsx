@@ -7,17 +7,20 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   maxWidth?: number;
   isLoading?: boolean;
   disabled?: boolean;
+  style?: React.CSSProperties;
 };
 
 export default function Button(props: ButtonProps) {
-  const { className, variant, maxWidth, isLoading, disabled, ...rest } = props;
+  const { className, variant, maxWidth, isLoading, disabled, style, ...rest } = props;
   return (
-    <button
+    <button 
       disabled={isLoading || disabled}
       style={{
         backgroundColor: isLoading || disabled ? "var(--grey-500)" : undefined,
         cursor: isLoading || disabled ? "not-allowed" : "pointer",
         maxWidth: maxWidth ? `${maxWidth}px` : "100%",
+        width: "100%",
+        ...style,
       }}
       {...rest}
       className={`${styles.button} ${className || ""} ${

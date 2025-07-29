@@ -46,11 +46,9 @@ def main():
         else:
             # Default completion messages
             completion_messages = [
-                "작업이 완료되었습니다!",
-                "모든 작업이 완료되었습니다!",
-                "작업이 완료되었습니다!",
-                "작업이 완료되었습니다!",
-                "작업이 완료되었습니다!"
+                "스퀴즈 LMS의 작업이 완료되었습니다!",
+                "스퀴즈 LMS의 작업이 완료되었습니다!",
+                "스퀴즈 LMS의 작업이 완료되었습니다!",
             ]
             text = random.choice(completion_messages)
         

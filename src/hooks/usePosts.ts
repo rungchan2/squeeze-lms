@@ -186,7 +186,10 @@ export function usePosts(
         getPosts(key, pageIndex, pageSize, journeySlug, showHiddenParam, userId),
       {
         revalidateOnFocus: false,
-        dedupingInterval: 30000, // 30초 동안 중복 요청 방지
+        revalidateOnReconnect: false,
+        revalidateIfStale: false,
+        dedupingInterval: 60000, // 60초 동안 중복 요청 방지
+        keepPreviousData: true,
       }
     );
 
@@ -228,8 +231,11 @@ export function useCompletedMissions(userId: string, journeySlug?: string) {
     userId ? [`completed-missions-${userId}`, userId, journeySlug] : null,
     ([key, id, slug]) => getCompletedMissionIds(key, id, slug),
     {
-      revalidateOnFocus: true,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
       dedupingInterval: 5 * 60 * 1000, // 5분 동안 중복 요청 방지
+      keepPreviousData: true,
     }
   );
 

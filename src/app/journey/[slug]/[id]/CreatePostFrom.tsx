@@ -8,7 +8,6 @@ import Tiptap from "@/components/richTextInput/RichTextEditor";
 import Heading from "@/components/Text/Heading";
 import Text from "@/components/Text/Text";
 import styled from "@emotion/styled";
-import Button from "@/components/common/Button";
 import { useEffect, useState } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { createPost, updatePost } from "@/utils/data/posts";
@@ -27,7 +26,9 @@ import EssayQuestionInput from "@/components/mission/EssayQuestionInput";
 import MultipleChoiceInput from "@/components/mission/MultipleChoiceInput";
 import ImageUploadInput from "@/components/mission/ImageUploadInput";
 import MixedQuestionInput from "@/components/mission/MixedQuestionInput";
-import { AnyAnswer, AnswersData } from "@/types/missionQuestions";
+import { AnyAnswer } from "@/types/missionQuestions";
+import { FloatingButton } from "@/components/common/FloatingButton";
+import BottomSpacing from "@/components/common/BottomSpacing";
 
 type TeamMember = {
   label: string;
@@ -270,6 +271,30 @@ export default function DoMissionPage({
     if (updateData) {
       setContent(updateData.content || "");
       setTitle(updateData.title || "");
+      
+      // Load structured answers if available
+      if ((updateData as any).answers_data && typeof (updateData as any).answers_data === 'object') {
+        const answersData = (updateData as any).answers_data;
+        if (answersData.answers && Array.isArray(answersData.answers)) {
+          setStructuredAnswers(answersData.answers);
+          
+          // Set validation state for existing answers
+          answersData.answers.forEach((answer: AnyAnswer) => {
+            const hasValidAnswer = 
+              (answer.answer_type === 'essay' && answer.answer_text) ||
+              (answer.answer_type === 'multiple_choice' && answer.selected_option) ||
+              (answer.answer_type === 'image_upload' && answer.image_urls && answer.image_urls.length > 0) ||
+              (answer.answer_type === 'mixed' && (answer.answer_text || (answer.image_urls && answer.image_urls.length > 0)));
+            
+            if (hasValidAnswer) {
+              setQuestionValidations(prev => ({
+                ...prev,
+                [answer.question_id]: true
+              }));
+            }
+          });
+        }
+      }
     }
   }, [updateData]);
 
@@ -318,6 +343,16 @@ export default function DoMissionPage({
   const handleSubmit = async (
     missionInstance: JourneyMissionInstanceWithMission
   ) => {
+    // Title validation
+    if (!title.trim()) {
+      toaster.create({
+        title: "미션 제목을 입력해주세요.",
+        description: "본인의 이름을 포함하면 더 좋습니다.",
+        type: "warning",
+      });
+      return;
+    }
+
     // Enhanced validation for different mission types
     if (isModernMission) {
       const unansweredQuestions = questions?.filter(q => 
@@ -460,25 +495,74 @@ export default function DoMissionPage({
   const handleUpdate = async (e: React.MouseEvent) => {
     e.preventDefault(); // 폼 기본 제출 동작 방지
 
-    if (!content.trim()) {
+    // Title validation
+    if (!title.trim()) {
       toaster.create({
-        title: "미션 내용을 입력해주세요.",
+        title: "미션 제목을 입력해주세요.",
         type: "warning",
       });
       return;
     }
 
+    // Validation based on mission type
+    if (isModernMission) {
+      const unansweredQuestions = questions?.filter(q => 
+        q.is_required && !questionValidations[q.id]
+      ) || [];
+      
+      if (unansweredQuestions.length > 0) {
+        const questionNumbers = unansweredQuestions.map((q, index) => 
+          questions?.findIndex(question => question.id === q.id) + 1
+        ).join(', ');
+        
+        toaster.create({
+          title: "필수 질문에 답변이 필요합니다.",
+          description: `질문 ${questionNumbers}번에 답변해주세요.`,
+          type: "warning",
+        });
+        return;
+      }
+    } else {
+      if (!content.trim()) {
+        toaster.create({
+          title: "미션 내용을 입력해주세요.",
+          type: "warning",
+        });
+        return;
+      }
+    }
+
     try {
       setIsSubmitting(true);
 
-      const { error } = await updatePost(
-        {
-          content: content,
-          title: title,
-          user_id: userId,
-        },
-        updateDataId || ""
-      );
+      // Prepare update data based on mission type
+      const updatePayload: any = {
+        title: title,
+        user_id: userId,
+      };
+
+      if (isModernMission) {
+        updatePayload.content = ""; // Clear legacy content for modern missions
+        updatePayload.answers_data = {
+          answers: structuredAnswers,
+          submission_metadata: {
+            total_questions: questions?.length || 0,
+            answered_questions: structuredAnswers.length,
+            submission_time: new Date().toISOString(),
+            auto_graded: false,
+            manual_review_required: true,
+          }
+        };
+        updatePayload.total_questions = questions?.length || 0;
+        updatePayload.answered_questions = structuredAnswers.length;
+        updatePayload.completion_rate = questions?.length ? 
+          (structuredAnswers.length / questions.length) * 100 : 0;
+      } else {
+        updatePayload.content = content;
+      }
+
+      const { error } = await updatePost(updatePayload, updateDataId || "");
+      
       if (error) {
         console.error("미션 수정 오류:", error);
         toaster.create({
@@ -501,8 +585,12 @@ export default function DoMissionPage({
 
       toaster.create({
         title: "미션이 성공적으로 수정되었습니다!",
+        description: isModernMission ? 
+          `${structuredAnswers.length}개 질문에 대한 답변이 수정되었습니다.` :
+          "답변이 성공적으로 수정되었습니다.",
         type: "success",
       });
+      
       // 캐시 무효화를 위해 페이지 새로고침
       if (!slug) {
         router.back();
@@ -599,7 +687,7 @@ export default function DoMissionPage({
           <ProgressSection>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Text variant="caption" color="var(--grey-600)">
-                진행률: {calculateProgress()}%
+                진행률: {calculateProgress().toFixed(0)}%
               </Text>
               <AutoSaveStatus>
                 {isAutoSaving ? (
@@ -619,9 +707,7 @@ export default function DoMissionPage({
         <InputAndTitle
           title="미션 제목"
           errorMessage={
-            title.length === 0
-              ? "미션 제목을 입력해주세요. (본인의 이름을 포함하면 더 좋습니다)"
-              : title.length > 100
+            title.length > 100
               ? "제목이 너무 깁니다. 100자 이내로 작성해주세요."
               : ""
           }
@@ -697,19 +783,22 @@ export default function DoMissionPage({
       </div>
       {/* 팀 미션인 경우 팀원 선택 컴포넌트 추가 */}
       
-      <div className="button-container">
-        <Button
-          variant="flat"
-          onClick={
-            updateData
-              ? handleUpdate
-              : () => handleSubmit(missionInstance as any)
+      <BottomSpacing />
+      
+      <FloatingButton
+        onClick={() => {
+          if (updateData) {
+            // Create a mock event for handleUpdate
+            const mockEvent = { preventDefault: () => {} } as React.MouseEvent;
+            handleUpdate(mockEvent);
+          } else {
+            handleSubmit(missionInstance as any);
           }
-          disabled={isSubmitting || title.length === 0 || title.length > 100 || (isModernMission && !areAllRequiredQuestionsAnswered())}
-        >
+        }}
+        position="center"
+      >
           {isSubmitting ? <Spinner /> : updateData ? "수정완료" : "제출"}
-        </Button>
-      </div>
+      </FloatingButton>
     </MissionContainer>
   );
 }
@@ -719,8 +808,6 @@ const MissionContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
-  justify-content: space-between;
-  height: calc(100dvh - 100px);
   max-width: var(--breakpoint-tablet);
   margin: 0 auto;
   .mission-container {
@@ -733,10 +820,6 @@ const MissionContainer = styled.div`
     display: flex;
     flex-direction: column;
     gap: 8px;
-  }
-
-  .button-container {
-    margin-top: 16px;
   }
 `;
 
