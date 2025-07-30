@@ -271,3 +271,6 @@ await deleteFile(fileId, userId)
 - Added support for different question types and response formats
 - Implemented enhanced metadata storage for mission-related questions
 - Improved data integrity and validation for mission question entries
+
+### Context Maintenance
+- If you have to followup the most recent chat history to maintain context up-to-date, read @logs/user_prompt_submit.json for userinput prompt and @logs/chat.json for chat logs

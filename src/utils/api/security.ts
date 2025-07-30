@@ -9,6 +9,12 @@ const getAllowedOrigins = (): string[] => {
   // Add production URL if available
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     origins.push(process.env.NEXT_PUBLIC_SITE_URL);
+    
+    // Also add www version if not already included
+    const url = new URL(process.env.NEXT_PUBLIC_SITE_URL);
+    if (!url.hostname.startsWith('www.')) {
+      origins.push(`${url.protocol}//www.${url.hostname}`);
+    }
   }
   
   // Add development origins

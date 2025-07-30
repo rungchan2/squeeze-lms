@@ -42,6 +42,7 @@ async function getPosts(
       ),
       journey_mission_instances!mission_instance_id (
         id,
+        journey_week_id,
         missions (
           id, name, description, points, mission_type
         )

@@ -475,7 +475,6 @@ const DashboardTabContainer = styled.div`
 const SectionContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 
   .section-title {
     margin-bottom: 0.5rem;

@@ -15,7 +15,7 @@ import Spinner from "@/components/common/Spinner";
 import { getJourneyByUuidRetrieveId } from "@/utils/data/journey";
 import { Tabs } from "@chakra-ui/react";
 import styled from "@emotion/styled";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface JourneyClientProps {
   slug: string;
@@ -40,29 +40,46 @@ export default function JourneyClient({
   initialData,
 }: JourneyClientProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isInitialized, setIsInitialized] = useState(false);
+  const [currentTab, setCurrentTab] = useState("plan");
 
-  // URL 파라미터로부터 현재 탭 값 결정
-  const getCurrentTab = () => {
-    const tab = searchParams.get("tab");
-    if (tab && ["plan", "mission", "dashboard", "notifications", "feed", "settings"].includes(tab)) {
-      return tab;
+  // 해시로부터 현재 탭 값 결정
+  const getCurrentTabFromHash = useCallback(() => {
+    if (typeof window === 'undefined') return "plan";
+    
+    const hash = window.location.hash.replace('#', '');
+    if (hash && ["plan", "mission", "dashboard", "notifications", "feed", "settings"].includes(hash)) {
+      return hash;
     }
     return "plan";
-  };
+  }, []);
 
-  const currentTab = getCurrentTab();
+  // 컴포넌트 마운트 시 해시에서 탭 설정
+  useEffect(() => {
+    const tabFromHash = getCurrentTabFromHash();
+    setCurrentTab(tabFromHash);
+  }, [getCurrentTabFromHash]);
 
-  // 탭 변경 핸들러 - replace 사용으로 히스토리 스택 최적화
+  // 해시 변경 리스너 (브라우저 뒤로가기/앞으로가기 대응)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const tabFromHash = getCurrentTabFromHash();
+      setCurrentTab(tabFromHash);
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [getCurrentTabFromHash]);
+
+  // 탭 변경 핸들러 - 해시 기반으로 변경
   const handleTabChange = useCallback((details: any) => {
     // Chakra UI Tabs의 onValueChange는 details 객체를 전달하므로 value를 추출
     const newTab = typeof details === 'string' ? details : details.value;
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("tab", newTab);
-    // replace를 사용해서 히스토리 스택이 쌓이지 않도록 함
-    router.replace(`/journey/${slug}?${params.toString()}`, { scroll: false });
-  }, [router, searchParams, slug]);
+    
+    // 해시를 변경하여 탭 전환 (페이지 리렌더링 없음)
+    window.location.hash = newTab;
+    setCurrentTab(newTab);
+  }, []);
 
   // 페이지 진입 시 slug 설정 - 한 번만 실행
   useEffect(() => {
