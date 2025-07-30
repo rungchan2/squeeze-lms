@@ -7,6 +7,7 @@ import Text from "@/components/Text/Text";
 import BulkUserCreationModal from "./BulkUserCreationModal";
 import styled from "@emotion/styled";
 import { Modal } from "@/components/modal/Modal";
+import { createClient } from "@/utils/supabase/client";
 
 // 사용자 상세 정보 모달 컴포넌트
 const UserDetailModal = ({ 
@@ -109,6 +110,7 @@ export default function UserManagement() {
   const [roleFilter, setRoleFilter] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [isUpdatingRole, setIsUpdatingRole] = useState<string | null>(null);
   
   const { users, isLoading, loadMore, isLoadingMore, isReachingEnd, total, mutate } = useAllUsers(20);
   const observerRef = useRef<HTMLDivElement>(null);
@@ -201,6 +203,32 @@ export default function UserManagement() {
 
   const handleRefresh = () => {
     mutate();
+  };
+
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    setIsUpdatingRole(userId);
+    
+    try {
+      const supabase = createClient();
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', userId);
+
+      if (error) {
+        console.error('Error updating role:', error);
+        alert(`권한 변경에 실패했습니다: ${error.message}`);
+      } else {
+        alert('사용자 권한이 성공적으로 변경되었습니다.');
+        mutate(); // Refresh user list
+      }
+    } catch (error) {
+      console.error('Error changing role:', error);
+      alert('권한 변경 중 오류가 발생했습니다.');
+    } finally {
+      setIsUpdatingRole(null);
+    }
   };
 
   return (
@@ -382,9 +410,27 @@ export default function UserManagement() {
                   </OrganizationCell>
                 </Table.Cell>
                 <Table.Cell>
-                  <Badge colorScheme={getRoleColor(user.role || 'user')} variant="subtle" size="sm">
-                    {getRoleLabel(user.role || 'user')}
-                  </Badge>
+                  <select
+                    value={user.role || 'user'}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleRoleChange(user.id, e.target.value);
+                    }}
+                    disabled={isUpdatingRole === user.id}
+                    style={{
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid var(--grey-300)',
+                      fontSize: '14px',
+                      backgroundColor: isUpdatingRole === user.id ? 'var(--grey-100)' : 'white',
+                      cursor: isUpdatingRole === user.id ? 'not-allowed' : 'pointer'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <option value="user">학생</option>
+                    <option value="teacher">교사</option>
+                    <option value="admin">관리자</option>
+                  </select>
                 </Table.Cell>
                 <Table.Cell>
                   <DateCell>

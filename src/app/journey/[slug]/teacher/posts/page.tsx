@@ -5,7 +5,7 @@ import { Table, Input, Stack } from "@chakra-ui/react";
 import { Tabs } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { FaRegTrashAlt, FaSearch, FaEye, FaFileAlt, FaUsers, FaChartBar } from "react-icons/fa";
+import { FaRegTrashAlt, FaSearch, FaEye, FaFileAlt } from "react-icons/fa";
 import { LuRefreshCw } from "react-icons/lu";
 import { HiOutlineDocumentDownload } from "react-icons/hi";
 import { ImBooks } from "react-icons/im";
@@ -20,7 +20,6 @@ import Text from "@/components/Text/Text";
 import { usePosts } from "@/hooks/usePosts";
 import { useWeeks } from "@/hooks/useWeeks";
 import { useJourneyMissionInstances } from "@/hooks/useJourneyMissionInstances";
-import { useJourneyBySlug } from "@/hooks/useJourneyBySlug";
 import { PostWithRelations } from "@/types";
 import AnswersViewer from "@/components/common/AnswersViewer";
 import { exportPostsToExcel } from "@/utils/excel/exportPosts";
@@ -58,7 +57,7 @@ export default function TeacherPostsPage() {
   const [selectedWeekId, setSelectedWeekId] = useState<string>("");
   const [searchTitle, setSearchTitle] = useState<string>("");
 
-  // usePosts 훅 사용
+  // usePosts 훅 사용 - slug를 사용
   const {
     data: allPosts,
     error,
@@ -70,14 +69,11 @@ export default function TeacherPostsPage() {
     total: totalPosts,
   } = usePosts(10, slug as string, true);
 
-  // useWeeks 훅 사용
+  // useWeeks 훅 사용 - slug를 사용
   const { weeks = [], isLoading: weeksLoading = false } = useWeeks(slug as string) || {};
 
   // useJourneyMissionInstances 훅 사용 (주차 필터링을 위해)
   const { missionInstances = [], isLoading: missionInstancesLoading = false } = useJourneyMissionInstances(slug as string) || {};
-
-  // useJourneyBySlug 훅 사용 (여정 정보 가져오기)
-  const { journey, isLoading: journeyLoading } = useJourneyBySlug(slug as string);
 
   // 학생 목록 추출 (memoized)
   const studentOptions = useMemo(() => {
@@ -120,19 +116,11 @@ export default function TeacherPostsPage() {
       );
     }
 
-    // 주차 필터 적용 (mission_instance_id를 통해 필터링)
+    // 주차 필터 적용 (journey_week_id를 통해 직접 필터링)
     if (selectedWeekId) {
-      // 선택된 주차에 속한 mission instance들의 ID 목록 가져오기
-      const weekMissionInstanceIds = missionInstances
-        .filter(instance => instance.journey_week_id === selectedWeekId)
-        .map(instance => instance.id);
-      
       filtered = filtered.filter((post: PostWithRelations) => {
-        // PostWithRelations에서 mission_instance_id는 mission 객체이므로 원본 post에서 가져와야 함
-        const missionInstanceId = (post as any).mission_instance_id;
-        return typeof missionInstanceId === 'string' 
-          ? weekMissionInstanceIds.includes(missionInstanceId)
-          : false;
+        // PostWithRelations에서 journey_mission_instances.journey_week_id를 통해 필터링
+        return post.journey_mission_instances?.journey_week_id === selectedWeekId;
       });
     }
 
@@ -144,7 +132,7 @@ export default function TeacherPostsPage() {
     }
 
     return filtered;
-  }, [allPosts, selectedStudentId, selectedWeekId, searchTitle, missionInstances]);
+  }, [allPosts, selectedStudentId, selectedWeekId, searchTitle]);
 
   // 통계 데이터 계산
   const postsStats = useMemo(() => {
@@ -211,7 +199,7 @@ export default function TeacherPostsPage() {
   };
 
   const handleExportToExcel = () => {
-    if (!journey || !weeks || !missionInstances) {
+    if (!weeks || !missionInstances) {
       toaster.create({
         title: "데이터를 불러오는 중입니다. 잠시 후 다시 시도해주세요.",
         type: "error",
@@ -222,7 +210,7 @@ export default function TeacherPostsPage() {
     try {
       const filename = exportPostsToExcel({
         posts: filteredPosts,
-        journeyName: journey.name,
+        journeyName: slug as string,
         weeks: weekOptions,
         missionInstances: missionInstances,
       });
@@ -307,7 +295,7 @@ export default function TeacherPostsPage() {
               <Button
                 variant="outline"
                 onClick={handleExportToExcel}
-                disabled={journeyLoading || !journey || filteredPosts.length === 0}
+                disabled={filteredPosts.length === 0}
                 style={{ width: "fit-content" }}
               >
                 <HiOutlineDocumentDownload />

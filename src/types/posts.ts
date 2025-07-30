@@ -75,6 +75,7 @@ export const userWithOrganizationSchema = pickedUserSchema.extend({
 
 const journeyMissionInstanceWithMissionSchema = z.object({
   id: z.string().uuid(),
+  journey_week_id: z.string().uuid(),
   missions: pickedMissionSchema,
 }).nullable().optional();
 
