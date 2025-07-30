@@ -213,7 +213,7 @@ export default function UserManagement() {
       
       const { error } = await supabase
         .from('profiles')
-        .update({ role: newRole })
+        .update({ role: newRole as "user" | "teacher" | "admin" })
         .eq('id', userId);
 
       if (error) {
