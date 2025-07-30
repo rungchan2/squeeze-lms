@@ -91,6 +91,8 @@ const StyledInput = styled.input<{ error?: boolean; disabled?: boolean }>`
 `;
 
 const StyledDatePickerWrapper = styled.div`
+  background-color: #fff;
+  z-index: 9999;
   position: relative;
   width: 100%;
 
@@ -111,7 +113,7 @@ const StyledDatePickerWrapper = styled.div`
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
       font-family: inherit;
-      background: var(--background);
+      background: #fff;
       border: 1px solid var(--border-subtle);
       
       &::before {

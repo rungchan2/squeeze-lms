@@ -274,3 +274,10 @@ await deleteFile(fileId, userId)
 
 ### Context Maintenance
 - If you have to followup the most recent chat history to maintain context up-to-date, read @logs/user_prompt_submit.json for userinput prompt and @logs/chat.json for chat logs
+
+### Supabase Monitoring & Management
+- **Supabase MCP Integration**:
+  - Use supabase-monster MCP to modify database, storage, or database policies
+  - Inspect and implicate MCP usage for user-requested actions
+  - Project ID: `egptutozdfchliouephl`
+  - Always verify if a specific database or storage action requires MCP intervention
