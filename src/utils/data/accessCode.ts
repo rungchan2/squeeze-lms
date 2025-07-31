@@ -1,40 +1,119 @@
 import { createClient } from "../supabase/client";
 import { Role } from "@/types";
-const supabase = createClient();
 
+export async function getAllAccessCodes() {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("role_access_code")
+    .select("*")
+    .order('created_at', { ascending: false });
+  
+  return { data, error };
+}
+
+export async function getAccessCode(id: string) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("role_access_code")
+    .select("*")
+    .eq("id", id)
+    .single();
+  
+  return { data, error };
+}
+
+export async function createAccessCode(accessCodeData: {
+  code: string;
+  role: Role;
+  expiry_date?: string;
+}) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("role_access_code")
+    .insert([accessCodeData])
+    .select("*")
+    .single();
+  
+  return { data, error };
+}
+
+export async function updateAccessCode(id: string, updates: {
+  code?: string;
+  role?: Role;
+  expiry_date?: string;
+}) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("role_access_code")
+    .update(updates)
+    .eq("id", id)
+    .select("*")
+    .single();
+  
+  return { data, error };
+}
+
+export async function deleteAccessCode(id: string) {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("role_access_code")
+    .delete()
+    .eq("id", id);
+  
+  return { data: null, error };
+}
+
+export async function confirmAccessCode(code: string, role?: Role) {
+  const supabase = createClient();
+  const trimmedCode = code.trim();
+  
+  let query = supabase
+    .from("role_access_code")
+    .select("*")
+    .eq("code", trimmedCode);
+  
+  if (role) {
+    query = query.eq("role", role);
+  }
+  
+  const { data, error } = await query.single();
+  
+  if (error) {
+    return { isValid: false, accessCode: undefined, error };
+  }
+  
+  return { isValid: true, accessCode: data, error: null };
+}
+
+export async function toggleAccessCodeExpiry(id: string, expiryDate: string | null) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("role_access_code")
+    .update({ expiry_date: expiryDate })
+    .eq("id", id)
+    .select("*")
+    .single();
+  
+  return { data, error };
+}
+
+export async function getAccessCodeByCode(code: string) {
+  const supabase = createClient();
+  const trimmedCode = code.trim();
+  const { data, error } = await supabase
+    .from("role_access_code")
+    .select("*")
+    .eq("code", trimmedCode)
+    .single();
+  
+  return { data, error };
+}
+
+// 기존 호환성을 위한 레거시 익스포트
 export const accessCode = {
-  async getAllAccessCodes() {
-    const { data, error } = await supabase.from("role_access_code").select("*");
-
-    if (error) throw error;
-    return data;
-  },
-  async createAccessCode(code: string, roleId: string) {
-    const { data, error } = await supabase
-      .from("role_access_code")
-      .insert([{ code, role: roleId as Role }]);
-
-    if (error) throw error;
-    return data;
-  },
-  async deleteAccessCode(id: string) {
-    const { error } = await supabase
-      .from("role_access_code")
-      .delete()
-      .eq("id", id);
-
-    if (error) throw error;
-    return true;
-  },
-  async confirmAccessCode(code: string, role: Role) {
-    const trimedCode = code.trim();
-    const { data, error } = await supabase
-      .from("role_access_code")
-      .select("*")
-      .eq("code", trimedCode)
-      .eq("role", role)
-      .single();
-    if (error) throw error;
-    return { data, error };
-  },
+  getAllAccessCodes,
+  createAccessCode: (code: string, roleId: string) => 
+    createAccessCode({ code, role: roleId as Role }),
+  deleteAccessCode,
+  confirmAccessCode
 };

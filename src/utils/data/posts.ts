@@ -223,7 +223,147 @@ export async function getJourenyPosts(journeyId: string) {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("posts")
-    .select("* mission_instance_id(*)")
+    .select("*, mission_instance_id(*)")
     .eq("journey_id", journeyId);
   return { data, error };
+}
+
+// 페이지네이션된 게시물 조회 (메인 피드용)
+export async function getPosts({ 
+  pageIndex = 0, 
+  pageSize = 10,
+  journeySlug, 
+  includeTeacher = false 
+}: { 
+  pageIndex?: number;
+  pageSize?: number;
+  journeySlug?: string;
+  includeTeacher?: boolean;
+}): Promise<PostsResponse> {
+  const supabase = createClient();
+  const from = pageIndex * pageSize;
+  const to = from + pageSize - 1;
+  
+  let query = supabase
+    .from("posts")
+    .select(`
+      *,
+      profiles (
+        id, first_name, last_name, organization_id, profile_image,
+        organizations (
+          id, name
+        )
+      )
+    `, { count: 'exact' })
+    .order("created_at", { ascending: false });
+    
+  // 숨겨진 게시물 제외
+  query = query.eq("is_hidden", false);
+  
+  // journeySlug가 제공된 경우 해당 journey의 게시물만 필터링
+  if (journeySlug && journeySlug !== 'all') {
+    // mission_instance_id를 통해 journey와 연결
+    const { data: missionInstances } = await supabase
+      .from("journey_mission_instances")
+      .select("id")
+      .eq("journey_id", journeySlug);
+    
+    if (missionInstances && missionInstances.length > 0) {
+      const instanceIds = missionInstances.map(instance => instance.id);
+      query = query.in("mission_instance_id", instanceIds);
+    } else {
+      // 해당 journey에 대한 mission instance가 없으면 빈 결과 반환
+      return {
+        data: [],
+        nextPage: null,
+        total: 0
+      };
+    }
+  }
+    
+  const { data, error, count } = await query.range(from, to);
+    
+  if (error) throw error;
+  
+  const hasNextPage = count ? from + pageSize < count : false;
+  const nextPage = hasNextPage ? pageIndex + 1 : null;
+  
+  return {
+    data: data as Post[],
+    nextPage,
+    total: count ?? 0
+  };
+}
+
+// 내 게시물 조회
+export async function getMyPosts(userId: string) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .select(`
+      *,
+      profiles (
+        id, first_name, last_name, organization_id, profile_image,
+        organizations (
+          id, name
+        )
+      )
+    `)
+    .eq("user_id", userId)
+    .eq("is_hidden", false)
+    .order("created_at", { ascending: false });
+  return { data, error };
+}
+
+// 좋아요한 게시물 조회
+export async function getMyLikedPosts(userId: string) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("likes")
+    .select(`
+      posts!inner (
+        *,
+        profiles (
+          id, first_name, last_name, organization_id, profile_image,
+          organizations (
+            id, name
+          )
+        )
+      )
+    `)
+    .eq("user_id", userId)
+    .eq("posts.is_hidden", false)
+    .order("created_at", { ascending: false });
+  
+  // likes 테이블에서 조회한 결과를 posts 형태로 변환
+  const transformedData = data?.map(like => (like as any).posts) || [];
+  
+  return { data: transformedData, error };
+}
+
+// 완료된 미션 조회
+export async function getCompletedMissions(userId: string, journeySlug: string) {
+  const supabase = createClient();
+  
+  // 해당 journey에서 사용자가 제출한 게시물의 mission_instance_id 조회
+  const { data: posts, error } = await supabase
+    .from("posts")
+    .select(`
+      mission_instance_id,
+      journey_mission_instances!inner (
+        id,
+        mission_id
+      )
+    `)
+    .eq("user_id", userId)
+    .eq("journey_mission_instances.journey_id", journeySlug);
+  
+  if (error) throw error;
+  
+  // mission_id 목록 반환
+  const completedMissionIds = posts
+    ?.map(post => (post as any).journey_mission_instances?.mission_id)
+    .filter(Boolean) || [];
+  
+  return { data: completedMissionIds, error: null };
 } 

@@ -1,177 +1,80 @@
+import { Dialog, Portal, CloseButton } from "@chakra-ui/react";
 import styled from "@emotion/styled";
-import { FaTimes } from "react-icons/fa";
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import Heading from "@/components/Text/Heading";
 
 interface ModalProps {
   children: React.ReactNode;
   isOpen: boolean;
   onClose: () => void;
   title?: string;
+  maxWidth?: string;
 }
 
-export function Modal({ children, isOpen, onClose, title }: ModalProps) {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const [isFadeOut, setIsFadeOut] = useState(false);
-  const handleOnClose = () => {
-    setIsFadeOut(true);
-  };
-
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-      handleOnClose();
-    }
-  };
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Escape") {
-      handleOnClose();
-    }
-  };
-
-  const handleAnimationEnd = () => {
-    if (isFadeOut) {
-      onClose();
-      setIsFadeOut(false);
-    }
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      window.addEventListener("keydown", handleKeyDown);
-    } else {
-      window.removeEventListener("keydown", handleKeyDown);
-    }
-  }, [isOpen, handleKeyDown]);
-  
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('modal-open');
-    } else {
-      document.body.classList.remove('modal-open');
-    }
-    
-    return () => {
-      document.body.classList.remove('modal-open');
-    };
-  }, [isOpen]);
-  
-  if (!isOpen) return null;
-
-  return createPortal(
-    <StyledModal
-      className={`${isFadeOut ? "fade-out" : "fade-in"}`}
-      onClick={handleOverlayClick}
-      onAnimationEnd={handleAnimationEnd}
+export function Modal({ children, isOpen, onClose, title, maxWidth = "650px" }: ModalProps) {
+  return (
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={(e) => !e.open && onClose()}
+      size="md"
+      placement="center"
+      motionPreset="scale"
     >
-      <div className="modal-body" ref={modalRef}>
-        <div className="modal-content">
-          {title && (
-            <div className="modal-header">
-              <Heading level={4}>{title}</Heading>
-            </div>
-          )}
-          <div className="modal-scroll-container">
-            {children}
-          </div>
-          <div className="modal-close" onClick={handleOnClose}>
-            <FaTimes />
-          </div>
-        </div>
-      </div>
-    </StyledModal>,
-    document.body
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <StyledDialogContent maxWidth={maxWidth}>
+            {title && (
+              <Dialog.Header>
+                <Dialog.Title>{title}</Dialog.Title>
+              </Dialog.Header>
+            )}
+            <Dialog.Body>
+              {children}
+            </Dialog.Body>
+            <Dialog.CloseTrigger asChild>
+              <CloseButton size="sm" />
+            </Dialog.CloseTrigger>
+          </StyledDialogContent>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   );
 }
 
-const StyledModal = styled.div`
-  @keyframes fade-out {
-    from {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
+const StyledDialogContent = styled(Dialog.Content)`
+  /* 기존 스타일과 유사하게 오버라이드 */
+  background-color: var(--white);
+  border-radius: 10px;
+  padding: 12px 0;
+  width: 90%;
+  max-width: ${({ maxWidth }) => maxWidth};
+  max-height: 90vh;
+  position: relative;
+  
+  /* Dialog.Header 스타일 */
+  & > header {
+    margin-bottom: 16px;
+  }
+  
+  /* Dialog.Body 스타일 */
+  & > div[data-part="body"] {
+    overflow-y: auto;
+    max-height: calc(90vh - 120px); /* 헤더와 패딩 고려 */
+    padding-right: 8px;
+    
+    /* 스크롤바 숨기기 */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    
+    /* Chrome, Safari, Opera에서 스크롤바 숨기기 */
+    &::-webkit-scrollbar {
+      display: none;
     }
   }
-
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  &.fade-out {
-    animation: fade-out 0.3s ease-in-out forwards;
-  }
-
-  &.fade-in {
-    animation: fade-in 0.3s ease-in-out forwards;
-  }
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100dvw;
-  height: 100dvh;
-  z-index: 1000;
-  background-color: rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-
-  .modal-body {
+  
+  /* CloseButton 위치 조정 */
+  & > button[data-part="close-trigger"] {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 450px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-
-    .modal-content {
-      position: relative;
-      background-color: var(--white);
-      border-radius: 10px;
-      padding: 32px 24px;
-      display: flex;
-      flex-direction: column;
-      max-height: 90vh;
-      
-      .modal-header {
-        margin-bottom: 16px;
-      }
-      
-      .modal-scroll-container {
-        overflow-y: auto;
-        max-height: calc(90vh - 64px); /* 패딩 고려 */
-        padding-right: 8px; /* 스크롤바 공간 확보 */
-        
-        /* 스크롤바 숨기기 */
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none; /* IE and Edge */
-        
-        /* Chrome, Safari, Opera에서 스크롤바 숨기기 */
-        &::-webkit-scrollbar {
-          display: none;
-        }
-      }
-
-      .modal-close {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        cursor: pointer;
-        padding: 4px;
-        z-index: 10;
-
-        &:hover {
-          background-color: var(--grey-100);
-          border-radius: 50%;
-        }
-      }
-    }
+    top: 10px;
+    right: 10px;
   }
 `;

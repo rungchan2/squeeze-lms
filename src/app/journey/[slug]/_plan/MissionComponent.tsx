@@ -440,7 +440,11 @@ export default function MissionComponent({
       </Modal>
 
       {/* 날짜 입력 모달 */}
-      <Modal isOpen={showDateModal} onClose={() => setShowDateModal(false)}>
+      <Modal 
+      isOpen={showDateModal} 
+      onClose={() => setShowDateModal(false)}
+      maxWidth="450px"
+      >
         <DateModalContainer onSubmit={handleConfirmAddMission}>
           <Heading level={4}>미션 일정 설정</Heading>
           <div className="date-inputs">
@@ -596,9 +600,10 @@ const ShowSearchContainer = styled.div`
 const DateModalContainer = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
   width: 100%;
   max-width: 400px;
+  justify-content: center;
 
   .date-inputs {
     display: flex;

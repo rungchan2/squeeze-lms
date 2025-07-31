@@ -42,7 +42,7 @@ export async function addLike({ postId, userId }: LikeParams): Promise<void> {
     const supabase = createClient();
     const { error } = await supabase
       .from("likes")
-      .insert([{ post_id: postId}]);
+      .insert([{ post_id: postId, user_id: userId }]);
 
     if (error) {
       throw error;

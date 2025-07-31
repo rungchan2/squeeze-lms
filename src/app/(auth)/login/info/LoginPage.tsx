@@ -389,24 +389,24 @@ export default function LoginPage() {
             variant="flat"
             disabled={!roleAccessCode}
             onClick={async () => {
-              const { data, error } = await accessCode.confirmAccessCode(
+              const { isValid, accessCode: accessCodeData, error } = await accessCode.confirmAccessCode(
                 roleAccessCode,
                 roleAccessType.value as Role
               );
 
-              if (error || !data) {
+              if (error || !isValid || !accessCodeData) {
                 toaster.create({
                   title: "권한 인증 실패",
                   type: "error",
                 });
-              } else if (data) {
-                setConfirmedRoleType(data.role as Role);
-                setValue("role", data.role as Role);
+              } else if (accessCodeData) {
+                setConfirmedRoleType(accessCodeData.role as Role);
+                setValue("role", accessCodeData.role as Role);
                 toaster.create({
                   title: "권한 인증 성공",
                   type: "success",
                 });
-                setValue("role", data.role as Role);
+                setValue("role", accessCodeData.role as Role);
                 setIsModalOpen(false);
                 setRoleAccessCode("");
               }

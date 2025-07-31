@@ -71,9 +71,9 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
     const fetchJourneyList = async () => {
       try {
         const journeyList = await getJourney(id);
-        setJourneyList(journeyList as UserJourneyWithJourney[]);
+        setJourneyList(journeyList as unknown as UserJourneyWithJourney[]);
       } catch (error) {
-        console.error("Error fetching journey list:", error);
+        console.error("Error fetching journey list:", error instanceof Error ? error.message : error);
         setJourneyList([]);
       }
     };

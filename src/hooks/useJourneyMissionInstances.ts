@@ -69,11 +69,10 @@ export function useJourneyMissionInstances(
     fetcher,
     {
       revalidateOnFocus: false, // 포커스 시 재검증 비활성화
-      revalidateOnReconnect: false, // 재연결 시 재검증 비활성화
-      revalidateIfStale: false, // stale 데이터 재검증 비활성화
-      dedupingInterval: 300000, // 5분 동안 중복 요청 방지
-      fallbackData: [], // 기본값 제공
-      revalidateOnMount: false, // 마운트 시 재검증 비활성화
+      revalidateOnReconnect: true, // 재연결 시 재검증 활성화
+      revalidateIfStale: true, // stale 데이터 재검증 활성화
+      dedupingInterval: 60000, // 1분 동안 중복 요청 방지
+      revalidateOnMount: true, // 마운트 시 재검증 활성화
       shouldRetryOnError: false, // 에러 시 재시도 비활성화
       errorRetryCount: 1, // 재시도 횟수 최소화
       errorRetryInterval: 5000, // 재시도 간격
@@ -88,9 +87,21 @@ export function useJourneyMissionInstances(
     missionInstances: missionInstances || [],
     isLoading,
     error,
-    createMissionInstance: (instanceData: CreateJourneyMissionInstance) => createMissionInstance(instanceData, mutate),
-    updateMissionInstance: (id: string, instanceData: UpdateJourneyMissionInstance) => updateMissionInstance(id, instanceData, mutate),
-    deleteMissionInstance: (id: string) => deleteMissionInstance(id, mutate),
+    createMissionInstance: async (instanceData: CreateJourneyMissionInstance) => {
+      const result = await createMissionInstance(instanceData);
+      mutate();
+      return result;
+    },
+    updateMissionInstance: async (id: string, instanceData: UpdateJourneyMissionInstance) => {
+      const result = await updateMissionInstance(id, instanceData);
+      mutate();
+      return result;
+    },
+    deleteMissionInstance: async (id: string) => {
+      const result = await deleteMissionInstance(id);
+      mutate();
+      return result;
+    },
     getMissionInstanceById: (id: string) => getMissionInstanceById(id),
     mutate,
   };
