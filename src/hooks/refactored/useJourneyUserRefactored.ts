@@ -4,6 +4,16 @@ import {
   createMutation
 } from '../base/useSupabaseQuery';
 import { useSupabaseAuth } from '../useSupabaseAuth';
+import {
+  getJourneyUsers,
+  getCurrentUserJourneys,
+  getUserJourneyStatus,
+  addUserToJourney,
+  removeUserFromJourney,
+  updateUserRole,
+  addMultipleUsersToJourney,
+  inviteUserByEmail
+} from '@/utils/data/userJourney';
 
 interface UserJourney {
   id: string;
@@ -22,9 +32,7 @@ interface UserJourney {
   };
   journeys?: {
     id: string;
-    title: string;
-    slug: string;
-    description?: string;
+    name: string;
   };
 }
 
@@ -32,26 +40,9 @@ interface UserJourney {
 export function useJourneyUsersRefactored(journeyId: string | null) {
   return useSupabaseQuery<UserJourney[]>(
     journeyId ? createCacheKey('journey-users', { journeyId }) : null,
-    async (supabase) => {
+    async () => {
       if (!journeyId) return [];
-
-      const { data, error } = await supabase
-        .from('user_journeys')
-        .select(`
-          *,
-          profiles (
-            id,
-            first_name,
-            last_name,
-            profile_image,
-            email
-          )
-        `)
-        .eq('journey_id', journeyId)
-        .order('joined_at', { ascending: false });
-
-      if (error) throw error;
-      return (data || []) as UserJourney[];
+      return await getJourneyUsers(journeyId);
     },
     {
       dedupingInterval: 60000, // 1분 동안 중복 요청 방지
@@ -65,25 +56,9 @@ export function useCurrentUserJourneysRefactored() {
 
   return useSupabaseQuery<UserJourney[]>(
     userId ? createCacheKey('current-user-journeys', { userId }) : null,
-    async (supabase) => {
+    async () => {
       if (!userId) return [];
-
-      const { data, error } = await supabase
-        .from('user_journeys')
-        .select(`
-          *,
-          journeys (
-            id,
-            title,
-            slug,
-            description
-          )
-        `)
-        .eq('user_id', userId)
-        .order('joined_at', { ascending: false });
-
-      if (error) throw error;
-      return (data || []) as UserJourney[];
+      return await getCurrentUserJourneys(userId);
     },
     {
       dedupingInterval: 60000, // 1분 동안 중복 요청 방지
@@ -99,33 +74,9 @@ export function useUserJourneyStatusRefactored(journeyId: string | null) {
     journeyId && userId 
       ? createCacheKey('user-journey-status', { journeyId, userId })
       : null,
-    async (supabase) => {
+    async () => {
       if (!journeyId || !userId) return null;
-
-      const { data, error } = await supabase
-        .from('user_journeys')
-        .select(`
-          *,
-          profiles (
-            id,
-            first_name,
-            last_name,
-            profile_image,
-            email
-          ),
-          journeys (
-            id,
-            title,
-            slug,
-            description
-          )
-        `)
-        .eq('journey_id', journeyId)
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data as UserJourney | null;
+      return await getUserJourneyStatus(journeyId, userId);
     }
   );
 }
@@ -134,33 +85,12 @@ export function useUserJourneyStatusRefactored(journeyId: string | null) {
 export function useJourneyUserActionsRefactored() {
 
   // 사용자를 여정에 추가
-  const addUserToJourney = createMutation<
+  const addUserToJourneyMutation = createMutation<
     UserJourney,
     { userId: string; journeyId: string; role?: 'participant' | 'teacher' | 'admin' }
   >(
-    async (supabase, { userId, journeyId, role = 'participant' }) => {
-      const { data, error } = await supabase
-        .from('user_journeys')
-        .insert({
-          user_id: userId,
-          journey_id: journeyId,
-          role_in_journey: role,
-          joined_at: new Date().toISOString(),
-        })
-        .select(`
-          *,
-          profiles (
-            id,
-            first_name,
-            last_name,
-            profile_image,
-            email
-          )
-        `)
-        .single();
-
-      if (error) throw error;
-      return data as UserJourney;
+    async ({ userId, journeyId, role = 'participant' }) => {
+      return await addUserToJourney({ userId, journeyId, role });
     },
     {
       revalidateKeys: ['journey-users', 'current-user-journeys', 'user-journey-status'],
@@ -168,19 +98,12 @@ export function useJourneyUserActionsRefactored() {
   );
 
   // 여정에서 사용자 제거
-  const removeUserFromJourney = createMutation<
+  const removeUserFromJourneyMutation = createMutation<
     boolean,
     { userId: string; journeyId: string }
   >(
-    async (supabase, { userId, journeyId }) => {
-      const { error } = await supabase
-        .from('user_journeys')
-        .delete()
-        .eq('user_id', userId)
-        .eq('journey_id', journeyId);
-
-      if (error) throw error;
-      return true;
+    async ({ userId, journeyId }) => {
+      return await removeUserFromJourney(userId, journeyId);
     },
     {
       revalidateKeys: ['journey-users', 'current-user-journeys', 'user-journey-status'],
@@ -188,33 +111,12 @@ export function useJourneyUserActionsRefactored() {
   );
 
   // 사용자의 여정 내 역할 변경
-  const updateUserRole = createMutation<
+  const updateUserRoleMutation = createMutation<
     UserJourney,
     { userId: string; journeyId: string; newRole: 'participant' | 'teacher' | 'admin' }
   >(
-    async (supabase, { userId, journeyId, newRole }) => {
-      const { data, error } = await supabase
-        .from('user_journeys')
-        .update({ 
-          role_in_journey: newRole,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId)
-        .eq('journey_id', journeyId)
-        .select(`
-          *,
-          profiles (
-            id,
-            first_name,
-            last_name,
-            profile_image,
-            email
-          )
-        `)
-        .single();
-
-      if (error) throw error;
-      return data as UserJourney;
+    async ({ userId, journeyId, newRole }) => {
+      return await updateUserRole({ userId, journeyId, newRole });
     },
     {
       revalidateKeys: ['journey-users', 'user-journey-status'],
@@ -222,34 +124,12 @@ export function useJourneyUserActionsRefactored() {
   );
 
   // 여러 사용자를 한 번에 여정에 추가
-  const addMultipleUsersToJourney = createMutation<
+  const addMultipleUsersToJourneyMutation = createMutation<
     UserJourney[],
     { userIds: string[]; journeyId: string; role?: 'participant' | 'teacher' | 'admin' }
   >(
-    async (supabase, { userIds, journeyId, role = 'participant' }) => {
-      const insertData = userIds.map(userId => ({
-        user_id: userId,
-        journey_id: journeyId,
-        role_in_journey: role,
-        joined_at: new Date().toISOString(),
-      }));
-
-      const { data, error } = await supabase
-        .from('user_journeys')
-        .insert(insertData)
-        .select(`
-          *,
-          profiles (
-            id,
-            first_name,
-            last_name,
-            profile_image,
-            email
-          )
-        `);
-
-      if (error) throw error;
-      return (data || []) as UserJourney[];
+    async ({ userIds, journeyId, role = 'participant' }) => {
+      return await addMultipleUsersToJourney({ userIds, journeyId, role });
     },
     {
       revalidateKeys: ['journey-users', 'current-user-journeys'],
@@ -257,10 +137,10 @@ export function useJourneyUserActionsRefactored() {
   );
 
   return {
-    addUserToJourney,
-    removeUserFromJourney,
-    updateUserRole,
-    addMultipleUsersToJourney,
+    addUserToJourney: addUserToJourneyMutation,
+    removeUserFromJourney: removeUserFromJourneyMutation,
+    updateUserRole: updateUserRoleMutation,
+    addMultipleUsersToJourney: addMultipleUsersToJourneyMutation,
   };
 }
 
@@ -318,48 +198,13 @@ export function useJourneyPermissionsRefactored(journeyId: string | null) {
 export function useJourneyInvitationsRefactored(journeyId: string | null) {
   
   // 이메일로 사용자 초대
-  const inviteUserByEmail = createMutation<
+  const inviteUserByEmailMutation = createMutation<
     boolean,
     { email: string; role?: 'participant' | 'teacher' | 'admin' }
   >(
-    async (supabase, { email, role = 'participant' }) => {
+    async ({ email, role = 'participant' }) => {
       if (!journeyId) throw new Error('Journey ID is required');
-
-      // 이메일로 사용자 찾기
-      const { data: user, error: userError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', email)
-        .single();
-
-      if (userError || !user) {
-        throw new Error('사용자를 찾을 수 없습니다.');
-      }
-
-      // 이미 참여 중인지 확인
-      const { data: existingMembership } = await supabase
-        .from('user_journeys')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('journey_id', journeyId)
-        .maybeSingle();
-
-      if (existingMembership) {
-        throw new Error('이미 여정에 참여 중인 사용자입니다.');
-      }
-
-      // 사용자를 여정에 추가
-      const { error: insertError } = await supabase
-        .from('user_journeys')
-        .insert({
-          user_id: user.id,
-          journey_id: journeyId,
-          role_in_journey: role,
-          joined_at: new Date().toISOString(),
-        });
-
-      if (insertError) throw insertError;
-      return true;
+      return await inviteUserByEmail({ email, journeyId, role });
     },
     {
       revalidateKeys: ['journey-users'],
@@ -367,6 +212,6 @@ export function useJourneyInvitationsRefactored(journeyId: string | null) {
   );
 
   return {
-    inviteUserByEmail,
+    inviteUserByEmail: inviteUserByEmailMutation,
   };
 }
