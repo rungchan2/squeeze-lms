@@ -35,7 +35,7 @@ type Option = {
 
 export default function SettingTab({ slug }: { slug: string }) {
   const { accessCodes } = useAccessCode();
-  const filterAccessCodes = accessCodes?.filter(
+  const filterAccessCodes = accessCodes?.data?.filter(
     (code) => code.role === "teacher"
   );
   const options: Option[] = [

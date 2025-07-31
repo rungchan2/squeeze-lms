@@ -1,11 +1,14 @@
-import { useCallback, useMemo } from 'react';
 import useSWR, { SWRConfiguration, mutate as globalMutate } from 'swr';
 import useSWRInfinite, { SWRInfiniteConfiguration } from 'swr/infinite';
-import { createClient } from '@/utils/supabase/client';
-import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database.types';
 
-// 공통 타입 정의
+// 데이터베이스 타입들
+export type DatabaseTables = Database['public']['Tables'];
+export type DatabaseRow<T extends keyof DatabaseTables> = DatabaseTables[T]['Row'];
+export type DatabaseInsert<T extends keyof DatabaseTables> = DatabaseTables[T]['Insert'];
+export type DatabaseUpdate<T extends keyof DatabaseTables> = DatabaseTables[T]['Update'];
+
+// 공통 응답 타입
 export interface QueryError {
   message: string;
   code?: string;
@@ -29,16 +32,6 @@ export const defaultSWRConfig: SWRConfiguration = {
   errorRetryInterval: 5000,
 };
 
-// Supabase 클라이언트 싱글톤
-let supabaseClient: SupabaseClient<Database> | null = null;
-
-export function getSupabaseClient() {
-  if (!supabaseClient) {
-    supabaseClient = createClient();
-  }
-  return supabaseClient;
-}
-
 // 캐시 키 생성 유틸리티
 export function createCacheKey(base: string, params?: Record<string, any>): string {
   if (!params) return base;
@@ -55,17 +48,15 @@ export function createCacheKey(base: string, params?: Record<string, any>): stri
   return `${base}:${JSON.stringify(sortedParams)}`;
 }
 
-// 기본 쿼리 훅
+// 기본 쿼리 훅 - utils/data 함수들과 함께 사용
 export function useSupabaseQuery<T>(
   key: string | null,
-  fetcher: (supabase: SupabaseClient<Database>) => Promise<T>,
+  fetcher: () => Promise<T>,
   config?: SWRConfiguration
 ) {
-  const supabase = useMemo(() => getSupabaseClient(), []);
-  
-  const wrappedFetcher = useCallback(async () => {
+  const wrappedFetcher = async () => {
     try {
-      return await fetcher(supabase);
+      return await fetcher();
     } catch (error: any) {
       throw {
         message: error.message || 'An error occurred',
@@ -73,7 +64,7 @@ export function useSupabaseQuery<T>(
         details: error.details,
       } as QueryError;
     }
-  }, [fetcher, supabase]);
+  };
 
   const result = useSWR<T, QueryError>(
     key,
@@ -90,34 +81,24 @@ export function useSupabaseQuery<T>(
   };
 }
 
-// 페이지네이션 훅
+// 페이지네이션 훅 - utils/data 함수들과 함께 사용
 export function useSupabaseInfiniteQuery<T>(
   getKey: (pageIndex: number, previousPageData: PaginatedResponse<T> | null) => string | null,
-  fetcher: (
-    supabase: SupabaseClient<Database>,
-    pageIndex: number,
-    pageSize: number,
-    key: string
-  ) => Promise<PaginatedResponse<T>>,
+  fetcher: (pageIndex: number, pageSize: number) => Promise<PaginatedResponse<T>>,
   pageSize = 10,
   config?: SWRInfiniteConfiguration
 ) {
-  const supabase = useMemo(() => getSupabaseClient(), []);
-  
-  const wrappedFetcher = useCallback(
-    async (key: string, pageIndex: number) => {
-      try {
-        return await fetcher(supabase, pageIndex, pageSize, key);
-      } catch (error: any) {
-        throw {
-          message: error.message || 'An error occurred',
-          code: error.code,
-          details: error.details,
-        } as QueryError;
-      }
-    },
-    [fetcher, supabase, pageSize]
-  );
+  const wrappedFetcher = async (key: string, pageIndex: number) => {
+    try {
+      return await fetcher(pageIndex, pageSize);
+    } catch (error: any) {
+      throw {
+        message: error.message || 'An error occurred',
+        code: error.code,
+        details: error.details,
+      } as QueryError;
+    }
+  };
 
   const result = useSWRInfinite<PaginatedResponse<T>, QueryError>(
     getKey,
@@ -130,11 +111,7 @@ export function useSupabaseInfiniteQuery<T>(
     }
   );
 
-  const data = useMemo(() => {
-    if (!result.data) return [];
-    return result.data.flatMap(page => page.data);
-  }, [result.data]);
-
+  const data = result.data ? result.data.flatMap(page => page.data) : [];
   const total = result.data?.[0]?.total ?? 0;
   const hasNextPage = result.data 
     ? result.data[result.data.length - 1]?.nextPage !== null 
@@ -151,41 +128,44 @@ export function useSupabaseInfiniteQuery<T>(
   };
 }
 
-// 뮤테이션 헬퍼
-export function createMutation<T, P>(
-  mutationFn: (supabase: SupabaseClient<Database>, params: P) => Promise<T>,
+// 뮤테이션 헬퍼 - utils/data 함수들과 함께 사용
+export function createMutation<T, P = void>(
+  mutationFn: (params: P) => Promise<T>,
   options?: {
     onSuccess?: (data: T) => void;
     onError?: (error: QueryError) => void;
     revalidateKeys?: string[];
   }
 ) {
-  return async (params: P) => {
-    const supabase = getSupabaseClient();
-    
-    try {
-      const result = await mutationFn(supabase, params);
-      
-      // 성공 시 관련 캐시 무효화
-      if (options?.revalidateKeys) {
-        await Promise.all(
-          options.revalidateKeys.map(key => 
-            globalMutate((k) => typeof k === 'string' && k.startsWith(key))
-          )
-        );
+  return {
+    mutate: async (params: P): Promise<T> => {
+      try {
+        const result = await mutationFn(params);
+        
+        // 성공 시 관련 캐시 무효화
+        if (options?.revalidateKeys) {
+          await Promise.all(
+            options.revalidateKeys.map(key => 
+              globalMutate((k) => typeof k === 'string' && k.startsWith(key))
+            )
+          );
+        }
+        
+        options?.onSuccess?.(result);
+        return result;
+      } catch (error: any) {
+        const queryError: QueryError = {
+          message: error.message || 'Mutation failed',
+          code: error.code,
+          details: error.details,
+        };
+        
+        options?.onError?.(queryError);
+        throw queryError;
       }
-      
-      options?.onSuccess?.(result);
-      return result;
-    } catch (error: any) {
-      const queryError: QueryError = {
-        message: error.message || 'Mutation failed',
-        code: error.code,
-        details: error.details,
-      };
-      
-      options?.onError?.(queryError);
-      throw queryError;
+    },
+    mutateAsync: async (params: P): Promise<T> => {
+      return await mutationFn(params);
     }
   };
 }

@@ -1,238 +1,244 @@
-import { 
-  useSupabaseQuery, 
-  useSupabaseInfiniteQuery,
+import {
+  useSupabaseQuery,
   createCacheKey,
   createMutation,
-  PaginatedResponse 
+  PaginatedResponse,
+  useSupabaseInfiniteQuery
 } from '../base/useSupabaseQuery';
-import { Profile } from '@/types';
+import { useSupabaseAuth } from '../useSupabaseAuth';
+import { User, CreateUser, SignupPage } from '@/types';
+import {
+  getSession,
+  getUser,
+  getOrganizationUsersByPage,
+  getAllUsersByPage,
+  getUserById,
+  getUserProfile,
+  deleteProfile,
+  deleteUser,
+  updateProfile,
+  updatePassword,
+  createProfile,
+  getProfileImage
+} from '@/utils/data/user';
 
-interface UserWithOrganization extends Profile {
-  organizations?: {
-    id: string;
-    name: string;
-  };
-}
-
-// 단일 사용자 조회 훅
-export function useUserRefactored(userId: string | null) {
-  const result = useSupabaseQuery<UserWithOrganization>(
-    userId ? `user:${userId}` : null,
-    async (supabase) => {
-      if (!userId) throw new Error('User ID is required');
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select(`
-          *,
-          organizations (
-            id,
-            name
-          )
-        `)
-        .eq('id', userId)
-        .single();
-
-      if (error) throw error;
-      return data as UserWithOrganization;
+// 현재 사용자 세션 조회 훅
+export function useSessionRefactored() {
+  return useSupabaseQuery(
+    createCacheKey('session'),
+    async () => {
+      const result = await getSession();
+      if (result.error) throw result.error;
+      return result.session;
     },
     {
-      dedupingInterval: 30000, // 30초
+      dedupingInterval: 60000, // 1분 동안 중복 요청 방지
     }
   );
+}
 
-  // 사용자 업데이트 함수
-  const updateUser = createMutation<Profile, { userId: string; updates: Partial<Profile> }>(
-    async (supabase, { userId, updates }) => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', userId)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data as Profile;
+// 현재 사용자 정보 조회 훅
+export function useUserRefactored() {
+  return useSupabaseQuery(
+    createCacheKey('user'),
+    async () => {
+      const result = await getUser();
+      if (result.error) throw result.error;
+      return result.user;
     },
     {
-      revalidateKeys: [`user:${userId}`, 'users'],
+      dedupingInterval: 60000, // 1분 동안 중복 요청 방지
     }
   );
-
-  return {
-    user: result.data,
-    error: result.error,
-    isLoading: result.isLoading,
-    mutate: result.refetch,
-    updateUser,
-  };
 }
 
-// 모든 사용자 무한 스크롤 훅
-export function useAllUsersRefactored(pageSize = 10) {
-  const getKey = (pageIndex: number, previousPageData: PaginatedResponse<UserWithOrganization> | null) => {
-    if (previousPageData === null || previousPageData.nextPage !== null) {
-      return createCacheKey('all-users', { page: pageIndex, size: pageSize });
-    }
-    return null;
-  };
-
-  const result = useSupabaseInfiniteQuery<UserWithOrganization>(
-    getKey,
-    async (supabase, pageIndex, pageSize) => {
-      const from = pageIndex * pageSize;
-      const to = from + pageSize - 1;
-
-      const { data, error, count } = await supabase
-        .from('profiles')
-        .select(`
-          *,
-          organizations (
-            id,
-            name
-          )
-        `, { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      if (error) throw error;
-
-      const hasNextPage = count ? from + pageSize < count : false;
-      const nextPage = hasNextPage ? pageIndex + 1 : null;
-
-      return {
-        data: (data || []) as UserWithOrganization[],
-        nextPage,
-        total: count ?? 0,
-      };
-    },
-    pageSize
-  );
-
-  return {
-    users: result.data,
-    error: result.error,
-    isLoading: result.isLoading,
-    isValidating: result.isValidating,
-    loadMore: result.loadMore,
-    isLoadingMore: result.isLoadingMore,
-    isReachingEnd: !result.hasNextPage,
-    total: result.total,
-    size: result.size,
-    setSize: result.setSize,
-    mutate: result.refetch,
-  };
-}
-
-// 조직별 사용자 무한 스크롤 훅
+// 조직 사용자들 페이지네이션 조회 훅
 export function useOrganizationUsersRefactored(
   organizationId: string | null,
   pageSize = 10
 ) {
-  const getKey = (pageIndex: number, previousPageData: PaginatedResponse<UserWithOrganization> | null) => {
+  const getKey = (pageIndex: number, previousPageData: PaginatedResponse<User> | null) => {
     if (!organizationId) return null;
     
     if (previousPageData === null || previousPageData.nextPage !== null) {
-      return createCacheKey('org-users', { 
-        orgId: organizationId, 
-        page: pageIndex, 
+      return createCacheKey('organization-users', { 
+        organizationId, 
+        page: pageIndex,
         size: pageSize 
       });
     }
     return null;
   };
 
-  const result = useSupabaseInfiniteQuery<UserWithOrganization>(
+  return useSupabaseInfiniteQuery<User>(
     getKey,
-    async (supabase, pageIndex, pageSize) => {
+    async (pageIndex, pageSize) => {
       if (!organizationId) throw new Error('Organization ID is required');
 
-      const from = pageIndex * pageSize;
-      const to = from + pageSize - 1;
-
-      const { data, error, count } = await supabase
-        .from('profiles')
-        .select(`
-          *,
-          organizations!inner (
-            id,
-            name
-          )
-        `, { count: 'exact' })
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      if (error) throw error;
-
-      const hasNextPage = count ? from + pageSize < count : false;
+      const result = await getOrganizationUsersByPage(organizationId, pageIndex, pageSize);
+      
+      const hasNextPage = result.count === pageSize;
       const nextPage = hasNextPage ? pageIndex + 1 : null;
 
       return {
-        data: (data || []) as UserWithOrganization[],
+        data: result.data,
         nextPage,
-        total: count ?? 0,
+        total: result.count
       };
     },
     pageSize
   );
+}
+
+// 전체 사용자 페이지네이션 조회 훅
+export function useAllUsersRefactored(pageSize = 10) {
+  const getKey = (pageIndex: number, previousPageData: PaginatedResponse<User> | null) => {
+    if (previousPageData === null || previousPageData.nextPage !== null) {
+      return createCacheKey('all-users', { 
+        page: pageIndex,
+        size: pageSize 
+      });
+    }
+    return null;
+  };
+
+  return useSupabaseInfiniteQuery<User>(
+    getKey,
+    async (pageIndex, pageSize) => {
+      const result = await getAllUsersByPage(pageIndex, pageSize);
+      
+      const hasNextPage = result.count === pageSize;
+      const nextPage = hasNextPage ? pageIndex + 1 : null;
+
+      return {
+        data: result.data,
+        nextPage,
+        total: result.count
+      };
+    },
+    pageSize
+  );
+}
+
+// 단일 사용자 조회 훅
+export function useUserByIdRefactored(userId: string | null) {
+  return useSupabaseQuery<User>(
+    userId ? createCacheKey('user-by-id', { userId }) : null,
+    async () => {
+      if (!userId) throw new Error('User ID is required');
+      
+      const result = await getUserById(userId);
+      return result;
+    }
+  );
+}
+
+// 현재 사용자 프로필 조회 훅
+export function useUserProfileRefactored() {
+  return useSupabaseQuery<User>(
+    createCacheKey('user-profile'),
+    async () => {
+      const result = await getUserProfile();
+      if (result.error) throw result.error;
+      return result.profile as User;
+    },
+    {
+      dedupingInterval: 30000, // 30초 동안 중복 요청 방지
+    }
+  );
+}
+
+// 사용자 프로필 이미지 조회 훅
+export function useProfileImageRefactored(userId: string | null) {
+  return useSupabaseQuery<string | null>(
+    userId ? createCacheKey('profile-image', { userId }) : null,
+    async () => {
+      if (!userId) return null;
+      
+      const result = await getProfileImage(userId);
+      return result;
+    },
+    {
+      dedupingInterval: 300000, // 5분 동안 중복 요청 방지 (이미지는 자주 변경되지 않음)
+    }
+  );
+}
+
+// 사용자 CRUD 액션들
+export function useUserActionsRefactored() {
+  // 프로필 생성
+  const createProfileMutation = createMutation<void, SignupPage>(
+    async (profileData) => {
+      const result = await createProfile(profileData);
+      if (result.error) throw result.error;
+    },
+    {
+      revalidateKeys: ['user-profile', 'organization-users', 'all-users']
+    }
+  );
+
+  // 프로필 업데이트
+  const updateProfileMutation = createMutation<void, { id: string; data: any }>(
+    async ({ id, data }) => {
+      const result = await updateProfile(id, data);
+      if (result.error) throw result.error;
+    },
+    {
+      revalidateKeys: ['user-profile', 'user-by-id', 'organization-users', 'all-users', 'profile-image']
+    }
+  );
+
+  // 비밀번호 변경
+  const updatePasswordMutation = createMutation<void, string>(
+    async (newPassword) => {
+      const result = await updatePassword(newPassword);
+      if (result.error) throw result.error;
+    }
+  );
+
+  // 프로필 삭제
+  const deleteProfileMutation = createMutation<void, string>(
+    async (uid) => {
+      const result = await deleteProfile(uid);
+      if (result.error) throw result.error;
+    },
+    {
+      revalidateKeys: ['organization-users', 'all-users']
+    }
+  );
+
+  // 사용자 삭제 (관리자용)
+  const deleteUserMutation = createMutation<void, string>(
+    async (uid) => {
+      const result = await deleteUser(uid);
+      if (result.error) throw result.error;
+    },
+    {
+      revalidateKeys: ['organization-users', 'all-users']
+    }
+  );
 
   return {
-    users: result.data,
-    error: result.error,
-    isLoading: result.isLoading,
-    isValidating: result.isValidating,
-    loadMore: result.loadMore,
-    isLoadingMore: result.isLoadingMore,
-    isReachingEnd: !result.hasNextPage,
-    total: result.total,
-    size: result.size,
-    setSize: result.setSize,
-    mutate: result.refetch,
+    createProfile: createProfileMutation,
+    updateProfile: updateProfileMutation,
+    updatePassword: updatePasswordMutation,
+    deleteProfile: deleteProfileMutation,
+    deleteUser: deleteUserMutation
   };
 }
 
-// 사용자 검색 훅
-export function useUserSearchRefactored(searchTerm: string, filters?: {
-  role?: string;
-  organizationId?: string;
-}) {
-  const key = searchTerm ? createCacheKey('user-search', { search: searchTerm, ...filters }) : null;
+// 편의 함수들
+export function useUpdateProfileRefactored() {
+  const actions = useUserActionsRefactored();
+  return actions.updateProfile;
+}
 
-  return useSupabaseQuery<UserWithOrganization[]>(
-    key,
-    async (supabase) => {
-      let query = supabase
-        .from('profiles')
-        .select(`
-          *,
-          organizations (
-            id,
-            name
-          )
-        `);
+export function useUpdatePasswordRefactored() {
+  const actions = useUserActionsRefactored();
+  return actions.updatePassword;
+}
 
-      // 검색어 적용
-      if (searchTerm) {
-        query = query.or(
-          `email.ilike.%${searchTerm}%,first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`
-        );
-      }
-
-      // 필터 적용
-      if (filters?.role) {
-        query = query.eq('role', filters.role);
-      }
-      if (filters?.organizationId) {
-        query = query.eq('organization_id', filters.organizationId);
-      }
-
-      const { data, error } = await query
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-      return (data || []) as UserWithOrganization[];
-    }
-  );
+export function useCreateProfileRefactored() {
+  const actions = useUserActionsRefactored();
+  return actions.createProfile;
 }

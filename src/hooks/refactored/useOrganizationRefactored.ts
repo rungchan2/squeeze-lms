@@ -1,185 +1,129 @@
-import { useSupabaseCRUD } from '../base/useSupabaseCRUD';
-import { useSupabaseQuery, createMutation } from '../base/useSupabaseQuery';
+import {
+  useSupabaseQuery,
+  createCacheKey,
+  createMutation
+} from '../base/useSupabaseQuery';
 import { Organization } from '@/types';
+import {
+  getOrganizations,
+  getOrganizationById,
+  getPublicOrganizations,
+  createOrganization,
+  updateOrganization,
+  deleteOrganization
+} from '@/utils/data/organization';
 
-// 조직 목록 조회 훅 (스퀴즈 조직 제외)
-export function useOrganizationListRefactored() {
+// 전체 조직 목록 조회 훅
+export function useOrganizationsRefactored() {
   return useSupabaseQuery<Organization[]>(
-    'organizations-filtered',
-    async (supabase) => {
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('*')
-        .not('name', 'ilike', '%스퀴즈%')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return (data || []) as Organization[];
+    createCacheKey('organizations'),
+    async () => {
+      const result = await getOrganizations();
+      if (result.error) throw result.error;
+      return (result.data || []) as Organization[];
+    },
+    {
+      dedupingInterval: 300000, // 5분 동안 중복 요청 방지 (조직 정보는 자주 변경되지 않음)
     }
   );
 }
 
-// 모든 조직 목록 조회 훅 (관리자용)
-export function useAllOrganizationsRefactored() {
-  const crud = useSupabaseCRUD({
-    tableName: 'organizations',
-    cacheKey: 'all-organizations',
-  });
-
-  return {
-    organizations: crud.data as Organization[],
-    isLoading: crud.isLoading,
-    error: crud.error,
-    refetch: crud.refetch,
-  };
+// 공개 조직 목록 조회 훅 (내부 조직 제외)
+export function usePublicOrganizationsRefactored() {
+  return useSupabaseQuery<Organization[]>(
+    createCacheKey('public-organizations'),
+    async () => {
+      const result = await getPublicOrganizations();
+      if (result.error) throw result.error;
+      return (result.data || []) as Organization[];
+    },
+    {
+      dedupingInterval: 300000, // 5분 동안 중복 요청 방지
+    }
+  );
 }
 
 // 단일 조직 조회 훅
-export function useOrganizationDetailRefactored(organizationId: string | null) {
+export function useOrganizationRefactored(organizationId: string | null) {
   return useSupabaseQuery<Organization>(
-    organizationId ? `organization:${organizationId}` : null,
-    async (supabase) => {
+    organizationId ? createCacheKey('organization', { organizationId }) : null,
+    async () => {
       if (!organizationId) throw new Error('Organization ID is required');
-
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('id', organizationId)
-        .single();
-
-      if (error) throw error;
-      return data as Organization;
+      
+      const result = await getOrganizationById(organizationId);
+      if (result.error) throw result.error;
+      return result.data as Organization;
     }
   );
 }
 
-// 조직 통계 조회 훅
-export function useOrganizationStatsRefactored(organizationId: string | null) {
-  return useSupabaseQuery(
-    organizationId ? `organization-stats:${organizationId}` : null,
-    async (supabase) => {
-      if (!organizationId) throw new Error('Organization ID is required');
-
-      // 조직의 사용자 수
-      const { count: userCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', organizationId);
-
-      // 조직의 여정 수 (조직이 참여한 여정)
-      const { count: journeyCount } = await supabase
-        .from('journey_users')
-        .select('profiles!inner(*)', { count: 'exact', head: true })
-        .eq('profiles.organization_id', organizationId);
-
-      // 조직의 활성 팀 수
-      const { count: teamCount } = await supabase
-        .from('team_members')
-        .select('profiles!inner(*)', { count: 'exact', head: true })
-        .eq('profiles.organization_id', organizationId);
-
-      return {
-        userCount: userCount || 0,
-        journeyCount: journeyCount || 0,
-        teamCount: teamCount || 0,
-      };
-    }
-  );
-}
-
-// 조직 관련 작업 훅
+// 조직 CRUD 액션들
 export function useOrganizationActionsRefactored() {
   // 조직 생성
-  const createOrganization = createMutation<Organization, Omit<Organization, 'id'>>(
-    async (supabase, organizationData) => {
-      const { data, error } = await supabase
-        .from('organizations')
-        .insert(organizationData)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data as Organization;
+  const createOrganizationMutation = createMutation<Organization, {
+    name: string;
+    description?: string;
+    logo_url?: string;
+  }>(
+    async (organizationData) => {
+      const result = await createOrganization(organizationData);
+      if (result.error) throw result.error;
+      return result.data as Organization;
     },
     {
-      revalidateKeys: ['organizations', 'all-organizations'],
+      revalidateKeys: ['organizations', 'public-organizations']
     }
   );
 
-  // 조직 업데이트
-  const updateOrganization = createMutation<Organization, { id: string; updates: Partial<Organization> }>(
-    async (supabase, { id, updates }) => {
-      const { data, error } = await supabase
-        .from('organizations')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data as Organization;
+  // 조직 수정
+  const updateOrganizationMutation = createMutation<Organization, {
+    id: string;
+    updates: {
+      name?: string;
+      description?: string;
+      logo_url?: string;
+    };
+  }>(
+    async ({ id, updates }) => {
+      const result = await updateOrganization(id, updates);
+      if (result.error) throw result.error;
+      return result.data as Organization;
     },
     {
-      revalidateKeys: ['organizations', 'all-organizations', 'organization'],
+      revalidateKeys: ['organizations', 'public-organizations', 'organization']
     }
   );
 
   // 조직 삭제
-  const deleteOrganization = createMutation<boolean, string>(
-    async (supabase, organizationId) => {
-      // 조직에 속한 사용자가 있는지 확인
-      const { count: userCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', organizationId);
-
-      if (userCount && userCount > 0) {
-        throw new Error('조직에 속한 사용자가 있어 삭제할 수 없습니다.');
-      }
-
-      const { error } = await supabase
-        .from('organizations')
-        .delete()
-        .eq('id', organizationId);
-
-      if (error) throw error;
-      return true;
+  const deleteOrganizationMutation = createMutation<void, string>(
+    async (organizationId) => {
+      const result = await deleteOrganization(organizationId);
+      if (result.error) throw result.error;
     },
     {
-      revalidateKeys: ['organizations', 'all-organizations'],
+      revalidateKeys: ['organizations', 'public-organizations', 'organization']
     }
   );
 
   return {
-    createOrganization,
-    updateOrganization,
-    deleteOrganization,
+    createOrganization: createOrganizationMutation,
+    updateOrganization: updateOrganizationMutation,
+    deleteOrganization: deleteOrganizationMutation
   };
 }
 
-// 조직별 사용자 목록 조회
-export function useOrganizationUsersRefactored(organizationId: string | null) {
-  return useSupabaseQuery(
-    organizationId ? `organization-users:${organizationId}` : null,
-    async (supabase) => {
-      if (!organizationId) throw new Error('Organization ID is required');
+// 편의 함수들
+export function useCreateOrganizationRefactored() {
+  const actions = useOrganizationActionsRefactored();
+  return actions.createOrganization;
+}
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          email,
-          first_name,
-          last_name,
-          role,
-          profile_image,
-          created_at
-        `)
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
+export function useUpdateOrganizationRefactored() {
+  const actions = useOrganizationActionsRefactored();
+  return actions.updateOrganization;
+}
 
-      if (error) throw error;
-      return data || [];
-    }
-  );
+export function useDeleteOrganizationRefactored() {
+  const actions = useOrganizationActionsRefactored();
+  return actions.deleteOrganization;
 }

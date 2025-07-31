@@ -4,6 +4,17 @@ import {
   createMutation
 } from '../base/useSupabaseQuery';
 import { JourneyMissionInstance, Mission, CreateJourneyMissionInstance, UpdateJourneyMissionInstance } from '@/types';
+import {
+  getJourneyMissionInstances,
+  getJourneyMissionInstanceById,
+  createMissionInstance,
+  updateMissionInstance,
+  deleteMissionInstance,
+  updateMissionInstanceStatus,
+  updateMissionInstancesOrder,
+  getJourneyMissionStats,
+  getMissionInstances
+} from '@/utils/data/journeyMissionInstance';
 
 // 여정 미션 인스턴스 목록 조회 훅
 export function useJourneyMissionInstancesRefactored(
@@ -17,29 +28,9 @@ export function useJourneyMissionInstancesRefactored(
           weekId: weekId || 'all' 
         })
       : null,
-    async (supabase) => {
+    async () => {
       if (!journeyUuid) return [];
-
-      let query = supabase
-        .from('journey_mission_instances')
-        .select(`
-          *,
-          mission:missions(*)
-        `)
-        .eq('journey_id', journeyUuid);
-
-      // weekId가 있으면 해당 주차로 필터링
-      if (weekId) {
-        query = query.eq('journey_week_id', weekId);
-      }
-
-      // 정렬: 생성일 기준 오름차순
-      query = query.order('created_at', { ascending: true });
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      return (data || []) as (JourneyMissionInstance & { mission: Mission })[];
+      return await getJourneyMissionInstances(journeyUuid, weekId);
     },
     {
       dedupingInterval: 300000, // 5분 동안 중복 요청 방지
@@ -55,20 +46,9 @@ export function useJourneyMissionInstanceRefactored(instanceId: string | null) {
     instanceId 
       ? createCacheKey('journey-mission-instance', { instanceId })
       : null,
-    async (supabase) => {
+    async () => {
       if (!instanceId) throw new Error('Instance ID is required');
-
-      const { data, error } = await supabase
-        .from('journey_mission_instances')
-        .select(`
-          *,
-          mission:missions(*)
-        `)
-        .eq('id', instanceId)
-        .single();
-
-      if (error) throw error;
-      return data as JourneyMissionInstance & { mission: Mission };
+      return await getJourneyMissionInstanceById(instanceId);
     }
   );
 }
@@ -77,22 +57,12 @@ export function useJourneyMissionInstanceRefactored(instanceId: string | null) {
 export function useJourneyMissionInstanceActionsRefactored() {
   
   // 미션 인스턴스 생성
-  const createMissionInstance = createMutation<
+  const createMissionInstanceMutation = createMutation<
     JourneyMissionInstance, 
     CreateJourneyMissionInstance
   >(
-    async (supabase, instanceData) => {
-      const { data, error } = await supabase
-        .from('journey_mission_instances')
-        .insert(instanceData)
-        .select(`
-          *,
-          mission:missions(*)
-        `)
-        .single();
-
-      if (error) throw error;
-      return data as JourneyMissionInstance;
+    async (instanceData) => {
+      return await createMissionInstance(instanceData);
     },
     {
       revalidateKeys: ['journey-mission-instances'],
@@ -100,23 +70,12 @@ export function useJourneyMissionInstanceActionsRefactored() {
   );
 
   // 미션 인스턴스 업데이트
-  const updateMissionInstance = createMutation<
+  const updateMissionInstanceMutation = createMutation<
     JourneyMissionInstance,
     { id: string; updates: UpdateJourneyMissionInstance }
   >(
-    async (supabase, { id, updates }) => {
-      const { data, error } = await supabase
-        .from('journey_mission_instances')
-        .update(updates)
-        .eq('id', id)
-        .select(`
-          *,
-          mission:missions(*)
-        `)
-        .single();
-
-      if (error) throw error;
-      return data as JourneyMissionInstance;
+    async ({ id, updates }) => {
+      return await updateMissionInstance(id, updates);
     },
     {
       revalidateKeys: ['journey-mission-instances', 'journey-mission-instance'],
@@ -124,15 +83,9 @@ export function useJourneyMissionInstanceActionsRefactored() {
   );
 
   // 미션 인스턴스 삭제
-  const deleteMissionInstance = createMutation<boolean, string>(
-    async (supabase, instanceId) => {
-      const { error } = await supabase
-        .from('journey_mission_instances')
-        .delete()
-        .eq('id', instanceId);
-
-      if (error) throw error;
-      return true;
+  const deleteMissionInstanceMutation = createMutation<boolean, string>(
+    async (instanceId) => {
+      return await deleteMissionInstance(instanceId);
     },
     {
       revalidateKeys: ['journey-mission-instances'],
@@ -140,26 +93,12 @@ export function useJourneyMissionInstanceActionsRefactored() {
   );
 
   // 미션 인스턴스 상태 업데이트 (활성화/비활성화)
-  const updateInstanceStatus = createMutation<
+  const updateInstanceStatusMutation = createMutation<
     JourneyMissionInstance,
     { id: string; isActive: boolean }
   >(
-    async (supabase, { id, isActive }) => {
-      const { data, error } = await supabase
-        .from('journey_mission_instances')
-        .update({ 
-          is_active: isActive,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .select(`
-          *,
-          mission:missions(*)
-        `)
-        .single();
-
-      if (error) throw error;
-      return data as JourneyMissionInstance;
+    async ({ id, isActive }) => {
+      return await updateMissionInstanceStatus(id, isActive);
     },
     {
       revalidateKeys: ['journey-mission-instances', 'journey-mission-instance'],
@@ -167,30 +106,12 @@ export function useJourneyMissionInstanceActionsRefactored() {
   );
 
   // 미션 인스턴스 순서 업데이트
-  const updateInstanceOrder = createMutation<
+  const updateInstanceOrderMutation = createMutation<
     boolean,
     { updates: { id: string; order: number }[] }
   >(
-    async (supabase, { updates }) => {
-      // 트랜잭션으로 여러 인스턴스의 순서를 한 번에 업데이트
-      const updatePromises = updates.map(({ id, order }) =>
-        supabase
-          .from('journey_mission_instances')
-          .update({ 
-            order_index: order,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', id)
-      );
-
-      const results = await Promise.all(updatePromises);
-      
-      // 에러가 있는지 확인
-      for (const result of results) {
-        if (result.error) throw result.error;
-      }
-
-      return true;
+    async ({ updates }) => {
+      return await updateMissionInstancesOrder(updates);
     },
     {
       revalidateKeys: ['journey-mission-instances'],
@@ -198,11 +119,11 @@ export function useJourneyMissionInstanceActionsRefactored() {
   );
 
   return {
-    createMissionInstance,
-    updateMissionInstance,
-    deleteMissionInstance,
-    updateInstanceStatus,
-    updateInstanceOrder,
+    createMissionInstance: createMissionInstanceMutation,
+    updateMissionInstance: updateMissionInstanceMutation,
+    deleteMissionInstance: deleteMissionInstanceMutation,
+    updateInstanceStatus: updateInstanceStatusMutation,
+    updateInstanceOrder: updateInstanceOrderMutation,
   };
 }
 
@@ -212,41 +133,9 @@ export function useJourneyMissionStatsRefactored(journeyUuid: string | null) {
     journeyUuid 
       ? createCacheKey('journey-mission-stats', { journeyUuid })
       : null,
-    async (supabase) => {
+    async () => {
       if (!journeyUuid) return {};
-
-      // 전체 미션 인스턴스 수
-      const { count: totalInstances } = await supabase
-        .from('journey_mission_instances')
-        .select('*', { count: 'exact', head: true })
-        .eq('journey_id', journeyUuid);
-
-      // 활성 미션 인스턴스 수
-      const { count: activeInstances } = await supabase
-        .from('journey_mission_instances')
-        .select('*', { count: 'exact', head: true })
-        .eq('journey_id', journeyUuid)
-        .eq('is_active', true);
-
-      // 주차별 미션 수
-      const { data: weeklyStats } = await supabase
-        .from('journey_mission_instances')
-        .select('journey_week_id')
-        .eq('journey_id', journeyUuid);
-
-      const weeklyCount = weeklyStats?.reduce((acc, item) => {
-        const weekId = item.journey_week_id;
-        if (weekId) {
-          acc[weekId] = (acc[weekId] || 0) + 1;
-        }
-        return acc;
-      }, {} as Record<string, number>) || {};
-
-      return {
-        totalInstances: totalInstances || 0,
-        activeInstances: activeInstances || 0,
-        weeklyCount,
-      };
+      return await getJourneyMissionStats(journeyUuid);
     },
     {
       dedupingInterval: 600000, // 10분 동안 중복 요청 방지
@@ -260,24 +149,9 @@ export function useMissionInstancesRefactored(missionId: string | null) {
     missionId 
       ? createCacheKey('mission-instances', { missionId })
       : null,
-    async (supabase) => {
+    async () => {
       if (!missionId) return [];
-
-      const { data, error } = await supabase
-        .from('journey_mission_instances')
-        .select(`
-          *,
-          journeys (
-            id,
-            title,
-            slug
-          )
-        `)
-        .eq('mission_id', missionId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return (data || []) as JourneyMissionInstance[];
+      return await getMissionInstances(missionId);
     }
   );
 }
