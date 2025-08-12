@@ -49,7 +49,7 @@ export function Providers({ children }: ProvidersProps) {
           revalidateIfStale: true,
         }}
       >
-        <ChakraProvider value={defaultSystem} resetCSS={false}>
+        <ChakraProvider value={defaultSystem}>
           {children}
           <Analytics />
         </ChakraProvider>
