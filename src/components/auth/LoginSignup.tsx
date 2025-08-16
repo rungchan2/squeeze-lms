@@ -6,13 +6,12 @@ import styled from "@emotion/styled";
 import { z } from "zod";
 import InputAndTitle from "@/components/InputAndTitle";
 import { PasswordInput } from "@/components/ui/password-input";
-import { signInWithEmail, signUpWithEmail } from "@/app/(auth)/actions";
+import { signInWithEmail } from "@/app/(auth)/actions";
 import { Input } from "@chakra-ui/react";
 import Text from "@/components/Text/Text";
 import Button from "@/components/common/Button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { DevTool } from "@hookform/devtools";
 import { createClient } from "@/utils/supabase/client";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
@@ -107,7 +106,7 @@ export default function LoginSignup() {
       >
         {isSubmitting ? <Spinner /> : "로그인"}
       </Button>
-      <DevTool control={control} />
+      {/* <DevTool control={control} /> */}
     </LoginForm>
   );
 }

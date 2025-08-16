@@ -59,33 +59,35 @@ export default function DoMissionPage({
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [structuredAnswers, setStructuredAnswers] = useState<AnswerData[]>([]);
-  const [questionValidations, setQuestionValidations] = useState<Record<string, boolean>>({});
+  const [questionValidations, setQuestionValidations] = useState<
+    Record<string, boolean>
+  >({});
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
-  
+
   // Fetch mission questions
   const { questions, isLoading: isLoadingQuestions } = useMissionQuestions(
     missionInstance?.mission.id || null
   );
-  
+
   // Check if this is a modern mission with questions or legacy mission
   const isModernMission = questions && questions.length > 0;
-  
+
   // Progress tracking for modern missions
   const calculateModernProgress = () => {
     if (!questions || questions.length === 0) return 0;
     let progress = 0;
-    
+
     // Title progress
     if (title.trim()) progress += 20;
-    
+
     // Questions progress (80% total)
     const questionProgress = (structuredAnswers.length / questions.length) * 80;
     progress += questionProgress;
-    
+
     return Math.min(progress, 100);
   };
-  
+
   // Progress tracking for legacy missions
   const calculateLegacyProgress = () => {
     let progress = 0;
@@ -93,49 +95,52 @@ export default function DoMissionPage({
     if (content.trim()) progress += 67;
     return Math.min(progress, 100);
   };
-  
+
   const calculateProgress = () => {
-    return isModernMission ? calculateModernProgress() : calculateLegacyProgress();
+    return isModernMission
+      ? calculateModernProgress()
+      : calculateLegacyProgress();
   };
 
   // Handle structured answer changes
   const handleQuestionAnswer = (questionId: string, answer: any) => {
-    const question = questions?.find(q => q.id === questionId);
+    const question = questions?.find((q) => q.id === questionId);
     if (!question) return;
 
     let answerData: AnswerData;
 
     // Create proper answer object based on question type
     switch (question.question_type) {
-      case 'essay':
+      case "essay":
         answerData = {
           question_id: questionId,
           question_order: question.question_order || 0,
-          answer_type: 'essay' as const,
-          answer_text: answer,
+          answer_type: "essay" as const,
+          answer_text: answer.html,
+          answer_text_plain: answer.plainText,
           selected_option: null,
           image_urls: [],
           is_correct: null,
           points_earned: null,
         };
         break;
-      case 'multiple_choice':
+      case "multiple_choice":
         answerData = {
           question_id: questionId,
           question_order: question.question_order || 0,
-          answer_type: 'multiple_choice' as const,
+          answer_type: "multiple_choice" as const,
           answer_text: null,
-          selected_option: Array.isArray(answer) ? answer.join(',') : answer,
+          selected_option: Array.isArray(answer) ? answer.join(",") : answer,
           image_urls: [],
           is_correct: null,
           points_earned: null,
         };
         break;
-      case 'image_upload':
+      case "image_upload":
         answerData = {
           question_id: questionId,
           question_order: question.question_order || 0,
-          answer_type: 'image_upload' as const,
+          answer_type: "image_upload" as const,
           answer_text: null,
           selected_option: null,
           image_urls: answer,
@@ -143,12 +148,13 @@ export default function DoMissionPage({
           points_earned: null,
         };
         break;
-      case 'mixed':
+      case "mixed":
         answerData = {
           question_id: questionId,
           question_order: question.question_order || 0,
-          answer_type: 'mixed' as const,
+          answer_type: "mixed" as const,
           answer_text: answer.text || null,
+          answer_text_plain: answer.plainText || null,
           selected_option: null,
           image_urls: answer.images || [],
           is_correct: null,
@@ -159,26 +165,28 @@ export default function DoMissionPage({
         return; // Skip unsupported question types
     }
 
-    setStructuredAnswers(prev => {
-      const filtered = prev.filter(a => a.question_id !== questionId);
-      return [...filtered, answerData].sort((a, b) => a.question_order - b.question_order);
+    setStructuredAnswers((prev) => {
+      const filtered = prev.filter((a) => a.question_id !== questionId);
+      return [...filtered, answerData].sort(
+        (a, b) => a.question_order - b.question_order
+      );
     });
   };
 
   // Handle question validation
   const handleQuestionValidation = (questionId: string, isValid: boolean) => {
-    setQuestionValidations(prev => ({
+    setQuestionValidations((prev) => ({
       ...prev,
-      [questionId]: isValid
+      [questionId]: isValid,
     }));
   };
 
   // Check if all required questions are answered
   const areAllRequiredQuestionsAnswered = () => {
     if (!questions) return true;
-    
-    const requiredQuestions = questions.filter(q => q.is_required);
-    return requiredQuestions.every(q => questionValidations[q.id] === true);
+
+    const requiredQuestions = questions.filter((q) => q.is_required);
+    return requiredQuestions.every((q) => questionValidations[q.id] === true);
   };
 
   // Auto-save functionality
@@ -197,9 +205,9 @@ export default function DoMissionPage({
         missionInstanceId,
         timestamp: new Date().toISOString(),
       };
-      
+
       localStorage.setItem(
-        `autosave_mission_${missionInstanceId}`, 
+        `autosave_mission_${missionInstanceId}`,
         JSON.stringify(autoSaveData)
       );
       setLastSaved(new Date());
@@ -214,7 +222,9 @@ export default function DoMissionPage({
   useEffect(() => {
     if (missionInstanceId && !updateData) {
       try {
-        const saved = localStorage.getItem(`autosave_mission_${missionInstanceId}`);
+        const saved = localStorage.getItem(
+          `autosave_mission_${missionInstanceId}`
+        );
         if (saved) {
           const autoSaveData = JSON.parse(saved);
           if (autoSaveData.title) setTitle(autoSaveData.title);
@@ -243,10 +253,13 @@ export default function DoMissionPage({
   const isTeamMissionType = (missionType: string | null): boolean => {
     return missionType === "team";
   };
-  
-  const isTeamMission = isTeamMissionType(missionInstance?.mission.mission_type || null);
-  const [selectedTeamMembers, setSelectedTeamMembers] =
-    useState<TeamMember[] | undefined>();
+
+  const isTeamMission = isTeamMissionType(
+    missionInstance?.mission.mission_type || null
+  );
+  const [selectedTeamMembers, setSelectedTeamMembers] = useState<
+    TeamMember[] | undefined
+  >();
 
   // useTeams 훅 사용
   const { teamData, markPostAsTeamSubmission } = useTeams(slug ?? "");
@@ -271,25 +284,33 @@ export default function DoMissionPage({
     if (updateData) {
       setContent(updateData.content || "");
       setTitle(updateData.title || "");
-      
+
       // Load structured answers if available
-      if ((updateData as any).answers_data && typeof (updateData as any).answers_data === 'object') {
+      if (
+        (updateData as any).answers_data &&
+        typeof (updateData as any).answers_data === "object"
+      ) {
         const answersData = (updateData as any).answers_data;
         if (answersData.answers && Array.isArray(answersData.answers)) {
           setStructuredAnswers(answersData.answers);
-          
+
           // Set validation state for existing answers
           answersData.answers.forEach((answer: AnyAnswer) => {
-            const hasValidAnswer = 
-              (answer.answer_type === 'essay' && answer.answer_text) ||
-              (answer.answer_type === 'multiple_choice' && answer.selected_option) ||
-              (answer.answer_type === 'image_upload' && answer.image_urls && answer.image_urls.length > 0) ||
-              (answer.answer_type === 'mixed' && (answer.answer_text || (answer.image_urls && answer.image_urls.length > 0)));
-            
+            const hasValidAnswer =
+              (answer.answer_type === "essay" && answer.answer_text) ||
+              (answer.answer_type === "multiple_choice" &&
+                answer.selected_option) ||
+              (answer.answer_type === "image_upload" &&
+                answer.image_urls &&
+                answer.image_urls.length > 0) ||
+              (answer.answer_type === "mixed" &&
+                (answer.answer_text ||
+                  (answer.image_urls && answer.image_urls.length > 0)));
+
             if (hasValidAnswer) {
-              setQuestionValidations(prev => ({
+              setQuestionValidations((prev) => ({
                 ...prev,
-                [answer.question_id]: true
+                [answer.question_id]: true,
               }));
             }
           });
@@ -355,15 +376,18 @@ export default function DoMissionPage({
 
     // Enhanced validation for different mission types
     if (isModernMission) {
-      const unansweredQuestions = questions?.filter(q => 
-        q.is_required && !questionValidations[q.id]
-      ) || [];
-      
+      const unansweredQuestions =
+        questions?.filter((q) => q.is_required && !questionValidations[q.id]) ||
+        [];
+
       if (unansweredQuestions.length > 0) {
-        const questionNumbers = unansweredQuestions.map((q, index) => 
-          questions?.findIndex(question => question.id === q.id) + 1
-        ).join(', ');
-        
+        const questionNumbers = unansweredQuestions
+          .map(
+            (q, index) =>
+              questions?.findIndex((question) => question.id === q.id) + 1
+          )
+          .join(", ");
+
         toaster.create({
           title: "필수 질문에 답변이 필요합니다.",
           description: `질문 ${questionNumbers}번에 답변해주세요.`,
@@ -412,13 +436,14 @@ export default function DoMissionPage({
               submission_time: new Date().toISOString(),
               auto_graded: false,
               manual_review_required: true,
-            }
+            },
           },
           total_questions: questions?.length || 0,
           answered_questions: structuredAnswers.length,
-          completion_rate: questions?.length ? 
-            (structuredAnswers.length / questions.length) * 100 : 0,
-        })
+          completion_rate: questions?.length
+            ? (structuredAnswers.length / questions.length) * 100
+            : 0,
+        }),
       };
 
       const { data, error } = await createPost(postData);
@@ -473,9 +498,9 @@ export default function DoMissionPage({
       // 성공 알림 후 캐시 무효화 리다이렉션
       toaster.create({
         title: "미션이 성공적으로 제출되었습니다!",
-        description: isModernMission ? 
-          `${structuredAnswers.length}개 질문에 답변하여 제출했습니다.` :
-          "답변이 성공적으로 저장되었습니다.",
+        description: isModernMission
+          ? `${structuredAnswers.length}개 질문에 답변하여 제출했습니다.`
+          : "답변이 성공적으로 저장되었습니다.",
         type: "success",
       });
 
@@ -506,15 +531,18 @@ export default function DoMissionPage({
 
     // Validation based on mission type
     if (isModernMission) {
-      const unansweredQuestions = questions?.filter(q => 
-        q.is_required && !questionValidations[q.id]
-      ) || [];
-      
+      const unansweredQuestions =
+        questions?.filter((q) => q.is_required && !questionValidations[q.id]) ||
+        [];
+
       if (unansweredQuestions.length > 0) {
-        const questionNumbers = unansweredQuestions.map((q, index) => 
-          questions?.findIndex(question => question.id === q.id) + 1
-        ).join(', ');
-        
+        const questionNumbers = unansweredQuestions
+          .map(
+            (q, index) =>
+              questions?.findIndex((question) => question.id === q.id) + 1
+          )
+          .join(", ");
+
         toaster.create({
           title: "필수 질문에 답변이 필요합니다.",
           description: `질문 ${questionNumbers}번에 답변해주세요.`,
@@ -551,18 +579,19 @@ export default function DoMissionPage({
             submission_time: new Date().toISOString(),
             auto_graded: false,
             manual_review_required: true,
-          }
+          },
         };
         updatePayload.total_questions = questions?.length || 0;
         updatePayload.answered_questions = structuredAnswers.length;
-        updatePayload.completion_rate = questions?.length ? 
-          (structuredAnswers.length / questions.length) * 100 : 0;
+        updatePayload.completion_rate = questions?.length
+          ? (structuredAnswers.length / questions.length) * 100
+          : 0;
       } else {
         updatePayload.content = content;
       }
 
       const { error } = await updatePost(updatePayload, updateDataId || "");
-      
+
       if (error) {
         console.error("미션 수정 오류:", error);
         toaster.create({
@@ -585,12 +614,12 @@ export default function DoMissionPage({
 
       toaster.create({
         title: "미션이 성공적으로 수정되었습니다!",
-        description: isModernMission ? 
-          `${structuredAnswers.length}개 질문에 대한 답변이 수정되었습니다.` :
-          "답변이 성공적으로 수정되었습니다.",
+        description: isModernMission
+          ? `${structuredAnswers.length}개 질문에 대한 답변이 수정되었습니다.`
+          : "답변이 성공적으로 수정되었습니다.",
         type: "success",
       });
-      
+
       // 캐시 무효화를 위해 페이지 새로고침
       if (!slug) {
         router.back();
@@ -612,9 +641,9 @@ export default function DoMissionPage({
   // Render question input component based on type
   const renderQuestionInput = (question: any, index: number) => {
     const initialValue = getInitialAnswerForQuestion(question.id);
-    
+
     switch (question.question_type) {
-      case 'essay':
+      case "essay":
         return (
           <EssayQuestionInput
             key={question.id}
@@ -625,22 +654,26 @@ export default function DoMissionPage({
             onValidation={handleQuestionValidation}
           />
         );
-      case 'multiple_choice':
+      case "multiple_choice":
         return (
           <MultipleChoiceInput
             key={question.id}
             question={question}
             questionIndex={index}
-            initialValue={initialValue?.selected_option ? 
-              (question.multiple_select ? 
-                initialValue.selected_option.split(',') : 
-                initialValue.selected_option) : 
-              (question.multiple_select ? [] : "")}
+            initialValue={
+              initialValue?.selected_option
+                ? question.multiple_select
+                  ? initialValue.selected_option.split(",")
+                  : initialValue.selected_option
+                : question.multiple_select
+                ? []
+                : ""
+            }
             onChange={handleQuestionAnswer}
             onValidation={handleQuestionValidation}
           />
         );
-      case 'image_upload':
+      case "image_upload":
         return (
           <ImageUploadInput
             key={question.id}
@@ -651,7 +684,7 @@ export default function DoMissionPage({
             onValidation={handleQuestionValidation}
           />
         );
-      case 'mixed':
+      case "mixed":
         return (
           <MixedQuestionInput
             key={question.id}
@@ -659,7 +692,7 @@ export default function DoMissionPage({
             questionIndex={index}
             initialValue={{
               text: initialValue?.answer_text || "",
-              images: initialValue?.image_urls || []
+              images: initialValue?.image_urls || [],
             }}
             onChange={handleQuestionAnswer}
             onValidation={handleQuestionValidation}
@@ -672,7 +705,7 @@ export default function DoMissionPage({
 
   // Get initial answer for a question (for edit mode)
   const getInitialAnswerForQuestion = (questionId: string) => {
-    return structuredAnswers.find(a => a.question_id === questionId);
+    return structuredAnswers.find((a) => a.question_id === questionId);
   };
 
   return (
@@ -685,13 +718,21 @@ export default function DoMissionPage({
               : "미션 (삭제된 과제 입니다)"}
           </Heading>
           <ProgressSection>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
               <Text variant="caption" color="var(--grey-600)">
                 진행률: {calculateProgress().toFixed(0)}%
               </Text>
               <AutoSaveStatus>
                 {isAutoSaving ? (
-                  <Text variant="caption" color="var(--primary-500)">저장 중...</Text>
+                  <Text variant="caption" color="var(--primary-500)">
+                    저장 중...
+                  </Text>
                 ) : lastSaved ? (
                   <Text variant="caption" color="var(--grey-500)">
                     {lastSaved.toLocaleTimeString()}에 저장됨
@@ -724,7 +765,9 @@ export default function DoMissionPage({
           <ModernMissionSection>
             <QuestionsContainer>
               {questions
-                .sort((a, b) => (a.question_order || 0) - (b.question_order || 0))
+                .sort(
+                  (a, b) => (a.question_order || 0) - (b.question_order || 0)
+                )
                 .map((question, index) => renderQuestionInput(question, index))}
             </QuestionsContainer>
           </ModernMissionSection>
@@ -746,45 +789,36 @@ export default function DoMissionPage({
           </LegacyMissionSection>
         )}
 
-        <Text variant="body" color="grey-700" fontWeight="bold">
-          미션 상세 설명
-        </Text>
-        <MissionCard
-          mission={missionInstance?.mission}
-          showDetails={true}
-          isModal={true}
-          missionInstance={missionInstance as any}
-        />
         {isTeamMission && (
-        <TeamSelectSection>
-          <Text variant="body" color="grey-700" fontWeight="bold">
-            과제 수행 팀 : {teamData?.team?.name}
-          </Text>
-          {teamData?.members && teamData.members.length <= 1 ? (
-            <EmptyTeamMessage>
-              <Text variant="body" color="grey-500">
-                팀원이 없습니다. 팀원을 초대해주세요.
-              </Text>
-            </EmptyTeamMessage>
-          ) : (
-            <StlyedSelect
-              defaultValues={selectedTeamMembers || []}
-              isDisabled={true}
-              options={teamData?.members.map((member) => ({
-                label: `${member.profiles?.first_name || ""} ${
-                  member.profiles?.last_name || ""
-                }`,
-                value: member.user_id,
-              }))}
-            />
-          )}
-        </TeamSelectSection>
-      )}
+          <TeamSelectSection>
+            <Text variant="body" color="grey-700" fontWeight="bold">
+              과제 수행 팀 : {teamData?.team?.name}
+            </Text>
+            {teamData?.members && teamData.members.length <= 1 ? (
+              <EmptyTeamMessage>
+                <Text variant="body" color="grey-500">
+                  팀원이 없습니다. 팀원을 초대해주세요.
+                </Text>
+              </EmptyTeamMessage>
+            ) : (
+              <StlyedSelect
+                defaultValues={selectedTeamMembers || []}
+                isDisabled={true}
+                options={teamData?.members.map((member) => ({
+                  label: `${member.profiles?.first_name || ""} ${
+                    member.profiles?.last_name || ""
+                  }`,
+                  value: member.user_id,
+                }))}
+              />
+            )}
+          </TeamSelectSection>
+        )}
       </div>
       {/* 팀 미션인 경우 팀원 선택 컴포넌트 추가 */}
-      
+
       <BottomSpacing />
-      
+
       <FloatingButton
         onClick={() => {
           if (updateData) {
@@ -797,7 +831,7 @@ export default function DoMissionPage({
         }}
         position="center"
       >
-          {isSubmitting ? <Spinner /> : updateData ? "수정완료" : "제출"}
+        {isSubmitting ? <Spinner /> : updateData ? "수정완료" : "제출"}
       </FloatingButton>
     </MissionContainer>
   );
@@ -892,7 +926,7 @@ const ProgressBarStyled = styled.div`
 const ProgressFill = styled.div<{ progress: number }>`
   height: 100%;
   background: var(--primary-500);
-  width: ${props => props.progress}%;
+  width: ${(props) => props.progress}%;
   transition: width 0.3s ease;
   border-radius: 4px;
 `;

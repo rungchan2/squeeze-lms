@@ -11,7 +11,7 @@ interface EssayQuestionInputProps {
   question: MissionQuestion;
   questionIndex: number;
   initialValue?: string;
-  onChange: (questionId: string, answer: string) => void;
+  onChange: (questionId: string, answer: { html: string; plainText: string }) => void;
   onValidation?: (questionId: string, isValid: boolean) => void;
 }
 
@@ -23,17 +23,22 @@ export default function EssayQuestionInput({
   onValidation,
 }: EssayQuestionInputProps) {
   const [answer, setAnswer] = useState(initialValue);
+  const [plainText, setPlainText] = useState("");
 
-  const handleChange = (value: string) => {
-    setAnswer(value);
-    onChange(question.id, value);
+  const handleChange = (htmlValue: string) => {
+    setAnswer(htmlValue);
+  };
+
+  const handlePlainTextChange = (plainTextValue: string) => {
+    setPlainText(plainTextValue);
+    onChange(question.id, { html: answer, plainText: plainTextValue });
     
-    // Basic validation
-    const isValid = value.trim().length > 0;
+    // Basic validation using plain text
+    const isValid = plainTextValue.trim().length > 0;
     onValidation?.(question.id, isValid);
   };
 
-  const characterCount = answer.replace(/<[^>]*>?/g, "").length;
+  const characterCount = plainText.length;
   const maxCharacters = question.max_characters || 1000;
   const isOverLimit = characterCount > maxCharacters;
 
@@ -56,6 +61,7 @@ export default function EssayQuestionInput({
           placeholder={question.placeholder_text || "답변을 입력해주세요..."}
           content={answer}
           onChange={handleChange}
+          onPlainTextChange={handlePlainTextChange}
           inputHeight="200px"
         />
         

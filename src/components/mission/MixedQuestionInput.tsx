@@ -14,7 +14,7 @@ interface MixedQuestionInputProps {
     text?: string;
     images?: string[];
   };
-  onChange: (questionId: string, answer: { text?: string; images?: string[] }) => void;
+  onChange: (questionId: string, answer: { text?: string; plainText?: string; images?: string[] }) => void;
   onValidation?: (questionId: string, isValid: boolean) => void;
 }
 
@@ -26,18 +26,20 @@ export default function MixedQuestionInput({
   onValidation,
 }: MixedQuestionInputProps) {
   const [textAnswer, setTextAnswer] = useState(initialValue.text || "");
+  const [plainTextAnswer, setPlainTextAnswer] = useState("");
   const [imageAnswers, setImageAnswers] = useState<string[]>(initialValue.images || []);
   const [textValid, setTextValid] = useState(false);
   const [imageValid, setImageValid] = useState(true);
 
-  const handleTextChange = (questionId: string, text: string) => {
-    setTextAnswer(text);
-    updateAnswer(text, imageAnswers);
+  const handleTextChange = (questionId: string, text: { html: string; plainText: string }) => {
+    setTextAnswer(text.html);
+    setPlainTextAnswer(text.plainText);
+    updateAnswer(text.html, text.plainText, imageAnswers);
   };
 
   const handleImageChange = (questionId: string, images: string[]) => {
     setImageAnswers(images);
-    updateAnswer(textAnswer, images);
+    updateAnswer(textAnswer, plainTextAnswer, images);
   };
 
   const handleTextValidation = (questionId: string, isValid: boolean) => {
@@ -50,8 +52,8 @@ export default function MixedQuestionInput({
     validateOverall(textValid, isValid);
   };
 
-  const updateAnswer = (text: string, images: string[]) => {
-    onChange(question.id, { text, images });
+  const updateAnswer = (text: string, plainText: string, images: string[]) => {
+    onChange(question.id, { text, plainText, images });
   };
 
   const validateOverall = (textIsValid: boolean, imageIsValid: boolean) => {

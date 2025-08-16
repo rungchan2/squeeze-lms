@@ -174,6 +174,7 @@ const RichTextEditor = ({
   placeholder,
   style,
   onChange,
+  onPlainTextChange,
   inputHeight = "350px",
   content
 }: {
@@ -181,6 +182,7 @@ const RichTextEditor = ({
   style?: React.CSSProperties;
   content: string;
   onChange: (value: string) => void;
+  onPlainTextChange?: (value: string) => void;
   inputHeight?: string;
 }) => {
   const editor = useEditor({
@@ -199,7 +201,10 @@ const RichTextEditor = ({
       </p>
     `,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      const plainText = editor.getText();
+      onChange(html);
+      onPlainTextChange?.(plainText);
     },
     immediatelyRender: false,
   });
