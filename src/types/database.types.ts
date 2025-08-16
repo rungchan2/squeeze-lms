@@ -8,7 +8,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -23,10 +23,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
+          extensions?: Json
           operationName?: string
           query?: string
           variables?: Json
-          extensions?: Json
         }
         Returns: Json
       }
@@ -1347,8 +1347,8 @@ export type Database = {
       get_file_stats: {
         Args: Record<PropertyKey, never>
         Returns: {
-          file_type: Database["public"]["Enums"]["file_type"]
           file_count: number
+          file_type: Database["public"]["Enums"]["file_type"]
           total_size_mb: number
         }[]
       }
@@ -1359,12 +1359,12 @@ export type Database = {
       get_migration_samples: {
         Args: { sample_count?: number }
         Returns: {
-          post_id: string
-          original_content_preview: string
-          new_answers_data: Json
-          original_score: number
-          new_manual_score: number
           completion_rate: number
+          new_answers_data: Json
+          new_manual_score: number
+          original_content_preview: string
+          original_score: number
+          post_id: string
         }[]
       }
       http: {
@@ -1373,12 +1373,12 @@ export type Database = {
       }
       http_delete: {
         Args:
+          | { content: string; content_type: string; uri: string }
           | { uri: string }
-          | { uri: string; content: string; content_type: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_get: {
-        Args: { uri: string } | { uri: string; data: Json }
+        Args: { data: Json; uri: string } | { uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_head: {
@@ -1397,17 +1397,17 @@ export type Database = {
         }[]
       }
       http_patch: {
-        Args: { uri: string; content: string; content_type: string }
+        Args: { content: string; content_type: string; uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_post: {
         Args:
-          | { uri: string; content: string; content_type: string }
-          | { uri: string; data: Json }
+          | { content: string; content_type: string; uri: string }
+          | { data: Json; uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_put: {
-        Args: { uri: string; content: string; content_type: string }
+        Args: { content: string; content_type: string; uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_reset_curlopt: {
@@ -1433,8 +1433,8 @@ export type Database = {
       migrate_existing_urls_to_files: {
         Args: Record<PropertyKey, never>
         Returns: {
-          table_name: string
           migrated_count: number
+          table_name: string
         }[]
       }
       migrate_posts_to_new_structure: {
@@ -1451,11 +1451,11 @@ export type Database = {
       }
       upload_file: {
         Args: {
+          p_file_size?: number
+          p_file_type: Database["public"]["Enums"]["file_type"]
+          p_mime_type?: string
           p_original_name: string
           p_url: string
-          p_file_type: Database["public"]["Enums"]["file_type"]
-          p_file_size?: number
-          p_mime_type?: string
         }
         Returns: number
       }
@@ -1467,8 +1467,8 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           check_name: string
-          status: string
           details: string
+          status: string
         }[]
       }
     }

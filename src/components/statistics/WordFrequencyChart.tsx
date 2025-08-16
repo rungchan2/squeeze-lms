@@ -147,10 +147,33 @@ export default function WordFrequencyChart({
 
   // 초기 선택된 그룹 설정 (모든 그룹을 기본으로 표시)
   useMemo(() => {
-    if (allGroups.length > 0 && visibleGroups.size === 0) {
-      setVisibleGroups(new Set(allGroups));
+    if (allGroups.length > 0) {
+      // 기존 선택된 그룹과 새로운 그룹을 합침
+      const currentVisible = new Set(visibleGroups);
+      let hasChanges = false;
+      
+      // 새로운 그룹이 추가되었거나 기존 그룹이 제거되었는지 확인
+      allGroups.forEach(group => {
+        if (!currentVisible.has(group)) {
+          currentVisible.add(group);
+          hasChanges = true;
+        }
+      });
+      
+      // 존재하지 않는 그룹은 제거
+      Array.from(currentVisible).forEach(group => {
+        if (!allGroups.includes(group)) {
+          currentVisible.delete(group);
+          hasChanges = true;
+        }
+      });
+      
+      // 변화가 있거나 첫 로드시에만 업데이트
+      if (hasChanges || visibleGroups.size === 0) {
+        setVisibleGroups(currentVisible);
+      }
     }
-  }, [allGroups, visibleGroups.size]);
+  }, [allGroups]);
 
   // 실제 차트에 표시할 데이터 (선택된 그룹만)
   const displayChartData = useMemo(() => {

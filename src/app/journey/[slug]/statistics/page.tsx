@@ -33,6 +33,8 @@ export default function StatisticsPage() {
   
   // 커스텀 그룹들
   const [customGroups, setCustomGroups] = useState<CustomWordGroup[]>([]);
+  // API 그룹들 (수정 가능한 state로 관리)
+  const [apiGroups, setApiGroups] = useState<CustomWordGroup[]>([]);
 
   // Journey 데이터 가져오기
   const { journey, isLoading: journeyLoading, error: journeyError } = useJourneyBySlug(
@@ -110,9 +112,12 @@ export default function StatisticsPage() {
     isLoading: groupingLoading 
   } = useAutoWordGrouping(combinedWordFrequency, 1, 20);
   
-  // API 그룹들 자동 로딩
-  const apiGroups: CustomWordGroup[] = useMemo(() => {
-    if (!groupingData?.groups) return [];
+  // API 그룹들 자동 로딩 (groupingData 변경 시 apiGroups state 업데이트)
+  useEffect(() => {
+    if (!groupingData?.groups) {
+      setApiGroups([]);
+      return;
+    }
     
     // 사용할 그룹 색상
     const groupColors = [
@@ -121,7 +126,7 @@ export default function StatisticsPage() {
       "#FFE4B5", "#D8BFD8", "#B0E0E6", "#F5DEB3", "#E0E0E0"
     ];
     
-    return groupingData.groups.map((group, index) => {
+    const newApiGroups = groupingData.groups.map((group, index) => {
       // group.words는 string[] 타입이므로 직접 사용
       const words = group.words;
       
@@ -147,7 +152,10 @@ export default function StatisticsPage() {
         apiWordsData: apiWordsData
       };
     });
-  }, [groupingData, combinedWordFrequency]);
+    
+    setApiGroups(newApiGroups);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupingData]);
 
   const handleFilterChange = (newFilters: FilterState) => {
     console.log('📝 Filter change received:', newFilters);
@@ -231,7 +239,7 @@ export default function StatisticsPage() {
                 apiGroups={apiGroups}
                 onApiGroupsChange={(newApiGroups) => {
                   console.log('📝 API groups updated:', newApiGroups);
-                  // API 그룹 수정은 현재 지원하지 않음
+                  setApiGroups(newApiGroups);
                 }}
               />
 
