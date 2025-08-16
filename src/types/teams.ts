@@ -9,18 +9,6 @@ const TeamSchema = z.object({
     updated_at: z.string().nullable(),
 });
 
-const OrganizationSchema = z.object({
-    id: z.string().uuid(),
-    name: z.string(),
-}).nullable();
-
-const ProfileSchema = z.object({
-    id: z.string().uuid(),
-    first_name: z.string().nullable(),
-    last_name: z.string().nullable(),
-    profile_image: z.string().nullable(),
-    organizations: OrganizationSchema,
-});
 
 const TeamMemberSchema = z.object({
     id: z.string().uuid(),

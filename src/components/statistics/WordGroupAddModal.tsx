@@ -149,7 +149,7 @@ export default function WordGroupAddModal({
           
           {availableWords.length === 0 ? (
             <EmptyState>
-              <Text variant="body" color="var(--grey-500)" textAlign="center">
+              <Text variant="body" color="var(--grey-500)" style={{ textAlign: 'center' }}>
                 선택 가능한 단어가 없습니다.<br />
                 모든 단어가 이미 다른 그룹에 할당되어 있습니다.
               </Text>
@@ -207,21 +207,21 @@ export default function WordGroupAddModal({
         
         <ModalActions>
           <Button
-            leftIcon={<FaPlus />}
             onClick={handleAdd}
             colorScheme="blue"
             size="sm"
             mr={3}
             disabled={availableWords.length === 0}
           >
+            <FaPlus style={{ marginRight: '0.5rem' }} />
             추가
           </Button>
           <Button
-            leftIcon={<FaTimes />}
             onClick={handleClose}
             variant="ghost"
             size="sm"
           >
+            <FaTimes style={{ marginRight: '0.5rem' }} />
             취소
           </Button>
         </ModalActions>

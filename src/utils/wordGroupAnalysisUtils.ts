@@ -1,5 +1,5 @@
 import { WordFrequencyResponse } from "@/hooks/useWordFrequencyAnalysis";
-import { WordGroupingResponse, WordGroup } from "@/hooks/useWordGrouping";
+import { WordGroupingResponse } from "@/hooks/useWordGrouping";
 
 export interface GroupFrequencyData {
   groupLabel: string;

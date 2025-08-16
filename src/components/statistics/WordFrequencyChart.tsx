@@ -57,7 +57,7 @@ export default function WordFrequencyChart({
     if (!data || data.length === 0) {
       return { 
         chartData: [], 
-        allGroups: [], 
+        allGroups: [] as string[], 
         groupStats: new Map(), 
         groupColors: {},
         weekGroupFrequencies: []
@@ -70,7 +70,7 @@ export default function WordFrequencyChart({
     console.log('🔧 Custom Groups:', customGroups.length, 'groups');
 
     let weekGroupFrequencies: WeekGroupFrequency[] = [];
-    let allGroups: string[] = [];
+    let calculatedGroups: string[] = [];
 
     // 1. 기본 빈 구조 생성
     weekGroupFrequencies = weekNames.map((weekName, weekIndex) => ({
@@ -107,21 +107,21 @@ export default function WordFrequencyChart({
         });
         
         // 그룹을 전체 그룹 목록에 추가
-        if (!allGroups.includes(group.name)) {
-          allGroups.push(group.name);
+        if (!calculatedGroups.includes(group.name)) {
+          calculatedGroups.push(group.name);
         }
       });
     }
 
     console.log('📈 Combined Week Group Frequencies:', weekGroupFrequencies);
-    console.log('🎯 All Groups (API + Custom):', allGroups);
+    console.log('🎯 All Groups (API + Custom):', calculatedGroups);
 
     // 3. 그룹별 통계 계산
     const groupStats = calculateGroupStatistics(weekGroupFrequencies);
     console.log('📊 Group Statistics:', groupStats);
 
     // 4. 그룹에 색상 할당 (커스텀 그룹은 기존 색상 유지)
-    const groupColors = assignColorsToGroups(allGroups);
+    const groupColors = assignColorsToGroups(calculatedGroups);
     
     // 커스텀 그룹의 색상을 지정된 색상으로 덮어쓰기
     customGroups.forEach(customGroup => {
@@ -131,14 +131,14 @@ export default function WordFrequencyChart({
     console.log('🎨 Group Colors (with custom colors):', groupColors);
 
     // 5. 차트 데이터는 초기에는 모든 그룹 선택된 상태로
-    const chartData = transformToChartData(weekGroupFrequencies, new Set(allGroups));
+    const chartData = transformToChartData(weekGroupFrequencies, new Set(calculatedGroups));
     console.log('📊 Combined Chart Data:', chartData);
     
     console.groupEnd();
 
     return {
       chartData,
-      allGroups,
+      allGroups: calculatedGroups,
       groupStats,
       groupColors,
       weekGroupFrequencies
@@ -282,7 +282,7 @@ export default function WordFrequencyChart({
                 key={groupLabel}
                 type="monotone"
                 dataKey={groupLabel}
-                stroke={groupColors[groupLabel]}
+                stroke={(groupColors as Record<string, string>)[groupLabel] || '#cccccc'}
                 strokeWidth={3}
                 dot={{ r: 5 }}
                 activeDot={{ r: 7 }}
@@ -315,7 +315,7 @@ export default function WordFrequencyChart({
                     onChange={() => handleGroupToggle(groupLabel)}
                     style={{ marginRight: '0.75rem' }}
                   />
-                  <GroupColorIndicator color={groupColors[groupLabel]} />
+                  <GroupColorIndicator color={(groupColors as Record<string, string>)[groupLabel] || '#cccccc'} />
                 </GroupCheckbox>
                 
                 <GroupInfo>

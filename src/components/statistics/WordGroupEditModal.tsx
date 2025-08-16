@@ -213,20 +213,20 @@ export default function WordGroupEditModal({
         
         <ModalActions>
           <Button
-            leftIcon={<FaSave />}
             onClick={handleSave}
             colorScheme="blue"
             size="sm"
             mr={3}
           >
+            <FaSave style={{ marginRight: '0.5rem' }} />
             수정
           </Button>
           <Button
-            leftIcon={<FaTimes />}
             onClick={handleClose}
             variant="ghost"
             size="sm"
           >
+            <FaTimes style={{ marginRight: '0.5rem' }} />
             취소
           </Button>
         </ModalActions>
