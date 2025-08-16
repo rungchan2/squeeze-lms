@@ -182,7 +182,7 @@ export default function StatsSummary({
           </StatCardHeader>
           <StatValue>
             <Text variant="body" fontWeight="bold" color="var(--warning-600)" style={{ fontSize: '1.5rem' }}>
-              "{stats.mostFrequentWord.word}"
+              &quot;{stats.mostFrequentWord.word}&quot;
             </Text>
             <Text variant="caption" color="var(--grey-500)">
               {stats.mostFrequentWord.frequency}회 출현
