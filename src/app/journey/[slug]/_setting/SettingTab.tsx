@@ -10,7 +10,7 @@ import { BsEnvelopeArrowUpFill } from "react-icons/bs";
 import { FaUserGroup } from "react-icons/fa6";
 import { Input, Separator } from "@chakra-ui/react";
 import { AdminOnly, TeacherOnly } from "@/components/auth/AdminOnly";
-import { FaChalkboardTeacher } from "react-icons/fa";
+import { FaChalkboardTeacher, FaChartLine } from "react-icons/fa";
 import { CgPassword } from "react-icons/cg";
 import { RiAdminFill } from "react-icons/ri";
 import Link from "next/link";
@@ -115,6 +115,16 @@ export default function SettingTab({ slug }: { slug: string }) {
                     fontWeight="medium"
                   >
                     클라스 수정 및 삭제
+                  </Text>
+                </MenuItem>
+                <MenuItem href={`/journey/${slug}/statistics`}>
+                  <FaChartLine />
+                  <Text
+                    variant="body"
+                    color="var(--grey-700)"
+                    fontWeight="medium"
+                  >
+                    통계
                   </Text>
                 </MenuItem>
                 <MenuItem href={`/journey/${slug}/teacher/users`}>

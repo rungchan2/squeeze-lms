@@ -8,9 +8,8 @@ import { Logo } from "@/components/navigation/Logo";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { IconContainer } from "../common/IconContainer";
-import { UserJourneyWithJourney } from "@/types";
-import { getJourney } from "@/utils/data/userJourney";
-import { Separator } from "@chakra-ui/react";
+import { Separator, Skeleton } from "@chakra-ui/react";
+import { useJourneyBySlug } from "@/hooks/useJourneyBySlug";
 import { Menu, Portal } from "@chakra-ui/react";
 import { toaster } from "@/components/ui/toaster";
 import { userLogout } from "@/utils/data/auth";
@@ -33,9 +32,20 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
   );
 
   const isJourney = useMemo(() => pathname?.includes("journey"), [pathname]);
+  
+  // Extract journey ID from pathname
+  const journeyId = useMemo(() => {
+    if (!isJourney) return null;
+    const pathSegments = pathname?.split("/") || [];
+    const journeyIndex = pathSegments.indexOf("journey");
+    return journeyIndex !== -1 && pathSegments[journeyIndex + 1] 
+      ? pathSegments[journeyIndex + 1] 
+      : null;
+  }, [pathname, isJourney]);
+
+  const { journey, isLoading: journeyLoading } = useJourneyBySlug(journeyId || "");
 
   const [isVisible, setIsVisible] = useState(true);
-  const [journeyList, setJourneyList] = useState<UserJourneyWithJourney[]>([]);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
 
@@ -66,28 +76,6 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  useEffect(() => {
-    if (!id) return;
-    const fetchJourneyList = async () => {
-      try {
-        const journeyList = await getJourney(id);
-        setJourneyList(journeyList as unknown as UserJourneyWithJourney[]);
-      } catch (error) {
-        console.error("Error fetching journey list:", error instanceof Error ? error.message : error);
-        setJourneyList([]);
-      }
-    };
-
-    fetchJourneyList();
-  }, [id]);
-
-  const onDropDownChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const journeyId = e.target.value;
-      router.push(`/journey/${journeyId}`);
-    },
-    [router]
-  );
 
   const handleLogout = useCallback(async () => {
     await userLogout();
@@ -97,22 +85,6 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
     });
     window.location.href = "/login";
   }, []);
-
-  // 드롭다운 옵션 메모이제이션
-  const dropdownOptions = useMemo(() => {
-    if (journeyList && journeyList.length > 0) {
-      return journeyList.map((journey) => (
-        <option value={journey.journeys?.id} key={journey.id}>
-          {journey.journeys?.name}
-        </option>
-      ));
-    }
-    return (
-      <option value="" key="0">
-        여행 없음
-      </option>
-    );
-  }, [journeyList]);
 
   return (
     <StyledNavigation $isVisible={isVisible && !isException}>
@@ -124,9 +96,13 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
                 <FaHome size={20} />
               </IconContainer>
               <Separator orientation="vertical" height="100%" size="sm" />
-              <select className="dropdown" onChange={onDropDownChange}>
-                {dropdownOptions}
-              </select>
+              <div className="workspace-name">
+                {journeyLoading ? (
+                  <Skeleton height="20px" width="120px" />
+                ) : (
+                  <span>{journey?.name || "워크스페이스"}</span>
+                )}
+              </div>
             </>
           ) : (
             <Logo width={100} />
@@ -203,17 +179,22 @@ function NavigationComponent({ exceptionPath }: { exceptionPath: string[] }) {
 export const Navigation = memo(NavigationComponent);
 
 const StyledNavigation = styled.div<{ $isVisible: boolean }>`
-  .dropdown {
-    background-color: var(--white);
-    border: 1px solid var(--gray-200);
-    border-radius: 5px;
-    padding: 5px;
-    width: 100%;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    padding-right: 12px;
+  .workspace-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    
+    span {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      max-width: 200px;
+    }
   }
+  
   position: fixed;
   gap: 70px;
   top: 0;

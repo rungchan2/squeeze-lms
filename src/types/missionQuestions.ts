@@ -105,6 +105,7 @@ export const essayAnswerSchema = z.object({
   question_order: z.number(),
   answer_type: z.literal('essay'),
   answer_text: z.string(),
+  answer_text_plain: z.string().optional(), // Plain text version for analysis
   selected_option: z.null(),
   image_urls: z.array(z.string()).default([]),
   is_correct: z.boolean().nullable(),
@@ -138,6 +139,7 @@ export const mixedAnswerSchema = z.object({
   question_order: z.number(),
   answer_type: z.literal('mixed'),
   answer_text: z.string().optional(),
+  answer_text_plain: z.string().optional(), // Plain text version for analysis
   selected_option: z.null(),
   image_urls: z.array(z.string()).default([]),
   is_correct: z.boolean().nullable(),

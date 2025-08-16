@@ -247,3 +247,92 @@ export function useCompletedMissions(userId: string, journeySlug?: string) {
     refetch: mutate,
   };
 }
+
+// Journey의 특정 주차 posts를 가져오는 함수
+async function getJourneyWeekPosts(
+  journeyId: string,
+  weekId?: string,
+  userId?: string
+): Promise<PostWithRelations[]> {
+  const supabase = createClient();
+
+  let query = supabase
+    .from("posts")
+    .select(
+      `
+      *,
+      profiles (
+        id, email, first_name, last_name, organization_id, profile_image, created_at,
+        organizations (
+          id, name
+        )
+      ),
+      teams (
+        id, name
+      ),
+      journey_mission_instances!mission_instance_id (
+        id,
+        journey_week_id,
+        missions (
+          id, name, description, points, mission_type
+        )
+      )
+    `
+    )
+    .eq("journey_id", journeyId)
+    .eq("is_hidden", false)
+    .order("created_at", { ascending: false });
+
+  // 사용자 필터링
+  if (userId) {
+    query = query.eq("user_id", userId);
+  }
+
+  const { data, error } = await query;
+  
+  if (error) throw error;
+
+  let posts = data as unknown as PostWithRelations[];
+
+  // 주차 필터링 (journey_mission_instances를 통해)
+  if (weekId) {
+    posts = posts.filter(post => 
+      post.journey_mission_instances?.journey_week_id === weekId
+    );
+  }
+
+  return posts;
+}
+
+// Journey 주차별 posts 훅
+export function useJourneyPosts(params: {
+  journeyId: string;
+  weekId?: string;
+  userId?: string;
+}) {
+  const { journeyId, weekId, userId } = params;
+  
+  const shouldFetch = Boolean(journeyId);
+  const cacheKey = shouldFetch 
+    ? [`journey-posts`, journeyId, weekId, userId]
+    : null;
+
+  const { data, error, isLoading, mutate } = useSWR(
+    cacheKey,
+    () => getJourneyWeekPosts(journeyId, weekId, userId),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+      dedupingInterval: 2 * 60 * 1000, // 2분 동안 중복 요청 방지
+      keepPreviousData: true,
+    }
+  );
+
+  return {
+    posts: data || [],
+    error,
+    isLoading,
+    refetch: mutate,
+  };
+}
