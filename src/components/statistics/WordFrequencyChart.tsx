@@ -19,12 +19,9 @@ import Spinner from "@/components/common/Spinner";
 import { WordFrequencyResponse } from "@/hooks/useWordFrequencyAnalysis";
 import { WordGroupingResponse } from "@/hooks/useWordGrouping";
 import {
-  calculateGroupFrequencies,
   transformToChartData,
-  extractAllGroupLabels,
   calculateGroupStatistics,
   assignColorsToGroups,
-  ChartGroupData,
   WeekGroupFrequency
 } from "@/utils/wordGroupAnalysisUtils";
 import { CustomWordGroup } from "./CustomWordGroupEditor";
