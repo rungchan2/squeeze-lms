@@ -264,14 +264,14 @@ export default function StatisticsPage() {
               />
 
               {/* 단어 그룹 분석 */}
-              {combinedWordFrequency.length > 0 && (
+              {/* {combinedWordFrequency.length > 0 && (
                 <WordGroupDisplay
                   data={groupingData}
                   isLoading={groupingLoading}
                   title="주제별 단어 그룹"
                   subtitle="유사한 의미의 단어들을 자동으로 분류하여 주요 학습 주제를 파악합니다"
                 />
-              )}
+              )} */}
 
               {/* 데이터 검증 및 디버깅 정보 */}
               <DataInspector
