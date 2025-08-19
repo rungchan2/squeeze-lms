@@ -4,7 +4,7 @@ import { useState } from "react";
 import styled from "@emotion/styled";
 import { Button } from "@chakra-ui/react";
 import Text from "@/components/Text/Text";
-import { FaPlus, FaTrash, FaEdit } from "react-icons/fa";
+import { FaPlus, FaTrash, FaEdit, FaEye, FaEyeSlash } from "react-icons/fa";
 import { toaster } from "@/components/ui/toaster";
 
 import WordGroupEditModal from "./WordGroupEditModal";
@@ -23,6 +23,7 @@ export interface CustomWordGroup {
   totalCount: number;
   isApiGroup?: boolean;
   apiWordsData?: Array<{ word: string; frequency: number }>;
+  isHidden?: boolean;
 }
 
 interface CustomWordGroupEditorProps {
@@ -105,13 +106,33 @@ export default function CustomWordGroupEditor({
     }
   };
 
+  // Handle hiding/showing API group
+  const handleToggleVisibility = (groupId: string) => {
+    const group = apiGroups.find(g => g.id === groupId);
+    if (!group) return;
+
+    const updatedApiGroups = apiGroups.map(g => 
+      g.id === groupId 
+        ? { ...g, isHidden: !g.isHidden }
+        : g
+    );
+    
+    onApiGroupsChange?.(updatedApiGroups);
+    
+    toaster.create({
+      title: group.isHidden ? `'${group.name}' 그룹이 표시됩니다` : `'${group.name}' 그룹이 숨겨집니다`,
+      type: "info",
+    });
+  };
+
   return (
     <Container>
       <Header>
         <HeaderContent>
           <Text variant="body" fontWeight="bold">단어 그룹 관리</Text>
           <Text variant="caption" color="var(--grey-600)">
-            AI가 생성한 그룹을 수정하거나 새로운 커스텀 그룹을 만들 수 있습니다
+            AI가 생성한 그룹을 수정하거나 새로운 커스텀 그룹을 만들 수 있습니다.<br />
+            AI 그룹은 👁️ 버튼으로 차트에서 숨기거나 표시할 수 있습니다.
           </Text>
         </HeaderContent>
         <AddButton
@@ -134,63 +155,90 @@ export default function CustomWordGroupEditor({
       ) : (
         <GroupsList>
           {allGroups.map((group) => (
-            <GroupItem key={group.id} $color={group.color} $isApiGroup={group.isApiGroup}>
+            <GroupItem 
+              key={group.id} 
+              $color={group.color} 
+              $isApiGroup={group.isApiGroup}
+              $isHidden={group.isHidden}
+            >
               <GroupHeader>
-                <GroupInfo>
+                <GroupInfo $isHidden={group.isHidden}>
                   <ColorDot $color={group.color} />
                   <div>
                     <GroupTitle>
                       <Text variant="body" fontWeight="bold">{group.name}</Text>
-                      {group.isApiGroup && (
+                      {!group.isHidden && group.isApiGroup && (
                         <GroupBadge>
                           <Text variant="caption" color="var(--primary-600)">자동생성</Text>
                         </GroupBadge>
                       )}
+                      {group.isHidden && (
+                        <HiddenBadge>
+                          <Text variant="caption" color="var(--warning-600)">숨겨짐</Text>
+                        </HiddenBadge>
+                      )}
                     </GroupTitle>
-                    <GroupMeta>
-                      <Text variant="caption" color="var(--grey-600)">
-                        {group.words.length}개 단어 · 총 빈도 {group.totalCount}
-                      </Text>
-                    </GroupMeta>
+                    {!group.isHidden && (
+                      <GroupMeta>
+                        <Text variant="caption" color="var(--grey-600)">
+                          {group.words.length}개 단어 · 총 빈도 {group.totalCount}
+                        </Text>
+                      </GroupMeta>
+                    )}
                   </div>
                 </GroupInfo>
                 
                 <GroupActions>
-                  <ActionButton onClick={() => handleEditGroup(group)}>
-                    <FaEdit />
-                  </ActionButton>
-                  {!group.isApiGroup && (
-                    <ActionButton
-                      onClick={() => handleDeleteGroup(group.id)}
-                      $isDelete
-                    >
-                      <FaTrash />
+                  {!group.isHidden && (
+                    <ActionButton onClick={() => handleEditGroup(group)}>
+                      <FaEdit />
                     </ActionButton>
+                  )}
+                  {group.isApiGroup ? (
+                    <ActionButton
+                      onClick={() => handleToggleVisibility(group.id)}
+                      $isHide={group.isHidden}
+                      title={group.isHidden ? "그룹 보이기" : "그룹 숨기기"}
+                    >
+                      {group.isHidden ? <FaEyeSlash /> : <FaEye />}
+                    </ActionButton>
+                  ) : (
+                    !group.isHidden && (
+                      <ActionButton
+                        onClick={() => handleDeleteGroup(group.id)}
+                        $isDelete
+                        title="그룹 삭제"
+                      >
+                        <FaTrash />
+                      </ActionButton>
+                    )
                   )}
                 </GroupActions>
               </GroupHeader>
               
-              <WordsList>
-                {group.words.map((word, index) => {
-                  let wordCount = 0;
-                  
-                  if (group.isApiGroup && group.apiWordsData) {
-                    // API 그룹의 경우 저장된 빈도수 데이터 사용
-                    const apiWordData = group.apiWordsData.find(w => w.word === word);
-                    wordCount = apiWordData?.frequency || 0;
-                  } else {
-                    // 커스텀 그룹의 경우 wordFrequencies에서 검색
-                    const wordData = wordFrequencies.find(item => item.word === word);
-                    wordCount = wordData?.count || 0;
-                  }
-                  
-                  return (
-                    <WordTag key={`${group.id}-${word}-${index}`}>
-                      {word} ({wordCount})
-                    </WordTag>
-                  );
-                })}
-              </WordsList>
+              <CollapseContent $isHidden={group.isHidden}>
+                <WordsList>
+                  {group.words.map((word, index) => {
+                    let wordCount = 0;
+                    
+                    if (group.isApiGroup && group.apiWordsData) {
+                      // API 그룹의 경우 저장된 빈도수 데이터 사용
+                      const apiWordData = group.apiWordsData.find(w => w.word === word);
+                      wordCount = apiWordData?.frequency || 0;
+                    } else {
+                      // 커스텀 그룹의 경우 wordFrequencies에서 검색
+                      const wordData = wordFrequencies.find(item => item.word === word);
+                      wordCount = wordData?.count || 0;
+                    }
+                    
+                    return (
+                      <WordTag key={`${group.id}-${word}-${index}`}>
+                        {word} ({wordCount})
+                      </WordTag>
+                    );
+                  })}
+                </WordsList>
+              </CollapseContent>
             </GroupItem>
           ))}
         </GroupsList>
@@ -264,15 +312,26 @@ const GroupsList = styled.div`
   gap: 1rem;
 `;
 
-const GroupItem = styled.div<{ $color: string; $isApiGroup?: boolean }>`
+const GroupItem = styled.div<{ $color: string; $isApiGroup?: boolean; $isHidden?: boolean }>`
   background: var(--white);
   border: 1px solid var(--grey-200);
   border-left: 4px solid ${props => props.$color};
   border-radius: 8px;
   padding: 1rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  
   ${props => props.$isApiGroup && `
     background: var(--grey-25);
     border-color: var(--primary-200);
+  `}
+  
+  ${props => props.$isHidden && `
+    background: var(--grey-50);
+    border-style: dashed;
+    border-color: var(--warning-300);
+    padding: 0.75rem 1rem;
+    transform: scale(0.98);
   `}
 `;
 
@@ -280,14 +339,20 @@ const GroupHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 `;
 
-const GroupInfo = styled.div`
+const GroupInfo = styled.div<{ $isHidden?: boolean }>`
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
   flex: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  ${props => props.$isHidden && `
+    opacity: 0.7;
+    transform: translateX(-8px);
+  `}
 `;
 
 const ColorDot = styled.div<{ $color: string }>`
@@ -311,6 +376,12 @@ const GroupBadge = styled.div`
   border-radius: 4px;
 `;
 
+const HiddenBadge = styled.div`
+  padding: 2px 6px;
+  background: var(--warning-100);
+  border-radius: 4px;
+`;
+
 const GroupMeta = styled.div`
   margin-top: 0.25rem;
 `;
@@ -318,9 +389,15 @@ const GroupMeta = styled.div`
 const GroupActions = styled.div`
   display: flex;
   gap: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Animate buttons sliding in/out */
+  > * {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 `;
 
-const ActionButton = styled.button<{ $isDelete?: boolean }>`
+const ActionButton = styled.button<{ $isDelete?: boolean; $isHide?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -328,15 +405,59 @@ const ActionButton = styled.button<{ $isDelete?: boolean }>`
   height: 32px;
   border: none;
   background: var(--grey-100);
-  color: ${props => props.$isDelete ? 'var(--negative-500)' : 'var(--grey-600)'};
+  color: ${props => {
+    if (props.$isDelete) return 'var(--negative-500)';
+    if (props.$isHide) return 'var(--warning-500)';
+    return 'var(--grey-600)';
+  }};
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(1);
   
   &:hover {
-    background: ${props => props.$isDelete ? 'var(--negative-100)' : 'var(--primary-100)'};
-    color: ${props => props.$isDelete ? 'var(--negative-600)' : 'var(--primary-600)'};
+    background: ${props => {
+      if (props.$isDelete) return 'var(--negative-100)';
+      if (props.$isHide) return 'var(--warning-100)';
+      return 'var(--primary-100)';
+    }};
+    color: ${props => {
+      if (props.$isDelete) return 'var(--negative-600)';
+      if (props.$isHide) return 'var(--warning-600)';
+      return 'var(--primary-600)';
+    }};
+    transform: scale(1.05);
   }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  svg {
+    transition: transform 0.2s ease;
+  }
+  
+  &:hover svg {
+    transform: ${props => props.$isHide ? 'rotate(10deg)' : 'none'};
+  }
+`;
+
+const CollapseContent = styled.div<{ $isHidden?: boolean }>`
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top;
+  
+  ${props => props.$isHidden ? `
+    max-height: 0;
+    opacity: 0;
+    transform: scaleY(0) translateY(-10px);
+    margin-top: 0;
+    overflow: hidden;
+  ` : `
+    max-height: 500px;
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+    margin-top: 0.75rem;
+  `}
 `;
 
 const WordsList = styled.div`

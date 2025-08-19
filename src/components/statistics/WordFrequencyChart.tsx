@@ -199,7 +199,9 @@ export default function WordFrequencyChart({
     return (
       <ChartContainer>
         <Spinner />
-        <Text>차트 데이터를 불러오는 중...</Text>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+          <Text color="var(--grey-500)">차트 데이터를 불러오는 중...</Text>
+        </div>
       </ChartContainer>
     );
   }
