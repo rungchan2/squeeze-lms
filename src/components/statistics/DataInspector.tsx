@@ -36,9 +36,7 @@ export default function DataInspector({
 
   if (isLoading) {
     return (
-      <InspectorContainer>
-        <Text>데이터를 불러오는 중...</Text>
-      </InspectorContainer>
+      <></>
     );
   }
 

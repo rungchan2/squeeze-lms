@@ -243,7 +243,7 @@ export default function StatsSummary({
       </StatsGrid>
 
       {/* 분석 진행률 */}
-      <ProgressSection>
+      {/* <ProgressSection>
         <ProgressHeader>
           <Heading level={5}>분석 완성도</Heading>
           <Text variant="caption" color="var(--grey-500)">
@@ -272,7 +272,7 @@ export default function StatsSummary({
             }
           </Text>
         </DataQuality>
-      </ProgressSection>
+      </ProgressSection> */}
 
       {/* 상위 단어 목록 */}
       {stats.topWords.length > 0 && (

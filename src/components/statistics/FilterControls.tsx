@@ -166,7 +166,7 @@ export default function FilterControls({
                 <option value="">전체 학생</option>
                 {students.map((userJourney) => (
                   <option key={userJourney.user_id} value={userJourney.user_id || ''}>
-                    {userJourney.profiles?.first_name} {userJourney.profiles?.last_name}
+                    {userJourney.profiles?.last_name}{userJourney.profiles?.first_name}
                   </option>
                 ))}
               </select>

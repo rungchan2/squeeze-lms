@@ -2,8 +2,9 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Box, VStack } from "@chakra-ui/react";
+import { Box, VStack, Button } from "@chakra-ui/react";
 import styled from "@emotion/styled";
+import { FaEnvelope } from "react-icons/fa";
 
 import Heading from "@/components/Text/Heading";
 import Text from "@/components/Text/Text";
@@ -16,6 +17,7 @@ import WordGroupDisplay from "@/components/statistics/WordGroupDisplay";
 import StatsSummary from "@/components/statistics/StatsSummary";
 import DataInspector from "@/components/statistics/DataInspector";
 import CustomWordGroupEditor, { CustomWordGroup, WordFrequency } from "@/components/statistics/CustomWordGroupEditor";
+import EmailReportModal from "@/components/statistics/EmailReportModal";
 
 import { useJourneyBySlug } from "@/hooks/useJourneyBySlug";
 import { useWeeks } from "@/hooks/useWeeks";
@@ -35,6 +37,8 @@ export default function StatisticsPage() {
   const [customGroups, setCustomGroups] = useState<CustomWordGroup[]>([]);
   // API 그룹들 (수정 가능한 state로 관리)
   const [apiGroups, setApiGroups] = useState<CustomWordGroup[]>([]);
+  // 이메일 모달 상태
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
   // Journey 데이터 가져오기
   const { journey, isLoading: journeyLoading, error: journeyError } = useJourneyBySlug(
@@ -199,10 +203,22 @@ export default function StatisticsPage() {
     <RoleGuard>
       <PageContainer>
         <PageHeader>
-          <Heading level={2}>📊 학습 분석 통계</Heading>
-          <Text variant="body" color="var(--grey-600)">
-            {journey.name} - 학생들의 주관식 답변을 분석하여 학습 변화를 추적합니다
-          </Text>
+          <HeaderContent>
+            <Heading level={2}>📊 학습 분석 통계</Heading>
+            <Text variant="body" color="var(--grey-600)">
+              {journey.name} - 학생들의 주관식 답변을 분석하여 학습 변화를 추적합니다
+            </Text>
+          </HeaderContent>
+          <EmailButton
+            onClick={() => setIsEmailModalOpen(true)}
+            colorScheme="blue"
+            variant="outline"
+            size="sm"
+            disabled={filters.selectedWeekIds.length === 0}
+          >
+            <FaEnvelope />
+            보고서 전송
+          </EmailButton>
         </PageHeader>
 
         <ContentContainer>
@@ -247,7 +263,7 @@ export default function StatisticsPage() {
               <WordFrequencyChart
                 data={chartData.filter((data): data is WordFrequencyResponse => data !== undefined)}
                 wordGroupData={groupingData}
-                customGroups={[...apiGroups, ...customGroups]}
+                customGroups={[...apiGroups.filter(group => !group.isHidden), ...customGroups]}
                 weekNames={weekNames}
                 isLoading={analysisLoading}
                 error={analysisError}
@@ -264,14 +280,14 @@ export default function StatisticsPage() {
               />
 
               {/* 단어 그룹 분석 */}
-              {combinedWordFrequency.length > 0 && (
+              {/* {combinedWordFrequency.length > 0 && (
                 <WordGroupDisplay
                   data={groupingData}
                   isLoading={groupingLoading}
                   title="주제별 단어 그룹"
                   subtitle="유사한 의미의 단어들을 자동으로 분류하여 주요 학습 주제를 파악합니다"
                 />
-              )}
+              )} */}
 
               {/* 데이터 검증 및 디버깅 정보 */}
               <DataInspector
@@ -290,6 +306,18 @@ export default function StatisticsPage() {
             </AnalysisResults>
           )}
         </ContentContainer>
+
+        {/* Email Report Modal */}
+        <EmailReportModal
+          isOpen={isEmailModalOpen}
+          onClose={() => setIsEmailModalOpen(false)}
+          journeyName={journey.name}
+          filters={filters}
+          wordFrequencyData={chartData.filter((data): data is WordFrequencyResponse => data !== undefined)}
+          customGroups={customGroups}
+          apiGroups={apiGroups.filter(group => !group.isHidden)}
+          weekNames={weekNames}
+        />
       </PageContainer>
     </RoleGuard>
   );
@@ -306,13 +334,30 @@ const PageContainer = styled(Box)`
 
 const PageHeader = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
   padding: 1.5rem;
   background: var(--white);
   border: 1px solid var(--grey-200);
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const HeaderContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const EmailButton = styled(Button)`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 const ContentContainer = styled(VStack)`
