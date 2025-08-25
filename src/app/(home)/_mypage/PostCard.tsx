@@ -24,6 +24,8 @@ import { getCommentsNumber } from "@/utils/data/comment";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { Modal } from "@/components/modal/Modal";
 import { useMissionQuestions } from "@/hooks/useMissionQuestions";
+import { useQuestionsByIds } from "@/hooks/useQuestionsByIds";
+import { excludeHtmlTags } from "@/utils/utils";
 
 interface PostCardProps {
   post: PostWithRelations;
@@ -60,7 +62,7 @@ export default memo(function PostCard({
   showDetails = false,
 }: PostCardProps) {
   const router = useRouter();
-  const { id } = useSupabaseAuth();
+  const { id, isAdmin } = useSupabaseAuth();
   const { onLike, onUnlike, likesCount, useUserLike } = useLikes(post.id);
   const { count } = useCommentsCount(post.id);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -191,7 +193,7 @@ export default memo(function PostCard({
   }, []);
 
   function OnlyMyPost({ children }: { children: React.ReactNode }) {
-    if (post.profiles?.id === id) {
+    if (post.profiles?.id === id || isAdmin) {
       return children;
     }
     return null;
@@ -260,9 +262,12 @@ export default memo(function PostCard({
   const structuredAnswers = hasStructuredAnswers ? 
     ((post as any).answers_data as any).answers : null;
   
-  // Get mission questions for displaying question text
-  const missionId = (post as any).mission_instance?.mission?.id;
-  const { questions } = useMissionQuestions(missionId);
+  // Get question IDs from answers for fetching question text
+  const questionIds = structuredAnswers ? 
+    structuredAnswers.map((answer: any) => answer.question_id).filter(Boolean) : [];
+  
+  // Get questions by IDs from answers_data
+  const { questions } = useQuestionsByIds(questionIds);
   //[ ] 팀 포스팅 시 팀원 이름 전부 표시 및 팀 미션이라는 표시가능.
   return (
     <PostCardContainer showDetails={showDetails} onClick={handlePostClick}>
@@ -407,7 +412,7 @@ export default memo(function PostCard({
                             const question = questions.find(q => q.id === answer.question_id);
                             return question ? (
                               <Text variant="body" color="var(--grey-700)" fontWeight="medium">
-                                {question.question_text}
+                                {excludeHtmlTags(question.question_text)}
                               </Text>
                             ) : (
                               <Text variant="body" color="var(--grey-500)" fontWeight="medium">
@@ -459,9 +464,9 @@ export default memo(function PostCard({
                         {/* Show question text */}
                         {question ? (
                           <Text variant="caption" color="var(--grey-600)" fontWeight="medium">
-                            Q{index + 1}: {question.question_text.length > 40 
-                              ? `${question.question_text.substring(0, 40)}...` 
-                              : question.question_text}
+                            Q{index + 1}: {excludeHtmlTags(question.question_text).length > 40 
+                              ? `${excludeHtmlTags(question.question_text).substring(0, 40)}...` 
+                              : excludeHtmlTags(question.question_text)}
                           </Text>
                         ) : (
                           <Text variant="caption" color="var(--grey-500)" fontWeight="medium">
