@@ -79,7 +79,7 @@ export default function EssayQuestionInput({
           inputHeight="200px"
         />
         
-        <CharacterCounter isOverLimit={isOverLimit || isUnderLimit}>
+        <CharacterCounter isOverLimit={Boolean(isOverLimit || isUnderLimit)}>
           <Text variant="caption" color={(isOverLimit || isUnderLimit) ? "var(--negative-500)" : "var(--grey-500)"}>
             {characterCount} / {maxCharacters} 글자 (공백 제외)
             {minCharacters > 0 && ` (최소 ${minCharacters}자)`}
