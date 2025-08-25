@@ -33,14 +33,28 @@ export default function EssayQuestionInput({
     setPlainText(plainTextValue);
     onChange(question.id, { html: answer, plainText: plainTextValue });
     
-    // Basic validation using plain text
-    const isValid = plainTextValue.trim().length > 0;
+    // Enhanced validation using plain text with min/max character limits (excluding spaces)
+    const textWithoutSpaces = plainTextValue.replace(/\s/g, '');
+    const textLength = textWithoutSpaces.length;
+    const minCharacters = question.min_characters || 0;
+    const maxCharacters = question.max_characters || 1000;
+    
+    let isValid = false;
+    if (question.is_required) {
+      isValid = textLength >= minCharacters && textLength <= maxCharacters;
+    } else {
+      // For optional questions, empty is valid, but if content exists it must meet requirements
+      isValid = textLength === 0 || (textLength >= minCharacters && textLength <= maxCharacters);
+    }
+    
     onValidation?.(question.id, isValid);
   };
 
-  const characterCount = plainText.length;
+  const characterCount = plainText.replace(/\s/g, '').length; // Count characters excluding spaces
+  const minCharacters = question.min_characters || 0;
   const maxCharacters = question.max_characters || 1000;
   const isOverLimit = characterCount > maxCharacters;
+  const isUnderLimit = question.is_required && characterCount < minCharacters;
 
   return (
     <QuestionContainer>
@@ -65,9 +79,12 @@ export default function EssayQuestionInput({
           inputHeight="200px"
         />
         
-        <CharacterCounter isOverLimit={isOverLimit}>
-          <Text variant="caption" color={isOverLimit ? "var(--negative-500)" : "var(--grey-500)"}>
-            {characterCount} / {maxCharacters} 글자
+        <CharacterCounter isOverLimit={isOverLimit || isUnderLimit}>
+          <Text variant="caption" color={(isOverLimit || isUnderLimit) ? "var(--negative-500)" : "var(--grey-500)"}>
+            {characterCount} / {maxCharacters} 글자 (공백 제외)
+            {minCharacters > 0 && ` (최소 ${minCharacters}자)`}
+            {isUnderLimit && ` - 최소 ${minCharacters}자 이상 입력해주세요`}
+            {isOverLimit && ` - 최대 ${maxCharacters}자 이하로 작성해주세요`}
           </Text>
         </CharacterCounter>
       </AnswerSection>

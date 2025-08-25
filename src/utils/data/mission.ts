@@ -151,6 +151,16 @@ export async function createMissionQuestion(question: CreateMissionQuestion) {
   return { data, error };
 }
 
+export async function getMissionQuestionsByIds(questionIds: string[]) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("mission_questions")
+    .select("*")
+    .in("id", questionIds);
+  
+  return { data, error };
+}
+
 export async function updateMissionQuestion(id: string, question: UpdateMissionQuestion) {
   const supabase = createClient();
   const { data, error } = await supabase

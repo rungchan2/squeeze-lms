@@ -57,15 +57,51 @@ export default function CustomWordGroupEditor({
   // Handle saving edited group
   const handleSaveEditedGroup = (updatedGroup: CustomWordGroup) => {
     if (updatedGroup.isApiGroup) {
-      // API 그룹 수정
+      // API 그룹 수정 시 총 카운트 재계산
+      let totalCount = 0;
+      const apiWordsData = updatedGroup.apiWordsData || [];
+      
+      updatedGroup.words.forEach(word => {
+        const apiWordData = apiWordsData.find(w => w.word === word);
+        if (apiWordData) {
+          totalCount += apiWordData.frequency;
+        } else {
+          // 새로 추가된 단어는 wordFrequencies에서 찾기
+          const wordData = wordFrequencies.find(item => item.word === word);
+          totalCount += wordData?.count || 0;
+          
+          // apiWordsData에도 추가
+          if (wordData) {
+            apiWordsData.push({ word: word, frequency: wordData.count });
+          }
+        }
+      });
+      
+      const updatedGroupWithCount = {
+        ...updatedGroup,
+        totalCount,
+        apiWordsData
+      };
+      
       const updatedApiGroups = apiGroups.map(group => 
-        group.id === updatedGroup.id ? updatedGroup : group
+        group.id === updatedGroup.id ? updatedGroupWithCount : group
       );
       onApiGroupsChange?.(updatedApiGroups);
     } else {
-      // 커스텀 그룹 수정
+      // 커스텀 그룹 수정 시 총 카운트 재계산
+      let totalCount = 0;
+      updatedGroup.words.forEach(word => {
+        const wordData = wordFrequencies.find(item => item.word === word);
+        totalCount += wordData?.count || 0;
+      });
+      
+      const updatedGroupWithCount = {
+        ...updatedGroup,
+        totalCount
+      };
+      
       const updatedCustomGroups = customGroups.map(group => 
-        group.id === updatedGroup.id ? updatedGroup : group
+        group.id === updatedGroup.id ? updatedGroupWithCount : group
       );
       onGroupsChange(updatedCustomGroups);
     }
@@ -222,9 +258,15 @@ export default function CustomWordGroupEditor({
                     let wordCount = 0;
                     
                     if (group.isApiGroup && group.apiWordsData) {
-                      // API 그룹의 경우 저장된 빈도수 데이터 사용
+                      // API 그룹의 경우 저장된 빈도수 데이터 먼저 확인
                       const apiWordData = group.apiWordsData.find(w => w.word === word);
-                      wordCount = apiWordData?.frequency || 0;
+                      if (apiWordData) {
+                        wordCount = apiWordData.frequency;
+                      } else {
+                        // apiWordsData에 없으면 wordFrequencies에서 찾기 (새로 추가된 단어)
+                        const wordData = wordFrequencies.find(item => item.word === word);
+                        wordCount = wordData?.count || 0;
+                      }
                     } else {
                       // 커스텀 그룹의 경우 wordFrequencies에서 검색
                       const wordData = wordFrequencies.find(item => item.word === word);
