@@ -2,9 +2,10 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Box, VStack, Button } from "@chakra-ui/react";
+import { Box, VStack, Button, useDisclosure, HStack } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import { FaEnvelope } from "react-icons/fa";
+import { FiSave, FiFolder } from "react-icons/fi";
 
 import Heading from "@/components/Text/Heading";
 import Text from "@/components/Text/Text";
@@ -18,6 +19,10 @@ import StatsSummary from "@/components/statistics/StatsSummary";
 import DataInspector from "@/components/statistics/DataInspector";
 import CustomWordGroupEditor, { CustomWordGroup, WordFrequency } from "@/components/statistics/CustomWordGroupEditor";
 import EmailReportModal from "@/components/statistics/EmailReportModal";
+import { SaveReportModal } from "@/components/statistics/SaveReportModal";
+import { ReportListDrawer } from "@/components/statistics/ReportListDrawer";
+import { WordGroupsConfig, StatisticsReport } from "@/types/statistics-report";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 
 import { useJourneyBySlug } from "@/hooks/useJourneyBySlug";
 import { useWeeks } from "@/hooks/useWeeks";
@@ -26,6 +31,7 @@ import { useAutoWordGrouping } from "@/hooks/useWordGrouping";
 
 export default function StatisticsPage() {
   const { slug } = useParams();
+  const { user } = useSupabaseAuth();
   const [filters, setFilters] = useState<FilterState>({
     viewMode: 'journey',
     selectedUserId: undefined,
@@ -39,6 +45,10 @@ export default function StatisticsPage() {
   const [apiGroups, setApiGroups] = useState<CustomWordGroup[]>([]);
   // 이메일 모달 상태
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  
+  // Report modal/drawer states
+  const saveReportModal = useDisclosure();
+  const reportListDrawer = useDisclosure();
 
   // Journey 데이터 가져오기
   const { journey, isLoading: journeyLoading, error: journeyError } = useJourneyBySlug(
@@ -147,7 +157,7 @@ export default function StatisticsPage() {
       const totalCount = apiWordsData.reduce((sum, w) => sum + w.frequency, 0);
       
       return {
-        id: `api-${group.label}`,
+        id: `api-${group.label}-${index}`,
         name: group.label,
         words: words,
         color: groupColors[index % groupColors.length],
@@ -164,6 +174,53 @@ export default function StatisticsPage() {
   const handleFilterChange = (newFilters: FilterState) => {
     console.log('📝 Filter change received:', newFilters);
     setFilters(newFilters);
+  };
+
+  // Report 적용 핸들러
+  const handleApplyReport = (report: StatisticsReport, data: any) => {
+    // 보고서의 word groups를 CustomWordGroup 형식으로 변환
+    const convertedGroups: CustomWordGroup[] = report.word_groups.groups.map(group => ({
+      id: group.id,
+      name: group.name,
+      words: group.words,
+      color: group.color,
+      totalCount: data.groupedData?.find((g: any) => g.id === group.id)?.totalFrequency || 0,
+      isApiGroup: false,
+      apiWordsData: group.words.map(word => {
+        const freq = combinedWordFrequency.find(([w]) => w === word)?.[1] || 0;
+        return { word, frequency: freq };
+      })
+    }));
+
+    // 커스텀 그룹으로 설정
+    setCustomGroups(convertedGroups);
+    
+    // 설정도 적용
+    if (report.word_groups.settings) {
+      // 필터 상태 업데이트 (minFrequency 등)
+      console.log('Applied report settings:', report.word_groups.settings);
+    }
+  };
+
+  // 현재 word groups configuration 가져오기
+  const getCurrentWordGroupsConfig = (): WordGroupsConfig => {
+    const allGroups = [...customGroups, ...apiGroups.filter(g => !g.isHidden)];
+    
+    return {
+      groups: allGroups.map(group => ({
+        id: group.id,
+        name: group.name,
+        color: group.color,
+        words: group.words,
+        isVisible: !group.isHidden,
+        order: 0,
+      })),
+      settings: {
+        minFrequency: 2,
+        showQuestionText: true,
+        excludedWords: [],
+      }
+    };
   };
 
   // 로딩 상태
@@ -209,16 +266,35 @@ export default function StatisticsPage() {
               {journey.name} - 학생들의 주관식 답변을 분석하여 학습 변화를 추적합니다
             </Text>
           </HeaderContent>
-          <EmailButton
-            onClick={() => setIsEmailModalOpen(true)}
-            colorScheme="blue"
-            variant="outline"
-            size="sm"
-            disabled={filters.selectedWeekIds.length === 0}
-          >
-            <FaEnvelope />
-            보고서 전송
-          </EmailButton>
+          <HStack gap={2}>
+            <Button
+              onClick={reportListDrawer.onOpen}
+              colorScheme="teal"
+              variant="outline"
+              size="sm"
+            >
+              저장된 보고서 <FiFolder />
+            </Button>
+            <Button
+              onClick={saveReportModal.onOpen}
+              colorScheme="blue"
+              variant="outline"
+              size="sm"
+              disabled={customGroups.length === 0 && apiGroups.length === 0}
+            >
+              보고서 저장 <FiSave />
+            </Button>
+            <EmailButton
+              onClick={() => setIsEmailModalOpen(true)}
+              colorScheme="blue"
+              variant="outline"
+              size="sm"
+              disabled={filters.selectedWeekIds.length === 0}
+            >
+              <FaEnvelope />
+              이메일 전송
+            </EmailButton>
+          </HStack>
         </PageHeader>
 
         <ContentContainer>
@@ -317,6 +393,28 @@ export default function StatisticsPage() {
           customGroups={customGroups}
           apiGroups={apiGroups.filter(group => !group.isHidden)}
           weekNames={weekNames}
+        />
+
+        {/* Save Report Modal */}
+        <SaveReportModal
+          open={saveReportModal.open}
+          onOpenChange={(open) => open ? saveReportModal.onOpen() : saveReportModal.onClose()}
+          journeyId={journey.id}
+          wordGroups={getCurrentWordGroupsConfig()}
+          currentSettings={{
+            minFrequency: 2,
+            showQuestionText: true,
+          }}
+        />
+
+        {/* Report List Drawer */}
+        <ReportListDrawer
+          open={reportListDrawer.open}
+          onOpenChange={(open) => open ? reportListDrawer.onOpen() : reportListDrawer.onClose()}
+          journeyId={journey.id}
+          onApplyReport={handleApplyReport}
+          onCreateNew={saveReportModal.onOpen}
+          currentUserId={user?.id}
         />
       </PageContainer>
     </RoleGuard>

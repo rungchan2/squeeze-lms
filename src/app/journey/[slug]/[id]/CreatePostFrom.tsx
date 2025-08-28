@@ -8,7 +8,7 @@ import Tiptap from "@/components/richTextInput/RichTextEditor";
 import Heading from "@/components/Text/Heading";
 import Text from "@/components/Text/Text";
 import styled from "@emotion/styled";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { createPost, updatePost } from "@/utils/data/posts";
 import { Input } from "@chakra-ui/react";
@@ -50,7 +50,7 @@ export default function DoMissionPage({
   slug?: string;
   missionInstanceId?: string;
 }) {
-  const { id: userId } = useSupabaseAuth();
+  const { id: userId, role } = useSupabaseAuth();
   const router = useRouter();
   const { missionInstance, isLoading, error } = useMissionInstance(
     missionInstanceId || ""
@@ -269,16 +269,35 @@ export default function DoMissionPage({
     userId || "",
     slug || ""
   );
-  // 권한 체크는 useEffect 내에서 수행, hooks는 조건부로 실행하면 안됨
-  useEffect(() => {
-    if (updateData && userId !== updateData?.user_id) {
-      toaster.create({
-        title: "권한이 없습니다.",
-        type: "error",
-      });
-      router.push(`/journey/${slug}`);
+
+  // 권한 체크 함수
+  const canEditPost = useCallback(() => {
+    if (!updateData || !userId) return false;
+    
+    // 작성자 본인
+    if (userId === updateData.user_id) return true;
+    
+    // teacher 또는 admin 권한
+    if (role === 'teacher' || role === 'admin') {
+      return true; // organization 체크는 DB 정책에서 처리
     }
-  }, [updateData, userId, router, slug]);
+    
+    return false;
+  }, [updateData, userId, role]);
+
+  // 권한 체크는 useEffect 내에서 수행, flushSync 오류 방지를 위해 비동기 처리
+  useEffect(() => {
+    if (updateData && !canEditPost()) {
+      // setTimeout을 사용하여 렌더링 사이클과 분리
+      setTimeout(() => {
+        toaster.create({
+          title: "권한이 없습니다.",
+          type: "error",
+        });
+        router.push(`/journey/${slug}`);
+      }, 0);
+    }
+  }, [updateData, canEditPost, router, slug]);
 
   useEffect(() => {
     if (updateData) {
