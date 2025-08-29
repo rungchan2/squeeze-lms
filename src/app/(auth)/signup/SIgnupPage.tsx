@@ -16,7 +16,6 @@ import {
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DevTool } from "@hookform/devtools";
 import { useState, useEffect } from "react";
 import { useOrganization } from "@/hooks/useOrganization";
 import Select from "react-select";
@@ -365,9 +364,6 @@ export default function SignupPage() {
         >
           다른 권한으로 회원가입하기
         </Text>
-        {process.env.NODE_ENV === "development" && (
-          <DevTool control={control} />
-        )}
       </FormContainer>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <ModalContainer>

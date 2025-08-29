@@ -53,14 +53,6 @@ async function fetchWordFrequency(
       },
     });
 
-    console.group('📡 Word Frequency API Response');
-    console.log('✅ Response Status:', response.status);
-    console.log('✅ Response OK:', response.ok);
-    console.log('✅ Response Headers:', Object.fromEntries(response.headers.entries()));
-    console.log('✅ Response URL:', response.url);
-    console.log('✅ Response Type:', response.type);
-    console.log('✅ Response Redirected:', response.redirected);
-
     if (!response.ok) {
       let errorDetails = 'Unknown error';
       let errorBody = null;

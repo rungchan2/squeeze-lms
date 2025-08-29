@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -944,6 +943,71 @@ export type Database = {
           role?: Database["public"]["Enums"]["role"]
         }
         Relationships: []
+      }
+      statistics_reports: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          journey_id: string | null
+          metadata: Json | null
+          name: string
+          updated_at: string | null
+          word_groups: Json
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          journey_id?: string | null
+          metadata?: Json | null
+          name: string
+          updated_at?: string | null
+          word_groups?: Json
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          journey_id?: string | null
+          metadata?: Json | null
+          name?: string
+          updated_at?: string | null
+          word_groups?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "statistics_reports_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "statistics_reports_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_with_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "statistics_reports_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "statistics_reports_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "journeys_with_files"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {

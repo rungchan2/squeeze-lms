@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createUserSchema, Role, type CreateUser } from "@/types";
-import { DevTool } from "@hookform/devtools";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { decrypt } from "@/utils/encryption";
@@ -364,7 +363,6 @@ export default function LoginPage() {
         >
           다른 권한으로 회원가입하기
         </Text>
-        <DevTool control={control} />
       </FormContainer>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <ModalContainer>

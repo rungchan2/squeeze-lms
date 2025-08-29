@@ -26,7 +26,7 @@ import BackButton from "@/components/common/BackButton";
 import Spinner from "@/components/common/Spinner";
 import { Stack, Flex } from "@chakra-ui/react";
 import { FloatingButton } from "@/components/common/FloatingButton";
-import { Spacing } from "@/components/common/Spacing";
+import BottomSpacing from "@/components/common/BottomSpacing";
 
 export default function NewMissionPage({ editMissionData }: { editMissionData?: Mission }) {
   const router = useRouter();
@@ -388,7 +388,7 @@ export default function NewMissionPage({ editMissionData }: { editMissionData?: 
           </QuestionBuilderSection>
         )}
       </div>
-      <Spacing />
+      <BottomSpacing />
       <FloatingButton onClick={handleSubmit(onSubmit)} position="center">
         미션 {editMissionData ? "수정" : "생성"}
       </FloatingButton>
