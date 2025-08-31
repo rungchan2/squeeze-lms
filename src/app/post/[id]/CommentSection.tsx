@@ -17,11 +17,13 @@ interface CommentSectionProps {
   postId?: string;
   enableRealtime?: boolean;
   missionInstanceId?: string;
+  journeyId?: string;
 }
 
 export default function CommentSection({
   postId: propPostId,
   missionInstanceId,
+  journeyId,
 }: CommentSectionProps = {}) {
   const params = useParams();
   const postId = propPostId || (params.id as string);
@@ -205,7 +207,7 @@ export default function CommentSection({
 
       <CommentInputSection
         createComment={createComment}
-        missionInstanceId={missionInstanceId}
+        missionInstanceId={journeyId || missionInstanceId}
         postId={postId}
       />
     </CommentSectionContainer>
