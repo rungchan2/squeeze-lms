@@ -198,7 +198,7 @@ export default function TeacherPostsPage() {
     refetch(); // 데이터 다시 불러오기
   };
 
-  const handleExportToExcel = () => {
+  const handleExportToExcel = async () => {
     if (!weeks || !missionInstances) {
       toaster.create({
         title: "데이터를 불러오는 중입니다. 잠시 후 다시 시도해주세요.",
@@ -208,7 +208,13 @@ export default function TeacherPostsPage() {
     }
 
     try {
-      const filename = exportPostsToExcel({
+      // Show loading toast
+      toaster.create({
+        title: "Excel 파일을 생성하는 중입니다...",
+        type: "loading",
+      });
+
+      const filename = await exportPostsToExcel({
         posts: filteredPosts,
         journeyName: slug as string,
         weeks: weekOptions,

@@ -133,6 +133,7 @@ export default function PostPage() {
           postId={params.id as string}
           enableRealtime={true}
           missionInstanceId={post.mission_instance_id?.id}
+          journeyId={post.journey_id || post.journey_mission_instances?.journey_id}
         />
       </CommentContainer>
     </PostPageContainer>

@@ -64,7 +64,7 @@ export default function JourneyTab() {
     return (
       <div>
         <Text variant="body" color="red">
-          사용자 여정 정보를 불러오는 중 오류가 발생했습니다.
+          사용자 미션 정보를 불러오는 중 오류가 발생했습니다.
         </Text>
       </div>
     );

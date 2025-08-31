@@ -6,6 +6,8 @@ import { AnswersData, AnyAnswer } from "@/types/missionQuestions";
 import Text from "@/components/Text/Text";
 import { FiFileText, FiCheckSquare, FiImage, FiLayers } from "react-icons/fi";
 import RichTextViewer from "@/components/richTextInput/RichTextViewer";
+import { useQuestionsByIds } from "@/hooks/useQuestionsByIds";
+import { excludeHtmlTags } from "@/utils/utils";
 
 interface AnswersViewerProps {
   answersData: AnswersData | null;
@@ -13,6 +15,13 @@ interface AnswersViewerProps {
 }
 
 const AnswersViewer: React.FC<AnswersViewerProps> = ({ answersData, legacyContent }) => {
+  // Get question IDs from answers for fetching question text (same approach as PostCard)
+  const questionIds = answersData?.answers ? 
+    answersData.answers.map(answer => answer.question_id).filter(Boolean) : [];
+  
+  // Fetch questions by IDs
+  const { questions } = useQuestionsByIds(questionIds);
+
   // Legacy content fallback for old posts
   if (!answersData && legacyContent) {
     return (
@@ -111,6 +120,20 @@ const AnswersViewer: React.FC<AnswersViewerProps> = ({ answersData, legacyConten
                   </ScoreBadge>
                 )}
               </AnswerHeader>
+
+              {/* Display question text */}
+              {questions && (
+                (() => {
+                  const question = questions.find(q => q.id === answer.question_id);
+                  return question ? (
+                    <QuestionText>
+                      <Text variant="body" color="var(--grey-700)" fontWeight="medium">
+                        {excludeHtmlTags(question.question_text)}
+                      </Text>
+                    </QuestionText>
+                  ) : null;
+                })()
+              )}
 
               <AnswerContent>
                 <AnswerRenderer answer={answer} />
@@ -385,4 +408,11 @@ const ImageItem = styled.div`
       transform: scale(1.02);
     }
   }
+`;
+
+const QuestionText = styled.div`
+  padding: 12px 16px;
+  background: var(--grey-50);
+  border-left: 3px solid var(--primary-300);
+  border-bottom: 1px solid var(--grey-200);
 `;

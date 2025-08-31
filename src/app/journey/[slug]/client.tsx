@@ -138,7 +138,7 @@ export default function JourneyClient({
         <Tabs.List width="100%" justifyContent="center">
           <Tabs.Trigger value="plan" {...triggerStyle}>
             <FaSchool />
-            일정
+            미션
           </Tabs.Trigger>
           <Tabs.Trigger value="dashboard" {...triggerStyle}>
             <VscGraphLine />

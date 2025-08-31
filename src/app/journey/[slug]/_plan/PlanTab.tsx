@@ -99,7 +99,7 @@ export default function PlanTab({ slug }: { slug: string }) {
   return (
     <PlanContainer>
       <div className="header">
-        <Heading level={3}>여행 일정</Heading>
+        <Heading level={3}>미션 일정</Heading>
       </div>
 
       <Suspense fallback={<Spinner />}>
