@@ -19,7 +19,7 @@ export default function NoJourney() {
         }} 
       />
       <Text variant="body" fontWeight="bold">
-        아직 여행이 없습니다..!
+        아직 미션이 없습니다..!
       </Text>
     </NoJourneyContainer>
   );
