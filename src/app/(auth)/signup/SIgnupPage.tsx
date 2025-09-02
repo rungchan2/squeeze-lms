@@ -406,7 +406,7 @@ export default function SignupPage() {
                   title: "권한 인증 실패",
                   type: "error",
                 });
-              } else if (accessCodeData) {
+              } else if (accessCodeData && 'role' in accessCodeData) {
                 setConfirmedRoleType(accessCodeData.role as Role);
                 setValue("role", accessCodeData.role as Role);
                 toaster.create({

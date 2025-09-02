@@ -68,9 +68,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 기본 역할 기반 권한 검사
-    const userRole = profile.role || "user";
-    const userRoleLevel = roleHierarchy[userRole] || 0;
+    const userRole = ('role' in profile && profile.role) ? profile.role : "user";
+    const userRoleLevel = roleHierarchy[userRole as keyof typeof roleHierarchy] || 0;
     const requiredRoleLevel = roleHierarchy[requiredRole] || 999;
+    const orgId = ('organization_id' in profile && typeof profile.organization_id === 'string') 
+      ? profile.organization_id 
+      : '';
     
     let hasPermission = userRoleLevel >= requiredRoleLevel;
 
@@ -79,8 +82,8 @@ export async function POST(request: NextRequest) {
       hasPermission = await checkResourcePermission(
         supabase,
         session.user.id,
-        userRole,
-        profile.organization_id || '',
+        userRole as string,
+        orgId,
         resourceType,
         resourceId,
         action
@@ -100,7 +103,7 @@ export async function POST(request: NextRequest) {
         debug: {
           userRoleLevel,
           requiredRoleLevel,
-          organizationId: profile.organization_id
+          organizationId: orgId
         }
       })
     });

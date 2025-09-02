@@ -13,9 +13,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createUserSchema, Role, type CreateUser } from "@/types";
 import { useState, useEffect } from "react";
-import Cookies from "js-cookie";
-import { decrypt } from "@/utils/encryption";
 import { NeededUserMetadata } from "@/app/(auth)/auth/callback/route";
+import { getAuthDataFromCookie, clearAuthCookie } from "@/app/(auth)/actions/auth-data";
 import { createProfile } from "../../actions";
 import { useOrganization } from "@/hooks/useOrganization";
 import Select from "react-select";
@@ -59,7 +58,6 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    control,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateUser>({
@@ -72,12 +70,14 @@ export default function LoginPage() {
       phone: "",
       role: "user",
       profile_image: "",
+      profile_image_file_id: null,
+      organization_id: "",
       marketing_opt_in: false,
-      privacy_agreed: false,
+      privacy_agreed: true, // Must be true to match the schema
     },
   });
 
-  // 사용자 데이터 로드
+  // Load user data
   useEffect(() => {
     let isMounted = true;
 
@@ -85,62 +85,47 @@ export default function LoginPage() {
       if (!isMounted) return;
 
       try {
-        // 서버에서 사용자 확인
-        const userData = await getUser();
-        if (!userData && isMounted) {
-          router.push("/error?message=로그인 정보가 없거나 유효하지 않습니다");
-          return;
-        }
-
-        // 쿠키에서 인증 데이터 가져오기
-        const cookieAuthData = Cookies.get("auth_data");
-        if (!cookieAuthData || typeof cookieAuthData !== "string") {
+        // Verify user is authenticated
+        const { data: userData, error: userError } = await getUser();
+        if (userError || !userData?.user) {
           if (isMounted) {
-            router.push(
-              "/error?message=로그인 정보가 없거나 유효하지 않습니다"
-            );
+            console.error("User verification failed:", userError);
+            router.push("/error?message="+encodeURIComponent("로그인 정보가 없거나 유효하지 않습니다"));
           }
           return;
         }
 
-        try {
-          const decryptedString = decrypt(cookieAuthData);
-          if (!decryptedString) {
-            throw new Error("복호화된 데이터가 없습니다");
-          }
-
-          const decryptedAuthData: NeededUserMetadata =
-            JSON.parse(decryptedString);
-
+        // Get auth data from cookie (server-side)
+        const { data: authData, error: authError } = await getAuthDataFromCookie();
+        
+        if (authError || !authData) {
           if (isMounted) {
-            setAuthData(decryptedAuthData);
-
-            // 폼 값 설정
-            setValue("email", decryptedAuthData.email || "");
-            setValue("first_name", decryptedAuthData.first_name || "");
-            setValue("last_name", decryptedAuthData.last_name || "");
-            setValue("profile_image", decryptedAuthData.profile_image || "");
-
-            if (decryptedAuthData.isEmailSignup) {
-              setIsSignUpUseEmail(true);
-            }
-
-            setIsLoading(false);
+            console.error("Auth data error:", authError);
+            router.push("/error?message="+encodeURIComponent(authError || "로그인 정보를 확인할 수 없습니다"));
           }
-        } catch (error) {
-          if (isMounted) {
-            const errorMessage =
-              error instanceof Error
-                ? error.message
-                : "알 수 없는 에러가 발생했습니다";
-            router.push(`/error?message=${encodeURIComponent(errorMessage)}`);
+          return;
+        }
+
+        if (isMounted) {
+          setAuthData(authData);
+
+          // Set form values
+          setValue("email", authData.email || "");
+          setValue("first_name", authData.first_name || "");
+          setValue("last_name", authData.last_name || "");
+          setValue("profile_image", authData.profile_image || "");
+
+          if (authData.isEmailSignup) {
+            setIsSignUpUseEmail(true);
           }
+
+          setIsLoading(false);
         }
       } catch (error) {
         if (isMounted) {
           console.error("사용자 정보 확인 중 오류:", error);
           router.push(
-            "/error?message=로그인 정보를 확인하는 중 오류가 발생했습니다"
+            "/error?message="+encodeURIComponent("로그인 정보를 확인하는 중 오류가 발생했습니다")
           );
         }
       }
@@ -154,9 +139,12 @@ export default function LoginPage() {
   }, [router, setValue]);
 
   useEffect(() => {
-    // 체크박스 상태가 변경될 때 폼 값 업데이트
+    // Update form values when checkbox state changes
     setValue("marketing_opt_in", isChecked.includes("mailAgreement"));
-    setValue("privacy_agreed", isChecked.includes("cookieAgreement"));
+    // privacy_agreed must be true according to schema, only update if checked
+    if (isChecked.includes("cookieAgreement")) {
+      setValue("privacy_agreed", true);
+    }
   }, [isChecked, setValue]);
 
   const handleCheckboxChangeAll = () => {
@@ -185,11 +173,44 @@ export default function LoginPage() {
 
   const onSubmit = async (data: CreateUser) => {
     try {
-      const { error } = await createProfile(data);
-      if (error) {
-        router.push(`/error?message=회원가입 실패: ${error.message}`);
+      // Validate required fields
+      if (!data.organization_id) {
+        toaster.create({
+          title: "소속을 선택해 주세요",
+          type: "error",
+        });
         return;
       }
+
+      // Ensure phone number format
+      if (data.phone && !data.phone.match(/^[0-9-]+$/)) {
+        toaster.create({
+          title: "전화번호는 숫자와 -만 입력 가능합니다",
+          type: "error",
+        });
+        return;
+      }
+
+      const { error } = await createProfile(data);
+      if (error) {
+        console.error("Profile creation error:", error);
+        
+        // Handle specific error cases
+        if (error.message?.includes("duplicate") || error.message?.includes("unique")) {
+          toaster.create({
+            title: "이미 가입된 이메일입니다",
+            type: "error",
+          });
+          router.push("/login");
+          return;
+        }
+        
+        router.push(`/error?message=${encodeURIComponent(`회원가입 실패: ${error.message}`)}`);
+        return;
+      }
+
+      // Clear auth cookie after successful profile creation
+      await clearAuthCookie();
 
       if (isSignUpUseEmail) {
         toaster.create({
@@ -200,20 +221,15 @@ export default function LoginPage() {
         return;
       }
 
-      try {
-        // 프로필 생성 성공 후 홈페이지로 리다이렉트
-        window.location.href = "/";
-      } catch (refreshError) {
-        console.error("사용자 정보 갱신 중 오류:", refreshError);
-        toaster.create({
-          title: "회원가입은 성공했으나 로그인 처리 중 오류가 발생했습니다.",
-          type: "warning",
-        });
-        window.location.href = "/login";
-      }
+      // Redirect to home for OAuth users
+      toaster.create({
+        title: "회원가입이 완료되었습니다!",
+        type: "success",
+      });
+      window.location.href = "/";
     } catch (error) {
       console.error("회원가입 오류:", error);
-      router.push("/error?message=회원가입 중 오류가 발생했습니다");
+      router.push("/error?message="+encodeURIComponent("회원가입 중 오류가 발생했습니다"));
     }
   };
 
@@ -397,14 +413,13 @@ export default function LoginPage() {
                   title: "권한 인증 실패",
                   type: "error",
                 });
-              } else if (accessCodeData) {
+              } else if (accessCodeData && 'role' in accessCodeData) {
                 setConfirmedRoleType(accessCodeData.role as Role);
                 setValue("role", accessCodeData.role as Role);
                 toaster.create({
                   title: "권한 인증 성공",
                   type: "success",
                 });
-                setValue("role", accessCodeData.role as Role);
                 setIsModalOpen(false);
                 setRoleAccessCode("");
               }

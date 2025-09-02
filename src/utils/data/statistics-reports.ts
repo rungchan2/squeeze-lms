@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/client';
-import { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
+// import { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 import { 
   StatisticsReport, 
   CreateStatisticsReport, 
@@ -7,9 +7,10 @@ import {
   StatisticsReportSchema 
 } from '@/types/statistics-report';
 
-type DBStatisticsReport = Tables<'statistics_reports'>;
-type DBStatisticsReportInsert = TablesInsert<'statistics_reports'>;
-type DBStatisticsReportUpdate = TablesUpdate<'statistics_reports'>;
+// TODO: Re-enable when database types are generated
+// type DBStatisticsReport = Tables<'statistics_reports'>;
+// type DBStatisticsReportInsert = TablesInsert<'statistics_reports'>;
+// type DBStatisticsReportUpdate = TablesUpdate<'statistics_reports'>;
 
 // Get all reports for a journey
 export async function getStatisticsReports(journeyId: string): Promise<StatisticsReport[]> {
@@ -57,7 +58,7 @@ export async function createStatisticsReport(
 ): Promise<StatisticsReport> {
   const supabase = createClient();
   
-  const insertData: DBStatisticsReportInsert = {
+  const insertData = {
     journey_id: report.journey_id,
     created_by: userId,
     name: report.name,
@@ -87,7 +88,7 @@ export async function updateStatisticsReport(
 ): Promise<StatisticsReport> {
   const supabase = createClient();
   
-  const updateData: DBStatisticsReportUpdate = {
+  const updateData = {
     ...(updates.name && { name: updates.name }),
     ...(updates.description !== undefined && { description: updates.description }),
     ...(updates.word_groups && { word_groups: updates.word_groups }),

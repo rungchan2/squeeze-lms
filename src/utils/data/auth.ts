@@ -47,19 +47,29 @@ export async function refreshToken() {
 }
 
 export const getURL = () => {
-  // 현재 환경이 개발(localhost) 환경인지 확인
-  const isDevelopment = 
-    !process.env.NEXT_PUBLIC_VERCEL_ENV || // Vercel 환경 변수가 없거나
-    process.env.NEXT_PUBLIC_VERCEL_ENV === 'development' || // 개발 환경이거나
-    window.location.hostname === 'localhost' || // 호스트가 localhost이거나
-    window.location.hostname === '127.0.0.1'; // 로컬 IP인 경우
-  
-  // 개발 환경이면 localhost 사용, 아니면 production URL 사용
-  if (isDevelopment) {
-    return 'http://localhost:3000/auth/callback';
-  } else {
-    return 'https://squeezeedu.com/auth/callback';
+  // Check if we're in a browser environment
+  if (typeof window !== 'undefined') {
+    const { hostname, protocol, port } = window.location;
+    
+    // Check if running on localhost or local IP
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    
+    if (isLocalhost) {
+      return `${protocol}//${hostname}:${port || '3000'}/auth/callback`;
+    }
+    
+    // For production, always use HTTPS
+    return `https://${hostname}/auth/callback`;
   }
+  
+  // Fallback for server-side or build time
+  // Use environment variable if available
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`;
+  }
+  
+  // Default to production URL
+  return 'https://squeezeedu.com/auth/callback';
 }
 
 export async function socialLogin(
