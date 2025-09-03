@@ -441,7 +441,7 @@ export default function DoMissionPage({
       // Prepare post data based on mission type
       const postData = {
         user_id: userId,
-        mission_instance_id: missionInstance.id,
+        mission_instance_id: (missionInstance as any).id,
         title: title,
         score: missionInstance.mission.points || 0,
         journey_id: missionInstance.journey_id || "",
@@ -489,7 +489,7 @@ export default function DoMissionPage({
         // 팀 미션이 아닌 경우 일반 유저 포인트 생성
         const { error: userPointError } = await userPoint.createUserPoint({
           profile_id: userId,
-          mission_instance_id: missionInstance.id,
+          mission_instance_id: (missionInstance as any).id,
           post_id: data?.id || "",
           total_points: missionInstance.mission.points || 0,
         });

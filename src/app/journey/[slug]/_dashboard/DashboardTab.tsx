@@ -113,8 +113,8 @@ export default function DashboardTab({ slug }: { slug?: string }) {
         const userScores: Record<string, number> = {};
         
         journeyPointsData.forEach(point => {
-          const profileId = point.profile_id;
-          const score = point.total_points || 0;
+          const profileId = (point as any).profile_id;
+          const score = (point as any).total_points || 0;
           
           if (!userScores[profileId]) {
             userScores[profileId] = 0;
@@ -132,7 +132,7 @@ export default function DashboardTab({ slug }: { slug?: string }) {
             first_name: profile?.first_name || null,
             last_name: profile?.last_name || null,
             profile_image: profile?.profile_image || null,
-            organization_name: profile?.organizations?.name || null,
+            organization_name: (profile?.organizations as any)?.name || null,
             total_score: userScores[profileId] || 0,
             rank: 0, // 초기값, 아래에서 계산
             isCurrentUser: profileId === userId
@@ -172,7 +172,7 @@ export default function DashboardTab({ slug }: { slug?: string }) {
                 
                 // 현재 사용자의 완료된 미션 찾기
                 const userCompletedMissions = journeyPointsData.filter(point => 
-                  point.profile_id === userId && 
+                  (point as any).profile_id === userId && 
                   weekMissionIds.includes(point.mission_instance_id)
                 );
                 

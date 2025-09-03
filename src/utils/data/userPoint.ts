@@ -65,7 +65,7 @@ const userPoint = {
         const { data, error } = await supabase
           .from("user_points")
           .update(updateData)
-          .eq("id", existingPoint.id)
+          .eq("id", (existingPoint as any).id)
           .select();
         
         if (error) {

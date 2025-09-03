@@ -94,7 +94,7 @@ export async function uploadFile(file: File, userId: string, options?: UploadOpt
 
   return {
     url: publicUrl,
-    fileId: fileRecord.id,
+    fileId: (fileRecord as any).id,
     metadata: fileRecord,
   }
 }

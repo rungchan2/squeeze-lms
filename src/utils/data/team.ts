@@ -53,16 +53,16 @@ export async function getCurrentUserTeam(
     if (initialData.length > 1) {
       return {
         team_id: initialData[0].team_id,
-        team_name: initialData[0].profiles?.first_name || "",
-        members: initialData.map((member) => member.profiles?.first_name || ""),
+        team_name: (initialData[0].profiles as any)?.first_name || "",
+        members: initialData.map((member) => (member.profiles as any)?.first_name || ""),
       };
     }
 
     // 단일 결과인 경우
     return {
       team_id: initialData[0].team_id,
-      team_name: initialData[0].profiles?.first_name || "",
-      members: initialData.map((member) => member.profiles?.first_name || ""),
+      team_name: (initialData[0].profiles as any)?.first_name || "",
+      members: initialData.map((member) => (member.profiles as any)?.first_name || ""),
     };
   } catch (error) {
     console.error("getCurrentUserTeam 예외 발생:", error);

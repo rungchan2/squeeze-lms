@@ -31,13 +31,18 @@ export async function createProfile(profile: CreateUser) {
   }
 
   // Ensure the profile ID matches the authenticated user
-  const profileData = {
+  const profileData: any = {
     ...profile,
     id: user.id,
-    email: profile.email || user.email,
+    email: profile.email || user.email || '',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
+  
+  // Convert null role to undefined for database insert
+  if (profileData.role === null) {
+    delete profileData.role;
+  }
 
   // Check if profile already exists
   const { data: existingProfile } = await supabase

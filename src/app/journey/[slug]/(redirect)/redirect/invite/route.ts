@@ -53,8 +53,8 @@ export async function GET(
     const { data: existingRecord } = await supabase_server
       .from("user_journeys")
       .select("id")
-      .eq("user_id", profileIdAndRole.id)
-      .eq("journey_id", journey.id)
+      .eq("user_id", (profileIdAndRole as any).id)
+      .eq("journey_id", (journey as any).id)
       .maybeSingle();
 
     if (existingRecord) {
@@ -66,9 +66,9 @@ export async function GET(
     const { error: insertError } = await supabase_server
       .from("user_journeys")
       .insert({
-        user_id: profileIdAndRole.id,
-        journey_id: journey.id,
-        role_in_journey: profileIdAndRole.role,
+        user_id: (profileIdAndRole as any).id,
+        journey_id: (journey as any).id,
+        role_in_journey: (profileIdAndRole as any).role,
         joined_at: new Date().toISOString(),
       });
 
