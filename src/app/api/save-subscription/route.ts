@@ -67,7 +67,7 @@ export const POST = apiGuards.postOnly(async (request: NextRequest, { user }) =>
           notification_json: subscriptionJson,
           message: "푸시 알림 구독 정보"
         })
-        .eq("id", existingData.id);
+        .eq("id", (existingData as any).id);
 
       if (updateError) {
         console.error("구독 정보 업데이트 오류:", updateError);

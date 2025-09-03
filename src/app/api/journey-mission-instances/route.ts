@@ -56,8 +56,8 @@ export const POST = apiGuards.postOnly(async (request: NextRequest, { user }) =>
     
     // 데이터 변환 (missions → mission)
     const transformedData = data?.map(item => ({
-      ...item,
-      mission: item.missions
+      ...(item as any),
+      mission: (item as any).missions
     })) || [];
     
     // 캐시 방지 헤더와 함께 응답
