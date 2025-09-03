@@ -201,13 +201,13 @@ export const exportPostsToExcel = async (data: ExcelExportData) => {
         answers.forEach((answer: any) => {
           const question = questionsMap.get(answer.question_id);
           if (question) {
-            const questionNumber = answer.question_order || question.question_order;
+            const questionNumber = answer.question_order || (question as any).question_order;
             if (!questionHeaders.has(questionNumber)) {
               questionHeaders.set(questionNumber, {
-                text: question.question_text.length > 50 
-                  ? question.question_text.substring(0, 50) + '...' 
-                  : question.question_text,
-                type: question.question_type
+                text: (question as any).question_text.length > 50 
+                  ? (question as any).question_text.substring(0, 50) + '...' 
+                  : (question as any).question_text,
+                type: (question as any).question_type
               });
             }
           }

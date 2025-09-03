@@ -1,9 +1,10 @@
 import { createClient } from "@/utils/supabase/client";
 import { CreateUserPoints } from "@/types";
-import { Database } from "@/types/database.types";
+// import { Database } from "@/types/database.types";
 
-export type UpdateUserPoints = Database["public"]["Tables"]["user_points"]["Update"];
-export type UserPoints = Database["public"]["Tables"]["user_points"]["Row"];
+// TODO: Re-enable when database types are generated
+// export type UpdateUserPoints = Database["public"]["Tables"]["user_points"]["Update"];
+// export type UserPoints = Database["public"]["Tables"]["user_points"]["Row"];
 
 const userPoint = {
   getUserPoints: async (userId: string) => {
@@ -64,7 +65,7 @@ const userPoint = {
         const { data, error } = await supabase
           .from("user_points")
           .update(updateData)
-          .eq("id", existingPoint.id)
+          .eq("id", (existingPoint as any).id)
           .select();
         
         if (error) {

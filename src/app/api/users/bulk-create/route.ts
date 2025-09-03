@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     console.log('[BULK_CREATE] Profile check result:', { profile, profileError: profileError?.message });
 
-    if (profileError || profile?.role !== 'admin') {
+    if (profileError || (profile as any)?.role !== 'admin') {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 });
     }
 
-    const orgNameToId = new Map(organizations.map(org => [org.name, org.id]));
+    const orgNameToId = new Map(organizations.map((org: any) => [org.name, org.id]));
 
     const result: BulkCreateResult = {
       success: true,

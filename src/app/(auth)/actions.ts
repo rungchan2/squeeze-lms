@@ -23,10 +23,48 @@ export const signInWithEmail = async (email: string, password: string) => {
 
 export async function createProfile(profile: CreateUser) {
   const supabase = await createClient();
+  
+  // Get current user
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { data: null, error: authError || new Error("User not authenticated") };
+  }
+
+  // Ensure the profile ID matches the authenticated user
+  const profileData: any = {
+    ...profile,
+    id: user.id,
+    email: profile.email || user.email || '',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+  
+  // Convert null role to undefined for database insert
+  if (profileData.role === null) {
+    delete profileData.role;
+  }
+
+  // Check if profile already exists
+  const { data: existingProfile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", user.id)
+    .single();
+
+  if (existingProfile) {
+    return { 
+      data: null, 
+      error: new Error("Profile already exists for this user") 
+    };
+  }
+
+  // Create the profile
   const { data, error } = await supabase
     .from("profiles")
-    .insert(profile as any)
+    .insert(profileData)
+    .select()
     .single();
+
   return { data, error };
 }
 

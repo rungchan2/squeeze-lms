@@ -514,9 +514,6 @@ export default function UsersPage() {
                       역할
                     </Table.ColumnHeader>
                     <Table.ColumnHeader>
-                      초대
-                    </Table.ColumnHeader>
-                    <Table.ColumnHeader>
                       바로추가
                     </Table.ColumnHeader>
                   </Table.Row>
@@ -542,27 +539,6 @@ export default function UsersPage() {
                             (user.first_name || "")}
                         </Table.Cell>
                         <Table.Cell>{user.role || "일반"}</Table.Cell>
-                        <Table.Cell justifyContent="center">
-                          <Button
-                            style={{
-                              maxWidth: "100px",
-                              alignSelf: "center",
-                              opacity: isUserInvited(user.id) ? 0.6 : 1,
-                            }}
-                            variant={
-                              isUserInvited(user.id) ? "flat" : "outline"
-                            }
-                            onClick={() => handleInvite(user.id, user.email)}
-                            disabled={
-                              !user.id ||
-                              isUserInvited(user.id) ||
-                              invitingUsers.includes(user.id)
-                            }
-                          >
-                            {getInviteButtonText(user.id)}
-                          </Button>
-                          
-                        </Table.Cell>
                         <Table.Cell width="fit-content">
                         <Button
                             style={{

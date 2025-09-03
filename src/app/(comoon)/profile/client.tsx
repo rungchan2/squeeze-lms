@@ -185,12 +185,11 @@ export default function ProfilePage() {
   };
   return (
     <Container>
-      <div className="page-header">
-        <BackButton />
-      </div>
+
       <ContentWrapper>
-        <ProfileSection>
-          <ProfileHeader>
+
+        <SectionCard>
+        <ProfileHeader>
             <FileUpload
               placeholder="프로필 이미지를 업로드하세요"
               width="120px"
@@ -212,9 +211,6 @@ export default function ProfilePage() {
               <Text variant="caption" color="var(--grey-600)">{getValues("email")}</Text>
             </ProfileInfo>
           </ProfileHeader>
-        </ProfileSection>
-
-        <SectionCard>
           <SectionHeader>
             <Heading level={4}>사용자 정보</Heading>
             <Button
@@ -223,6 +219,7 @@ export default function ProfilePage() {
               isLoading={isSubmitting}
               disabled={isSubmitting}
               onClick={handleSubmit(onSubmit)}
+              maxWidth={100}
             >
               저장
             </Button>
@@ -251,12 +248,18 @@ export default function ProfilePage() {
                 <Text variant="body" fontWeight="medium">알림 수신</Text>
                 <Text variant="caption" color="var(--grey-600)">마케팅 및 프로모션 알림을 받습니다</Text>
               </div>
+              <div className="switch-label">
               <Controller
                 name="marketing_opt_in"
                 control={control}
                 render={({ field }) => (
                   <Field.Root invalid={!!errors.marketing_opt_in}>
                     <Switch.Root
+                      style={{
+                        width: "20px",
+                        height: "20px",
+                      }}
+                      width={20}
                       name={field.name}
                       checked={field.value}
                       onCheckedChange={({ checked }) => field.onChange(checked)}
@@ -269,6 +272,7 @@ export default function ProfilePage() {
                   </Field.Root>
                 )}
               />
+              </div>
             </SwitchContainer>
           </Form>
         </SectionCard>
@@ -347,14 +351,13 @@ const Container = styled.div`
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
-  background-color: var(--grey-50);
 
   .page-header {
     background-color: var(--white);
     border-bottom: 1px solid var(--grey-200);
     padding: 16px 24px;
     position: sticky;
-    top: 70px;
+    top: 30px;
     z-index: 100;
     
     @media (max-width: 768px) {
@@ -372,9 +375,9 @@ const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-width: 600px;
+  max-width: var(--breakpoint-tablet);
   width: 100%;
-  margin: 32px auto 0;
+  margin: 0 auto;
   padding: 0 24px;
 
   @media (max-width: 768px) {

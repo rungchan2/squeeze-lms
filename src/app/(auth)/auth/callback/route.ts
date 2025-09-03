@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { encrypt } from "@/utils/encryption"; // 암호화 유틸리티 필요
+import { encrypt } from "@/utils/encryption";
 
 export type NeededUserMetadata = {
   uid: string;
@@ -38,12 +38,16 @@ export async function GET(request: Request) {
           .eq("email", data.user.email || "")
           .single();
 
+        // Extract user metadata safely
+        const fullName = data.user.user_metadata?.full_name || data.user.user_metadata?.name || "";
+        const nameParts = fullName.trim().split(" ").filter(Boolean);
+        
         const neededuserData: NeededUserMetadata = {
           uid: data.user.id,
           email: data.user.email || "",
-          first_name: data.user.user_metadata.full_name.split(" ")[0],
-          last_name: data.user.user_metadata.full_name.split(" ")[1] || "",
-          profile_image: data.user.user_metadata.picture || "",
+          first_name: nameParts[0] || data.user.user_metadata?.given_name || "",
+          last_name: nameParts.slice(1).join(" ") || data.user.user_metadata?.family_name || "",
+          profile_image: data.user.user_metadata?.picture || data.user.user_metadata?.avatar_url || "",
         };
 
         if (userData.data === null) {
@@ -51,10 +55,11 @@ export async function GET(request: Request) {
           const encryptedData = encrypt(JSON.stringify(neededuserData));
 
           response.cookies.set("auth_data", encryptedData, {
-            httpOnly: false,
-            secure: process.env.NEXT_PUBLIC_VERCEL_ENV === "production",
+            httpOnly: true, // Always httpOnly for security
+            secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
-            maxAge: 60 * 10, // 10분
+            maxAge: 60 * 30, // 30 minutes for better UX
+            path: "/",
           });
 
           return response;

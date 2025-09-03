@@ -40,12 +40,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       exists: true,
-      subscription: data.notification_json ? JSON.parse(data.notification_json) : null,
+      subscription: (data as any).notification_json ? JSON.parse((data as any).notification_json) : null,
       data: {
-        id: data.id,
-        type: data.type,
-        receiver_id: data.receiver_id,
-        created_at: data.created_at
+        id: (data as any).id,
+        type: (data as any).type,
+        receiver_id: (data as any).receiver_id,
+        created_at: (data as any).created_at
       },
     });
     

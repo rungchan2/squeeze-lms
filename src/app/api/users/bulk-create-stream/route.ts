@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
           .eq('id', user.id)
           .single();
 
-        if (profileError || profile?.role !== 'admin') {
+        if (profileError || (profile as any)?.role !== 'admin') {
           controller.enqueue(encoder.encode('data: {"error": "Admin access required"}\n\n'));
           controller.close();
           return;
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
           return;
         }
 
-        const orgNameToId = new Map(organizations.map(org => [org.name, org.id]));
+        const orgNameToId = new Map(organizations.map((org: any) => [org.name, org.id]));
 
         // Check for existing users
         const emails = users.map(u => u.email).filter(Boolean);
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
           .select('email')
           .in('email', emails);
 
-        const existingEmails = new Set(existingUsers?.map(u => u.email) || []);
+        const existingEmails = new Set(existingUsers?.map((u: any) => u.email) || []);
 
         const result: BulkCreateResult = {
           success: true,
