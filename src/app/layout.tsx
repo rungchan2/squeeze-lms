@@ -11,7 +11,6 @@ import Pwa from "@/components/pwa";
 import { PostHogProvider } from "./posthog";
 type LayoutProps = {
   children: React.ReactNode;
-  params: { [key: string]: string };
 };
 
 export const metadata: Metadata = {
