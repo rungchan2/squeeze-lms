@@ -1,9 +1,6 @@
 import { createClient } from "@/utils/supabase/client";
 import { getMarketingOptIn } from "@/utils/data/user";
 
-
-const supabase = createClient();
-
 export const sendEmail = async (
   email: string,
   subject: string,
@@ -18,6 +15,7 @@ export const sendEmail = async (
   try {
     console.log("이메일 전송 요청:", { email, subject, body });
 
+    const supabase = createClient();
     const { data, error } = await supabase.functions.invoke("resend", {
       body: { to: email, subject, html: body },
     });

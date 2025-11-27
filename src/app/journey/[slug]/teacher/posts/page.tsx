@@ -1,11 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
-import { Table, Input, Stack } from "@chakra-ui/react";
+import {
+  Table,
+  Input,
+  Stack,
+  createListCollection,
+  Select,
+  Badge,
+  Box,
+} from "@chakra-ui/react";
 import { Tabs } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { FaRegTrashAlt, FaSearch, FaEye, FaFileAlt } from "react-icons/fa";
+import { FaRegTrashAlt, FaSearch, FaEye, FaFileAlt, FaUsers } from "react-icons/fa";
 import { LuRefreshCw } from "react-icons/lu";
 import { HiOutlineDocumentDownload } from "react-icons/hi";
 import { ImBooks } from "react-icons/im";
@@ -25,6 +33,7 @@ import AnswersViewer from "@/components/common/AnswersViewer";
 import { exportPostsToExcel } from "@/utils/excel/exportPosts";
 import Button from "@/components/common/Button";
 import { Dialog, CloseButton, Portal } from "@chakra-ui/react";
+import StudentSubmissionMatrix from "./StudentSubmissionMatrix";
 
 export default function TeacherPostsPage() {
   const { slug } = useParams();
@@ -36,7 +45,7 @@ export default function TeacherPostsPage() {
   // URL 파라미터로부터 현재 탭 값 결정 (JourneyClient와 동일한 로직)
   const getCurrentTab = () => {
     const tab = searchParams.get("postsTab");
-    if (tab && ["week", "all"].includes(tab)) {
+    if (tab && ["week", "all", "students"].includes(tab)) {
       return tab;
     }
     return "week";
@@ -45,15 +54,20 @@ export default function TeacherPostsPage() {
   const currentTab = getCurrentTab();
 
   // 탭 변경 핸들러 (JourneyClient와 동일한 로직)
-  const handleTabChange = useCallback((details: any) => {
-    const newTab = typeof details === 'string' ? details : details.value;
-    const params = new URLSearchParams(searchParams);
-    params.set("postsTab", newTab);
-    router.push(`/journey/${slug}/teacher/posts?${params.toString()}`, { scroll: false });
-  }, [router, searchParams, slug]);
+  const handleTabChange = useCallback(
+    (details: any) => {
+      const newTab = typeof details === "string" ? details : details.value;
+      const params = new URLSearchParams(searchParams);
+      params.set("postsTab", newTab);
+      router.push(`/journey/${slug}/teacher/posts?${params.toString()}`, {
+        scroll: false,
+      });
+    },
+    [router, searchParams, slug]
+  );
 
   // 필터 상태 관리
-  const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
   const [selectedWeekId, setSelectedWeekId] = useState<string>("");
   const [searchTitle, setSearchTitle] = useState<string>("");
 
@@ -70,10 +84,12 @@ export default function TeacherPostsPage() {
   } = usePosts(10, slug as string, true);
 
   // useWeeks 훅 사용 - slug를 사용
-  const { weeks = [], isLoading: weeksLoading = false } = useWeeks(slug as string) || {};
+  const { weeks = [], isLoading: weeksLoading = false } =
+    useWeeks(slug as string) || {};
 
   // useJourneyMissionInstances 훅 사용 (주차 필터링을 위해)
-  const { missionInstances = [], isLoading: missionInstancesLoading = false } = useJourneyMissionInstances(slug as string) || {};
+  const { missionInstances = [], isLoading: missionInstancesLoading = false } =
+    useJourneyMissionInstances(slug as string) || {};
 
   // 학생 목록 추출 (memoized)
   const studentOptions = useMemo(() => {
@@ -86,22 +102,24 @@ export default function TeacherPostsPage() {
             id: studentId,
             name: `${post.profiles.last_name}${post.profiles.first_name}`,
             first_name: post.profiles.first_name,
-            last_name: post.profiles.last_name
+            last_name: post.profiles.last_name,
           });
         }
       }
     });
-    return Array.from(uniqueStudents.values()).sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(uniqueStudents.values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
   }, [allPosts]);
 
   // 주차 목록 추출 (memoized)
   const weekOptions = useMemo(() => {
     return weeks
       .sort((a, b) => (a.week_number || 0) - (b.week_number || 0))
-      .map(week => ({
+      .map((week) => ({
         id: week.id,
         name: week.name,
-        week_number: week.week_number
+        week_number: week.week_number,
       }));
   }, [weeks]);
 
@@ -109,10 +127,11 @@ export default function TeacherPostsPage() {
   const filteredPosts = useMemo(() => {
     let filtered = allPosts;
 
-    // 학생 필터 적용
-    if (selectedStudentId) {
-      filtered = filtered.filter((post: PostWithRelations) => 
-        post.profiles?.id === selectedStudentId
+    // 학생 필터 적용 (다중 선택)
+    if (selectedStudentIds.length > 0) {
+      filtered = filtered.filter(
+        (post: PostWithRelations) =>
+          post.profiles?.id && selectedStudentIds.includes(post.profiles.id)
       );
     }
 
@@ -120,19 +139,21 @@ export default function TeacherPostsPage() {
     if (selectedWeekId) {
       filtered = filtered.filter((post: PostWithRelations) => {
         // PostWithRelations에서 journey_mission_instances.journey_week_id를 통해 필터링
-        return post.journey_mission_instances?.journey_week_id === selectedWeekId;
+        return (
+          post.journey_mission_instances?.journey_week_id === selectedWeekId
+        );
       });
     }
 
     // 제목 검색 필터 적용
     if (searchTitle.trim()) {
-      filtered = filtered.filter((post: PostWithRelations) => 
+      filtered = filtered.filter((post: PostWithRelations) =>
         post.title.toLowerCase().includes(searchTitle.toLowerCase().trim())
       );
     }
 
     return filtered;
-  }, [allPosts, selectedStudentId, selectedWeekId, searchTitle]);
+  }, [allPosts, selectedStudentIds, selectedWeekId, searchTitle]);
 
   // 통계 데이터 계산
   const postsStats = useMemo(() => {
@@ -140,7 +161,7 @@ export default function TeacherPostsPage() {
       total: totalPosts || 0,
       filtered: filteredPosts.length,
       students: studentOptions.length,
-      hidden: allPosts.filter(post => post.is_hidden).length
+      hidden: allPosts.filter((post) => post.is_hidden).length,
     };
   }, [totalPosts, filteredPosts.length, studentOptions.length, allPosts]);
 
@@ -220,13 +241,13 @@ export default function TeacherPostsPage() {
         weeks: weekOptions,
         missionInstances: missionInstances,
       });
-      
+
       toaster.create({
         title: `${filename} 파일이 다운로드되었습니다.`,
         type: "success",
       });
     } catch (error) {
-      console.error('Excel export error:', error);
+      console.error("Excel export error:", error);
       toaster.create({
         title: "Excel 파일 내보내기에 실패했습니다.",
         type: "error",
@@ -239,8 +260,8 @@ export default function TeacherPostsPage() {
 
   return (
     <AdminContainer>
-      <Tabs.Root 
-        value={currentTab} 
+      <Tabs.Root
+        value={currentTab}
         onValueChange={handleTabChange}
         variant="line"
       >
@@ -252,6 +273,10 @@ export default function TeacherPostsPage() {
           <Tabs.Trigger value="all">
             <ImBooks />
             전체보기
+          </Tabs.Trigger>
+          <Tabs.Trigger value="students">
+            <FaUsers />
+            학생별 현황
           </Tabs.Trigger>
           <Tabs.Indicator rounded="l2" />
         </Tabs.List>
@@ -266,7 +291,13 @@ export default function TeacherPostsPage() {
             <HeaderInfo>
               <Stack direction="row" alignItems="center" gap={2}>
                 <FaFileAlt size={20} color="var(--primary-600)" />
-                <Text variant="body" fontWeight="bold" style={{ fontSize: "18px" }}>제출된 미션</Text>
+                <Text
+                  variant="body"
+                  fontWeight="bold"
+                  style={{ fontSize: "18px" }}
+                >
+                  제출된 미션
+                </Text>
               </Stack>
               <StatsGrid>
                 <StatCard>
@@ -287,7 +318,7 @@ export default function TeacherPostsPage() {
                 </StatCard>
               </StatsGrid>
             </HeaderInfo>
-            
+
             <ActionButtons>
               <Button
                 variant="outline"
@@ -320,32 +351,99 @@ export default function TeacherPostsPage() {
                   value={searchTitle}
                   onChange={(e) => setSearchTitle(e.target.value)}
                   variant="subtle"
-                  style={{ border: 'none', boxShadow: 'none' }}
+                  style={{ border: "none", boxShadow: "none" }}
                 />
               </SearchInput>
             </SearchBar>
-            
+
             <FilterControls>
-              <FilterGroup>
-                <FilterLabel>학생 선택</FilterLabel>
-                <select
-                  value={selectedStudentId}
-                  onChange={(e) => setSelectedStudentId(e.target.value)}
-                  style={{
-                    padding: '8px',
-                    borderRadius: '4px',
-                    border: '1px solid var(--grey-300)',
-                    fontSize: '14px',
-                    minWidth: '150px'
-                  }}
+              <FilterGroup style={{ minWidth: "250px" }}>
+                <FilterLabel>
+                  학생 선택{" "}
+                  {selectedStudentIds.length > 0 &&
+                    `(${selectedStudentIds.length}명)`}
+                </FilterLabel>
+                <Select.Root
+                  collection={createListCollection({
+                    items: studentOptions.map((student) => ({
+                      label: student.name,
+                      value: student.id,
+                    })),
+                  })}
+                  multiple
+                  value={selectedStudentIds}
+                  onValueChange={(details) =>
+                    setSelectedStudentIds(details.value)
+                  }
+                  size="sm"
                 >
-                  <option value="">전체 학생</option>
-                  {studentOptions.map((student) => (
-                    <option key={student.id} value={student.id}>
-                      {student.name}
-                    </option>
-                  ))}
-                </select>
+                  <Select.HiddenSelect />
+                  <Select.Control>
+                    <Select.Trigger
+                      style={{
+                        minWidth: "200px",
+                        border: "1px solid var(--grey-300)",
+                        borderRadius: "4px",
+                        padding: "8px 12px",
+                        backgroundColor: "white",
+                      }}
+                    >
+                      <Select.ValueText placeholder="전체 학생">
+                        {selectedStudentIds.length === 0
+                          ? "전체 학생"
+                          : selectedStudentIds.length === 1
+                            ? studentOptions.find(
+                                (s) => s.id === selectedStudentIds[0]
+                              )?.name || "1명 선택"
+                            : `${selectedStudentIds.length}명 선택`}
+                      </Select.ValueText>
+                    </Select.Trigger>
+                    {selectedStudentIds.length > 0 && (
+                      <Select.ClearTrigger
+                        style={{
+                          padding: "4px",
+                          cursor: "pointer",
+                          marginRight: "4px",
+                        }}
+                      />
+                    )}
+                    <Select.IndicatorGroup>
+                      <Select.Indicator />
+                    </Select.IndicatorGroup>
+                  </Select.Control>
+                  <Portal>
+                    <Select.Positioner>
+                      <Select.Content
+                        style={{
+                          maxHeight: "300px",
+                          overflowY: "auto",
+                          backgroundColor: "white",
+                          border: "1px solid var(--grey-200)",
+                          borderRadius: "8px",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                          zIndex: 1000,
+                        }}
+                      >
+                        {studentOptions.map((student) => (
+                          <Select.Item
+                            item={{ label: student.name, value: student.id }}
+                            key={student.id}
+                            style={{
+                              padding: "8px 12px",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <Select.ItemIndicator />
+                            {student.name}
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select.Positioner>
+                  </Portal>
+                </Select.Root>
               </FilterGroup>
 
               <FilterGroup>
@@ -355,17 +453,18 @@ export default function TeacherPostsPage() {
                   onChange={(e) => setSelectedWeekId(e.target.value)}
                   disabled={weeksLoading || missionInstancesLoading}
                   style={{
-                    padding: '8px',
-                    borderRadius: '4px',
-                    border: '1px solid var(--grey-300)',
-                    fontSize: '14px',
-                    minWidth: '150px'
+                    padding: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid var(--grey-300)",
+                    fontSize: "14px",
+                    minWidth: "150px",
                   }}
                 >
                   <option value="">전체 주차</option>
                   {weekOptions.map((week) => (
                     <option key={week.id} value={week.id}>
-                      {week.week_number ? `${week.week_number}주차: ` : ''}{week.name}
+                      {week.week_number ? `${week.week_number}주차: ` : ""}
+                      {week.name}
                     </option>
                   ))}
                 </select>
@@ -375,7 +474,11 @@ export default function TeacherPostsPage() {
 
           {/* 테이블 영역 */}
           <TableContainer>
-            <Table.Root size="sm" variant="outline" backgroundColor="var(--white)">
+            <Table.Root
+              size="sm"
+              variant="outline"
+              backgroundColor="var(--white)"
+            >
               <Table.ColumnGroup>
                 <Table.Column htmlWidth="30%" />
                 <Table.Column htmlWidth="15%" />
@@ -390,20 +493,29 @@ export default function TeacherPostsPage() {
                   <Table.ColumnHeader>작성자</Table.ColumnHeader>
                   <Table.ColumnHeader>상태</Table.ColumnHeader>
                   <Table.ColumnHeader>제출날짜</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="center">제출내용</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="center">관리</Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="center">
+                    제출내용
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="center">
+                    관리
+                  </Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
                 {filteredPosts.map((post: PostWithRelations, index: number) => (
                   <Table.Row
                     key={`post-${post.id}-${index}`}
-                    _hover={{ backgroundColor: "var(--grey-50)", cursor: "pointer" }}
+                    _hover={{
+                      backgroundColor: "var(--grey-50)",
+                      cursor: "pointer",
+                    }}
                     onClick={() => router.push(`/post/${post.id}`)}
                   >
                     <Table.Cell>
                       <PostTitleCell>
-                        <div style={{ fontWeight: 500, marginBottom: '4px' }}>{post.title}</div>
+                        <div style={{ fontWeight: 500, marginBottom: "4px" }}>
+                          {post.title}
+                        </div>
                         {post.journey_mission_instances?.missions && (
                           <Text variant="caption" color="var(--grey-500)">
                             {post.journey_mission_instances.missions.name}
@@ -413,10 +525,13 @@ export default function TeacherPostsPage() {
                     </Table.Cell>
                     <Table.Cell>
                       <StudentCell>
-                        {post.profiles?.last_name}{post.profiles?.first_name}
+                        {post.profiles?.last_name}
+                        {post.profiles?.first_name}
                       </StudentCell>
                     </Table.Cell>
-                    <Table.Cell onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                    <Table.Cell
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                    >
                       <StatusSelect
                         defaultValue={post.is_hidden ? "hide" : "show"}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
@@ -433,11 +548,16 @@ export default function TeacherPostsPage() {
                       </DateCell>
                     </Table.Cell>
                     <Table.Cell textAlign="center">
-                      <Dialog.Root placement="center" motionPreset="slide-in-bottom">
+                      <Dialog.Root
+                        placement="center"
+                        motionPreset="slide-in-bottom"
+                      >
                         <Dialog.Trigger asChild>
                           <Button
                             variant="plain"
-                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                            onClick={(e: React.MouseEvent) =>
+                              e.stopPropagation()
+                            }
                           >
                             <FaEye />
                           </Button>
@@ -445,18 +565,21 @@ export default function TeacherPostsPage() {
                         <Portal>
                           <Dialog.Backdrop />
                           <Dialog.Positioner>
-                            <Dialog.Content 
-                              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                              style={{ maxWidth: '90vw', width: '800px' }}
+                            <Dialog.Content
+                              onClick={(e: React.MouseEvent) =>
+                                e.stopPropagation()
+                              }
+                              style={{ maxWidth: "90vw", width: "800px" }}
                             >
                               <Dialog.Header>
                                 <Dialog.Title>
-                                  {post.title} - {post.profiles?.last_name}{post.profiles?.first_name}
+                                  {post.title} - {post.profiles?.last_name}
+                                  {post.profiles?.first_name}
                                 </Dialog.Title>
                               </Dialog.Header>
                               <Dialog.Body>
-                                <AnswersViewer 
-                                  answersData={post.answers_data || null} 
+                                <AnswersViewer
+                                  answersData={post.answers_data || null}
                                   legacyContent={post.content}
                                 />
                               </Dialog.Body>
@@ -483,17 +606,18 @@ export default function TeacherPostsPage() {
                     </Table.Cell>
                   </Table.Row>
                 ))}
-                
+
                 {filteredPosts.length === 0 && (
                   <Table.Row>
                     <Table.Cell colSpan={6} textAlign="center">
                       <EmptyState>
                         <FaFileAlt size={32} color="var(--grey-400)" />
                         <Text variant="body" color="var(--grey-500)">
-                          {searchTitle || selectedStudentId || selectedWeekId
-                            ? '검색 조건에 맞는 제출이 없습니다'
-                            : '제출된 미션이 없습니다'
-                          }
+                          {searchTitle ||
+                          selectedStudentIds.length > 0 ||
+                          selectedWeekId
+                            ? "검색 조건에 맞는 제출이 없습니다"
+                            : "제출된 미션이 없습니다"}
                         </Text>
                       </EmptyState>
                     </Table.Cell>
@@ -508,13 +632,17 @@ export default function TeacherPostsPage() {
                 <Text
                   variant="caption"
                   color="var(--grey-500)"
-                  style={{ textAlign: 'center', padding: '1rem' }}
+                  style={{ textAlign: "center", padding: "1rem" }}
                 >
                   모든 데이터를 불러왔습니다.
                 </Text>
               )}
             </div>
           </TableContainer>
+        </Tabs.Content>
+
+        <Tabs.Content value="students">
+          <StudentSubmissionMatrix slug={slug as string} />
         </Tabs.Content>
       </Tabs.Root>
     </AdminContainer>
@@ -542,7 +670,7 @@ const HeaderSection = styled.div`
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 24px;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 16px;
@@ -618,7 +746,7 @@ const SearchInput = styled.div`
   background: var(--grey-50);
   border-radius: 8px;
   border: 1px solid var(--grey-200);
-  
+
   &:focus-within {
     border-color: var(--primary-300);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -676,7 +804,7 @@ const StatusSelect = styled.select`
   border-radius: 4px;
   border: 1px solid var(--grey-200);
   cursor: pointer;
-  
+
   &:hover {
     background-color: var(--grey-100);
   }

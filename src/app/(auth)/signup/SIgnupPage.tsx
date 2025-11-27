@@ -21,13 +21,15 @@ import { useOrganization } from "@/hooks/useOrganization";
 import Select from "react-select";
 import { toaster } from "@/components/ui/toaster";
 import constants from "@/utils/constants";
-import { createProfile } from "@/utils/data/user";
-import { signupPageSchema, type SignupPage } from "@/types";
-import { signUpWithEmail } from "@/utils/data/auth";
+import { signupPageSchema, type SignupPage, type CreateUser } from "@/types";
 import { Modal } from "@/components/modal/Modal";
 import { Role } from "@/types";
 import { accessCode } from "@/utils/data/accessCode";
 import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import {
+  signUpWithEmail as signUpWithEmailAction,
+  createProfile as createProfileAction,
+} from "@/app/(auth)/actions";
 
 type Agreement = "mailAgreement" | "cookieAgreement";
 
@@ -51,7 +53,6 @@ export default function SignupPage() {
   const {
     register,
     handleSubmit,
-    control,
     setValue,
     watch,
     formState: { errors, isSubmitting },
@@ -67,6 +68,7 @@ export default function SignupPage() {
       marketing_opt_in: false,
       privacy_agreed: false,
       profile_image: "",
+      profile_image_file_id: null,
     },
   });
 
@@ -119,10 +121,14 @@ export default function SignupPage() {
 
   const onSubmit = async (data: SignupPage) => {
     try {
+      const { password, password_confirmation: _passwordConfirmation, ...rest } =
+        data;
+      void _passwordConfirmation;
+
       // 1. 인증 계정 생성
-      const { userData, error } = await signUpWithEmail(
+      const { userData, error } = await signUpWithEmailAction(
         data.email,
-        data.password
+        password
       );
 
       if (error) {
@@ -136,16 +142,14 @@ export default function SignupPage() {
 
       // 2. 프로필 생성
       if (userData.user) {
-        // 사용자 ID 가져오기
-
-        // 프로필 데이터에 uid 추가
-        const profileData: SignupPage = {
-          ...data,
-          profile_image: "",
+        const profileData: CreateUser = {
+          ...rest,
+          profile_image: rest.profile_image || "",
+          profile_image_file_id: rest.profile_image_file_id ?? null,
         };
 
         // 프로필 생성
-        const { error: profileError } = await createProfile(profileData);
+        const { error: profileError } = await createProfileAction(profileData);
 
         if (profileError) {
           console.error("프로필 생성 오류:", profileError);
@@ -214,9 +218,9 @@ export default function SignupPage() {
             title="비밀번호 확인"
             errorMessage={
               errors.password_confirmation?.message ||
-              watch("password") !== watch("password_confirmation")
+              (watch("password") && watch("password_confirmation") && watch("password") !== watch("password_confirmation")
                 ? "비밀번호가 일치하지 않습니다."
-                : ""
+                : "")
             }
           >
             <Input

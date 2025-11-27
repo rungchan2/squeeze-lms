@@ -29,15 +29,15 @@ const formatAnswer = (answer: AnyAnswer): string => {
   switch (answer.answer_type) {
     case 'essay':
       return answer.answer_text ? excludeHtmlTags(answer.answer_text) : '답변 없음';
-    
+
     case 'multiple_choice':
       return answer.selected_option || '선택 없음';
-    
+
     case 'image_upload':
       const imageText = answer.answer_text ? excludeHtmlTags(answer.answer_text) : '';
       const imageCount = answer.image_urls?.length || 0;
       return imageText ? `${imageText} (이미지 ${imageCount}개)` : `이미지 ${imageCount}개 업로드`;
-    
+
     case 'mixed':
       const mixedText = answer.answer_text ? excludeHtmlTags(answer.answer_text) : '';
       const mixedImageCount = answer.image_urls?.length || 0;
@@ -49,57 +49,10 @@ const formatAnswer = (answer: AnyAnswer): string => {
         return `이미지 ${mixedImageCount}개 업로드`;
       }
       return '답변 없음';
-    
+
     default:
       return '알 수 없는 형식';
   }
-};
-
-// Helper function to extract structured answers from answers_data
-const extractStructuredAnswers = (answersData: any): Record<string, string> => {
-  const result: Record<string, string> = {};
-  
-  if (!answersData || typeof answersData !== 'object') {
-    return result;
-  }
-
-  // Parse if it's a string (JSON string from database)
-  let parsedData: AnswersData;
-  try {
-    parsedData = typeof answersData === 'string' ? JSON.parse(answersData) : answersData;
-  } catch (error) {
-    console.error('Failed to parse answers_data:', error);
-    return result;
-  }
-
-  // Check if it has the expected structure
-  if (parsedData.answers && Array.isArray(parsedData.answers)) {
-    // Sort answers by question_order
-    const sortedAnswers = [...parsedData.answers].sort((a, b) => a.question_order - b.question_order);
-    
-    sortedAnswers.forEach((answer, index) => {
-      const questionKey = `문항 ${answer.question_order}`;
-      result[questionKey] = formatAnswer(answer);
-      
-      // Add score if available
-      if (answer.points_earned !== null && answer.points_earned !== undefined) {
-        result[`${questionKey} 점수`] = String(answer.points_earned);
-      }
-    });
-
-    // Add submission metadata
-    if (parsedData.submission_metadata) {
-      const totalQuestions = parsedData.submission_metadata.total_questions || 0;
-      const answeredQuestions = parsedData.submission_metadata.answered_questions || 0;
-      const completionRate = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
-      
-      result['총 문항수'] = String(totalQuestions);
-      result['답변 문항수'] = String(answeredQuestions);
-      result['완료율'] = `${completionRate.toFixed(1)}%`;
-    }
-  }
-
-  return result;
 };
 
 // Helper function to get Korean question type names
@@ -118,16 +71,17 @@ const getQuestionTypeKorean = (type: string): string => {
   }
 };
 
-// Helper function to fetch mission questions by IDs (same approach as PostCard)
-const fetchMissionQuestionsByIds = async (questionIds: string[]) => {
-  if (questionIds.length === 0) return [];
+// Helper function to fetch all mission questions for given mission IDs
+const fetchMissionQuestionsByMissionIds = async (missionIds: string[]) => {
+  if (missionIds.length === 0) return [];
 
   try {
     const supabase = createClient();
     const { data: questions, error } = await supabase
       .from('mission_questions')
       .select('*')
-      .in('id', questionIds);
+      .in('mission_id', missionIds)
+      .order('question_order', { ascending: true });
 
     if (error) {
       console.error('Failed to fetch mission questions:', error);
@@ -141,79 +95,130 @@ const fetchMissionQuestionsByIds = async (questionIds: string[]) => {
   }
 };
 
+interface WeekQuestionInfo {
+  weekNumber: number;
+  weekId: string;
+  weekName: string;
+  missionId: string;
+  missionName: string;
+  questionOrder: number;
+  questionId: string;
+  questionText: string;
+  questionType: string;
+  columnKey: string; // e.g., "1-1", "1-2", "2-1"
+}
+
 export const exportPostsToExcel = async (data: ExcelExportData) => {
   const { posts, journeyName, weeks, missionInstances } = data;
 
   // Create a mapping for week information
   const weekMap = new Map(weeks.map(week => [week.id, week]));
-  
+
   // Create a mapping for mission instance to week
   const missionInstanceToWeekMap = new Map(
     missionInstances.map(instance => [instance.id, instance.journey_week_id])
   );
 
-  // Get all unique question IDs from posts' answers_data (same approach as PostCard)
-  const allQuestionIds = [...new Set(
-    posts
-      .map(post => {
-        if (post.answers_data) {
-          const structuredAnswers = extractStructuredAnswers(post.answers_data);
-          // Extract question IDs from answers structure
-          let parsedData;
-          try {
-            parsedData = typeof post.answers_data === 'string' ? JSON.parse(post.answers_data) : post.answers_data;
-          } catch {
-            return [];
-          }
-          if (parsedData.answers && Array.isArray(parsedData.answers)) {
-            return parsedData.answers.map((answer: any) => answer.question_id).filter(Boolean);
-          }
-        }
-        return [];
-      })
-      .flat()
-  )];
+  // Create a mapping for mission instance to mission
+  const missionInstanceToMissionMap = new Map(
+    missionInstances.map(instance => [instance.id, instance])
+  );
 
-  // Fetch all questions by IDs 
-  const allQuestions = await fetchMissionQuestionsByIds(allQuestionIds);
-  
-  // Create a map for easy lookup
-  const questionsMap = new Map(allQuestions.map(q => [q.id, q]));
+  // Get all unique mission IDs from mission instances
+  const allMissionIds = [...new Set(missionInstances.map(mi => mi.mission_id).filter(Boolean))];
 
-  // Find the maximum number of questions across all posts for dynamic columns
-  let maxQuestions = 0;
-  const questionHeaders = new Map<number, { text: string; type: string }>();
+  // Fetch all questions for these missions
+  const allMissionQuestions = await fetchMissionQuestionsByMissionIds(allMissionIds);
 
-  posts.forEach(post => {
-    if (post.answers_data) {
-      let parsedData;
-      try {
-        parsedData = typeof post.answers_data === 'string' ? JSON.parse(post.answers_data) : post.answers_data;
-      } catch {
-        return;
-      }
-      
-      if (parsedData.answers && Array.isArray(parsedData.answers)) {
-        const answers = parsedData.answers;
-        maxQuestions = Math.max(maxQuestions, answers.length);
-        
-        // Build question headers using the fetched questions
-        answers.forEach((answer: any) => {
-          const question = questionsMap.get(answer.question_id);
-          if (question) {
-            const questionNumber = answer.question_order || (question as any).question_order;
-            if (!questionHeaders.has(questionNumber)) {
-              questionHeaders.set(questionNumber, {
-                text: (question as any).question_text.length > 50 
-                  ? (question as any).question_text.substring(0, 50) + '...' 
-                  : (question as any).question_text,
-                type: (question as any).question_type
-              });
-            }
-          }
-        });
-      }
+  // Build a comprehensive map of week -> mission -> questions
+  // This ensures all questions are captured even if no posts exist for them
+  const weekMissionQuestionsMap = new Map<string, Map<string, any[]>>();
+
+  missionInstances.forEach(instance => {
+    const weekId = instance.journey_week_id;
+    const missionId = instance.mission_id;
+
+    if (!weekMissionQuestionsMap.has(weekId)) {
+      weekMissionQuestionsMap.set(weekId, new Map());
     }
+
+    const missionMap = weekMissionQuestionsMap.get(weekId)!;
+    if (!missionMap.has(missionId)) {
+      const questionsForMission = allMissionQuestions
+        .filter(q => q.mission_id === missionId)
+        .sort((a, b) => a.question_order - b.question_order);
+      missionMap.set(missionId, questionsForMission);
+    }
+  });
+
+  // Build ordered question columns based on week_number
+  // Format: {weekNumber}-{questionOrder} (e.g., 1-1, 1-2, 2-1)
+  const orderedQuestionColumns: WeekQuestionInfo[] = [];
+
+  // Sort weeks by week_number
+  const sortedWeeks = [...weeks].sort((a, b) => (a.week_number || 0) - (b.week_number || 0));
+
+  sortedWeeks.forEach(week => {
+    const missionMap = weekMissionQuestionsMap.get(week.id);
+    if (!missionMap) return;
+
+    // For each week, get all questions sorted by mission and question_order
+    const questionsInWeek: Array<{
+      missionInstance: any;
+      question: any;
+    }> = [];
+
+    // Find mission instances for this week
+    const weekMissionInstances = missionInstances.filter(mi => mi.journey_week_id === week.id);
+
+    weekMissionInstances.forEach(mi => {
+      const questions = missionMap.get(mi.mission_id) || [];
+      questions.forEach(q => {
+        questionsInWeek.push({
+          missionInstance: mi,
+          question: q,
+        });
+      });
+    });
+
+    // Sort by question order within the week
+    questionsInWeek.sort((a, b) => a.question.question_order - b.question.question_order);
+
+    // Create column entries
+    questionsInWeek.forEach((item, idx) => {
+      const questionNumber = idx + 1;
+      const columnKey = `${week.week_number || 0}-${questionNumber}`;
+
+      orderedQuestionColumns.push({
+        weekNumber: week.week_number || 0,
+        weekId: week.id,
+        weekName: week.name,
+        missionId: item.missionInstance.mission_id,
+        missionName: item.missionInstance.mission?.name || '',
+        questionOrder: item.question.question_order,
+        questionId: item.question.id,
+        questionText: item.question.question_text,
+        questionType: item.question.question_type,
+        columnKey,
+      });
+    });
+  });
+
+  // Create a map from questionId to columnKey for quick lookup
+  const questionIdToColumnKey = new Map<string, string>();
+  orderedQuestionColumns.forEach(col => {
+    questionIdToColumnKey.set(col.questionId, col.columnKey);
+  });
+
+  // Build column headers based on ordered questions
+  const questionColumnHeaders: { key: string; header: string }[] = orderedQuestionColumns.map(col => {
+    const shortText = col.questionText.length > 30
+      ? col.questionText.substring(0, 30) + '...'
+      : col.questionText;
+    return {
+      key: col.columnKey,
+      header: `${col.columnKey}회차: ${shortText} [${getQuestionTypeKorean(col.questionType)}]`,
+    };
   });
 
   // Transform posts data for Excel
@@ -226,7 +231,7 @@ export const exportPostsToExcel = async (data: ExcelExportData) => {
     // Get mission information from journey_mission_instances
     const mission = post.journey_mission_instances?.missions;
 
-    // Base data
+    // Base data - exact order as requested
     const baseData: Record<string, any> = {
       '학교명': post.profiles?.organizations?.name || '',
       '제출자 이메일': post.profiles?.email || '',
@@ -238,32 +243,36 @@ export const exportPostsToExcel = async (data: ExcelExportData) => {
       '제목': post.title,
     };
 
+    // Initialize all question columns with empty values
+    questionColumnHeaders.forEach(col => {
+      baseData[col.header] = '';
+    });
+
     // Extract structured answers if available
     if (post.answers_data) {
-      const structuredAnswers = extractStructuredAnswers(post.answers_data);
-      
-      // Add structured answer columns with question text headers
-      for (let i = 1; i <= maxQuestions; i++) {
-        const questionHeader = questionHeaders.get(i);
-        const questionKey = questionHeader 
-          ? `문항 ${i}: ${questionHeader.text} [${getQuestionTypeKorean(questionHeader.type)}]`
-          : `문항 ${i}`;
-        
-        baseData[questionKey] = structuredAnswers[`문항 ${i}`] || '';
-        
-        // Add score column if any post has scores
-        const scoreKey = `문항 ${i} 점수`;
-        if (structuredAnswers[scoreKey]) {
-          baseData[`${questionKey} 점수`] = structuredAnswers[scoreKey];
-        }
+      let parsedData: AnswersData;
+      try {
+        parsedData = typeof post.answers_data === 'string'
+          ? JSON.parse(post.answers_data)
+          : post.answers_data;
+      } catch {
+        parsedData = { answers: [], submission_metadata: { total_questions: 0, answered_questions: 0, submission_time: '' } };
       }
 
-      // Add metadata columns
-      baseData['총 문항수'] = structuredAnswers['총 문항수'] || '0';
-      baseData['답변 문항수'] = structuredAnswers['답변 문항수'] || '0';
-      baseData['완료율'] = structuredAnswers['완료율'] || '0%';
+      if (parsedData.answers && Array.isArray(parsedData.answers)) {
+        parsedData.answers.forEach(answer => {
+          const columnKey = questionIdToColumnKey.get(answer.question_id);
+          if (columnKey) {
+            // Find the corresponding header
+            const colHeader = questionColumnHeaders.find(h => h.key === columnKey);
+            if (colHeader) {
+              baseData[colHeader.header] = formatAnswer(answer);
+            }
+          }
+        });
+      }
     } else if (post.content) {
-      // Fallback to legacy content field
+      // Fallback to legacy content field - put in a generic column
       baseData['기존 내용'] = excludeHtmlTags(post.content);
     }
 
@@ -279,28 +288,68 @@ export const exportPostsToExcel = async (data: ExcelExportData) => {
     return baseData;
   });
 
+  // Define the exact column order
+  const baseColumns = [
+    '학교명',
+    '제출자 이메일',
+    '제출자 이름',
+    '유저 가입일',
+    '제출일',
+    '주차',
+    '미션명',
+    '제목',
+  ];
+
+  const questionHeaders = questionColumnHeaders.map(h => h.header);
+
+  const trailingColumns = [
+    '기존 내용',
+    '총점',
+    '자동 점수',
+    '수동 점수',
+    '팀 제출 여부',
+    '팀명',
+    '숨김 상태',
+    '조회수',
+  ];
+
+  const allColumns = [...baseColumns, ...questionHeaders, ...trailingColumns];
+
+  // Filter out columns that don't exist in any data row
+  const columnsWithData = allColumns.filter(col => {
+    return excelData.some(row => row[col] !== undefined && row[col] !== '');
+  });
+
+  // Ensure base columns are always present even if empty
+  const finalColumns = [...new Set([...baseColumns, ...columnsWithData])];
+
+  // Reorder data to match column order
+  const orderedExcelData = excelData.map(row => {
+    const orderedRow: Record<string, any> = {};
+    finalColumns.forEach(col => {
+      orderedRow[col] = row[col] ?? '';
+    });
+    return orderedRow;
+  });
+
   // Create workbook and worksheet
   const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.json_to_sheet(excelData);
+  const worksheet = XLSX.utils.json_to_sheet(orderedExcelData, { header: finalColumns });
 
   // Set column widths for better readability
-  const columnWidths = [
-    { wch: 15 }, // 학교명
-    { wch: 20 }, // 제출자 이메일
-    { wch: 12 }, // 제출자 이름
-    { wch: 12 }, // 유저 가입일
-    { wch: 18 }, // 제출일
-    { wch: 20 }, // 여정명
-    { wch: 20 }, // 주차
-    { wch: 20 }, // 미션명
-    { wch: 30 }, // 제목
-    { wch: 50 }, // 내용
-    { wch: 8 },  // 점수
-    { wch: 12 }, // 팀 제출 여부
-    { wch: 15 }, // 팀명
-    { wch: 10 }, // 숨김 상태
-    { wch: 8 },  // 조회수
-  ];
+  const columnWidths = finalColumns.map(col => {
+    if (col === '학교명') return { wch: 15 };
+    if (col === '제출자 이메일') return { wch: 25 };
+    if (col === '제출자 이름') return { wch: 12 };
+    if (col === '유저 가입일') return { wch: 12 };
+    if (col === '제출일') return { wch: 18 };
+    if (col === '주차') return { wch: 20 };
+    if (col === '미션명') return { wch: 20 };
+    if (col === '제목') return { wch: 30 };
+    if (col.includes('회차:')) return { wch: 50 }; // Question columns
+    if (col === '기존 내용') return { wch: 50 };
+    return { wch: 12 };
+  });
 
   worksheet['!cols'] = columnWidths;
 
